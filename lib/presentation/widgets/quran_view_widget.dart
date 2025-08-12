@@ -28,6 +28,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   bool _autoScrollEnabled = true; // future: expose as user setting
   DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _autoScrollThrottle = Duration(milliseconds: 350);
+  DateTime _lastUserScroll = DateTime.fromMillisecondsSinceEpoch(0);
+  static const Duration _manualScrollSuppressionWindow = Duration(seconds: 3); // pause auto-scroll shortly after user interacts
 
   @override
   void initState() {
@@ -46,6 +48,11 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
       // User has scrolled to the end, load more verses
           Provider.of<QuranProvider>(context, listen: false).loadMoreVerses();
+    }
+    // Mark user scroll interaction (ignore if programmatic overscroll not triggered by user - heuristic: userScrollDirection not idle)
+    final dir = _scrollController.position.userScrollDirection;
+    if (dir != ScrollDirection.idle) {
+      _lastUserScroll = DateTime.now();
     }
   }
 
@@ -115,6 +122,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     if (!_autoScrollEnabled) return;
     final now = DateTime.now();
     if (now.difference(_lastAutoScroll) < _autoScrollThrottle) return; // throttle
+  // Suppress if user manually scrolled recently to respect user control
+  if (now.difference(_lastUserScroll) < _manualScrollSuppressionWindow) return;
     final index = verses.indexWhere((v) => v.verseKey == verseKey);
     if (index < 0) return;
     if (_isVerseRoughlyVisible(index, verses)) return; // already visible enough
@@ -128,7 +137,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
         await Scrollable.ensureVisible(
           ctx,
           duration: const Duration(milliseconds: 420),
-          alignment: 0.1,
+          alignment: 0.1, // keep verse near top for readability (approx top padding)
           curve: Curves.easeInOutCubic,
         );
         return;
@@ -259,18 +268,32 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                         future: bookmarkProvider.isBookmarked(verse.verseKey),
                         builder: (context, snapshot) {
                           final isBm = snapshot.data ?? false;
-                          return VerseWidget(
+                          final currentPlaying = Provider.of<AudioProvider>(context).currentTrack?.verseKey;
+                          final currentWordIdx = Provider.of<AudioProvider>(context).currentWordIndex;
+                          final wbw = Provider.of<WordByWordProvider>(context).currentWordByWordVerses.firstWhere(
+                            (element) => element.verseNumber == verse.number,
+                            orElse: () => WordByWordVerse(verseNumber: verse.number, words: []),
+                          );
+                          final isCurrent = currentPlaying == verse.verseKey;
+                          return AnimatedContainer(
                             key: key,
-                            verse: verse,
-                            settings: appState.settings,
-                            isBookmarked: isBm,
-                            onBookmarkToggle: () => bookmarkProvider.toggleBookmark(verse.verseKey),
-                            // Use verseKey directly instead of legacy 'tag'
-                            currentPlayingVerseKey: Provider.of<AudioProvider>(context).currentTrack?.verseKey,
-                    currentWordIndex: Provider.of<AudioProvider>(context).currentWordIndex, // Pass current word index
-                    wordByWordData: Provider.of<WordByWordProvider>(context).currentWordByWordVerses.firstWhere(
-                      (element) => element.verseNumber == verse.number, orElse: () => WordByWordVerse(verseNumber: verse.number, words: []), // Provide a default empty list
-                    ),
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: isCurrent
+                                  ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.35)
+                                  : null,
+                            ),
+                            child: VerseWidget(
+                              verse: verse,
+                              settings: appState.settings,
+                              isBookmarked: isBm,
+                              onBookmarkToggle: () => bookmarkProvider.toggleBookmark(verse.verseKey),
+                              currentPlayingVerseKey: currentPlaying,
+                              currentWordIndex: currentWordIdx,
+                              wordByWordData: wbw,
+                            ),
                           );
                         },
                       );
