@@ -144,6 +144,55 @@ Medium: 3,9,11,12,14,16,22,24
 Low: 2,4,5,6,10,17,18,19,23,25,26
 
 ---
+## Appendix A: Help Page Feature Coverage Audit (2025-08-12)
+Derived from `help_page.dart` descriptive sections; status reflects actual implementation or current placeholder.
+
+| Area | Feature (Help Label) | Status | Notes / Debt |
+|------|----------------------|--------|--------------|
+| Search Panel | Kërkimi Inteligjent (term, surah name/number, verse ref 2:255, Arabic) | PARTIAL | Core index + term search ok; direct pattern `2:255` navigation implemented via openSurahAtVerse; Arabic diacritics normalized; need explicit surah name alias mapping robustness |
+| Search Panel | Filtrat e Kërkimit (choose Albanian vs Arabic or specific Juz) | MISSING | No UI filter toggles or Juz constraint currently in search widget |
+| Search Panel | Zgjedhja e Përkthimit (multi translation compare) | PARTIAL | Dropdown exists; search ranking only uses active translation; multi-field weighting pending |
+| Search Panel | Lundrim i Shpejtë (Go to Juz) | MISSING | No 'Go to Juz' quick menu in current UI; requires Juz index & mapping |
+| Reader Controls | Shko te Ajeti (jump within surah) | PARTIAL | Indirect: openSurahAtVerse from external; in-surah drop-down not present (needs verse picker) |
+| Reader Controls | Modaliteti i Përzgjedhjes (multi-select verses) | MISSING | No selection state / action bar implemented |
+| Reader Controls | Lexim pa Shpërqendrime (fullscreen) | MISSING | No fullscreen toggle hiding chrome |
+| Reader Controls | Luaj Gjithë Suren (play entire surah) | PARTIAL | playSurah exists; verify continuous playback & UI control state; stop button unified? |
+| Verse Actions | Dëgjo (single verse play) | IMPLEMENTED | Per-verse play button + highlight current verse |
+| Verse Actions | Shto te të Preferuarat (favorites) | PARTIAL | Bookmark provider integrated; favorite vs bookmark terminology mismatch |
+| Verse Actions | Kopjo | MISSING | UI button placeholder / TODO |
+| Verse Actions | Ndaj (share) | MISSING | Snackbar placeholder only |
+| Verse Actions | Shenjo (bookmark reading position) | PARTIAL | Bookmark concept present; dedicated 'last position' marker absent |
+| Verse Actions | Shënim (notes) | PARTIAL | Notes system exists; per-verse quick add from verse card not yet wired (TODO) |
+| Verse Actions | Memorizo | PARTIAL | Memorization provider scaffold + toggle; advanced tools (hide text, spaced repetition) missing |
+| Verse Actions | Gjenero Imazh | MISSING | Feature described; implementation not located in code tree |
+| Tabs | Kurani | IMPLEMENTED | Surah list + reader view present |
+| Tabs | Indeksi Tematik | IMPLEMENTED | Thematic index provider & UI present |
+| Tabs | Texhvid | IMPLEMENTED | Rules & quiz content integrated |
+| Tabs | Të Preferuarat | PARTIAL | Favorites/bookmarks accessible; UX polish & filtering pending |
+| Tabs | Memorizim | PARTIAL | Basic list & provider; lacking progression tools |
+| Tabs | Shenjuesit (bookmarks / last position) | PARTIAL | Bookmark list exists; distinct last-read marker logic missing |
+| Tabs | Shënimet | PARTIAL | Notes infrastructure; enhanced search/filter UI may be limited |
+| Settings | Tema (themes) | IMPLEMENTED | Multiple themes available |
+| Settings | Madhësia e shkronjave | IMPLEMENTED | Font size settings applied in widgets |
+| Settings | Përkthimi | IMPLEMENTED | Switchable via dropdown; search weighting pending |
+| Settings | Opsionet e shfaqjes (toggle arabic, translation, transliteration, word-by-word) | IMPLEMENTED | AppSettings manages toggles |
+
+### Coverage Summary
+- Implemented: 11
+- Partial: 13
+- Missing: 7
+
+### Actionable Debt Additions (Grouped)
+1. Search Filters & Juz Navigation: Add translation scope toggles (arabic / translation), Juz selector, surah alias map.
+2. Reader UX: Verse jump dropdown, fullscreen toggle, multi-select with action bar.
+3. Verse Actions Completion: Copy, Share, Image generation, last-read marker, quick note add wiring.
+4. Memorization Enhancements: Practice modes (hide text, spaced repetition scheduling), stats persistence.
+5. Favorites vs Bookmarks Terminology: Unify naming & UI labels.
+6. Index Ranking: Incorporate multi-translation weighting once filters added.
+7. Accessibility: Fullscreen & selection modes should respect system UI overlays; add reduce-motion consideration for auto-scroll.
+
+
+---
 ## Sprint 1 (Proposed Targets)
 1. Logger abstraction + replace prints.
 2. Reintroduce bookmark & memorization stubs (feature-flagged) + action pattern.
