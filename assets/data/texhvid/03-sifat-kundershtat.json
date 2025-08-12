@@ -1,0 +1,284 @@
+[
+  {
+    "id": "el-hems-el-xhehr",
+    "title": "EL-HEMS (Fshehtësi) vs EL-XHEHR (Haptazi)",
+    "slug": "el-hems-el-xhehr",
+    "pageNumber": 84,
+    "description": "El-Hemse (الشَّهْمْسُ) do të thotë zë i heshtur, i mbyllur, i fshehur. Në Terminologji hemse do të thotë: të vazhduarit e frymës apo më mirë frymëmarrjes pas theksimit të shkronjës, për shkak të përkufizimit dhe për shkak të dobësimit të zërit nga vendartikulimi.<br/>El-Xhehr (الْجَهْرُ) do të thotë: çelje, hapje - pra zë i fuqishëm në të shprehur të shkronjës. Në TERMINOLOGJI do të thotë: mbyllja e derës së frymëmarrjes në momentin e artikulimit të shkronjës për shkak të fuqisë që ka zëri.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Hems (الشَّهْمْسُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 10 shkronja, të përmbledhura në shprehjen: <span class='arabic-text text-2xl'>فَحَثَّهُ شَخْصٌ سَكَتَ</span><br/>(ف – ح – ث – ه – ش – خ – ص – س – ك – ت)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Xhehr (الْجَهْرُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 19 shkronjat e mbetura të alfabetit."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "hems-xhehr-q1",
+        "text": "Cila nga këto shkronja është nga grupi i El-Hems (të fshehta/pa zë)?",
+        "options": [
+          {
+            "id": "hems-xhehr-q1-o1",
+            "text": "ب (Baa')",
+            "isCorrect": false
+          },
+          {
+            "id": "hems-xhehr-q1-o2",
+            "text": "س (Siin)",
+            "isCorrect": true
+          },
+          {
+            "id": "hems-xhehr-q1-o3",
+            "text": "ج (Xhiim)",
+            "isCorrect": false
+          },
+          {
+            "id": "hems-xhehr-q1-o4",
+            "text": "م (Miim)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat e El-Hems janë: ف, ح, ث, ه, ش, خ, ص, س, ك, ت. Pra, س (Siin) është njëra prej tyre."
+      }
+    ]
+  },
+  {
+    "id": "esh-shiddetu-errehavetu-et-tewessut",
+    "title": "ESH-SHIDDETU (Shtrënguese) vs ERREHAVETU (Çliruese) vs ET-TEWESSUT (Mesatare)",
+    "slug": "esh-shiddetu-errehavetu-et-tewessut",
+    "pageNumber": 86,
+    "description": "Esh-Shiddetu (الشِّدَّةُ) gjuhësisht do të thotë fortësi. Në terminologji: Rezervimi i zërit gjatë shqiptimit në shkronjë, me qëllim që të forcohet shkronja kur të shpërthen në vendnyjëtim.<br/>Errehavetu (الرَّخَاوَةُ) gjuhësisht do të thotë e lehtë, e butë, e lirë. Në terminologji: Kalimi i zërit pa pengesë gjatë shqiptimit të shkronjës për shkak se mbështetja në vendnyjëtim nuk është e fortë.<br/>Et-Tewessut (التَّوَسُّطُ) ose Bejnijjeh (البَيْنِيَّةُ) do të thotë mesatare. Këto shkronja nuk janë as plotësisht të forta (Shiddah) që të ndërpresin plotësisht zërin, as plotësisht të buta (Rekhawah) që zëri të kalojë lirshëm, por janë mesatare.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e Esh-Shiddetu (الشِّدَّةُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 8 shkronja, të përmbledhura në shprehjen: <span class='arabic-text text-2xl'>أَجِدْ قَطٍ بَكَتْ</span><br/>(ء – ج – د – ق – ط – ب – ك – ت)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronjat e Errehavetu (الرَّخَاوَةُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 16 shkronja: <span class='arabic-text text-2xl'>خُذْ غِثَّ زَوَىٍ فَشَاهِدْ صَدْقٍ سَلَّ</span><br/>(خ – ذ – غ – ث – ز – و (vav) – ى (jaa) – ف – ش – ه – ـ (siin) – ص – ظ – س – ل (elif))"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronjat e Et-Tewessut (التَّوَسُّطُ) ose Bejnijjeh (البَيْنِيَّةُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 5 shkronja, të përmbledhura në shprehjen: <span class='arabic-text text-2xl'>لِنْ عُمَرْ</span><br/>(ل – ن – ع – م – ر)"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "shiddah-rakhawah-q1",
+        "text": "Cila nga këto shkronja ka cilësinë Esh-Shiddetu (Shtrënguese)?",
+        "options": [
+          {
+            "id": "shiddah-rakhawah-q1-o1",
+            "text": "س (Siin)",
+            "isCorrect": false
+          },
+          {
+            "id": "shiddah-rakhawah-q1-o2",
+            "text": "ق (Kaaf e trashë)",
+            "isCorrect": true
+          },
+          {
+            "id": "shiddah-rakhawah-q1-o3",
+            "text": "ل (Laam)",
+            "isCorrect": false
+          },
+          {
+            "id": "shiddah-rakhawah-q1-o4",
+            "text": "ف (Faa)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat e Esh-Shiddetu janë: ء, ج, д, ق, ط, ب, ك, ت. Pra, ق (Kaaf e trashë) është njëra prej tyre."
+      }
+    ]
+  },
+  {
+    "id": "el-istila-el-istifal",
+    "title": "EL-ISTI\\'LA (Ngritje) vs EL-ISTIFAL (Ulje)",
+    "slug": "el-istila-el-istifal",
+    "pageNumber": 87,
+    "description": "El-Isti'la (الْاِسْتِعْلَاءُ) do të thotë ngritje, lartësim. Në Terminologji: Ngritja e majës së gjuhës lart në qiellzë kur të theksohet shkronja. Shkronjat e Isti'la-së janë gjithmonë të trasha (mufekhame).<br/>El-Istifal (الْاِسْتِفَالُ) do të thotë ulje, zbritje. Në Terminologji: Zbritja e gjuhës poshtë ku e ka vendin në gojë, gjithmonë kur të theksohet shkronja. Shkronjat e Istifal-it janë gjithmonë të holla (murakkake), përveç Lamit dhe Ra-së në disa raste, dhe Elifit që pason shkronjën paraardhëse.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Isti'la (الْاِسْتِعْلَاءُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 7 shkronja, të përmbledhura në shprehjen: <span class='arabic-text text-2xl'>خُصَّ ضَغْطٍ قِظْ</span><br/>(خ – ص – ض – غ – ط – ق – ظ)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Istifal (الْاِسْتِفَالُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 22 shkronjat e mbetura të alfabetit."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "istila-istifal-q1",
+        "text": "Cila nga këto shkronja është gjithmonë e trashë (El-Isti'la)?",
+        "options": [
+          {
+            "id": "istila-istifal-q1-o1",
+            "text": "ب (Baa')",
+            "isCorrect": false
+          },
+          {
+            "id": "istila-istifal-q1-o2",
+            "text": "س (Siin)",
+            "isCorrect": false
+          },
+          {
+            "id": "istila-istifal-q1-o3",
+            "text": "ط (Taa e trashë)",
+            "isCorrect": true
+          },
+          {
+            "id": "istila-istifal-q1-o4",
+            "text": "ل (Laam)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat e El-Isti'la janë gjithmonë të trasha dhe janë: خ, ص, ض, غ, ط, ق, ظ. Pra, ط (Taa e trashë) është njëra prej tyre."
+      }
+    ]
+  },
+  {
+    "id": "el-itbak-el-infitah",
+    "title": "EL-ITBAK (Mbulim/Ngjitje) vs EL-INFITAH (Hapje)",
+    "slug": "el-itbak-el-infitah",
+    "pageNumber": 88,
+    "description": "El-Itbak (الْإِطْبَاقُ) do të thotë ngjitje përmbyllje. Në Terminologji: Ngjitja e një pjese të gjuhës apo pjesës më të madhe të gjuhës me qiellzën e epërme, me rastin e artikulimit të shkronjës. Këto janë shkronjat më të trasha.<br/>El-Infitah (الْاِنْفِتَاحُ) do të thotë ndarje, mospërputhje, hapje. Në Terminologji: Mosbashkëngjitja e gjuhës me qiellzën e epërm, në mënyrë që të mos bllokohet zëri në mes tyre gjatë artikulimit të shkronjës.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Itbak (الْإِطْبَاقُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 4 shkronja: <span class='arabic-text text-2xl'>ص – ض – ط – ظ</span>"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Infitah (الْاِنْفِتَاحُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 25 shkronjat e mbetura të alfabetit."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "itbak-infitah-q1",
+        "text": "Cila nga këto shkronja ka cilësinë El-Itbak (Mbulim/Ngjitje)?",
+        "options": [
+          {
+            "id": "itbak-infitah-q1-o1",
+            "text": "ق (Kaaf e trashë)",
+            "isCorrect": false
+          },
+          {
+            "id": "itbak-infitah-q1-o2",
+            "text": "ص (Saad)",
+            "isCorrect": true
+          },
+          {
+            "id": "itbak-infitah-q1-o3",
+            "text": "خ (Khaa)",
+            "isCorrect": false
+          },
+          {
+            "id": "itbak-infitah-q1-o4",
+            "text": "غ (Gajn)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat e El-Itbak janë: ص, ض, ط, ظ. Këto janë shkronjat më të trasha sepse gjuha 'mbulon' qiellzën më shumë."
+      }
+    ]
+  },
+  {
+    "id": "el-idhlak-el-ismat",
+    "title": "EL-IDHLAK (Rrëshqitje) vs EL-ISMAT (Ngulmim)",
+    "slug": "el-idhlak-el-ismat",
+    "pageNumber": 90,
+    "description": "El-Idhlak (الْإِذْلَاقُ) gjuhësisht do të thotë mprehtësi gjuhësore, ose maja e gjuhës. Në terminologji: Shpejtësimi, rrëshqitësimi, dhe lehtësimi i shqiptimit të shkronjës për shkak se del prej majës së gjuhës ose prej buzëve.<br/>El-Ismat (الْإِصْمَاتُ) gjuhësisht do të thotë mosshpejtim, ngecje, ndalje. Në terminologji: Ngecja, vështirësimi i artikulimit të shkronjës për shkak të artikulimit të saj larg majës së gjuhës.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Idhlak (الْإِذْلَاقُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 6 shkronja, të përmbledhura në shprehjen: <span class='arabic-text text-2xl'>فِرَّ مِنْ لُبٍّ</span><br/>(ف – ر – م – ن – ل – ب)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Ismat (الْإِصْمَاتُ):"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 23 shkronjat e mbetura të alfabetit."
+      },
+      {
+        "type": "text",
+        "meaning": "Shënim: Këto cilësi lidhen më shumë me fonologjinë dhe morfologjinë e gjuhës arabe (p.sh. formimi i fjalëve katërshkronjëshe ose pesëshkronjëshe) sesa me ndikim të drejtpërdrejtë në shqiptimin e Texhvidit për fillestarët."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "idhlak-ismat-q1",
+        "text": "Cila nga këto shkronja i takon grupit El-Idhlak (Rrëshqitje/Lehtësi)?",
+        "options": [
+          {
+            "id": "idhlak-ismat-q1-o1",
+            "text": "ج (Xhiim)",
+            "isCorrect": false
+          },
+          {
+            "id": "idhlak-ismat-q1-o2",
+            "text": "ل (Laam)",
+            "isCorrect": true
+          },
+          {
+            "id": "idhlak-ismat-q1-o3",
+            "text": "ق (Kaaf e trashë)",
+            "isCorrect": false
+          },
+          {
+            "id": "idhlak-ismat-q1-o4",
+            "text": "ع (Ajn)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat e El-Idhlak janë: ف, ر, م, ن, ل, ب. Këto shkronja artikulohen nga maja e gjuhës ose buzët, gjë që i bën më të lehta për t'u shqiptuar shpejt."
+      }
+    ]
+  }
+]

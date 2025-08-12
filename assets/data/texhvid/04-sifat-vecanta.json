@@ -1,0 +1,407 @@
+[
+  {
+    "id": "es-safir",
+    "title": "ES-SAFIR (Fishkëllima)",
+    "slug": "es-safir",
+    "pageNumber": 95,
+    "description": "Es-Safir (الصَّفِيرُ) do të thotë zë, tingull, i cili buron prej gojës së kafshëve kur të pinë ujë, ose tingulli i bilbilit. Në terminologji do të thotë tingulli apo zëri i buruar prej shkronjave të caktuara (safirë), i cili depërton fuqishëm në aparatin e të dëgjuarit (veshët).",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e Es-Safir:"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 3 shkronja: <span class='arabic-text text-2xl'>ص – ز – س</span>"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>ص (Saad)</span>: Më e forta, ngjason me zërin e patës."
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>ز (Zaaj)</span>: Ngjason me zërin e bletës."
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>س (Siin)</span>: Më e dobëta, ngjason me zërin e karkalecit."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "safir-q1",
+        "text": "Cila nga këto shkronja NUK është shkronjë Safir (fishkëlluese)?",
+        "options": [
+          {
+            "id": "safir-q1-o1",
+            "text": "ص (Saad)",
+            "isCorrect": false
+          },
+          {
+            "id": "safir-q1-o2",
+            "text": "ش (Shiin)",
+            "isCorrect": true
+          },
+          {
+            "id": "safir-q1-o3",
+            "text": "ز (Zaaj)",
+            "isCorrect": false
+          },
+          {
+            "id": "safir-q1-o4",
+            "text": "س (Siin)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat Safir janë ص, ز, dhe س. Shkronja ش (Shiin) ka cilësinë Tefesh-shi (përhapje)."
+      }
+    ]
+  },
+  {
+    "id": "el-kalkalah",
+    "title": "EL-KALKALAH (Dridhja/Tundja)",
+    "slug": "el-kalkalah",
+    "pageNumber": 97,
+    "description": "El-Kalkalah (الْقَلْقَلَةُ) do të thotë lëvizje, dridhje, tronditje. Në terminologji: Të dridhësh, të tronditësh fuqishëm zërin e shkronjës së pavokalizuar (me sukun) në vendartikulimin e tij sa, që të kuptohet shumë i qartë. Ndryshe quhet zë shtesë, i cili formohet për shkak të shtrëngimit dhe lirimit të menjëhershëm.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Kalkalah:"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 5 shkronja, të përmbledhura në shprehjen: <span class='arabic-text text-2xl'>قُطْبُ جَدٍ</span><br/>(ق – ط – ب – ج – د)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkallët e Kalkalah:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>Kalkalah Kubra (e Madhe):</span> Kur ndalemi te shkronja Kalkalah me teshtid. Shembull: <span class='arabic-text text-2xl'>الْحَقُّ</span> (duke ndaluar te Kuuf-i)"
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>Kalkalah Wusta (e Mesme):</span> Kur ndalemi te shkronja Kalkalah pa teshtid. Shembull: <span class='arabic-text text-2xl'>مُحِيطٌ</span> (duke ndaluar te Taa-i)"
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-emphasis'>Kalkalah Sugra (e Vogël):</span> Kur shkronja Kalkalah është me sukun në mes të fjalës ose në fund por vazhdojmë leximin. Shembull: <span class='arabic-text text-2xl'>يَقْطَعُونَ</span>, <span class='arabic-text text-2xl'>قَدْ أَفْلَحَ</span>"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "kalkalah-q1",
+        "text": "Cila nga këto shkronja është shkronjë Kalkalah?",
+        "options": [
+          {
+            "id": "kalkalah-q1-o1",
+            "text": "ك (Kaaf)",
+            "isCorrect": false
+          },
+          {
+            "id": "kalkalah-q1-o2",
+            "text": "د (Daal)",
+            "isCorrect": true
+          },
+          {
+            "id": "kalkalah-q1-o3",
+            "text": "ل (Laam)",
+            "isCorrect": false
+          },
+          {
+            "id": "kalkalah-q1-o4",
+            "text": "ف (Faa)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat Kalkalah janë ق, ط, ب, ج, د."
+      }
+    ]
+  },
+  {
+    "id": "el-lijn",
+    "title": "EL-LIJN (Butësia)",
+    "slug": "el-lijn",
+    "pageNumber": 100,
+    "description": "El-Lijn (اللِّينُ) gjuhësisht do të thotë lehtësuese, zbutësuese. Në terminologji: Artikulimi i shkronjës prej vendartikulimit të tij me lehtësi të madhe, pa e ngarkuar gjuhë fare.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Lijn:"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 2 shkronja: <span class='arabic-text text-2xl'>و (Waw Sakin)</span> dhe <span class='arabic-text text-2xl'>ي (Jaa Sakin)</span>, me kusht që para tyre të jetë zanorja e shkurtër Fet'ha (◌َ)."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خَوْفٌ",
+            "pronunciation": "khawf"
+          },
+          {
+            "arabic": "بَيْتٌ",
+            "pronunciation": "bejt"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "lijn-q1",
+        "text": "Cilët janë kushtet që një Waw (و) ose Jaa (ي) të jenë shkronja Lijn?",
+        "options": [
+          {
+            "id": "lijn-q1-o1",
+            "text": "Të jenë me Damma.",
+            "isCorrect": false
+          },
+          {
+            "id": "lijn-q1-o2",
+            "text": "Të jenë me Sukun dhe para tyre të jetë Fet'ha.",
+            "isCorrect": true
+          },
+          {
+            "id": "lijn-q1-o3",
+            "text": "Të jenë me Kesra.",
+            "isCorrect": false
+          },
+          {
+            "id": "lijn-q1-o4",
+            "text": "Të jenë me Teshtid.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat Lijn janë Waw Sakin (وْ) dhe Jaa Sakin (يْ) kur para tyre është një shkronjë me Fet'ha (◌َ)."
+      }
+    ]
+  },
+  {
+    "id": "el-inhiraf",
+    "title": "EL-INHIRAF (Devijimi/Anim)",
+    "slug": "el-inhiraf",
+    "pageNumber": 101,
+    "description": "El-Inhiraf (الْاِنْحِرَافُ) do të thotë anim, lakim, shtrembërim, shmangie etj. Në terminologji: Të marrësh shkronjën prej vendartikulimit të tij, dhe të mënjanuarit e saj deri te vendartikulimi i shkronjës tjetër.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronjat e El-Inhiraf:"
+      },
+      {
+        "type": "text",
+        "meaning": "Janë 2 shkronja: <span class='arabic-text text-2xl'>ل (Laam)</span> dhe <span class='arabic-text text-2xl'>ر (Raa)</span>"
+      },
+      {
+        "type": "text",
+        "meaning": "Shkronja <span class='arabic-emphasis'>ل (Laam)</span> anon nga maja e gjuhës drejt anësoreve të saj."
+      },
+      {
+        "type": "text",
+        "meaning": "Shkronja <span class='arabic-emphasis'>ر (Raa)</span> anon nga maja e gjuhës pak drejt shpinës së saj."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "inhiraf-q1",
+        "text": "Cila nga këto shkronja ka cilësinë El-Inhiraf?",
+        "options": [
+          {
+            "id": "inhiraf-q1-o1",
+            "text": "م (Miim)",
+            "isCorrect": false
+          },
+          {
+            "id": "inhiraf-q1-o2",
+            "text": "ر (Raa)",
+            "isCorrect": true
+          },
+          {
+            "id": "inhiraf-q1-o3",
+            "text": "س (Siin)",
+            "isCorrect": false
+          },
+          {
+            "id": "inhiraf-q1-o4",
+            "text": "ك (Kaaf)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat e El-Inhiraf janë ل (Laam) dhe ر (Raa)."
+      }
+    ]
+  },
+  {
+    "id": "et-tekrir",
+    "title": "ET-TEKRIR (Përsëritja)",
+    "slug": "et-tekrir",
+    "pageNumber": 101,
+    "description": "Et-Tekrir (التَّكْرِيرُ) do të thotë përsëritje. Në terminologji: Të dridhurit e majës së gjuhës në momentin e artikulimit të shkronjës. Kjo cilësi i takon vetëm shkronjës ر (Raa). Duhet pasur kujdes që kjo dridhje të mos ekzagjerohet, por të jetë e lehtë.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronja e Et-Tekrir:"
+      },
+      {
+        "type": "text",
+        "meaning": "Është vetëm 1 shkronjë: <span class='arabic-text text-2xl'>ر (Raa)</span>"
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull: <span class='arabic-text text-2xl'>الرَّحْمٰنِ الرَّحِيمِ</span>. Kujdes nga përsëritja e tepruar e ر."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "tekrir-q1",
+        "text": "Cila shkronjë ka cilësinë Et-Tekrir (Përsëritje/Dridhje e majës së gjuhës)?",
+        "options": [
+          {
+            "id": "tekrir-q1-o1",
+            "text": "ل (Laam)",
+            "isCorrect": false
+          },
+          {
+            "id": "tekrir-q1-o2",
+            "text": "ر (Raa)",
+            "isCorrect": true
+          },
+          {
+            "id": "tekrir-q1-o3",
+            "text": "ز (Zaaj)",
+            "isCorrect": false
+          },
+          {
+            "id": "tekrir-q1-o4",
+            "text": "ن (Nuun)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Cilësia Et-Tekrir i takon vetëm shkronjës ر (Raa) dhe i referohet dridhjes së lehtë të majës së gjuhës gjatë shqiptimit të saj."
+      }
+    ]
+  },
+  {
+    "id": "et-tefesh-shi",
+    "title": "ET-TEFESH-SHI (Përhapja)",
+    "slug": "et-tefesh-shi",
+    "pageNumber": 102,
+    "description": "Et-Tefesh-shi (التَّفَشِّي) do të thotë shpërndarje, përhapje, gjërim. Në terminologji: Shpërndarja, përhapja, zgjërimi i zërit (ajrit) të shkronjës ش (Shiin) në brendi të gojës, derisa të takohet me pjesën e brendshme të dhëmbëve të sipërm dhe të poshtëm.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronja e Et-Tefesh-shi:"
+      },
+      {
+        "type": "text",
+        "meaning": "Është vetëm 1 shkronjë: <span class='arabic-text text-2xl'>ش (Shiin)</span>"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "الشَّمْسُ",
+            "pronunciation": "esh-shemsu"
+          },
+          {
+            "arabic": "فَاشْهَدُوا",
+            "pronunciation": "feshheduu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "tefesh-shi-q1",
+        "text": "Cila shkronjë ka cilësinë Et-Tefesh-shi (Përhapje e zërit në gojë)?",
+        "options": [
+          {
+            "id": "tefesh-shi-q1-o1",
+            "text": "س (Siin)",
+            "isCorrect": false
+          },
+          {
+            "id": "tefesh-shi-q1-o2",
+            "text": "ش (Shiin)",
+            "isCorrect": true
+          },
+          {
+            "id": "tefesh-shi-q1-o3",
+            "text": "ص (Saad)",
+            "isCorrect": false
+          },
+          {
+            "id": "tefesh-shi-q1-o4",
+            "text": "خ (Khaa)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Cilësia Et-Tefesh-shi i takon vetëm shkronjës ش (Shiin) dhe i referohet përhapjes së ajrit/zërit në gojë gjatë shqiptimit të saj."
+      }
+    ]
+  },
+  {
+    "id": "el-istitale",
+    "title": "EL-ISTITALE (Zgjatja e Zërit)",
+    "slug": "el-istitale",
+    "pageNumber": 103,
+    "description": "El-Istitale (الْاِسْتِطَالَةُ) do të thotë zgjatim, zgjerim, shtrirje. Në terminologji: Zgjatja dhe zgjerimi i gjuhës gjatë artikulimit të shkronjës ض (Daad), prej njërës anë e deri në anën tjetër, deri sa t’i afrohet vendartikulimit të shkronjës ل (Laam).",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shkronja e El-Istitale:"
+      },
+      {
+        "type": "text",
+        "meaning": "Është vetëm 1 shkronjë: <span class='arabic-text text-2xl'>ض (Daad)</span>"
+      },
+      {
+        "type": "text",
+        "meaning": "Vendi i shkronjës ض përfshinë vijë të gjatë, ajo përfshinë edhe dhëmballët, duke filluar nga ana e majtë dhe e djathtë e gjuhës. Kur gjuha ngrihet gjatë artikulimit të shkronjës ض (Dad), të dyja anët e gjuhës bashkohen me dhëmballët dhe bëhet tubimi i ajrit, atëherë zëri zgjatet dhe zgjerohet si pasojë e ngushtimit të venddaljes në të gjitha anët."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "الضَّالِّينَ",
+            "pronunciation": "ed-daalliin"
+          },
+          {
+            "arabic": "يَضْرِبُ",
+            "pronunciation": "jadribu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "istitale-q1",
+        "text": "Cila shkronjë ka cilësinë El-Istitale (Zgjatje e zërit/artikulimit)?",
+        "options": [
+          {
+            "id": "istitale-q1-o1",
+            "text": "ط (Taa e trashë)",
+            "isCorrect": false
+          },
+          {
+            "id": "istitale-q1-o2",
+            "text": "ض (Daad)",
+            "isCorrect": true
+          },
+          {
+            "id": "istitale-q1-o3",
+            "text": "ص (Saad)",
+            "isCorrect": false
+          },
+          {
+            "id": "istitale-q1-o4",
+            "text": "ظ (Dhaa e trashë)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Cilësia El-Istitale i takon vetëm shkronjës ض (Daad) dhe i referohet zgjatjes së pikës së saj të artikulimit përgjatë anësoreve të gjuhës."
+      }
+    ]
+  }
+]

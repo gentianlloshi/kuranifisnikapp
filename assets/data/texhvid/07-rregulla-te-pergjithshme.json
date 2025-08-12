@@ -1,0 +1,843 @@
+[
+  {
+    "id": "hamzatul-wasl-dhe-qat",
+    "title": "HEMZETUL WASL (هَمْزَةُ الْوَصْلِ) dhe HEMZETUL KAT\\' (هَمْزَةُ الْقَطْعِ)",
+    "slug": "hamzatul-wasl-dhe-qat",
+    "pageNumber": 142,
+    "description": "Hemzetul Kat' (هَمْزَةُ الْقَطْعِ) është hemzeja që lexohet gjithmonë, qoftë në fillim të fjalës, në mes, apo në fund, dhe shkruhet (أ، إ، ئ، ؤ).<br/>Hemzetul Wasl (هَمْزَةُ الْوَصْلِ) është hemzeja që lexohet vetëm kur fillohet leximi me të, por nuk lexohet (anashkalohet) kur vazhdohet leximi nga një fjalë para saj. Shkruhet si Elif pa shenjën e hemzesë sipër ose poshtë (ٱ), ose thjesht ا.<br/>Ajo gjendet në fillim të disa emrave, foljeve dhe pjesëzës ال (el).",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Hemzetul Kat' (هَمْزَةُ الْقَطْعِ)"
+      },
+      {
+        "type": "text",
+        "meaning": "Lexohet gjithmonë. Shembuj:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "أَحَدٌ",
+            "pronunciation": "ehadun"
+          },
+          {
+            "arabic": "إِيمَانٌ",
+            "pronunciation": "iimaanun"
+          },
+          {
+            "arabic": "سَأَلَ",
+            "pronunciation": "se ele"
+          },
+          {
+            "arabic": "يُؤْمِنُ",
+            "pronunciation": "ju\\'minu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Hemzetul Wasl (هَمْزَةُ الْوَصْلِ)"
+      },
+      {
+        "type": "text",
+        "meaning": "Mënyra e leximit të Hemzetul Wasl kur fillohet me të:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. <b>Me Fetha (e):</b> Gjithmonë te pjesëza <span class='arabic-text'>الْ</span> (el). Shembull: <span class='arabic-text'>الْحَمْدُ</span> (kur fillojmë: elhamdu)."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <b>Me Damma (u):</b> Te foljet urdhërore, nëse shkronja e tretë e foljes ka Damme origjinale. Shembull: <span class='arabic-text'>ٱنْظُرْ</span> (kur fillojmë: undhur), <span class='arabic-text'>ٱدْعُ</span> (kur fillojmë: ud'u)."
+      },
+      {
+        "type": "text",
+        "meaning": "3. <b>Me Kesra (i):</b> Në të gjitha rastet tjera:<br/>   - Te foljet (urdhërore ose të kryera) nëse shkronja e tretë ka Fetha ose Kesra. Shembull: <span class='arabic-text'>ٱسْتَغْفِرْ</span> (kur fillojmë: istegfir), <span class='arabic-text'>ٱضْرِبْ</span> (kur fillojmë: idrib).<br/>   - Te disa emra specifikë (اسْم، ابْن، ابْنَة، امْرُؤ، امْرَأَة، اثْنَيْنِ، اثْنَتَيْنِ). Shembull: <span class='arabic-text'>ٱسْمُ</span> (kur fillojmë: ismu), <span class='arabic-text'>ٱبْنُ</span> (kur fillojmë: ibnu)."
+      },
+      {
+        "type": "text",
+        "meaning": "Kur vazhdohet leximi, Hemzetul Wasl nuk lexohet. Shembull: <span class='arabic-text'>وَٱسْتَغْفِرْ</span> (lexohet: wes-tegfir), <span class='arabic-text'>بِٱسْمِ</span> (lexohet: bismi)."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "hamza-wasl-q1",
+        "text": "Si lexohet Hemzetul Wasl në fjalën <span class='arabic-text'>ٱلْقَمَرُ</span> kur fillojmë leximin me të?",
+        "options": [
+          {
+            "id": "hamza-wasl-q1-o1",
+            "text": "Si 'i' (il-kameru)",
+            "isCorrect": false
+          },
+          {
+            "id": "hamza-wasl-q1-o2",
+            "text": "Si 'u' (ul-kameru)",
+            "isCorrect": false
+          },
+          {
+            "id": "hamza-wasl-q1-o3",
+            "text": "Si 'e' (el-kameru)",
+            "isCorrect": true
+          },
+          {
+            "id": "hamza-wasl-q1-o4",
+            "text": "Nuk lexohet",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Hemzetul Wasl te pjesëza ال gjithmonë lexohet me Fetha (e) kur fillohet me të."
+      }
+    ]
+  },
+  {
+    "id": "el-wakf-vel-ibtida",
+    "title": "EL-WAKF (Ndalimi) dhe EL-IBTIDA\\' (Fillimi)",
+    "slug": "el-wakf-vel-ibtida",
+    "pageNumber": 283,
+    "description": "El-Wakf (ndalimi) është ndërprerja e zërit në fund të një fjale gjatë leximit të Kur'anit, me qëllim të marrjes frymë dhe vazhdimit të leximit. El-Ibtida' (fillimi) është rifillimi i leximit pas ndalimit.<br/>Ndalimi bëhet në fund të fjalës, jo në mes. Rifillimi bëhet me shkronjë me zanore.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Llojet Kryesore të Ndalimit (El-Wakf el-Ikhtijari - i Zgjedhur):"
+      },
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>Wakf Tamm (الْوَقْفُ التَّامُّ - Ndalim i Plotë):</span> Ndalimi në një fjalë ku kuptimi është plotësuar dhe nuk ka lidhje gramatikore apo kuptimore me fjalën pasuese. Rifillimi bëhet me fjalën pasuese. Shenja në Mushaf: shpesh <span class='arabic-text'>م</span> ose fundi i ajetit."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>Wakf Kaafi (الْوَقْفُ الْكَافِي - Ndalim i Mjaftueshëm):</span> Ndalimi në një fjalë ku kuptimi është plotësuar, por fjala pasuese ka lidhje kuptimore (jo gramatikore) me të. Rifillimi bëhet me fjalën pasuese. Shenja në Mushaf: shpesh <span class='arabic-text'>قلى</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-emphasis'>Wakf Hasan (الْوَقْفُ الْحَسَنُ - Ndalim i Mirë):</span> Ndalimi në një fjalë ku kuptimi është plotësuar, por fjala pasuese ka lidhje gramatikore dhe kuptimore me të. Lejohet ndalimi, por preferohet të rifillohet nga fjala ku u ndal ose më parë, nëse kuptimi e lejon. Shenja në Mushaf: shpesh <span class='arabic-text'>صلى</span> ose <span class='arabic-text'>ج</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "4. <span class='arabic-emphasis'>Wakf Kabih (الْوَقْفُ الْقَبِيحُ - Ndalim i Keq):</span> Ndalimi në një fjalë që nuk e plotëson kuptimin ose jep kuptim të gabuar. Duhet shmangur. Nuk ka shenjë specifike, por duhet kuptuar konteksti."
+      },
+      {
+        "type": "title",
+        "meaning": "Shenjat e Ndalimit në Mushaf:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "م",
+            "pronunciation": "Mim",
+            "meaning": "Ndalim i obliguar (Lazim)."
+          },
+          {
+            "arabic": "لا",
+            "pronunciation": "Laam-Elif",
+            "meaning": "Mos u ndal."
+          },
+          {
+            "arabic": "صلى",
+            "pronunciation": "Sad-Lam-Jaa",
+            "meaning": "Vazhdimi më i mirë (El-Waslu Ewla)."
+          },
+          {
+            "arabic": "قلى",
+            "pronunciation": "Kaaf-Lam-Jaa",
+            "meaning": "Ndalimi më i mirë (El-Wakfu Ewla)."
+          },
+          {
+            "arabic": "ج",
+            "pronunciation": "Xhim",
+            "meaning": "Ndalim i lejuar (Xhaiz)."
+          },
+          {
+            "arabic": "؞",
+            "pronunciation": "Tri pika (Waqf Mu'anaka)",
+            "meaning": "Ndalohu në njërën prej tyre, jo në të dyja."
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Mënyrat e Ndalimit në Shkronjën e Fundit (Faqe 288 e PDF-së):"
+      },
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>Es-Sukun (السُّكُونُ - Heshtja):</span> Mënyra kryesore; shkronja e fundit bëhet Sakin. Vlen për shkronja me Fetha, Damma, Kesra."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>Er-Revm (الرَّوْمُ):</span> Shqiptimi i një pjese (rreth 1/3) të zanores (vetëm Damma ose Kesra) me zë të ulët sa ta dëgjojë vetëm ai që është afër. Nuk ka Revm në Fetha. Trajtohet si vazhdim i leximit për disa rregulla (p.sh., Medd Arid bëhet 2 kohë)."
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-emphasis'>El-Ishmam (الْإِشْمَامُ):</span> Bashkimi i buzëve sikur do të shqiptohej Damma, menjëherë pas Sukunizimit të shkronjës së fundit që kishte Damma. Vetëm shihet, nuk dëgjohet. Nuk ka Ishmam në Fetha apo Kesra."
+      },
+      {
+        "type": "text",
+        "meaning": "4. <span class='arabic-emphasis'>El-Ibdal (الْإِبْدَالُ - Zëvendësimi):</span> Tenvini Fetha (◌ً) në fund të fjalës (përveç në Taa Merbuta ة) zëvendësohet me Elif Meddije kur ndalemi. Shembull: <span class='arabic-text'>عَلِيمًا</span> lexohet <span class='arabic-text'>عَلِيمَا</span>."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "waqf-q1",
+        "text": "Cila shenjë ndalimi tregon se vazhdimi është më i mirë?",
+        "options": [
+          {
+            "id": "waqf-q1-o1",
+            "text": "م",
+            "isCorrect": false
+          },
+          {
+            "id": "waqf-q1-o2",
+            "text": "قلى",
+            "isCorrect": false
+          },
+          {
+            "id": "waqf-q1-o3",
+            "text": "صلى",
+            "isCorrect": true
+          },
+          {
+            "id": "waqf-q1-o4",
+            "text": "لا",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shenja صلى (Sad-Lam-Jaa) tregon 'El-Waslu Ewla', që do të thotë se vazhdimi i leximit është më i preferuar se ndalimi."
+      },
+      {
+        "id": "waqf-q2",
+        "text": "Çfarë është Er-Revm (الرَّوْمُ)?",
+        "options": [
+          {
+            "id": "waqf-q2-o1",
+            "text": "Heshtje e plotë e shkronjës së fundit.",
+            "isCorrect": false
+          },
+          {
+            "id": "waqf-q2-o2",
+            "text": "Shqiptimi i një pjese të zanores Damma ose Kesra me zë të ulët gjatë ndalimit.",
+            "isCorrect": true
+          },
+          {
+            "id": "waqf-q2-o3",
+            "text": "Bashkimi i buzëve pa zë pas Sukunizimit të Dammes.",
+            "isCorrect": false
+          },
+          {
+            "id": "waqf-q2-o4",
+            "text": "Zëvendësimi i Tenvinit Fetha me Elif.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Er-Revm është shqiptimi i një pjese të zanores (Damma ose Kesra) me zë të ulët kur ndalemi, duke treguar zanoren origjinale të shkronjës."
+      }
+    ]
+  },
+  {
+    "id": "el-maktu-vel-mevsul",
+    "title": "EL-MAKTU\\' (I Ndarë) dhe EL-MEVSUL (I Bashkuar)",
+    "slug": "el-maktu-vel-mevsul",
+    "pageNumber": 150,
+    "description": "Disa fjalë në Kur'an ndonjëherë shkruhen të bashkuara (Mevsul) dhe ndonjëherë të ndara (Maktu'). Kjo ka rëndësi sepse ndikon se ku mund të ndalesh gjatë leximit. Nëse fjala është Maktu', mund të ndalesh te pjesa e parë. Nëse është Mevsul, duhet të ndalesh vetëm në fund të fjalës së bashkuar.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Shembuj të Zakonshëm:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-text'>أَنْ لاَ</span> (Maktu') vs <span class='arabic-text'>أَلاَّ</span> (Mevsul). Shembull Maktu': <span class='arabic-text'>أَنْ لاَ تَعْبُدُوا</span>. Shembull Mevsul: <span class='arabic-text'>أَلاَّ تَسْجُدَ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-text'>إِنْ مَا</span> (Maktu') vs <span class='arabic-text'>إِمَّا</span> (Mevsul). Shembull Maktu': <span class='arabic-text'>وَإِنْ مَا نُرِيَنَّكَ</span>. Shembull Mevsul: <span class='arabic-text'>إِمَّا يَبْلُغَنَّ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-text'>عَنْ مَا</span> (Maktu') vs <span class='arabic-text'>عَمَّا</span> (Mevsul). Shembull Maktu': <span class='arabic-text'>عَنْ مَا نُهُوا عَنْهُ</span>. Shembull Mevsul: <span class='arabic-text'>عَمَّا يَعْمَلُونَ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "4. <span class='arabic-text'>أَيْنَ مَا</span> (Maktu') vs <span class='arabic-text'>أَيْنَمَا</span> (Mevsul)."
+      },
+      {
+        "type": "text",
+        "meaning": "Lista e plotë e fjalëve dhe vendet e tyre specifike në Kur'an është e detajuar në librat e Texhvidit dhe Kiraeteve."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "maktu-mevsul-q1",
+        "text": "Nëse fjala <span class='arabic-text'>إِنْ لَمْ</span> është shkruar Maktu' (e ndarë), ku lejohet të ndalesh?",
+        "options": [
+          {
+            "id": "maktu-mevsul-q1-o1",
+            "text": "Vetëm te <span class='arabic-text'>لَمْ</span>",
+            "isCorrect": false
+          },
+          {
+            "id": "maktu-mevsul-q1-o2",
+            "text": "Mund të ndalesh te <span class='arabic-text'>إِنْ</span>",
+            "isCorrect": true
+          },
+          {
+            "id": "maktu-mevsul-q1-o3",
+            "text": "Nuk lejohet ndalimi fare",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Kur fjalët janë shkruar Maktu' (të ndara), lejohet ndalimi në fund të pjesës së parë, në këtë rast te <span class='arabic-text'>إِنْ</span>."
+      }
+    ]
+  },
+  {
+    "id": "et-taaat",
+    "title": "ET-TAA\\'AT (Format e Shkronjës Taa)",
+    "slug": "et-taaat",
+    "pageNumber": 206,
+    "description": "Shkronja Taa në fund të fjalëve mund të jetë e dy llojeve kryesore: Taa Merbuta (ة) dhe Taa Mebsuta/Meftuha (ت). Mënyra e ndalimit në to është e ndryshme.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Et-Taa el-Merbuta (التَّاءُ الْمَرْبُوطَةُ)"
+      },
+      {
+        "type": "text",
+        "meaning": "Shkruhet <span class='arabic-emphasis'>ة</span>. Kur ndalemi në një fjalë që mbaron me Taa Merbuta, ajo lexohet si Haa Sakin (<span class='arabic-emphasis'>هْ</span>). Kur vazhdojmë leximin, lexohet si Taa me zanoren e saj."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَحْمَةٌ",
+            "pronunciation": "Ndalimi: rahmeh, Vazhdimi: rahmetun"
+          },
+          {
+            "arabic": "الْجَنَّةَ",
+            "pronunciation": "Ndalimi: el-xhenneh, Vazhdimi: el-xhennete"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Et-Taa el-Mebsuta / el-Meftuha (التَّاءُ الْمَبْسُوطَةُ / الْمَفْتُوحَةُ)"
+      },
+      {
+        "type": "text",
+        "meaning": "Shkruhet <span class='arabic-emphasis'>ت</span>. Kur ndalemi në një fjalë që mbaron me Taa Mebsuta, ajo lexohet si Taa Sakin (<span class='arabic-emphasis'>تْ</span>) (me cilësinë Hems). Kur vazhdojmë leximin, lexohet si Taa me zanoren e saj."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَحْمَتُ",
+            "pronunciation": "Ndalimi: rahmet, Vazhdimi: rahmetu"
+          },
+          {
+            "arabic": "بَيْتٌ",
+            "pronunciation": "Ndalimi: bejt, Vazhdimi: bejtun"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Në Mushafin Uthmanik, disa fjalë që normalisht mbarojnë me Taa Merbuta, në disa vende specifike janë shkruar me Taa Mebsuta (p.sh., <span class='arabic-text'>رَحْمَت</span> në disa kontekste). Këto ndiqen sipas shkrimit në Mushaf."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "taaat-q1",
+        "text": "Si lexohet Taa Merbuta (<span class='arabic-text'>ة</span>) kur ndalemi në fjalën <span class='arabic-text'>نِعْمَةٌ</span>?",
+        "options": [
+          {
+            "id": "taaat-q1-o1",
+            "text": "Si <span class='arabic-text'>تْ</span> (ni'met)",
+            "isCorrect": false
+          },
+          {
+            "id": "taaat-q1-o2",
+            "text": "Si <span class='arabic-text'>هْ</span> (ni'meh)",
+            "isCorrect": true
+          },
+          {
+            "id": "taaat-q1-o3",
+            "text": "Si <span class='arabic-text'>ةُ</span> (ni'metu)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Kur ndalemi në një fjalë që mbaron me Taa Merbuta (ة), ajo lexohet si Haa Sakin (هْ)."
+      }
+    ]
+  },
+  {
+    "id": "alaketul-huruf",
+    "title": "RAPORTET MES SHKRONJAVE (عَلَاقَاتُ الْحُرُوفِ)",
+    "slug": "alaketul-huruf",
+    "pageNumber": 254,
+    "description": "Kur dy shkronja takohen (njëra pas tjetrës, e para me sukun ose jo), ato mund të kenë katër lloje raportesh bazuar në pikën e artikulimit (Makhrexh) dhe cilësitë (Sifat). Këto raporte ndikojnë në rregullat e Idgamit (bashkëngjitjes) ose Idh'harit (leximit të qartë).",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "1. El-Mutemathilejn (الْمُتَمَاثِلَيْنِ - Dy Shkronja Identike)"
+      },
+      {
+        "type": "text",
+        "meaning": "Dy shkronja që janë identike në pikën e artikulimit dhe në të gjitha cilësitë. Shembuj: <span class='arabic-text'>بْ + ب</span>, <span class='arabic-text'>دْ + د</span>, <span class='arabic-text'>لْ + ل</span>.<br/>Nëse e para është Sakin dhe e dyta me zanore (Mutemathilejn Sagir), bëhet Idgam (përveç disa rasteve). Shembull: <span class='arabic-text'>قَدْ دَخَلُوا ⇜ قَدَّخَلُوا</span>."
+      },
+      {
+        "type": "title",
+        "meaning": "2. El-Mutexhanisejn (الْمُتَجَانِسَيْنِ - Dy Shkronja Homogjene)"
+      },
+      {
+        "type": "text",
+        "meaning": "Dy shkronja që kanë të njëjtën pikë kryesore artikulimi, por ndryshojnë në disa cilësi. Shembuj:<br/>- <span class='arabic-text'>(ت د ط)</span> nga maja e gjuhës me rrënjët e dhëmbëve të sipërm.<br/>- <span class='arabic-text'>(ث ذ ظ)</span> nga maja e gjuhës me skajet e dhëmbëve të sipërm.<br/>- <span class='arabic-text'>(ب م و)</span> nga buzët (Waw-i si bashkëtingëllore).<br/>Idgami ndodh në disa kombinime kur e para është Sakin."
+      },
+      {
+        "type": "title",
+        "meaning": "3. El-Mutekaribejn (الْمُتَقَارِبَيْنِ - Dy Shkronja të Përafërta)"
+      },
+      {
+        "type": "text",
+        "meaning": "Dy shkronja që kanë pika artikulimi dhe/ose cilësi të përafërta. Shembuj: <span class='arabic-text'>قْ + ك</span>, <span class='arabic-text'>لْ + ر</span> (Idgam), <span class='arabic-text'>نْ + ل</span> (Idgam).<br/>Idgami ndodh në disa kombinime specifike."
+      },
+      {
+        "type": "title",
+        "meaning": "4. El-Mutebaidejn (الْمُتَبَاعِدَيْنِ - Dy Shkronja të Largëta)"
+      },
+      {
+        "type": "text",
+        "meaning": "Dy shkronja që kanë pika artikulimi të largëta dhe cilësi të ndryshme. Për këto, rregulli bazë është Idh'har (lexim i qartë i secilës). Shembull: <span class='arabic-text'>ءْ + ه</span>, <span class='arabic-text'>حْ + ع</span>."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "huruf-relations-q1",
+        "text": "Cili është raporti mes shkronjave <span class='arabic-text'>تْ</span> dhe <span class='arabic-text'>طَ</span> në <span class='arabic-text'>آمَنَتْ طَائِفَةٌ</span>?",
+        "options": [
+          {
+            "id": "huruf-relations-q1-o1",
+            "text": "Mutemathilejn (Identike)",
+            "isCorrect": false
+          },
+          {
+            "id": "huruf-relations-q1-o2",
+            "text": "Mutexhanisejn (Homogjene)",
+            "isCorrect": true
+          },
+          {
+            "id": "huruf-relations-q1-o3",
+            "text": "Mutekaribejn (Të Përafërta)",
+            "isCorrect": false
+          },
+          {
+            "id": "huruf-relations-q1-o4",
+            "text": "Mutebaidejn (Të Largëta)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat ت dhe ط dalin nga e njëjta pikë artikulimi (maja e gjuhës me rrënjët e dhëmbëve të sipërm), por kanë cilësi të ndryshme (ت është e hollë, ط është e trashë). Ky është raporti Mutexhanisejn. Në këtë rast bëhet Idgam Nakis (i pjesshëm)."
+      }
+    ]
+  },
+  {
+    "id": "meratib-el-kiraah",
+    "title": "KATEGORITË E LEXIMIT (مَرَاتِبُ الْقِرَاءَةِ)",
+    "slug": "meratib-el-kiraah",
+    "pageNumber": 291,
+    "description": "Leximi i Kur'anit mund të bëhet me shpejtësi të ndryshme, por gjithmonë duke respektuar rregullat e Texhvidit. Këto kategori janë:",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>Et-Tertil (التَّرْتِيلُ):</span> Leximi i ngadaltë, i qetë, me përsiatje të kuptimeve dhe zbatim të plotë të rregullave. Ky është niveli më i mirë për mësim dhe adhurim."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>Et-Tahkik (التَّحْقِيقُ):</span> Ngjashëm me Tertilin, por edhe më i ngadaltë dhe me më shumë përpikëri në artikulim dhe rregulla. Përdoret kryesisht për qëllime mësimore të detajuara."
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-emphasis'>El-Hadr (الْحَدْرُ):</span> Leximi i shpejtë, por duke ruajtur saktësinë e shkronjave dhe rregullave themelore të Texhvidit (p.sh., zgjatimet e duhura, ghunnet). Duhet kujdes që shpejtësia të mos çojë në gabime."
+      },
+      {
+        "type": "text",
+        "meaning": "4. <span class='arabic-emphasis'>Et-Tedvir (التَّدْوِيرُ):</span> Një nivel mesatar shpejtësie, mes Tertilit dhe Hadrit."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "meratib-q1",
+        "text": "Cila kategori leximi është më e ngadalta dhe përdoret kryesisht për qëllime mësimore të detajuara?",
+        "options": [
+          {
+            "id": "meratib-q1-o1",
+            "text": "El-Hadr",
+            "isCorrect": false
+          },
+          {
+            "id": "meratib-q1-o2",
+            "text": "Et-Tertil",
+            "isCorrect": false
+          },
+          {
+            "id": "meratib-q1-o3",
+            "text": "Et-Tahkik",
+            "isCorrect": true
+          },
+          {
+            "id": "meratib-q1-o4",
+            "text": "Et-Tedvir",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Et-Tahkik është niveli më i ngadaltë i leximit, me fokus maksimal në përpikërinë e çdo shkronje dhe rregulli, dhe përdoret shpesh për mësim."
+      }
+    ]
+  },
+  {
+    "id": "sexhdetu-tilawah",
+    "title": "SEXHDETU TILAWAH (سَجْدَةُ التِّلَاوَةِ - Sexhdeja e Leximit)",
+    "slug": "sexhdetu-tilawah",
+    "pageNumber": 299,
+    "description": "Sexhdetu Tilawah është sexhdeja që bëhet kur lexohet ose dëgjohet një ajet i caktuar i Kur'anit ku përmendet urdhri për të bërë sexhde ose përshkruhet sexhdeja e krijesave ndaj Allahut. Ka 15 vende në Kur'an ku bëhet Sexhdetu Tilawah.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Kushtet dhe Mënyra:"
+      },
+      {
+        "type": "text",
+        "meaning": "- Nijeti (qëllimi)."
+      },
+      {
+        "type": "text",
+        "meaning": "- Tekbiri (Allahu Ekber) kur bihet në sexhde dhe kur ngrihesh (sipas disa medhhebeve)."
+      },
+      {
+        "type": "text",
+        "meaning": "- Bërja e një sexhdeje të vetme."
+      },
+      {
+        "type": "text",
+        "meaning": "- Disa dijetarë thonë se kushtet janë si ato të namazit (pastërtia, mbulimi, kthimi nga Kibla), ndërsa disa të tjerë janë më të lehtësueshëm."
+      },
+      {
+        "type": "title",
+        "meaning": "Çfarë thuhet në Sexhde:"
+      },
+      {
+        "type": "text",
+        "meaning": "Mund të thuhet tesbihu i zakonshëm i sexhdes (<span class='arabic-text'>سُبْحَانَ رَبِّيَ الْأَعْلَى</span>), ose lutje specifike të transmetuara, siç është ajo e përmendur në PDF (faqe 301): <span class='arabic-text'>سَجَدَ وَجْهِي لِلَّذِي خَلَقَهُ وَشَقَّ سَمْعَهُ وَبَصَرَهُ بِحَوْلِهِ وَقُوَّتِهِ، فَتَبَارَكَ اللَّهُ أَحْسَنُ الْخَالِقِينَ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "Vendet e Sexhdes në Kur'an janë të shënuara në Mushaf, shpesh me simbolin e një mihrabi të vogël (<span class='arabic-emphasis'>۩</span>) ose fjalën <span class='arabic-emphasis'>السجدة</span>."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "sajdah-tilawah-q1",
+        "text": "Sa herë bëhet sexhde kur haset një ajet i Sexhdetu Tilawah?",
+        "options": [
+          {
+            "id": "sajdah-tilawah-q1-o1",
+            "text": "Dy herë",
+            "isCorrect": false
+          },
+          {
+            "id": "sajdah-tilawah-q1-o2",
+            "text": "Një herë",
+            "isCorrect": true
+          },
+          {
+            "id": "sajdah-tilawah-q1-o3",
+            "text": "Tri herë",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Për Sexhdetu Tilawah bëhet vetëm një sexhde."
+      }
+    ]
+  },
+  {
+    "id": "el-lahn",
+    "title": "LLOJET E GABIMEVE NË LEXIM (أَقْسَامُ اللَّحْنِ - El-Lahn)",
+    "slug": "el-lahn",
+    "pageNumber": 306,
+    "description": "El-Lahn nënkupton gabimin ose devijimin nga leximi i saktë i Kur'anit. Ka dy lloje kryesore:",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "1. El-Lahn el-Xheli (اللَّحْنُ الْجَلِيُّ - Gabimi i Qartë/Rëndë)"
+      },
+      {
+        "type": "text",
+        "meaning": "Gabim që e prish strukturën gramatikore ose kuptimin e fjalës, qoftë duke ndryshuar një shkronjë, një zanore, apo duke hequr/shtuar diçka. Ky lloj gabimi është haram (i ndaluar) dhe mund ta prishë namazin.<br/>Shembuj: Të lexosh <span class='arabic-text'>أَنْعَمْتُ</span> (en'amtu - Unë begatova) në vend të <span class='arabic-text'>أَنْعَمْتَ</span> (en'amte - Ti begatove) në suren El-Fatiha."
+      },
+      {
+        "type": "title",
+        "meaning": "2. El-Lahn el-Hafi (اللَّحْنُ الْخَفِيُّ - Gabimi i Fshehtë/Lehtë)"
+      },
+      {
+        "type": "text",
+        "meaning": "Gabim që lidhet me moszbatimin e përpiktë të rregullave të Texhvidit që nuk e prishin kuptimin direkt, por e ulin cilësinë e leximit. P.sh., mosrealizimi i plotë i një Ghunneh, zgjatimi më pak ose më shumë se sa duhet i një Medd-i të lejuar, mosdhënia e cilësive të duhura shkronjave (p.sh., trashje/hollim jo korrekt).<br/>Ky lloj gabimi konsiderohet mekruh (i papëlqyer) dhe duhet të punohet për ta shmangur duke mësuar Texhvidin."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "lahn-q1",
+        "text": "Ndryshimi i zanores së një shkronje që çon në ndryshimin e kuptimit të fjalës, çfarë lloj gabimi është?",
+        "options": [
+          {
+            "id": "lahn-q1-o1",
+            "text": "El-Lahn el-Hafi (Gabim i Lehtë)",
+            "isCorrect": false
+          },
+          {
+            "id": "lahn-q1-o2",
+            "text": "El-Lahn el-Xheli (Gabim i Rëndë)",
+            "isCorrect": true
+          }
+        ],
+        "explanation": "Ndryshimi i një zanoreje që ndikon në kuptim (p.sh., <span class='arabic-text'>أَنْعَمْتَ</span> vs <span class='arabic-text'>أَنْعَمْتُ</span>) është El-Lahn el-Xheli, një gabim i rëndë."
+      }
+    ]
+  },
+  {
+    "id": "wajibul-ghunneh",
+    "title": "GHUNNEH E OBLIGUESHME (الْغُنَّةُ الْوَاجِبَةُ)",
+    "slug": "wajibul-ghunneh",
+    "pageNumber": 112,
+    "description": "Ghunneh është tingulli hundor që shoqëron shkronjat Nun (ن) dhe Mim (م). Kur Nuni ose Mimi kanë Teshtid (<span class='arabic-emphasis'>نّ</span>, <span class='arabic-emphasis'>مّ</span>), Ghunneh-ja është e obligueshme (Wajib) dhe duhet të mbahet për dy kohë.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Shembuj për <span class='arabic-emphasis'>نّ</span> (Nun Mushaddedah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "إِنَّ",
+            "pronunciation": "inna"
+          },
+          {
+            "arabic": "الْجَنَّةِ",
+            "pronunciation": "el-xhenneti"
+          },
+          {
+            "arabic": "مِنْ نِعْمَةٍ",
+            "pronunciation": "min ni'metin (këtu bëhet Idgam me Ghunneh, por efekti i Ghunneh-s te Nun i dytë është i ngjashëm)"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Shembuj për <span class='arabic-emphasis'>مّ</span> (Mim Mushaddedah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ثُمَّ",
+            "pronunciation": "thumma"
+          },
+          {
+            "arabic": "عَمَّ",
+            "pronunciation": "'amma"
+          },
+          {
+            "arabic": "مِمَّا",
+            "pronunciation": "mimmaa"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "wajibul-ghunneh-q1",
+        "text": "Sa kohë duhet të mbahet Ghunneh-ja te shkronjat <span class='arabic-text'>نّ</span> dhe <span class='arabic-text'>مّ</span>?",
+        "options": [
+          {
+            "id": "wajibul-ghunneh-q1-o1",
+            "text": "Një kohë.",
+            "isCorrect": false
+          },
+          {
+            "id": "wajibul-ghunneh-q1-o2",
+            "text": "Dy kohë.",
+            "isCorrect": true
+          },
+          {
+            "id": "wajibul-ghunneh-q1-o3",
+            "text": "Tri kohë.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Ghunneh-ja te Nuni dhe Mimi me Teshtid (نّ, مّ) është e obligueshme dhe mbahet për dy kohë."
+      }
+    ]
+  },
+  {
+    "id": "es-sekteh",
+    "title": "ES-SEKTEH (السَّكْتَةُ - Pauza e Shkurtër)",
+    "slug": "es-sekteh",
+    "pageNumber": 283,
+    "description": "Es-Sekteh është një pauzë shumë e shkurtër gjatë leximit, më e shkurtër se ndalimi (Wakf), ku zëri ndërpritet pa marrë frymë, me qëllim të vazhdimit të menjëhershëm të leximit. Sipas transmetimit të Hafs an Asim, ka katër vende obligatore (wajib) dhe dy vende të lejuara (xhaiz) për Sekteh.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Vendet Obligatore (Wajib) të Sektes sipas Hafsit:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. Surja El-Kehf, ajeti 1-2: <span class='arabic-text'>...عِوَجًا ۜ﴿١﴾ قَيِّمًا لِيُنْذِرَ...</span> (pauzë e shkurtër te fjala <span class='arabic-text'>عِوَجًا</span>)."
+      },
+      {
+        "type": "text",
+        "meaning": "2. Surja Jasin, ajeti 52: <span class='arabic-text'>...مِنْ مَرْقَدِنَا ۜ ۗ هَٰذَا مَا وَعَدَ...</span> (pauzë e shkurtër te fjala <span class='arabic-text'>مَرْقَدِنَا</span>)."
+      },
+      {
+        "type": "text",
+        "meaning": "3. Surja El-Kijameh, ajeti 27: <span class='arabic-text'>وَقِيلَ مَنْ ۜ رَاقٍ</span> (pauzë e shkurtër te fjala <span class='arabic-text'>مَنْ</span>)."
+      },
+      {
+        "type": "text",
+        "meaning": "4. Surja El-Mutaffifin, ajeti 14: <span class='arabic-text'>كَلَّا ۖ بَلْ ۜ رَانَ...</span> (pauzë e shkurtër te fjala <span class='arabic-text'>بَلْ</span>)."
+      },
+      {
+        "type": "title",
+        "meaning": "Vendet e Lejuara (Xhaiz) të Sektes sipas Hafsit:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. Mes sureve El-Enfal dhe Et-Tewbe."
+      },
+      {
+        "type": "text",
+        "meaning": "2. Surja El-Hakka, ajeti 28-29: <span class='arabic-text'>مَا أَغْنَىٰ عَنِّي مَالِيَهْ ۜ﴿٢٨﴾ هَلَكَ عَنِّي سُلْطَانِيَهْ</span> (lejohet pauzë te fjala <span class='arabic-text'>مَالِيَهْ</span>)."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "sekteh-q1",
+        "text": "Çfarë është Es-Sekteh?",
+        "options": [
+          {
+            "id": "sekteh-q1-o1",
+            "text": "Një ndalim i gjatë me marrje fryme.",
+            "isCorrect": false
+          },
+          {
+            "id": "sekteh-q1-o2",
+            "text": "Një pauzë shumë e shkurtër pa marrë frymë.",
+            "isCorrect": true
+          },
+          {
+            "id": "sekteh-q1-o3",
+            "text": "Një lloj zgjatimi (Medd).",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Es-Sekteh është një pauzë shumë e shkurtër gjatë leximit ku zëri ndërpritet pa marrë frymë."
+      }
+    ]
+  },
+  {
+    "id": "idgam-mutexhanisejn",
+    "title": "IDGAM EL-MUTEXHANISEJN (Bashkëngjitja e Shkronjave Homogjene)",
+    "slug": "idgam-mutexhanisejn",
+    "pageNumber": 267,
+    "description": "Idgam El-Mutexhanisejn ndodh kur takohen dy shkronja që kanë të njëjtën pikë kryesore artikulimi por ndryshojnë në disa cilësi, dhe shkronja e parë është Sakin (me Sukun) ndërsa e dyta ka zanore. Shkronja e parë shkrihet plotësisht ose pjesërisht në të dytën.<br/>Kombinimet më të njohura ku bëhet Idgam:",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>ت</span> Sakin pasohet nga <span class='arabic-emphasis'>د</span> ose <span class='arabic-emphasis'>ط</span>:<br/>   - <span class='arabic-text'>تْ</span> në <span class='arabic-text'>د</span> (Idgam Kamil): <span class='arabic-text'>أُجِيبَتْ دَعْوَتُكُمَا</span> lexohet <span class='arabic-text'>أُجِيبَدَّعْوَتُكُمَا</span><br/>   - <span class='arabic-text'>تْ</span> në <span class='arabic-text'>ط</span> (Idgam Nakis - mbetet pak nga cilësia Itbak e ط-së, por ت-ja humbet): <span class='arabic-text'>آمَنَتْ طَائِفَةٌ</span> lexohet afërsisht si <span class='arabic-text'>آمَنَطَّائِفَةٌ</span> (me një الطاء të lehtësuar). Disa thonë Idgam Kamil."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>د</span> Sakin pasohet nga <span class='arabic-emphasis'>ت</span> (Idgam Kamil):<br/>   - <span class='arabic-text'>قَدْ تَبَيَّنَ</span> lexohet <span class='arabic-text'>قَتَّبَيَّنَ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-emphasis'>ط</span> Sakin pasohet nga <span class='arabic-emphasis'>ت</span> (Idgam Nakis - mbetet cilësia Isti'la dhe Itbak e ط-së):<br/>   - <span class='arabic-text'>أَحَطْتُ</span> lexohet me një tingull të përzier, <span class='arabic-text'>بَسَطْتَ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "4. <span class='arabic-emphasis'>ذ</span> Sakin pasohet nga <span class='arabic-emphasis'>ظ</span> (Idgam Kamil):<br/>   - <span class='arabic-text'>إِذْ ظَلَمُوا</span> lexohet <span class='arabic-text'>إِظَّلَمُوا</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "5. <span class='arabic-emphasis'>ث</span> Sakin pasohet nga <span class='arabic-emphasis'>ذ</span> (Idgam Kamil):<br/>   - <span class='arabic-text'>يَلْهَثْ ذَٰلِكَ</span> lexohet <span class='arabic-text'>يَلْهَذَّٰلِكَ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "6. <span class='arabic-emphasis'>ب</span> Sakin pasohet nga <span class='arabic-emphasis'>م</span> (Idgam Kamil me Ghunneh):<br/>   - <span class='arabic-text'>ارْكَبْ مَعَنَا</span> lexohet <span class='arabic-text'>ارْكَمَّعَنَا</span> (Surja Hud, ky është një rast i veçantë sipas disa transmetimeve)."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "idgam-mutexhanisejn-q1",
+        "text": "Çfarë ndodh kur <span class='arabic-text'>دْ</span> (Daal Sakin) pasohet nga <span class='arabic-text'>تَ</span> (Taa me Fetha)?",
+        "options": [
+          {
+            "id": "idgam-mutexhanisejn-q1-o1",
+            "text": "Lexohen të dyja qartë (Idh'har).",
+            "isCorrect": false
+          },
+          {
+            "id": "idgam-mutexhanisejn-q1-o2",
+            "text": "Daal-i shkrihet plotësisht në Taa (Idgam Kamil).",
+            "isCorrect": true
+          },
+          {
+            "id": "idgam-mutexhanisejn-q1-o3",
+            "text": "Taa-ja shkrihet në Daal.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Kur <span class='arabic-text'>دْ</span> pasohet nga <span class='arabic-text'>ت</span>, bëhet Idgam Kamil, pra Daal-i shkrihet plotësisht në Taa dhe lexohet si një <span class='arabic-text'>تّ</span>."
+      }
+    ]
+  },
+  {
+    "id": "idgam-mutekaribejn",
+    "title": "IDGAM EL-MUTEKARIBEJN (Bashkëngjitja e Shkronjave të Përafërta)",
+    "slug": "idgam-mutekaribejn",
+    "pageNumber": 262,
+    "description": "Idgam El-Mutekaribejn ndodh kur takohen dy shkronja që kanë pika artikulimi dhe/ose cilësi të përafërta, dhe shkronja e parë është Sakin ndërsa e dyta ka zanore. Shkronja e parë shkrihet në të dytën.<br/>Kombinimet kryesore ku bëhet Idgam:",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>ل</span> Sakin pasohet nga <span class='arabic-emphasis'>ر</span> (Idgam Kamil):<br/>   - <span class='arabic-text'>قُلْ رَبِّ</span> lexohet <span class='arabic-text'>قُرَّبِّ</span> (përveç te <span class='arabic-text'>بَلْ ۜ رَانَ</span> ku bëhet Sekteh)."
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>ق</span> Sakin pasohet nga <span class='arabic-emphasis'>ك</span> (Idgam Kamil ose Nakis, varësisht nga transmetimi):<br/>   - <span class='arabic-text'>أَلَمْ نَخْلُقْكُمْ</span> lexohet <span class='arabic-text'>أَلَمْ نَخْلُكُُّمْ</span> (Idgam Kamil sipas shumicës). Disa bëjnë Idgam Nakis duke ruajtur cilësinë Isti'la të ق-së."
+      },
+      {
+        "type": "text",
+        "meaning": "Shënim: Idgami i Nun Sakin në <span class='arabic-text'>ل</span> dhe <span class='arabic-text'>ر</span> është gjithashtu një lloj Idgam Mutekaribejn (pa Ghunneh)."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "idgam-mutekaribejn-q1",
+        "text": "Si lexohet <span class='arabic-text'>قُلْ رَبِّ</span>?",
+        "options": [
+          {
+            "id": "idgam-mutekaribejn-q1-o1",
+            "text": "<span class='arabic-text'>قُلْ رَبِّ</span> (me Idh'har të Laam-it)",
+            "isCorrect": false
+          },
+          {
+            "id": "idgam-mutekaribejn-q1-o2",
+            "text": "<span class='arabic-text'>قُرَّبِّ</span> (me Idgam të Laam-it në Raa)",
+            "isCorrect": true
+          }
+        ],
+        "explanation": "Kur <span class='arabic-text'>لْ</span> (Laam Sakin) pasohet nga <span class='arabic-text'>ر</span> (Raa), bëhet Idgam Kamil, pra Laam-i shkrihet plotësisht në Raa dhe lexohet si një <span class='arabic-text'>رّ</span>."
+      }
+    ]
+  }
+]

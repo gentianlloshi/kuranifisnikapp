@@ -1,0 +1,114 @@
+[
+  {
+    "id": "shkronja-zanoret-e-gjata",
+    "title": "SHKRONJA (ا و ي) ZANORET E GJATA",
+    "slug": "shkronja-zanoret-e-gjata",
+    "pageNumber": 41,
+    "description": "Këto tre shkronja, Elifi (ا), Waw (و), dhe Jaa (ي), kur vijnë si zgjatime (Medd), kanë një rol të veçantë. Ato artikulohen nga zbrazëtia e gojës dhe fytit (El-Xhauf) dhe nuk kanë një pikë specifike kontakti si bashkëtingëlloret tjera.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "<b>Elifi (ا)</b>: Gjithmonë vjen me sukun dhe para saj një shkronjë me Fet'ha. Ajo zgjat tingullin 'e' në 'aa'."
+      },
+      {
+        "type": "text",
+        "meaning": "<b>Waw (و)</b>: Kur vjen me sukun dhe para saj një shkronjë me Damme, ajo zgjat tingullin 'u' në 'uu'."
+      },
+      {
+        "type": "text",
+        "meaning": "<b>Jaa (ي)</b>: Kur vjen me sukun dhe para saj një shkronjë me Kesra, ajo zgjat tingullin 'i' në 'ii'."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-laam-elif",
+    "title": "SHKRONJA LAM-ELIF (لا)",
+    "slug": "shkronja-laam-elif",
+    "pageNumber": 42,
+    "description": "Lam-Elif (لا) nuk është një shkronjë e veçantë në alfabet, por një kombinim grafik i shkronjës Laam (ل) dhe Elif (ا). Përdoret për të shkruar tingullin e zgjatur 'laa'.",
+    "examples": [
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "لَا",
+            "pronunciation": "laa"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sifat-al-huruf-permbledhje",
+    "title": "SIFAT AL-HURUF (Cilësitë e Shkronjave) - Përmbledhje",
+    "slug": "sifat-al-huruf-permbledhje",
+    "pageNumber": 82,
+    "description": "Çdo shkronjë arabe ka një set cilësish (Sifat) që përcaktojnë shqiptimin e saktë të saj. Këto cilësi ndahen në dy grupe: ato që kanë të kundërtën e tyre dhe ato që nuk e kanë.",
+    "examples": []
+  },
+  {
+    "id": "sifat-el-lazimeh-el-arida",
+    "title": "SIFAT EL-LAZIMEH (Cilësitë e Përhershme) vs EL-ARIDA (Të Rastit)",
+    "slug": "sifat-el-lazimeh-el-arida",
+    "pageNumber": 83,
+    "description": "<b>Sifat el-Lazimeh</b> janë cilësi të pandashme të një shkronje, që e shoqërojnë atë në çdo gjendje (me zanore ose sukun).<br/><b>Sifat el-Arida</b> janë cilësi që shfaqen vetëm në raste të caktuara, si p.sh., trashja (Tafkhim) e Laam-it vetëm në emrin e Allahut, ose rregullat e Nun Sakin (Idgam, Ikhfa, etj.).",
+    "examples": []
+  },
+  {
+    "id": "sifat-kuvvah-dhaaf",
+    "title": "Cilësitë e Forta (Kuvvah) dhe të Dobëta (Dha’f)",
+    "slug": "sifat-kuvvah-dhaaf",
+    "pageNumber": 92,
+    "description": "Cilësitë e shkronjave ndahen në të forta dhe të dobëta. Një shkronjë konsiderohet e fortë ose e dobët bazuar në numrin e cilësive të forta apo të dobëta që posedon.<br/><b>Cilësi të Forta:</b> Xhehr, Shiddeh, Isti'la, Itbak, Ismat, Safir, Kalkalah, Inhiraf, Tekrir, Tefesh-shi, Istitale.<br/><b>Cilësi të Dobëta:</b> Hems, Rekhawah, Istifal, Infitah, Idhlak, Lijn.",
+    "examples": []
+  },
+  {
+    "id": "ghunneh-perkufizim",
+    "title": "GHUNNEH (الْغُنَّةُ) - Përkufizimi",
+    "slug": "ghunneh-perkufizim",
+    "pageNumber": 111,
+    "description": "Ghunneh është një tingull hundor, melodioz, që është pjesë e pandashme e strukturës së shkronjave Nun (ن) dhe Mim (م). Vendi i daljes së saj është zgavra e hundës (El-Khajshum).",
+    "examples": []
+  },
+  {
+    "id": "huruf-mukattaa",
+    "title": "HURUF MUKATTA'A (الحُرُوفُ الْمُقَطَّعَةُ - Shkronjat e Ndara)",
+    "slug": "huruf-mukattaa",
+    "pageNumber": 224,
+    "description": "Këto janë shkronja ose kombinime shkronjash që gjenden në fillim të 29 sureve të Kur'anit. Ato lexohen duke shqiptuar emrin e plotë të secilës shkronjë, jo tingullin e saj.<br/>Shembull: الم lexohet 'Elif Laam Miim'. Kuptimi i tyre i saktë i dihet vetëm Allahut.",
+    "examples": []
+  },
+  {
+    "id": "medd-tabiee-harfi",
+    "title": "MEDD TABI'EE HARFI (الْمَدُّ الطَّبِيعِي الْحَرْفِيُّ)",
+    "slug": "medd-tabiee-harfi",
+    "pageNumber": 226,
+    "description": "Ky është një zgjatim natyror prej 2 kohësh që ndodh te disa nga shkronjat Huruf Mukatta'a. Këto janë 5 shkronja të përmbledhura në fjalën <span class='arabic-text'>حَيٌّ طَهُرَ</span> (ح ي ط ه ر). Këto shkronja, kur lexohen me emrat e tyre, nuk kanë një shkronjë të tretë me sukun, prandaj zgjaten vetëm 2 kohë.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Shembull te طه (Taa Haa): Secila shkronjë zgjatet 2 kohë."
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull te حم (Haa Miim): Haa-ja zgjatet 2 kohë, ndërsa Miim-i 6 kohë (Medd Lazim)."
+      }
+    ]
+  },
+  {
+    "id": "takimi-i-dy-sukuneve",
+    "title": "TAKIMI I DY SUKUNEVE (اِلْتِقَاءُ السَّاكِنَيْنِ)",
+    "slug": "takimi-i-dy-sukuneve",
+    "pageNumber": 147,
+    "description": "Në gjuhën arabe, normalisht nuk lejohet takimi i dy shkronjave me sukun njëra pas tjetrës gjatë leximit të vazhdueshëm. Për të shmangur këtë, zakonisht shkronja e parë me sukun merr një zanore (më shpesh Kesra) për të mundësuar lidhjen.<br/>Shembull: Fjala <span class='arabic-text'>قُلْ</span> pasohet nga <span class='arabic-text'>هُوَ اللهُ</span>. Për t'i lidhur, themi <span class='arabic-text'>قُلِ هُوَ اللهُ</span> (kuli huwallah).",
+    "examples": []
+  },
+  {
+    "id": "nuni-i-vogel-parandalues",
+    "title": "NUNI I VOGËL PARANDALUES (نُونُ الْوِقَايَةِ)",
+    "slug": "nuni-i-vogel-parandalues",
+    "pageNumber": 282,
+    "description": "Ky është një Nun me Kesra (<span class='arabic-text'>نِ</span>) që vendoset mes një foljeje ose pjesëze dhe përemrit vetor të vetës së parë njëjës (<span class='arabic-text'>ي</span> - 'më', 'mua') për të mbrojtur zanoren e fundit të foljes nga ndryshimi.<br/>Shembull: Për të thënë 'më krijoi mua', nuk themi <span class='arabic-text'>خَلَقَي</span> (që do të prishte fjalën), por themi <span class='arabic-text'>خَلَقَنِي</span> (khalaqanii).",
+    "examples": []
+  }
+]

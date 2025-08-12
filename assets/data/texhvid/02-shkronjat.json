@@ -1,0 +1,3864 @@
+[
+  {
+    "id": "shkronja-elif-hemze",
+    "title": "SHKRONJA ا / ء (Elif/Hemze)",
+    "slug": "shkronja-elif-hemze",
+    "pageNumber": 8,
+    "description": "Shkronja Elif (ا) shërben si mbajtëse për Hemzenë (ء) kur ajo vjen në fillim të fjalës. Hemzeja është një ndalesë e plotë e zërit që artikulohet nga fundi i fytit (pjesa më e thellë). Ajo është shkronjë me cilësi Xhehr (e zëshme) dhe Shiddeh (ndërprerje e zërit).",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Hemzeja me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "أَ",
+            "pronunciation": "e"
+          },
+          {
+            "arabic": "إِ",
+            "pronunciation": "i"
+          },
+          {
+            "arabic": "أُ",
+            "pronunciation": "u"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Hemzeja me Zëra të Gjatë (Medd Bedel):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "آ",
+            "pronunciation": "aa"
+          },
+          {
+            "arabic": "إِي",
+            "pronunciation": "ii"
+          },
+          {
+            "arabic": "أُو",
+            "pronunciation": "uu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Hemzeja me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءًا",
+            "pronunciation": "en"
+          },
+          {
+            "arabic": "ءٍ",
+            "pronunciation": "in"
+          },
+          {
+            "arabic": "ءٌ",
+            "pronunciation": "un"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Hemzeja me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "يَأْكُلُ",
+            "pronunciation": "je'kulu"
+          },
+          {
+            "arabic": "بِئْر",
+            "pronunciation": "bi'r"
+          },
+          {
+            "arabic": "يُؤْمِنُ",
+            "pronunciation": "ju'minu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "hemze-shkronja-q1",
+        "text": "Nga cila pjesë e fytit artikulohet shkronja ء (Hemze)?",
+        "options": [
+          {
+            "id": "hemze-shkronja-q1-o1",
+            "text": "Mesi i fytit",
+            "isCorrect": false
+          },
+          {
+            "id": "hemze-shkronja-q1-o2",
+            "text": "Fillimi i fytit (afër gojës)",
+            "isCorrect": false
+          },
+          {
+            "id": "hemze-shkronja-q1-o3",
+            "text": "Fundi i fytit (më e thella)",
+            "isCorrect": true
+          },
+          {
+            "id": "hemze-shkronja-q1-o4",
+            "text": "Nuk është shkronjë fytore",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Hemzeja artikulohet nga pjesa më e thellë e fytit, afër kordave të zërit."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-ba",
+    "title": "SHKRONJA ب (Baa\\')",
+    "slug": "shkronja-ba",
+    "pageNumber": 14,
+    "description": "Shkronja 'B' (ب) theksohet duke i bashkuar buzët dhe duke lëshuar frymëmarrje me hundë. Është shkronjë Kalkalah kur është me Sukun.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/baa.png",
+        "meaning": "Pika e artikulimit të shkronjës Baa\\'"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ب me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بَ",
+            "pronunciation": "be"
+          },
+          {
+            "arabic": "بِ",
+            "pronunciation": "bi"
+          },
+          {
+            "arabic": "بُ",
+            "pronunciation": "bu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ب me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بَا",
+            "pronunciation": "baa"
+          },
+          {
+            "arabic": "بِي",
+            "pronunciation": "bii"
+          },
+          {
+            "arabic": "بُو",
+            "pronunciation": "buu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ب me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بًا",
+            "pronunciation": "ben"
+          },
+          {
+            "arabic": "بٍ",
+            "pronunciation": "bin"
+          },
+          {
+            "arabic": "بٌ",
+            "pronunciation": "bun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ب me Sukun (kalkalah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَبْ",
+            "pronunciation": "eb"
+          },
+          {
+            "arabic": "حَبْل",
+            "pronunciation": "habl"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ب me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَبَّ",
+            "pronunciation": "rabba"
+          },
+          {
+            "arabic": "حَبِّ",
+            "pronunciation": "habbi"
+          },
+          {
+            "arabic": "تَبُّ",
+            "pronunciation": "tabbu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "ba-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ب (Baa')?",
+        "options": [
+          {
+            "id": "ba-q1-o1",
+            "text": "Maja e gjuhës me qiellzën e epërme",
+            "isCorrect": false
+          },
+          {
+            "id": "ba-q1-o2",
+            "text": "Duke bashkuar buzët",
+            "isCorrect": true
+          },
+          {
+            "id": "ba-q1-o3",
+            "text": "Mesi i fytit",
+            "isCorrect": false
+          },
+          {
+            "id": "ba-q1-o4",
+            "text": "Fundi i fytit",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ب (Baa') artikulohet duke bashkuar buzët."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-ta",
+    "title": "SHKRONJA ت (Taa\\')",
+    "slug": "shkronja-ta",
+    "pageNumber": 15,
+    "description": "Shkronja ت (Taa') theksohet duke e prekur qiellzën e epërme me majën e gjuhës dhe duke lëshuar frymë edhe prej gojës (prej mesit të dhëmbëve) dhe duke liruar frymëmarrje me hundë.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/taa.png",
+        "meaning": "Pika e artikulimit të shkronjës Taa\\'"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ت me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "تَ",
+            "pronunciation": "te"
+          },
+          {
+            "arabic": "تِ",
+            "pronunciation": "ti"
+          },
+          {
+            "arabic": "تُ",
+            "pronunciation": "tu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ت me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "تَا",
+            "pronunciation": "taa"
+          },
+          {
+            "arabic": "تِي",
+            "pronunciation": "tii"
+          },
+          {
+            "arabic": "تُو",
+            "pronunciation": "tuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ت me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "تًا",
+            "pronunciation": "ten"
+          },
+          {
+            "arabic": "تٍ",
+            "pronunciation": "tin"
+          },
+          {
+            "arabic": "تٌ",
+            "pronunciation": "tun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ت me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَتْ",
+            "pronunciation": "et"
+          },
+          {
+            "arabic": "بَيْت",
+            "pronunciation": "bejt"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ت me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَتَّ",
+            "pronunciation": "metta"
+          },
+          {
+            "arabic": "بتِّ",
+            "pronunciation": "bitti"
+          },
+          {
+            "arabic": "يَتُوبُ",
+            "pronunciation": "jetuubbu (shembull hipotetik, rrallë)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "ta-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ت (Taa')?",
+        "options": [
+          {
+            "id": "ta-q1-o1",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës",
+            "isCorrect": true
+          },
+          {
+            "id": "ta-q1-o2",
+            "text": "Bashkimi i buzëve",
+            "isCorrect": false
+          },
+          {
+            "id": "ta-q1-o3",
+            "text": "Mesi i gjuhës me mesin e qiellzës",
+            "isCorrect": false
+          },
+          {
+            "id": "ta-q1-o4",
+            "text": "Fundi i fytit",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ت (Taa') artikulohet duke prekur qiellzën e epërme (afër rrënjëve të dhëmbëve prerës) me majën e gjuhës."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-tha",
+    "title": "SHKRONJA ث (Thaa\\')",
+    "slug": "shkronja-tha",
+    "pageNumber": 16,
+    "description": "Shkronja ث (Thaa') theksohet duke e prekur fortë majen e gjuhës me dhëmbët e përparmë dhe duke liruar frymë nga hunda. Dallimi ndërmjet shkronjës ب ت dhe ث qëndron te pikat; pra me një pikë është shkronja ب (B), me dy pika shkronja ت (T) dhe me tri pika është shkronja ث (Th).",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/thaa.png",
+        "meaning": "Pika e artikulimit të shkronjës Thaa\\'"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ث me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ثَ",
+            "pronunciation": "the"
+          },
+          {
+            "arabic": "ثِ",
+            "pronunciation": "thi"
+          },
+          {
+            "arabic": "ثُ",
+            "pronunciation": "thu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ث me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ثَا",
+            "pronunciation": "thaa"
+          },
+          {
+            "arabic": "ثِي",
+            "pronunciation": "thii"
+          },
+          {
+            "arabic": "ثُو",
+            "pronunciation": "thuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ث me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ثًا",
+            "pronunciation": "then"
+          },
+          {
+            "arabic": "ثٍ",
+            "pronunciation": "thin"
+          },
+          {
+            "arabic": "ثٌ",
+            "pronunciation": "thun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ث me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَثْ",
+            "pronunciation": "eth"
+          },
+          {
+            "arabic": "مُثْبِت",
+            "pronunciation": "muthbit"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ث me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بَثَّ",
+            "pronunciation": "beththa"
+          },
+          {
+            "arabic": "حَدِّثْ",
+            "pronunciation": "haddith (shembull me sukun pas)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "tha-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ث (Thaa')?",
+        "options": [
+          {
+            "id": "tha-q1-o1",
+            "text": "Maja e gjuhës me dhëmbët e përparmë të sipërm (duke e nxjerrë pak gjuhën)",
+            "isCorrect": true
+          },
+          {
+            "id": "tha-q1-o2",
+            "text": "Bashkimi i buzëve",
+            "isCorrect": false
+          },
+          {
+            "id": "tha-q1-o3",
+            "text": "Mesi i gjuhës me qiellzën",
+            "isCorrect": false
+          },
+          {
+            "id": "tha-q1-o4",
+            "text": "Fundi i fytit",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ث (Thaa') artikulohet duke vendosur majën e gjuhës në skajet e dhëmbëve të përparmë të sipërm, duke e nxjerrë pak gjuhën."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-xhiim",
+    "title": "SHKRONJA ج (Xhiim)",
+    "slug": "shkronja-xhiim",
+    "pageNumber": 17,
+    "description": "Shkronja ج (Xhiim) theksohet duke i afruar dhëmbët dhe duke e prekur mesin e qiellzës së epërme me mesin e gjuhës. Është shkronjë Kalkalah kur është me Sukun.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/jeem.png",
+        "meaning": "Pika e artikulimit të shkronjës Xhiim"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ج me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "جَ",
+            "pronunciation": "xhe"
+          },
+          {
+            "arabic": "جِ",
+            "pronunciation": "xhi"
+          },
+          {
+            "arabic": "جُ",
+            "pronunciation": "xhu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ج me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "جَا",
+            "pronunciation": "xhaa"
+          },
+          {
+            "arabic": "جِي",
+            "pronunciation": "xhii"
+          },
+          {
+            "arabic": "جُو",
+            "pronunciation": "xhuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ج me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "جًا",
+            "pronunciation": "xhen"
+          },
+          {
+            "arabic": "جٍ",
+            "pronunciation": "xhin"
+          },
+          {
+            "arabic": "جٌ",
+            "pronunciation": "xhun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ج me Sukun (kalkalah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَجْ",
+            "pronunciation": "exh"
+          },
+          {
+            "arabic": "فَجْر",
+            "pronunciation": "fexhr"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ج me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "حَجَّ",
+            "pronunciation": "haxhxha"
+          },
+          {
+            "arabic": "سِجِّيل",
+            "pronunciation": "sixhxhiil"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "xhiim-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ج (Xhiim)?",
+        "options": [
+          {
+            "id": "xhiim-q1-o1",
+            "text": "Maja e gjuhës me qiellzën e poshtme",
+            "isCorrect": false
+          },
+          {
+            "id": "xhiim-q1-o2",
+            "text": "Mesi i gjuhës me mesin e qiellzës së epërme",
+            "isCorrect": true
+          },
+          {
+            "id": "xhiim-q1-o3",
+            "text": "Fundi i gjuhës me fundin e qiellzës",
+            "isCorrect": false
+          },
+          {
+            "id": "xhiim-q1-o4",
+            "text": "Fundi i fytit",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ج (Xhiim) artikulohet duke prekur mesin e qiellzës së epërme me mesin e gjuhës."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-haa-mesme",
+    "title": "SHKRONJA ح (Haa e mesme)",
+    "slug": "shkronja-haa-mesme",
+    "pageNumber": 18,
+    "description": "Shkronja ح (Haa e mesme) nxirret nga mesi i fytit dhe duke i shtrënguar nofullat. Vërejtje: Shkronja ج (Xh) dhe shkronja ح (H e mesme) ndryshojnë në mes vete, ngase shkronja ج (Xh) e ka një pikë në brendi të saj.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/haa.png",
+        "meaning": "Pika e artikulimit të shkronjës Haa (e mesme)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ح me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "حَ",
+            "pronunciation": "ha"
+          },
+          {
+            "arabic": "حِ",
+            "pronunciation": "hi"
+          },
+          {
+            "arabic": "حُ",
+            "pronunciation": "hu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ح me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "حَا",
+            "pronunciation": "haa"
+          },
+          {
+            "arabic": "حِي",
+            "pronunciation": "hii"
+          },
+          {
+            "arabic": "حُو",
+            "pronunciation": "huu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ح me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "حًا",
+            "pronunciation": "han"
+          },
+          {
+            "arabic": "حٍ",
+            "pronunciation": "hin"
+          },
+          {
+            "arabic": "حٌ",
+            "pronunciation": "hun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ح me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَحْ",
+            "pronunciation": "eh"
+          },
+          {
+            "arabic": "نَحْنُ",
+            "pronunciation": "nahnu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ح me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَحَّ",
+            "pronunciation": "rahha"
+          },
+          {
+            "arabic": "صِحِّ",
+            "pronunciation": "sihhi"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "haa-mesme-q1",
+        "text": "Nga cila pjesë e fytit artikulohet shkronja ح (Haa e mesme)?",
+        "options": [
+          {
+            "id": "haa-mesme-q1-o1",
+            "text": "Fundi i fytit (afër gjoksit)",
+            "isCorrect": false
+          },
+          {
+            "id": "haa-mesme-q1-o2",
+            "text": "Mesi i fytit",
+            "isCorrect": true
+          },
+          {
+            "id": "haa-mesme-q1-o3",
+            "text": "Fillimi i fytit (afër gojës)",
+            "isCorrect": false
+          },
+          {
+            "id": "haa-mesme-q1-o4",
+            "text": "Nuk është shkronjë fytore",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ح (Haa e mesme) artikulohet nga mesi i fytit."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-khaa",
+    "title": "SHKRONJA خ (Khaa)",
+    "slug": "shkronja-khaa",
+    "pageNumber": 19,
+    "description": "Shkronja خ (Khaa) theksohet nga pjesa e epërme e fytit dhe duke lëshuar ngërthitje të lehtë. Vërejtje: Shkronja ج (Xh) dhe shkronja خ (H e rëndë) ndryshojnë në mes vete, ngase shkronja ج (Xh) e ka një pikë në brendi të saj, ndërsa shkronja خ (H e rëndë) e ka një pikë mbi vete.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/khaa.png",
+        "meaning": "Pika e artikulimit të shkronjës Khaa"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja خ me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خَ",
+            "pronunciation": "kha (si 'ch' gjermane por më e fortë)"
+          },
+          {
+            "arabic": "خِ",
+            "pronunciation": "khi"
+          },
+          {
+            "arabic": "خُ",
+            "pronunciation": "khu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja خ me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خَا",
+            "pronunciation": "khaa"
+          },
+          {
+            "arabic": "خِي",
+            "pronunciation": "khii"
+          },
+          {
+            "arabic": "خُو",
+            "pronunciation": "khuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja خ me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خًا",
+            "pronunciation": "khan"
+          },
+          {
+            "arabic": "خٍ",
+            "pronunciation": "khin"
+          },
+          {
+            "arabic": "خٌ",
+            "pronunciation": "khun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja خ me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَخْ",
+            "pronunciation": "ekh"
+          },
+          {
+            "arabic": "نَخْل",
+            "pronunciation": "nakhl"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja خ me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "سَخَّ",
+            "pronunciation": "sakhkha"
+          },
+          {
+            "arabic": "دَخِّنْ",
+            "pronunciation": "dakhkhin"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "khaa-q1",
+        "text": "Nga cila pjesë e fytit artikulohet shkronja خ (Khaa)?",
+        "options": [
+          {
+            "id": "khaa-q1-o1",
+            "text": "Mesi i fytit",
+            "isCorrect": false
+          },
+          {
+            "id": "khaa-q1-o2",
+            "text": "Fundi i fytit",
+            "isCorrect": false
+          },
+          {
+            "id": "khaa-q1-o3",
+            "text": "Fillimi i fytit (pjesa e epërme, afër gojës)",
+            "isCorrect": true
+          },
+          {
+            "id": "khaa-q1-o4",
+            "text": "Nuk është shkronjë fytore",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja خ (Khaa) artikulohet nga pjesa e epërme e fytit, më afër gojës."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-daal",
+    "title": "SHKRONJA د (Daal)",
+    "slug": "shkronja-daal",
+    "pageNumber": 20,
+    "description": "Shkronja د (Daal) theksohet duke e prekur vijën e dhëmbëve dhe të qiellzës me majën e gjuhës. Është shkronjë Kalkalah kur është me Sukun.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/daal.png",
+        "meaning": "Pika e artikulimit të shkronjës Daal"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja د me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "دَ",
+            "pronunciation": "de"
+          },
+          {
+            "arabic": "دِ",
+            "pronunciation": "di"
+          },
+          {
+            "arabic": "دُ",
+            "pronunciation": "du"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja د me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "دَا",
+            "pronunciation": "daa"
+          },
+          {
+            "arabic": "دِي",
+            "pronunciation": "dii"
+          },
+          {
+            "arabic": "دُو",
+            "pronunciation": "duu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja د me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "دًا",
+            "pronunciation": "den"
+          },
+          {
+            "arabic": "دٍ",
+            "pronunciation": "din"
+          },
+          {
+            "arabic": "دٌ",
+            "pronunciation": "dun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja د me Sukun (kalkalah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَدْ",
+            "pronunciation": "ed"
+          },
+          {
+            "arabic": "قَدْ",
+            "pronunciation": "kad"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja د me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَدَّ",
+            "pronunciation": "medda"
+          },
+          {
+            "arabic": "شَدِيد",
+            "pronunciation": "shediid"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "daal-q1",
+        "text": "Cila është pika e artikulimit të shkronjës د (Daal)?",
+        "options": [
+          {
+            "id": "daal-q1-o1",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës",
+            "isCorrect": true
+          },
+          {
+            "id": "daal-q1-o2",
+            "text": "Maja e gjuhës me skajet e dhëmbëve të sipërm prerës",
+            "isCorrect": false
+          },
+          {
+            "id": "daal-q1-o3",
+            "text": "Mesi i gjuhës me qiellzën e fortë",
+            "isCorrect": false
+          },
+          {
+            "id": "daal-q1-o4",
+            "text": "Buzët",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja د (Daal) artikulohet duke prekur me majën e gjuhës rrënjët e dhëmbëve të sipërm prerës (vendin ku fillojnë dhëmbët pas mishit të tyre)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-dhaal",
+    "title": "SHKRONJA ذ (Dhaal)",
+    "slug": "shkronja-dhaal",
+    "pageNumber": 21,
+    "description": "Shkronja ذ (Dhaal) theksohet duke i afruar dhëmbët (por jo me i ngjitur) dhe duke futur gjuhën në mes tyre. Vërejtje: Shkronja د (D) e lehtë dhe shkronja ذ (Dh) e lehtë ndryshojnë në mes vete nga ajo se shkronja Dh e ka një pikë.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/dhaal.png",
+        "meaning": "Pika e artikulimit të shkronjës Dhaal"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ذ me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ذَ",
+            "pronunciation": "dhe (si 'th' angleze te 'the')"
+          },
+          {
+            "arabic": "ذِ",
+            "pronunciation": "dhi"
+          },
+          {
+            "arabic": "ذُ",
+            "pronunciation": "dhu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ذ me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ذَا",
+            "pronunciation": "dhaa"
+          },
+          {
+            "arabic": "ذِي",
+            "pronunciation": "dhii"
+          },
+          {
+            "arabic": "ذُو",
+            "pronunciation": "dhuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ذ me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ذًا",
+            "pronunciation": "dhen"
+          },
+          {
+            "arabic": "ذٍ",
+            "pronunciation": "dhin"
+          },
+          {
+            "arabic": "ذٌ",
+            "pronunciation": "dhun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ذ me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اِذْ",
+            "pronunciation": "idh"
+          },
+          {
+            "arabic": "خُذْ",
+            "pronunciation": "khudh"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ذ me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "لَذَّ",
+            "pronunciation": "ledhdha (e rrallë me teshtid)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "dhaal-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ذ (Dhaal)?",
+        "options": [
+          {
+            "id": "dhaal-q1-o1",
+            "text": "Maja e gjuhës me skajet e dhëmbëve të sipërm prerës (duke e nxjerrë pak gjuhën)",
+            "isCorrect": true
+          },
+          {
+            "id": "dhaal-q1-o2",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës",
+            "isCorrect": false
+          },
+          {
+            "id": "dhaal-q1-o3",
+            "text": "Mesi i fytit",
+            "isCorrect": false
+          },
+          {
+            "id": "dhaal-q1-o4",
+            "text": "Buzët",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ذ (Dhaal) artikulohet duke vendosur majën e gjuhës në skajet e dhëmbëve të sipërm prerës, duke e nxjerrë pak gjuhën (ngjashëm me ث)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-raa",
+    "title": "SHKRONJA ر (Raa\\')",
+    "slug": "shkronja-raa",
+    "pageNumber": 22,
+    "description": "Shkronja ر (Raa') theksohet duke e prekur me majën e gjuhës pjesën e mesme të qiellzës. Është tingull gjuhor. Rregullat e trashjes dhe hollimit të saj janë specifike.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/raa.png",
+        "meaning": "Pika e artikulimit të shkronjës Raa\\'"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ر me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَ",
+            "pronunciation": "re (ose ra, varësisht nga rregullat e trashjes)"
+          },
+          {
+            "arabic": "رِ",
+            "pronunciation": "ri"
+          },
+          {
+            "arabic": "رُ",
+            "pronunciation": "ru (ose ruu e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ر me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَا",
+            "pronunciation": "raa"
+          },
+          {
+            "arabic": "رِي",
+            "pronunciation": "rii"
+          },
+          {
+            "arabic": "رُو",
+            "pronunciation": "ruu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ر me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رًا",
+            "pronunciation": "ren"
+          },
+          {
+            "arabic": "رٍ",
+            "pronunciation": "rin"
+          },
+          {
+            "arabic": "رٌ",
+            "pronunciation": "run"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ر me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَرْ",
+            "pronunciation": "er"
+          },
+          {
+            "arabic": "قِرْطَاس",
+            "pronunciation": "kirtaas"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ر me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَرَّ",
+            "pronunciation": "merra"
+          },
+          {
+            "arabic": "سِرٌّ",
+            "pronunciation": "sirrun"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "raa-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ر (Raa')?",
+        "options": [
+          {
+            "id": "raa-q1-o1",
+            "text": "Maja e gjuhës me pjesën e qiellzës afër rrënjëve të dhëmbëve të sipërm prerës",
+            "isCorrect": true
+          },
+          {
+            "id": "raa-q1-o2",
+            "text": "Maja e gjuhës me skajet e dhëmbëve të sipërm prerës",
+            "isCorrect": false
+          },
+          {
+            "id": "raa-q1-o3",
+            "text": "Mesi i gjuhës me qiellzën",
+            "isCorrect": false
+          },
+          {
+            "id": "raa-q1-o4",
+            "text": "Buzët",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ر (Raa') artikulohet duke prekur me majën e gjuhës pjesën e qiellzës që është pak më mbrapa se artikulimi i shkronjës Nun (ف)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-zaaj",
+    "title": "SHKRONJA ز (Zaaj)",
+    "slug": "shkronja-zaaj",
+    "pageNumber": 23,
+    "description": "Shkronja ز (Zaaj) theksohet duke prekur gjuhën me dhëmbët e përparmë. Është shkronjë Safir (fishkëlluese). Vërejtje: Shkronja ر (R) dhe ز (Z) ndryshojnë mes vete nga ajo se shkronja ز (Z) e ka një pikë.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/zaay.png",
+        "meaning": "Pika e artikulimit të shkronjës Zaaj"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ز me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "زَ",
+            "pronunciation": "ze"
+          },
+          {
+            "arabic": "زِ",
+            "pronunciation": "zi"
+          },
+          {
+            "arabic": "زُ",
+            "pronunciation": "zu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ز me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "زَا",
+            "pronunciation": "zaa"
+          },
+          {
+            "arabic": "زِي",
+            "pronunciation": "zii"
+          },
+          {
+            "arabic": "زُو",
+            "pronunciation": "zuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ز me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "زًا",
+            "pronunciation": "zen"
+          },
+          {
+            "arabic": "زٍ",
+            "pronunciation": "zin"
+          },
+          {
+            "arabic": "زٌ",
+            "pronunciation": "zun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ز me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَزْ",
+            "pronunciation": "ez"
+          },
+          {
+            "arabic": "خُبْز",
+            "pronunciation": "khubz"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ز me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "عَزَّ",
+            "pronunciation": "azza"
+          },
+          {
+            "arabic": "رِزْق",
+            "pronunciation": "rizq (nuk ka teshtid këtu)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "zaaj-q1",
+        "text": "Nga artikulohet shkronja ز (Zaaj)?",
+        "options": [
+          {
+            "id": "zaaj-q1-o1",
+            "text": "Maja e gjuhës duke prekur pak hapësirën mes dhëmbëve të sipërm dhe të poshtëm prerës.",
+            "isCorrect": true
+          },
+          {
+            "id": "zaaj-q1-o2",
+            "text": "Bashkimi i buzëve.",
+            "isCorrect": false
+          },
+          {
+            "id": "zaaj-q1-o3",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "zaaj-q1-o4",
+            "text": "Maja e gjuhës me qiellzën e fortë.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ز (Zaaj) artikulohet duke afruar majën e gjuhës shumë afër dhëmbëve të poshtëm prerës, duke lënë një hapësirë të vogël për të dalë ajri bashkë me tingullin fishkëllues."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-siin",
+    "title": "SHKRONJA س (Siin)",
+    "slug": "shkronja-siin",
+    "pageNumber": 24,
+    "description": "Shkronja س (Siin) theksohet duke takuar majën e gjuhës me dhëmbët dhe duke liruar frymë. Është shkronjë Safir (fishkëlluese).",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/seen.png",
+        "meaning": "Pika e artikulimit të shkronjës Siin"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja س me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "سَ",
+            "pronunciation": "se"
+          },
+          {
+            "arabic": "سِ",
+            "pronunciation": "si"
+          },
+          {
+            "arabic": "سُ",
+            "pronunciation": "su"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja س me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "سَا",
+            "pronunciation": "saa"
+          },
+          {
+            "arabic": "سِي",
+            "pronunciation": "sii"
+          },
+          {
+            "arabic": "سُو",
+            "pronunciation": "suu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja س me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "سًا",
+            "pronunciation": "sen"
+          },
+          {
+            "arabic": "سٍ",
+            "pronunciation": "sin"
+          },
+          {
+            "arabic": "سٌ",
+            "pronunciation": "sun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja س me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَسْ",
+            "pronunciation": "es"
+          },
+          {
+            "arabic": "مَسْجِد",
+            "pronunciation": "mesxhid"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja س me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَسَّ",
+            "pronunciation": "messa"
+          },
+          {
+            "arabic": "يُوَسْوِسُ",
+            "pronunciation": "juwesswisu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "siin-q1",
+        "text": "Si shqiptohet shkronja س (Siin)?",
+        "options": [
+          {
+            "id": "siin-q1-o1",
+            "text": "Duke bashkuar buzët.",
+            "isCorrect": false
+          },
+          {
+            "id": "siin-q1-o2",
+            "text": "Maja e gjuhës duke prekur pak hapësirën mes dhëmbëve të sipërm dhe të poshtëm prerës, duke krijuar një tingull fishkëllues.",
+            "isCorrect": true
+          },
+          {
+            "id": "siin-q1-o3",
+            "text": "Nga mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "siin-q1-o4",
+            "text": "Duke ngritur pjesën e pasme të gjuhës.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja س (Siin) artikulohet ngjashëm me ز (Zaaj), duke afruar majën e gjuhës shumë afër dhëmbëve të poshtëm prerës, duke lënë një hapësirë të vogël për të dalë ajri bashkë me tingullin fishkëllues."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-shiin",
+    "title": "SHKRONJA ش (Shiin)",
+    "slug": "shkronja-shiin",
+    "pageNumber": 25,
+    "description": "Shkronja ش (Shiin) theksohet duke e takuar qiellzën me mesin e gjuhës dhe duke liruar frymën nga hunda. Ka cilësinë Tefesh-shi (përhapje e zërit). Vërejtje: Shkronja س (S) dhe ش (Sh) ndryshojnë në mes veti se shkronja س (S) është pa pika ndërsa shkronja ش (Sh) i ka tri pika.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/sheen.png",
+        "meaning": "Pika e artikulimit të shkronjës Shiin"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ش me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "شَ",
+            "pronunciation": "she"
+          },
+          {
+            "arabic": "شِ",
+            "pronunciation": "shi"
+          },
+          {
+            "arabic": "شُ",
+            "pronunciation": "shu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ش me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "شَا",
+            "pronunciation": "shaa"
+          },
+          {
+            "arabic": "شِي",
+            "pronunciation": "shii"
+          },
+          {
+            "arabic": "شُو",
+            "pronunciation": "shuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ش me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "شًا",
+            "pronunciation": "shen"
+          },
+          {
+            "arabic": "شٍ",
+            "pronunciation": "shin"
+          },
+          {
+            "arabic": "شٌ",
+            "pronunciation": "shun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ش me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَشْ",
+            "pronunciation": "esh"
+          },
+          {
+            "arabic": "يَشْرَبُ",
+            "pronunciation": "jeshrebu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ش me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَشَّ",
+            "pronunciation": "reshsha"
+          },
+          {
+            "arabic": "الشَّمْس",
+            "pronunciation": "esh-shems"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "shiin-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ش (Shiin)?",
+        "options": [
+          {
+            "id": "shiin-q1-o1",
+            "text": "Maja e gjuhës me dhëmbët e sipërm.",
+            "isCorrect": false
+          },
+          {
+            "id": "shiin-q1-o2",
+            "text": "Mesi i gjuhës me pjesën përkatëse të qiellzës së fortë.",
+            "isCorrect": true
+          },
+          {
+            "id": "shiin-q1-o3",
+            "text": "Buzët.",
+            "isCorrect": false
+          },
+          {
+            "id": "shiin-q1-o4",
+            "text": "Fundi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ش (Shiin) artikulohet duke ngritur mesin e gjuhës drejt qiellzës së fortë, duke lejuar ajrin të përhapet."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-saad",
+    "title": "SHKRONJA ص (Saad)",
+    "slug": "shkronja-saad",
+    "pageNumber": 26,
+    "description": "Shkronja ص (Saad) theksohet duke e takuar fortë majën e gjuhës me mesin e dhëmbëve të përparëm dhe duke liruar frymë nga hunda. Është shkronjë e trashë (Isti'la, Itbak) dhe Safir (fishkëlluese).",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/saad.png",
+        "meaning": "Pika e artikulimit të shkronjës Saad"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ص me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "صَ",
+            "pronunciation": "sa (e trashë)"
+          },
+          {
+            "arabic": "صِ",
+            "pronunciation": "si (e trashë)"
+          },
+          {
+            "arabic": "صُ",
+            "pronunciation": "su (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ص me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "صَا",
+            "pronunciation": "saa (e trashë)"
+          },
+          {
+            "arabic": "صِي",
+            "pronunciation": "sii (e trashë)"
+          },
+          {
+            "arabic": "صُو",
+            "pronunciation": "suu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ص me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "صًا",
+            "pronunciation": "san (e trashë)"
+          },
+          {
+            "arabic": "صٍ",
+            "pronunciation": "sin (e trashë)"
+          },
+          {
+            "arabic": "صٌ",
+            "pronunciation": "sun (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ص me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَصْ",
+            "pronunciation": "es (e trashë)"
+          },
+          {
+            "arabic": "مِصْر",
+            "pronunciation": "misr"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ص me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قَصَّ",
+            "pronunciation": "kassa (e trashë)"
+          },
+          {
+            "arabic": "الصَّلَاة",
+            "pronunciation": "es-salaah"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "saad-q1",
+        "text": "Çfarë e dallon shkronjën ص (Saad) nga س (Siin) në shqiptim?",
+        "options": [
+          {
+            "id": "saad-q1-o1",
+            "text": "ص është më e hollë se س.",
+            "isCorrect": false
+          },
+          {
+            "id": "saad-q1-o2",
+            "text": "ص artikulohet me buzë, ndërsa س me gjuhë.",
+            "isCorrect": false
+          },
+          {
+            "id": "saad-q1-o3",
+            "text": "ص është shkronjë e trashë (pjesa e pasme e gjuhës ngrihet), ndërsa س është e hollë.",
+            "isCorrect": true
+          },
+          {
+            "id": "saad-q1-o4",
+            "text": "ص nuk ka tingull fishkëllues, ndërsa س ka.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ص (Saad) është versioni i trashë i س (Siin). Pika e artikulimit është e ngjashme (maja e gjuhës afër dhëmbëve të poshtëm), por te ص ngrihet pjesa e pasme e gjuhës (Isti'la) dhe gjuha mbulon më shumë qiellzën (Itbak), duke i dhënë tingull të trashë."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-daad",
+    "title": "SHKRONJA ض (Daad)",
+    "slug": "shkronja-daad",
+    "pageNumber": 27,
+    "description": "Shkronja ض (Daad) theksohet duke taku fort pjesën më të madhe të harkut të gjuhës me pjesën më të madhe të qiellzës apo të pjesës mbi dhëmbët e epërm bile duke prekur edhe rrënjët e dhëmbëve të epërm. Është shkronjë e trashë (Isti'la, Itbak) dhe ka cilësinë Istitale (zgjatje e zërit). Shkronja 'S' e rëndë (ص) dhe shkronja 'D' e rëndë (ض) ndryshojnë në mes vete vetëm se shkronja 'D' e rëndë (ض) e ka një pikë.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/daad.png",
+        "meaning": "Pika e artikulimit të shkronjës Daad"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ض me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ضَ",
+            "pronunciation": "da (e trashë)"
+          },
+          {
+            "arabic": "ضِ",
+            "pronunciation": "di (e trashë)"
+          },
+          {
+            "arabic": "ضُ",
+            "pronunciation": "du (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ض me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ضَا",
+            "pronunciation": "daa (e trashë)"
+          },
+          {
+            "arabic": "ضِي",
+            "pronunciation": "dii (e trashë)"
+          },
+          {
+            "arabic": "ضُو",
+            "pronunciation": "duu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ض me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ضًا",
+            "pronunciation": "dan (e trashë)"
+          },
+          {
+            "arabic": "ضٍ",
+            "pronunciation": "din (e trashë)"
+          },
+          {
+            "arabic": "ضٌ",
+            "pronunciation": "dun (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ض me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَضْ",
+            "pronunciation": "ed (e trashë)"
+          },
+          {
+            "arabic": "يَضْرِبُ",
+            "pronunciation": "jadribu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ض me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خَضَّ",
+            "pronunciation": "khadda (e trashë)"
+          },
+          {
+            "arabic": "الضَّالِّينَ",
+            "pronunciation": "ed-daalliin"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "daad-q1",
+        "text": "Cila është një nga karakteristikat kryesore të shkronjës ض (Daad)?",
+        "options": [
+          {
+            "id": "daad-q1-o1",
+            "text": "Artikulohet vetëm me majën e gjuhës.",
+            "isCorrect": false
+          },
+          {
+            "id": "daad-q1-o2",
+            "text": "Është shkronjë e hollë dhe e lehtë.",
+            "isCorrect": false
+          },
+          {
+            "id": "daad-q1-o3",
+            "text": "Artikulohet duke përdorur njërën ose të dyja anësoret e gjuhës me dhëmballët e sipërm, dhe ka cilësinë Istitale (zgjatje).",
+            "isCorrect": true
+          },
+          {
+            "id": "daad-q1-o4",
+            "text": "Nuk ka pikë.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ض (Daad) artikulohet duke prekur anësoren(et) e gjuhës me dhëmballët e sipërm. Është e trashë dhe ka cilësinë unike Istitale (zgjatje e zërit anash në gojë)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-taa-trashe",
+    "title": "SHKRONJA ط (Taa e trashë)",
+    "slug": "shkronja-taa-trashe",
+    "pageNumber": 28,
+    "description": "Shkronja ط (Taa e trashë) theksohet duke mbledhur gojën dhe me tërë gjuhën duke prekur gjysmëharkun e qiellzës dhe duke lëshuar frymë nga fyti. Është shkronjë e trashë (Isti'la, Itbak) dhe Kalkalah kur është me Sukun.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/tah.png",
+        "meaning": "Pika e artikulimit të shkronjës Taa (e trashë)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ط me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "طَ",
+            "pronunciation": "ta (e trashë)"
+          },
+          {
+            "arabic": "طِ",
+            "pronunciation": "ti (e trashë)"
+          },
+          {
+            "arabic": "طُ",
+            "pronunciation": "tu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ط me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "طَا",
+            "pronunciation": "taa (e trashë)"
+          },
+          {
+            "arabic": "طِي",
+            "pronunciation": "tii (e trashë)"
+          },
+          {
+            "arabic": "طُو",
+            "pronunciation": "tuu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ط me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "طًا",
+            "pronunciation": "tan (e trashë)"
+          },
+          {
+            "arabic": "طٍ",
+            "pronunciation": "tin (e trashë)"
+          },
+          {
+            "arabic": "طٌ",
+            "pronunciation": "tun (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ط me Sukun (kalkalah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَطْ",
+            "pronunciation": "et (e trashë)"
+          },
+          {
+            "arabic": "يَقْطَعُ",
+            "pronunciation": "jaktau"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ط me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "شَطَّ",
+            "pronunciation": "shetta (e trashë)"
+          },
+          {
+            "arabic": "الطَّامَّة",
+            "pronunciation": "et-taammah"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "taa-trashe-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ط (Taa e trashë)?",
+        "options": [
+          {
+            "id": "taa-trashe-q1-o1",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës, ngjashëm me ت dhe د, por me ngritje të pasme të gjuhës.",
+            "isCorrect": true
+          },
+          {
+            "id": "taa-trashe-q1-o2",
+            "text": "Maja e gjuhës me skajet e dhëmbëve të sipërm prerës.",
+            "isCorrect": false
+          },
+          {
+            "id": "taa-trashe-q1-o3",
+            "text": "Anësoret e gjuhës me dhëmballët e sipërm.",
+            "isCorrect": false
+          },
+          {
+            "id": "taa-trashe-q1-o4",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ط (Taa e trashë) ka të njëjtën pikë artikulimi bazë si ت (Taa) dhe د (Daal) - maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës - por dallohet nga trashja (Isti'la dhe Itbak)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-dhaa-trashe",
+    "title": "SHKRONJA ظ (Dhaa e trashë)",
+    "slug": "shkronja-dhaa-trashe",
+    "pageNumber": 29,
+    "description": "Shkronja ظ (Dhaa e trashë) theksohet duke e mbledhur gojën dhe me tërë gjuhën me e prekur gjysmëharkun e dhëmbëve të epërm dhe duke lëshuar frymë nga hunda. Është shkronjë e trashë (Isti'la, Itbak). Vërejtje: Shkronja 'T' e rëndë (ط) dhe shkronja 'Dh' e rëndë (ظ) ndryshojnë në mes veti vetëm se shkronja 'Dh' e rëndë e ka një pikë.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/dhaa.png",
+        "meaning": "Pika e artikulimit të shkronjës Dhaa (e trashë)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ظ me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ظَ",
+            "pronunciation": "dha (e trashë, si 'th' angleze te 'the' por e trashë)"
+          },
+          {
+            "arabic": "ظِ",
+            "pronunciation": "dhi (e trashë)"
+          },
+          {
+            "arabic": "ظُ",
+            "pronunciation": "dhu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ظ me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ظَا",
+            "pronunciation": "dhaa (e trashë)"
+          },
+          {
+            "arabic": "ظِي",
+            "pronunciation": "dhii (e trashë)"
+          },
+          {
+            "arabic": "ظُو",
+            "pronunciation": "dhuu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ظ me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ظًا",
+            "pronunciation": "dhan (e trashë)"
+          },
+          {
+            "arabic": "ظٍ",
+            "pronunciation": "dhin (e trashë)"
+          },
+          {
+            "arabic": "ظٌ",
+            "pronunciation": "dhun (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ظ me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَظْ",
+            "pronunciation": "edh (e trashë)"
+          },
+          {
+            "arabic": "يُظْهِرُ",
+            "pronunciation": "judhhiru"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ظ me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "عَظَّ",
+            "pronunciation": "adhdha (e trashë)"
+          },
+          {
+            "arabic": "الظَّنُّ",
+            "pronunciation": "edh-dhannu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "dhaa-trashe-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ظ (Dhaa e trashë)?",
+        "options": [
+          {
+            "id": "dhaa-trashe-q1-o1",
+            "text": "Maja e gjuhës me skajet e dhëmbëve të sipërm prerës (duke e nxjerrë pak gjuhën), ngjashëm me ذ dhe ث, por me ngritje të pasme të gjuhës.",
+            "isCorrect": true
+          },
+          {
+            "id": "dhaa-trashe-q1-o2",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës.",
+            "isCorrect": false
+          },
+          {
+            "id": "dhaa-trashe-q1-o3",
+            "text": "Mesi i gjuhës me qiellzën.",
+            "isCorrect": false
+          },
+          {
+            "id": "dhaa-trashe-q1-o4",
+            "text": "Fundi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ظ (Dhaa e trashë) ka të njëjtën pikë artikulimi bazë si ذ (Dhaal) dhe ث (Thaa) - maja e gjuhës me skajet e dhëmbëve të sipërm prerës - por dallohet nga trashja (Isti'la dhe Itbak)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-ajn",
+    "title": "SHKRONJA ع (Ajn)",
+    "slug": "shkronja-ajn",
+    "pageNumber": 30,
+    "description": "Shkronja ع (Ajn) theksohet prej mesit të fytit duke e mbajtur gojën hapur dhe duke e shtrënguar.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/ain.png",
+        "meaning": "Pika e artikulimit të shkronjës Ajn"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ع me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "عَ",
+            "pronunciation": "'a (e thellë fytore)"
+          },
+          {
+            "arabic": "عِ",
+            "pronunciation": "'i"
+          },
+          {
+            "arabic": "عُ",
+            "pronunciation": "'u"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ع me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "عَا",
+            "pronunciation": "'aa"
+          },
+          {
+            "arabic": "عِي",
+            "pronunciation": "'ii"
+          },
+          {
+            "arabic": "عُو",
+            "pronunciation": "'uu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ع me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "عًا",
+            "pronunciation": "'an"
+          },
+          {
+            "arabic": "عٍ",
+            "pronunciation": "'in"
+          },
+          {
+            "arabic": "عٌ",
+            "pronunciation": "'un"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ع me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَعْ",
+            "pronunciation": "e'"
+          },
+          {
+            "arabic": "يَعْمَلُ",
+            "pronunciation": "ja'melu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ع me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "دَعَّ",
+            "pronunciation": "da''a"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "ajn-q1",
+        "text": "Nga cila pjesë e fytit artikulohet shkronja ع (Ajn)?",
+        "options": [
+          {
+            "id": "ajn-q1-o1",
+            "text": "Fundi i fytit (afër gjoksit).",
+            "isCorrect": false
+          },
+          {
+            "id": "ajn-q1-o2",
+            "text": "Mesi i fytit.",
+            "isCorrect": true
+          },
+          {
+            "id": "ajn-q1-o3",
+            "text": "Fillimi i fytit (afër gojës).",
+            "isCorrect": false
+          },
+          {
+            "id": "ajn-q1-o4",
+            "text": "Nuk është shkronjë fytore.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ع (Ajn) artikulohet nga mesi i fytit, duke e shtrënguar atë pjesë."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-gajn",
+    "title": "SHKRONJA غ (Gajn)",
+    "slug": "shkronja-gajn",
+    "pageNumber": 31,
+    "description": "Shkronja غ (Gajn) theksohet prej pjesës së epërme të fytit dhe duke liruar frymë nga laringu. Vërejtje: Shkronja 'Ajn' dhe shkronja 'Gajn' ndryshojnë në mes vete nga ajo se 'Gajni' e ka një pikë.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/ghain.png",
+        "meaning": "Pika e artikulimit të shkronjës Gajn"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja غ me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "غَ",
+            "pronunciation": "gha (e trashë, si 'g' por fërkuese)"
+          },
+          {
+            "arabic": "غِ",
+            "pronunciation": "ghi"
+          },
+          {
+            "arabic": "غُ",
+            "pronunciation": "ghu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja غ me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "غَا",
+            "pronunciation": "ghaa"
+          },
+          {
+            "arabic": "غِي",
+            "pronunciation": "ghii"
+          },
+          {
+            "arabic": "غُو",
+            "pronunciation": "ghuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja غ me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "غًا",
+            "pronunciation": "ghan"
+          },
+          {
+            "arabic": "غٍ",
+            "pronunciation": "ghin"
+          },
+          {
+            "arabic": "غٌ",
+            "pronunciation": "ghun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja غ me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَغْ",
+            "pronunciation": "egh"
+          },
+          {
+            "arabic": "يَغْفِرُ",
+            "pronunciation": "jeghfiru"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja غ me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَغّ",
+            "pronunciation": "maghgha (e rrallë)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "gajn-q1",
+        "text": "Nga cila pjesë e fytit artikulohet shkronja غ (Gajn)?",
+        "options": [
+          {
+            "id": "gajn-q1-o1",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "gajn-q1-o2",
+            "text": "Fillimi i fytit (pjesa e epërme, afër gojës).",
+            "isCorrect": true
+          },
+          {
+            "id": "gajn-q1-o3",
+            "text": "Fundi i fytit (afër gjoksit).",
+            "isCorrect": false
+          },
+          {
+            "id": "gajn-q1-o4",
+            "text": "Nuk është shkronjë fytore.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja غ (Gajn) artikulohet nga pjesa e epërme e fytit, afër gojës, ngjashëm me خ (Khaa) por me zë."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-faa",
+    "title": "SHKRONJA ف (Faa)",
+    "slug": "shkronja-faa",
+    "pageNumber": 32,
+    "description": "Shkronja ف (Faa) theksohet duke i shtrënguar dhëmborët e epërm me buzën e poshtme dhe duke liruar frymë nga hunda.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/faa.png",
+        "meaning": "Pika e artikulimit të shkronjës Faa"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ف me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "فَ",
+            "pronunciation": "fe"
+          },
+          {
+            "arabic": "فِ",
+            "pronunciation": "fi"
+          },
+          {
+            "arabic": "فُ",
+            "pronunciation": "fu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ف me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "فَا",
+            "pronunciation": "faa"
+          },
+          {
+            "arabic": "فِي",
+            "pronunciation": "fii"
+          },
+          {
+            "arabic": "فُو",
+            "pronunciation": "fuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ف me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "فًا",
+            "pronunciation": "fen"
+          },
+          {
+            "arabic": "فٍ",
+            "pronunciation": "fin"
+          },
+          {
+            "arabic": "فٌ",
+            "pronunciation": "fun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ف me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَفْ",
+            "pronunciation": "ef"
+          },
+          {
+            "arabic": "يَفْعَلُ",
+            "pronunciation": "jef'alu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ف me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خَفَّ",
+            "pronunciation": "khaffa"
+          },
+          {
+            "arabic": "كَفٌّ",
+            "pronunciation": "keffun"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "faa-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ف (Faa)?",
+        "options": [
+          {
+            "id": "faa-q1-o1",
+            "text": "Duke bashkuar buzët.",
+            "isCorrect": false
+          },
+          {
+            "id": "faa-q1-o2",
+            "text": "Duke prekur skajet e dhëmbëve të sipërm prerës me pjesën e brendshme të buzës së poshtme.",
+            "isCorrect": true
+          },
+          {
+            "id": "faa-q1-o3",
+            "text": "Maja e gjuhës me qiellzën.",
+            "isCorrect": false
+          },
+          {
+            "id": "faa-q1-o4",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ف (Faa) artikulohet duke prekur skajet e dhëmbëve të sipërm prerës me pjesën e brendshme (të lagësht) të buzës së poshtme."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-kaaf-trashe",
+    "title": "SHKRONJA ق (Kaaf e trashë)",
+    "slug": "shkronja-kaaf-trashe",
+    "pageNumber": 33,
+    "description": "Shkronja ق (Kaaf e trashë) theksohet prej mesit të fytit dhe duke shtrënguar gojën dhe hundën. Është shkronjë e trashë (Isti'la) dhe Kalkalah kur është me Sukun.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/qaaf.png",
+        "meaning": "Pika e artikulimit të shkronjës Kaaf (e trashë)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ق me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قَ",
+            "pronunciation": "ka (e trashë)"
+          },
+          {
+            "arabic": "قِ",
+            "pronunciation": "ki (e trashë)"
+          },
+          {
+            "arabic": "قُ",
+            "pronunciation": "ku (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ق me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قَا",
+            "pronunciation": "kaa (e trashë)"
+          },
+          {
+            "arabic": "قِي",
+            "pronunciation": "kii (e trashë)"
+          },
+          {
+            "arabic": "قُو",
+            "pronunciation": "kuu (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ق me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قًا",
+            "pronunciation": "kan (e trashë)"
+          },
+          {
+            "arabic": "قٍ",
+            "pronunciation": "kin (e trashë)"
+          },
+          {
+            "arabic": "قٌ",
+            "pronunciation": "kun (e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ق me Sukun (kalkalah):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَقْ",
+            "pronunciation": "ek (e trashë)"
+          },
+          {
+            "arabic": "يَقْرَأُ",
+            "pronunciation": "jakrau"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ق me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "حَقَّ",
+            "pronunciation": "hakka (e trashë)"
+          },
+          {
+            "arabic": "الْقُوَّة",
+            "pronunciation": "el-kuwweh"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "kaaf-trashe-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ق (Kaaf e trashë)?",
+        "options": [
+          {
+            "id": "kaaf-trashe-q1-o1",
+            "text": "Fundi i gjuhës duke prekur qiellzën e butë.",
+            "isCorrect": true
+          },
+          {
+            "id": "kaaf-trashe-q1-o2",
+            "text": "Maja e gjuhës me dhëmbët e sipërm.",
+            "isCorrect": false
+          },
+          {
+            "id": "kaaf-trashe-q1-o3",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "kaaf-trashe-q1-o4",
+            "text": "Buzët.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ق (Kaaf e trashë) artikulohet duke ngritur pjesën më të pasme të gjuhës (rrënjën e gjuhës) drejt qiellzës së butë."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-kaaf-lehte",
+    "title": "SHKRONJA ك (Kaaf e lehtë)",
+    "slug": "shkronja-kaaf-lehte",
+    "pageNumber": 35,
+    "description": "Shkronja ك (Kaaf e lehtë) theksohet duke e qelur gojën pjesërisht dhe duke shtrënguar pjesën e epërme të fytit dhe duke e prekur me pjesën e mesme të gjuhës.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/kaaf.png",
+        "meaning": "Pika e artikulimit të shkronjës Kaaf (e lehtë)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ك me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "كَ",
+            "pronunciation": "ke"
+          },
+          {
+            "arabic": "كِ",
+            "pronunciation": "ki"
+          },
+          {
+            "arabic": "كُ",
+            "pronunciation": "ku"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ك me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "كَا",
+            "pronunciation": "kaa"
+          },
+          {
+            "arabic": "كِي",
+            "pronunciation": "kii"
+          },
+          {
+            "arabic": "كُو",
+            "pronunciation": "kuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ك me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "كًا",
+            "pronunciation": "ken"
+          },
+          {
+            "arabic": "كٍ",
+            "pronunciation": "kin"
+          },
+          {
+            "arabic": "كٌ",
+            "pronunciation": "kun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ك me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَكْ",
+            "pronunciation": "ek"
+          },
+          {
+            "arabic": "يَكْتُبُ",
+            "pronunciation": "jektubu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ك me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَكَّ",
+            "pronunciation": "mekka"
+          },
+          {
+            "arabic": "بِكِّ",
+            "pronunciation": "bikki (e rrallë)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "kaaf-lehte-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ك (Kaaf e lehtë)?",
+        "options": [
+          {
+            "id": "kaaf-lehte-q1-o1",
+            "text": "Fundi i gjuhës duke prekur qiellzën e butë, pak më përpara se shkronja ق.",
+            "isCorrect": true
+          },
+          {
+            "id": "kaaf-lehte-q1-o2",
+            "text": "Fundi i gjuhës duke prekur qiellzën e butë, në të njëjtin vend si ق.",
+            "isCorrect": false
+          },
+          {
+            "id": "kaaf-lehte-q1-o3",
+            "text": "Maja e gjuhës me qiellzën e fortë.",
+            "isCorrect": false
+          },
+          {
+            "id": "kaaf-lehte-q1-o4",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ك (Kaaf e lehtë) artikulohet duke ngritur pjesën e pasme të gjuhës drejt qiellzës së fortë, pak më përpara se pika e artikulimit të ق (Kaaf e trashë)."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-laam",
+    "title": "SHKRONJA ل (Laam)",
+    "slug": "shkronja-laam",
+    "pageNumber": 36,
+    "description": "Shkronja ل (Laam) theksohet duke prekur me pjesët anësore të gjuhës pjesën e qiellzës dhe duke lëshuar frymë nga të dy anët e dhëmbëve. Rregullat e trashjes dhe hollimit të saj janë specifike, veçanërisht në emrin e Allahut.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/laam.png",
+        "meaning": "Pika e artikulimit të shkronjës Laam"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ل me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "لَ",
+            "pronunciation": "le"
+          },
+          {
+            "arabic": "لِ",
+            "pronunciation": "li"
+          },
+          {
+            "arabic": "لُ",
+            "pronunciation": "lu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ل me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "لَا",
+            "pronunciation": "laa"
+          },
+          {
+            "arabic": "لِي",
+            "pronunciation": "lii"
+          },
+          {
+            "arabic": "لُو",
+            "pronunciation": "luu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ل me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "لً",
+            "pronunciation": "len"
+          },
+          {
+            "arabic": "لٍ",
+            "pronunciation": "lin"
+          },
+          {
+            "arabic": "لٌ",
+            "pronunciation": "lun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ل me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَلْ",
+            "pronunciation": "el"
+          },
+          {
+            "arabic": "قُلْ",
+            "pronunciation": "kul"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ل me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ظَلَّ",
+            "pronunciation": "dhalla"
+          },
+          {
+            "arabic": "اللّٰهُ",
+            "pronunciation": "Allah"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "laam-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ل (Laam)?",
+        "options": [
+          {
+            "id": "laam-q1-o1",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës.",
+            "isCorrect": false
+          },
+          {
+            "id": "laam-q1-o2",
+            "text": "Maja e gjuhës bashkë me pjesën e përparme të anësoreve të saj, duke prekur qiellzën nga dhëmballët e parë deri te kaninët, dhëmbët prerës anësorë dhe qendrorë të sipërm.",
+            "isCorrect": true
+          },
+          {
+            "id": "laam-q1-o3",
+            "text": "Mesi i gjuhës me qiellzën e fortë.",
+            "isCorrect": false
+          },
+          {
+            "id": "laam-q1-o4",
+            "text": "Buzët.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ل (Laam) artikulohet duke prekur me majën e gjuhës dhe anësoret e saj (deri te dhëmballët e parë) pjesën e qiellzës përballë dhëmbëve të sipërm, nga kanini në kanin."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-miim",
+    "title": "SHKRONJA م (Miim)",
+    "slug": "shkronja-miim",
+    "pageNumber": 37,
+    "description": "Shkronja م (Miim) theksohet duke i bashkuar buzët plotësisht dhe duke liruar frymë nga fyti. Ka cilësi hundore (Ghunneh) kur është me Teshtid ose Sukun (në disa rregulla).",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/meem.png",
+        "meaning": "Pika e artikulimit të shkronjës Miim"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja م me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَ",
+            "pronunciation": "me"
+          },
+          {
+            "arabic": "مِ",
+            "pronunciation": "mi"
+          },
+          {
+            "arabic": "مُ",
+            "pronunciation": "mu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja م me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَا",
+            "pronunciation": "maa"
+          },
+          {
+            "arabic": "مِي",
+            "pronunciation": "mii"
+          },
+          {
+            "arabic": "مُو",
+            "pronunciation": "muu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja م me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مًا",
+            "pronunciation": "men"
+          },
+          {
+            "arabic": "مٍ",
+            "pronunciation": "min"
+          },
+          {
+            "arabic": "مٌ",
+            "pronunciation": "mun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja م me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَمْ",
+            "pronunciation": "em"
+          },
+          {
+            "arabic": "هُمْ",
+            "pronunciation": "hum"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja م me Shadda (Teshtid) (me Ghunneh):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَمَّ",
+            "pronunciation": "emma"
+          },
+          {
+            "arabic": "ثُمَّ",
+            "pronunciation": "thumma"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "miim-q1",
+        "text": "Cila është pika e artikulimit të shkronjës م (Miim)?",
+        "options": [
+          {
+            "id": "miim-q1-o1",
+            "text": "Maja e gjuhës me qiellzën.",
+            "isCorrect": false
+          },
+          {
+            "id": "miim-q1-o2",
+            "text": "Duke bashkuar buzët.",
+            "isCorrect": true
+          },
+          {
+            "id": "miim-q1-o3",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "miim-q1-o4",
+            "text": "Fundi i gjuhës.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja م (Miim) artikulohet duke bashkuar plotësisht buzët."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-nuun",
+    "title": "SHKRONJA ن (Nuun)",
+    "slug": "shkronja-nuun",
+    "pageNumber": 38,
+    "description": "Shkronja ن (Nuun) theksohet duke e prekur mesin e qiellzës me majen e gjuhës (paragjuhën) dhe duke e mbajtur frymën në ekuilibër. Ka cilësi hundore (Ghunneh) kur është me Teshtid ose Sukun (në shumicën e rregullave).",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/noon.png",
+        "meaning": "Pika e artikulimit të shkronjës Nuun"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ن me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "نَ",
+            "pronunciation": "ne"
+          },
+          {
+            "arabic": "نِ",
+            "pronunciation": "ni"
+          },
+          {
+            "arabic": "نُ",
+            "pronunciation": "nu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ن me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "نَا",
+            "pronunciation": "naa"
+          },
+          {
+            "arabic": "نِي",
+            "pronunciation": "nii"
+          },
+          {
+            "arabic": "نُو",
+            "pronunciation": "nuu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ن me Tenvin (si referencë, pasi Tenvini është nunim):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "كِتَابًا",
+            "pronunciation": "kitaben"
+          },
+          {
+            "arabic": "كِتَابٍ",
+            "pronunciation": "kitabin"
+          },
+          {
+            "arabic": "كِتَابٌ",
+            "pronunciation": "kitabun"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ن me Sukun (rregullat e saj janë të detajuara veçmas):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَنْ",
+            "pronunciation": "en"
+          },
+          {
+            "arabic": "مِنْ",
+            "pronunciation": "min"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ن me Shadda (Teshtid) (me Ghunneh):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَنَّ",
+            "pronunciation": "enna"
+          },
+          {
+            "arabic": "الْجَنَّة",
+            "pronunciation": "el-xhenneh"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "nuun-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ن (Nuun)?",
+        "options": [
+          {
+            "id": "nuun-q1-o1",
+            "text": "Maja e gjuhës me rrënjët e dhëmbëve të sipërm prerës (pak më lart se ل).",
+            "isCorrect": true
+          },
+          {
+            "id": "nuun-q1-o2",
+            "text": "Bashkimi i buzëve.",
+            "isCorrect": false
+          },
+          {
+            "id": "nuun-q1-o3",
+            "text": "Mesi i gjuhës me qiellzën e fortë.",
+            "isCorrect": false
+          },
+          {
+            "id": "nuun-q1-o4",
+            "text": "Fundi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ن (Nuun) artikulohet duke prekur me majën e gjuhës pjesën e qiellzës përballë rrënjëve të dhëmbëve të sipërm prerës, pak më lart se pika e artikulimit të Laam-it."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-haa-lehte",
+    "title": "SHKRONJA ه (Haa e lehtë/fundit)",
+    "slug": "shkronja-haa-lehte",
+    "pageNumber": 40,
+    "description": "Shkronja ه (Haa e lehtë) theksohet duke e ulur gjuhën poshtë dhëmbëve të poshtëm kështu që gjuha tërhiqet në tërësi ndërsa prej pjesës së poshtme dhe thellësis së fytit të del frymë tingëlluese.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/haa-light.png",
+        "meaning": "Pika e artikulimit të shkronjës Haa (e lehtë)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ه me Zëra të Shkurtër:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "هَ",
+            "pronunciation": "he"
+          },
+          {
+            "arabic": "هِ",
+            "pronunciation": "hi"
+          },
+          {
+            "arabic": "هُ",
+            "pronunciation": "hu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ه me Zëra të Gjatë:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "هَا",
+            "pronunciation": "haa"
+          },
+          {
+            "arabic": "هِي",
+            "pronunciation": "hii"
+          },
+          {
+            "arabic": "هُو",
+            "pronunciation": "huu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ه me Tenvin:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "هًا",
+            "pronunciation": "hen (e rrallë)"
+          },
+          {
+            "arabic": "هٍ",
+            "pronunciation": "hin (e rrallë)"
+          },
+          {
+            "arabic": "هٌ",
+            "pronunciation": "hun (e rrallë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ه me Sukun:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَهْ",
+            "pronunciation": "eh"
+          },
+          {
+            "arabic": "لَهُمْ",
+            "pronunciation": "lehum"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ه me Shadda (Teshtid):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اللهُ",
+            "pronunciation": "Allahu (teshtidi është mbi Lam por Haa ndikohet)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "haa-lehte-q1",
+        "text": "Nga cila pjesë e fytit artikulohet shkronja ه (Haa e lehtë)?",
+        "options": [
+          {
+            "id": "haa-lehte-q1-o1",
+            "text": "Fundi i fytit (pjesa më e thellë, afër gjoksit).",
+            "isCorrect": true
+          },
+          {
+            "id": "haa-lehte-q1-o2",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "haa-lehte-q1-o3",
+            "text": "Fillimi i fytit (afër gojës).",
+            "isCorrect": false
+          },
+          {
+            "id": "haa-lehte-q1-o4",
+            "text": "Nuk është shkronjë fytore.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ه (Haa e lehtë) artikulohet nga fundi i fytit, pjesa më e afërt me gjoksin."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-waw",
+    "title": "SHKRONJA و (Waw)",
+    "slug": "shkronja-waw",
+    "pageNumber": 39,
+    "description": "Shkronja و (Waw) theksohet duke i bashkuar buzët dhe duke tërhequr frymë nga fundi i fytit dhe duke e liruar nga mesi i buzëve. Kur është shkronjë zgjatimi (Medd), del nga zbrazëtia e gojës. Kur është shkronjë e butë (Lijn), del nga rrumbullakimi i buzëve pa i bashkuar plotësisht.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/waw.png",
+        "meaning": "Pika e artikulimit të shkronjës Waw"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja و me Zëra të Shkurtër (si bashkëtingëllore):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "وَ",
+            "pronunciation": "we"
+          },
+          {
+            "arabic": "وِ",
+            "pronunciation": "wi"
+          },
+          {
+            "arabic": "وُ",
+            "pronunciation": "wu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja و si Zë i Gjatë (Medd):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بُو",
+            "pronunciation": "buu (pas Dammes)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja و me Tenvin (si bashkëtingëllore):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "وً",
+            "pronunciation": "wen (e rrallë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja و me Sukun (si bashkëtingëllore ose Lijn):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَوْ",
+            "pronunciation": "ew (Lijn)"
+          },
+          {
+            "arabic": "يَوْم",
+            "pronunciation": "jewm (Lijn)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja و me Shadda (Teshtid) (si bashkëtingëllore):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قَوَّ",
+            "pronunciation": "kawwa"
+          },
+          {
+            "arabic": "عَدُوٌّ",
+            "pronunciation": "aduwwun"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "waw-q1",
+        "text": "Cila është pika e artikulimit të shkronjës و (Waw) si bashkëtingëllore?",
+        "options": [
+          {
+            "id": "waw-q1-o1",
+            "text": "Maja e gjuhës me qiellzën.",
+            "isCorrect": false
+          },
+          {
+            "id": "waw-q1-o2",
+            "text": "Duke rrumbullakuar buzët pa i bashkuar plotësisht, duke lënë një hapësirë të vogël në mes.",
+            "isCorrect": true
+          },
+          {
+            "id": "waw-q1-o3",
+            "text": "Mesi i fytit.",
+            "isCorrect": false
+          },
+          {
+            "id": "waw-q1-o4",
+            "text": "Fundi i gjuhës.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja و (Waw) si bashkëtingëllore artikulohet duke rrumbullakuar buzët dhe duke i çuar ato pak përpara, pa i bashkuar plotësisht."
+      }
+    ]
+  },
+  {
+    "id": "shkronja-jaa",
+    "title": "SHKRONJA ي (Jaa)",
+    "slug": "shkronja-jaa",
+    "pageNumber": 42,
+    "description": "Shkronja ي (Jaa) theksohet nga pjesa e epërme e fytit duke takuar pjesën e poshtme të gjuhës me qiellzën e epërme. Kur është shkronjë zgjatimi (Medd), del nga zbrazëtia e gojës. Kur është shkronjë e butë (Lijn), del nga mesi i gjuhës duke u ngritur drejt qiellzës së fortë pa u prekur plotësisht.",
+    "examples": [
+      {
+        "type": "image",
+        "image": "https://tajweed.me/images/letters/yaa.png",
+        "meaning": "Pika e artikulimit të shkronjës Jaa"
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ي me Zëra të Shkurtër (si bashkëtingëllore):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "يَ",
+            "pronunciation": "je"
+          },
+          {
+            "arabic": "يِ",
+            "pronunciation": "ji"
+          },
+          {
+            "arabic": "يُ",
+            "pronunciation": "ju"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ي si Zë i Gjatë (Medd):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بِي",
+            "pronunciation": "bii (pas Kesrës)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ي me Tenvin (si bashkëtingëllore):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "يًا",
+            "pronunciation": "jen (e rrallë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ي me Sukun (si bashkëtingëllore ose Lijn):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَيْ",
+            "pronunciation": "ej (Lijn)"
+          },
+          {
+            "arabic": "بَيْت",
+            "pronunciation": "bejt (Lijn)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Shkronja ي me Shadda (Teshtid) (si bashkëtingëllore):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "حَيَّ",
+            "pronunciation": "hajja"
+          },
+          {
+            "arabic": "اِيَّاك",
+            "pronunciation": "ijjaaka"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "jaa-q1",
+        "text": "Cila është pika e artikulimit të shkronjës ي (Jaa) si bashkëtingëllore?",
+        "options": [
+          {
+            "id": "jaa-q1-o1",
+            "text": "Maja e gjuhës me qiellzën e butë.",
+            "isCorrect": false
+          },
+          {
+            "id": "jaa-q1-o2",
+            "text": "Mesi i gjuhës duke u afruar me qiellzën e fortë.",
+            "isCorrect": true
+          },
+          {
+            "id": "jaa-q1-o3",
+            "text": "Buzët.",
+            "isCorrect": false
+          },
+          {
+            "id": "jaa-q1-o4",
+            "text": "Fundi i fytit.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja ي (Jaa) si bashkëtingëllore artikulohet duke ngritur mesin e gjuhës drejt qiellzës së fortë, ngjashëm me ش (Shiin) dhe ج (Xhiim) por pa bllokim të plotë të ajrit."
+      }
+    ]
+  }
+]

@@ -1,0 +1,536 @@
+[
+  {
+    "id": "lutja1",
+    "titulli": "Lutje 1",
+    "shqip": "“Zoti ynë, ne i bëmë të padrejtë vetvetes, në qoftë se nuk na falë dhe nuk na mëshiron, ne me siguri do të jemi prej të shkatërruarve!”",
+    "burimi": "Araf, 23."
+  },
+  {
+    "id": "lutja2",
+    "titulli": "Lutje 2",
+    "shqip": "“Zoti im, unë mbështetem në mbrojtjen Tënde që të mos kërkoj prej Teje atë për çka nuk kam njohuri, e në qoftë se nuk më fal mua dhe nuk më mëshiron Ti, do të jem i humbur!”",
+    "burimi": "Hud, 47."
+  },
+  {
+    "id": "lutja3",
+    "titulli": "Lutje 3",
+    "shqip": "“Zoti im, më falë mua dhe prindërit e mi, si dhe ata që hynë në shtëpinë time, duke qenë besimtarë, edhe besimtarët e besimtaret.”",
+    "burimi": "Nuh, 28."
+  },
+  {
+    "id": "lutja4",
+    "titulli": "Lutje 4",
+    "shqip": "“Zoti ynë, pranoje prej nesh, se me të vërtetë Ti je që dëgjon dhe e di!”",
+    "burimi": "Bekare, 127."
+  },
+  {
+    "id": "lutja5",
+    "titulli": "Lutje 5",
+    "shqip": "“Dhe falna neve, vërtetë Ti je Falës dhe Mëshirues!”",
+    "burimi": "Bekare, 128."
+  },
+  {
+    "id": "lutja6",
+    "titulli": "Lutje 6",
+    "shqip": "“O Zoti im! Më bën mua nga ata që falin namazin dhe prej pasardhësve të mi, si dhe pranoje lutjen time o Zoti ynë!”",
+    "burimi": "Ibrahim, 40."
+  },
+  {
+    "id": "lutja7",
+    "titulli": "Lutje 7",
+    "shqip": "“Zoti ynë! Më fal gabimet mua edhe prindërve të mi, fali edhe të gjithë besimtarët Ditën kur jepet llogaria.”",
+    "burimi": "Ibrahim, 41."
+  },
+  {
+    "id": "lutja8",
+    "titulli": "Lutje 8",
+    "shqip": "“Zoti im, më dhuro mua urtësi dhe më bashko me të mirët! Më bën përkujtim të mirë ndër ata që vijnë pas, Më bën prej trashëguesve të Xhenetit të begatshëm.”",
+    "burimi": "Shuara, 83-85."
+  },
+  {
+    "id": "lutja9",
+    "titulli": "Lutje 9",
+    "shqip": "“E mos më turpëro në Ditën kur do të ringjallen.”",
+    "burimi": "Shuara, 87."
+  },
+  {
+    "id": "lutja10",
+    "titulli": "Lutje 10",
+    "shqip": "“Zoti im, më dhuro mua një fëmijë prej të mirëve!”",
+    "burimi": "Safat, 100."
+  },
+  {
+    "id": "lutja11",
+    "titulli": "Lutje 11",
+    "shqip": "“Zoti ynë, vetëm Ty të jemi mbështetur, vetëm nga Ti jemi kthyer dhe vetëm te Ti është e ardhmja!”",
+    "burimi": "Mumtehine, 4."
+  },
+  {
+    "id": "lutja12",
+    "titulli": "Lutje 12",
+    "shqip": "“Zoti ynë, mos na vën në sprovë në duar të atyre që nuk besuan dhe falna, Zoti ynë, Ti je Ngadhënjyesi, i Urti.”",
+    "burimi": "Mumtehine, 5."
+  },
+  {
+    "id": "lutja13",
+    "titulli": "Lutje 13",
+    "shqip": "“Zoti im, më mundëso që të falënderoj të mirat Tuaja që m’i dhurove mua dhe prindërve të mi dhe që të bëj vepra të mira që Ti i pëlqen, e me mëshirën tënde më fut në mesin e robërve Tuaj të mirë!”",
+    "burimi": "Neml, 19."
+  },
+  {
+    "id": "lutja14",
+    "titulli": "Lutje 14",
+    "shqip": "“Zoti im, më falë edhe mua nga ana Juaj një pasardhës të mirë, vërtet, Ti je Dëgjues i lutjes!”",
+    "burimi": "Ali Imran, 38."
+  },
+  {
+    "id": "lutja15",
+    "titulli": "Lutje 15",
+    "shqip": "“Zoti im, mos më le të vetmuar se Ti je më i miri trashëgues.”",
+    "burimi": "Enbija, 89."
+  },
+  {
+    "id": "lutja16",
+    "titulli": "Lutje 16",
+    "shqip": "“Nuk ka hyjni që meriton të adhurohet përveç Teje që je i Madhëruar. Vërtetë, unë jam prej të padrejtëve.”",
+    "burimi": "Enbija, 87."
+  },
+  {
+    "id": "lutja17",
+    "titulli": "Lutje 17",
+    "shqip": "“Zoti im, ma zgjero gjoksin tim! Më lehtëso në këtë punë timen! Më zgjidh nyjën e gjuhës sime! Që ta kuptojnë fjalën time!”",
+    "burimi": "Ta Ha, 25-28."
+  },
+  {
+    "id": "lutja18",
+    "titulli": "Lutje 18",
+    "shqip": "“Zoti im, unë e ngarkova veten e Ti më fal mua!”",
+    "burimi": "Kasas, 16."
+  },
+  {
+    "id": "lutja19",
+    "titulli": "Lutje 19",
+    "shqip": "“Zoti ynë, ne e besuam shpalljen, e pasuam të Dërguarin, pra shënona bashkë me ata që dëshmojnë besimin e drejtë!”",
+    "burimi": "Ali Imran, 53."
+  },
+  {
+    "id": "lutja20",
+    "titulli": "Lutje 20",
+    "shqip": "“Zoti ynë, mos i mundëso popullit mizor të na sprovojë! Me Mëshirën Tënde, na shpëto prej popullit jobesimtarë!”",
+    "burimi": "Junus, 85-86."
+  },
+  {
+    "id": "lutja21",
+    "titulli": "Lutje 21",
+    "shqip": "“Zoti ynë, na i falë mëkatet dhe teprimin në veprat tona, si dhe na forco këmbët tona dhe na ndihmon kundër popullit jobesimtar!”",
+    "burimi": "Ali Imran, 147."
+  },
+  {
+    "id": "lutja22",
+    "titulli": "Lutje 22",
+    "shqip": "“O Zoti ynë, na dhuro nga ana Jote mëshirë dhe na përgatitë udhëzim të drejtë në tërë çështjen tonë!”",
+    "burimi": "Kehf, 10."
+  },
+  {
+    "id": "lutja23",
+    "titulli": "Lutje 23",
+    "shqip": "“Zoti im, më shto dituri!”",
+    "burimi": "Ta Ha, 114."
+  },
+  {
+    "id": "lutja24",
+    "titulli": "Lutje 24",
+    "shqip": "“O Zot im, unë mbrohem me Ty prej cytjeve të djajve! Kërkoj mbrojtjen Tënde që ata të mos më afrohen!”",
+    "burimi": "Mu’minun, 97-98."
+  },
+  {
+    "id": "lutja25",
+    "titulli": "Lutje 25",
+    "shqip": "“O Zoti im, më fal e më mëshiro, se Ti je më i miri i Mëshiruesve!”",
+    "burimi": "Mu’minun, 118."
+  },
+  {
+    "id": "lutja26",
+    "titulli": "Lutje 26",
+    "shqip": "“Zoti ynë na jep të mira në këtë jetë, të mira në botën tjetër dhe na ruaj nga dënimi i zjarrit!”",
+    "burimi": "Bekare, 201."
+  },
+  {
+    "id": "lutja27",
+    "titulli": "Lutje 27",
+    "shqip": "“Dëgjuam dhe respektuam. Kërkojmë faljen tënde o Zoti ynë, te Ti është ardhmëria jonë.”",
+    "burimi": "Bekare, 285."
+  },
+  {
+    "id": "lutja28",
+    "titulli": "Lutje 28",
+    "shqip": "“Zoti ynë, mos na dëno nëse harrojmë ose gabojmë! Zoti ynë, mos na ngarko neve barrë të rëndë siç i ngarkove ata para nesh! Zoti ynë, mos na ngarko me atë për të cilën nuk kemi fuqi! Na i mbulo të këqijat, na fal dhe na mëshiro. Ti je Mbrojtësi ynë, pra na ndihmo kundër popullit pabesimtarë!”",
+    "burimi": "Bekare, 286."
+  },
+  {
+    "id": "lutja29",
+    "titulli": "Lutje 29",
+    "shqip": "“Zoti ynë, mos na i lako zemrat tona pasi na i drejtove, na dhuro mëshirën Tënde, ngase vetëm Ti je Dhuruesi i Madh.”",
+    "burimi": "Ali Imran, 8."
+  },
+  {
+    "id": "lutja30",
+    "titulli": "Lutje 30",
+    "shqip": "“Zoti ynë, këtë nuk e krijove kot, i lartësuar qofsh, ruana prej dënimit të zjarrit! Zoti ynë, atë të cilin që Ti e fute në zjarr, atë e ke poshtëruar! Zoti ynë, ne dëgjuam një thirrës që ftonte për besim:Të besoni Zotin tuaj! E ne besuam! Zoti ynë, na i falë mëkatet tona, na i mbulo të metat dhe pas vdekjes na bashko me të mirët! Zoti ynë, jepna atë që nëpërmjet të Dërguarve Tu, na e premtove dhe në Ditën e Kijametit mos na turpëro. Me të vërtetë Ti je Ai që nuk e shkel premtimin.”",
+    "burimi": "Ali Imran, 191-194."
+  },
+  {
+    "id": "lutja31",
+    "titulli": "Lutje 31",
+    "shqip": "“O Zoti ynë, ne besuam, prandaj na falë dhe na mëshiro, se Ti je më i miri i Mëshiruesve!”",
+    "burimi": "Mu’minun, 109."
+  },
+  {
+    "id": "lutja32",
+    "titulli": "Lutje 32",
+    "shqip": "“Zoti ynë, largoje prej nesh vuajtjen e Xhehenemit, e s’ka dyshim se vuajtja në të është gjëja më e rëndë. Ai, vërtet është vendqëndrim i keq.”",
+    "burimi": "Furkan, 65-66."
+  },
+  {
+    "id": "lutja33",
+    "titulli": "Lutje 33",
+    "shqip": "“Zoti ynë, na bën që të jemi të gëzuar me punën e grave tona dhe pasardhësve tanë, neve na bën shembull për të devotshmit.”",
+    "burimi": "Furkan, 74."
+  },
+  {
+    "id": "lutja34",
+    "titulli": "Lutje 34",
+    "shqip": "“Zoti im, më inspiro mua që të falënderoj për të mirën tënde që ma dhurove mua dhe prindërve të mi, që të bëj vepra të mira që i pëlqen Ti dhe m’i bën të mirë pasardhësit e mi, unë pendohem tek Ti dhe unë jam prej muslimanëve.”",
+    "burimi": "Ahkaf, 15."
+  },
+  {
+    "id": "lutja35",
+    "titulli": "Lutje 35",
+    "shqip": "“Zoti ynë, falna ne dhe vëllezërit tanë që para nesh u pajisën me besim dhe mos lejo në zemrat tona urrejtjeje ndaj atyre që besuan. Zoti ynë Ti je i Butë, Mëshirues!”",
+    "burimi": "Hashr, 10."
+  },
+  {
+    "id": "lutja36",
+    "titulli": "Lutje 36",
+    "shqip": "“Zoti ynë, na e plotëso dritën tonë, falna neve. Vërtet, Ti je i Plotfuqishëm për çdo send.”",
+    "burimi": "Tahrim, 8."
+  },
+  {
+    "id": "lutja37",
+    "titulli": "Lutje 37",
+    "shqip": "“Zoti ynë, ne vërtet besuam, na i falë mëkatet tona dhe na ruaj prej ndëshkimit të zjarrit!”",
+    "burimi": "Ali Imran, 16."
+  },
+  {
+    "id": "lutja38",
+    "titulli": "Lutje 38",
+    "shqip": "“Zoti ynë, ne kemi besuar, pra na regjistro ndër ata që dëshmojnë.”",
+    "burimi": "Maide, 83."
+  },
+  {
+    "id": "lutja39",
+    "titulli": "Lutje 39",
+    "shqip": "“Zoti im! Bëje këtë qytet të sigurt dhe më mbro mua e bijtë e mi nga adhurimi i idhujve.”",
+    "burimi": "Ibrahim, 35."
+  },
+  {
+    "id": "lutja40",
+    "titulli": "Lutje 40",
+    "shqip": "“O Zoti im çfarëdo dhuntie që të më japësh, unë jam nevojtar!”",
+    "burimi": "Kasas, 24."
+  },
+  {
+    "id": "lutja41",
+    "titulli": "Lutje 41",
+    "shqip": "“O Zoti im, më ndihmo kundër popullit të prishur!”",
+    "burimi": "Ankebut, 30."
+  },
+  {
+    "id": "lutja42",
+    "titulli": "Lutje 42",
+    "shqip": "“Zoti ynë mos na bëj neve me mizorët!”",
+    "burimi": "Araf, 47."
+  },
+  {
+    "id": "lutja43",
+    "titulli": "Lutje 43",
+    "shqip": "“Më mjafton Allahu, s’ka zot pos Tij, te Ai mbështetem, e Ai është Zot i Arshit të madh!”",
+    "burimi": "Teube, 129."
+  },
+  {
+    "id": "lutja44",
+    "titulli": "Lutje 44",
+    "shqip": "“Shpresoj që Zoti im të më udhëzoj drejt Rrugës së Drejtë.”",
+    "burimi": "Kasas, 22."
+  },
+  {
+    "id": "lutja45",
+    "titulli": "Lutje 45",
+    "shqip": "“O Zoti im, më shpëto prej popullit zullumqar.”",
+    "burimi": "Kasas, 21."
+  },
+  {
+    "id": "lutja46",
+    "titulli": "Lutje 46",
+    "shqip": "“O Allahu im na jep të mira në këtë jetë, të mira edhe në botën tjetër, si dhe na ruaj prej dënimit me zjarr!”",
+    "burimi": "Buhariu 7/163 dhe Muslimi 4/2070."
+  },
+  {
+    "id": "lutja47",
+    "titulli": "Lutje 47",
+    "shqip": "“O Allahu im, kërkoj mbrojtje nga sprova që lodhë, nga fundi i fatkeqësive, gjykimi i keq dhe dashaligësia e armiqve”",
+    "burimi": "Buhariu 7/155 dhe Muslimi 4/2080."
+  },
+  {
+    "id": "lutja48",
+    "titulli": "Lutje 48",
+    "shqip": "“O Allahu im, të lus Ty për udhëzim, devotshmëri, dëlirësi dhe pasuri.”",
+    "burimi": "Muslimi 4/2087."
+  },
+  {
+    "id": "lutja49",
+    "titulli": "Lutje 49",
+    "shqip": "“O Allahu im, më udhëzo dhe më mbaj në rrugë të drejtë, O Allahu im, unë të lutem ty për udhëzim dhe drejtim.”",
+    "burimi": "Muslimi 4/2090."
+  },
+  {
+    "id": "lutja50",
+    "titulli": "Lutje 50",
+    "shqip": "“O Allahu im, unë kërkoj mbrojtjen Tënde nga largimi i dhuntive Tuaja, keqësimin e shëndetit që ma ke dhënë, dënimin e papritur dhe nga i gjithë hidhërimi Yt.”",
+    "burimi": "Muslimi 4/2097."
+  },
+  {
+    "id": "lutja51",
+    "titulli": "Lutje 51",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga e keqja e asaj që e kam vepruar dhe nga e keqja e asaj që nuk e kam vepruar.”",
+    "burimi": "Muslimi 4/2085."
+  },
+  {
+    "id": "lutja52",
+    "titulli": "Lutje 52",
+    "shqip": "“O Allahu im, në mëshirën Tënde shpresoj, mos më le të mbështetem në vetvete, aq sa një përpëlitje e syrit dhe ma përmirëso gjendjen time. Nuk ka të adhuruar tjetër përveç Teje.”",
+    "burimi": "Ebu Davudi 4/324, Ahmedi 5/42."
+  },
+  {
+    "id": "lutja53",
+    "titulli": "Lutje 53",
+    "shqip": "“Nuk ka hyjni që meriton të adhurohet përveç Teje, që je i Madhëruar. Vërtetë, unë jam prej mëkatarëve.”",
+    "burimi": "Tirmidhi 5/295, Hakimi 1/505."
+  },
+  {
+    "id": "lutja54",
+    "titulli": "Lutje 54",
+    "shqip": "“O Allahu im, Ndryshues i zemrave, përforcoje zemrën time në fenë Tënde.”",
+    "burimi": "Muslimi 4/2045."
+  },
+  {
+    "id": "lutja55",
+    "titulli": "Lutje 55",
+    "shqip": "“O Rrotullues i zemrave, përqendroje zemrën time në Fenë Tënde.”",
+    "burimi": "Tirmidhi 5/538, Ahmedi 4/182."
+  },
+  {
+    "id": "lutja56",
+    "titulli": "Lutje 56",
+    "shqip": "“O Allahu im, kërkoj nga Ti shëndet në këtë botë dhe në Ahiret.”",
+    "burimi": "Tirmidhi 5/584."
+  },
+  {
+    "id": "lutja57",
+    "titulli": "Lutje 57",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga gërbula, çmenduria, zgjeba dhe nga të gjitha sëmundjet e shëmtuara.”",
+    "burimi": "Ebu Davudi 2/93, Nesaiu 8/271."
+  },
+  {
+    "id": "lutja58",
+    "titulli": "Lutje 58",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde prej moralit të keq, prej veprave të këqija dhe prej epsheve të këqija.”",
+    "burimi": "Tirmidhi 5/575, Ibën Hibani."
+  },
+  {
+    "id": "lutja59",
+    "titulli": "Lutje 59",
+    "shqip": "“O Allahu im, Ti je Falës, Bujar dhe e do faljen, andaj më fal mua.”",
+    "burimi": "Tirmidhi, 5/534."
+  },
+  {
+    "id": "lutja60",
+    "titulli": "Lutje 60",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga frika, kërkoj mbrojtjen Tënde nga koprracia, kërkoj mbrojtjen Tënde që të kthehem në moshë të shtyrë dhe kërkoj mbrojtjen Tënde nga sprovat e kësaj bote dhe nga dënimi i varrit.”",
+    "burimi": "Buhariu në Fet’hul Bari 11/181."
+  },
+  {
+    "id": "lutja61",
+    "titulli": "Lutje 61",
+    "shqip": "“O Allahu im, zgjeroje furnizimit Tënd ndaj meje atëherë kur të më kaplon pleqëria dhe kur të ndahem nga jeta.”",
+    "burimi": "Hakimi 1/542."
+  },
+  {
+    "id": "lutja62",
+    "titulli": "Lutje 62",
+    "shqip": "“Allahu im, m’i fal mëkatet, ma zgjero shtëpinë time dhe më beko mua në furnizimin tim.”",
+    "burimi": "Ahmedi 4/63 dhe 5/375."
+  },
+  {
+    "id": "lutja63",
+    "titulli": "Lutje 63",
+    "shqip": "“O Allahu im, kërkoj prej dhuntive dhe mëshirës Tënde, ngase askush nuk i posedon këto përveç Teje.”",
+    "burimi": "Taberani."
+  },
+  {
+    "id": "lutja64",
+    "titulli": "Lutje 64",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga uria, se ajo është më e keqe se varfëria dhe kërkoj mbrojtjen Tënde nga tradhtia, ngase është vesi më i keq i brendshëm.”",
+    "burimi": "Ebu Davudi 2/91, Nesaiu 8/263."
+  },
+  {
+    "id": "lutja65",
+    "titulli": "Lutje 65",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga varfëria, pakësimi dhe nënçmimi, si dhe kërkoj mbrojtjen Tënde nga bërja padrejtësi ndokujt ose të më bëjë padrejtësi ndokush.”",
+    "burimi": "Nesaiu dhe Ebu Davudi 2/91."
+  },
+  {
+    "id": "lutja66",
+    "titulli": "Lutje 66",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga fqinji i keq në vendbanim, ngase fqinji endacak transferohet.”",
+    "burimi": "Hakimi 1/532, Nesaiu 8/274."
+  },
+  {
+    "id": "lutja67",
+    "titulli": "Lutje 67",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde prej ditës së keqe, natës së keqe, çastit të keq, shokut të keq dhe fqinjit të keq në vendin ku banoj.”",
+    "burimi": "Taberani."
+  },
+  {
+    "id": "lutja68",
+    "titulli": "Lutje 68",
+    "shqip": "“O Allahu im, kërkoj prej Teje Xhenetin dhe mbrohem me Ty nga zjarri” (tri herë)",
+    "burimi": "Tirmidhi 4/700, Ibën Maxhe 1453."
+  },
+  {
+    "id": "lutja69",
+    "titulli": "Lutje 69",
+    "shqip": "“O Allahu im, ma mëso fenë.”",
+    "burimi": "Bazuar në lutjen për Ibën Abasin (Buhariu dhe Muslimi)."
+  },
+  {
+    "id": "lutja70",
+    "titulli": "Lutje 70",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga idhujtaria, që e di dhe kërkoj faljen Tënde për atë që nuk e di.”",
+    "burimi": "Ahmedi 4/403."
+  },
+  {
+    "id": "lutja71",
+    "titulli": "Lutje 71",
+    "shqip": "“O Allahu im, më bën dobi me atë që më ke mësuar, më mëso atë që më bën dobi dhe ma shto diturinë.”",
+    "burimi": "Ibën Maxhe 1/92."
+  },
+  {
+    "id": "lutja72",
+    "titulli": "Lutje 72",
+    "shqip": "“O Allahu im, të lutem për dituri të dobishme, furnizim të mirë dhe vepra të pranuara.”",
+    "burimi": "Ibën Maxhe 1/298."
+  },
+  {
+    "id": "lutja73",
+    "titulli": "Lutje 73",
+    "shqip": "“O Zot im më fal dhe ma prano pendimin tim! Ti je vërtetë Ai që pranon pendimin dhe që falë shumë.”",
+    "burimi": "Ebu Davudi, Tirmidhi, Ibën Maxhe 2/1353."
+  },
+  {
+    "id": "lutja74",
+    "titulli": "Lutje 74",
+    "shqip": "“O Allahu im, më pastro mua nga mëkatet dhe gabimet e mia, O Allahu im më pastro prej tyre, ashtu sikur pastrohet rroba e bardhë prej njollave. O Allahu im, më pastro mua me borë, akull dhe me ujë të ftohtë.”",
+    "burimi": "Nesaiu 1/198, Tirmidhi 5/515."
+  },
+  {
+    "id": "lutja75",
+    "titulli": "Lutje 75",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen tënde nga koprracia, nga frika, nga jeta e keqe, nga sprova e zemrës dhe nga dënimi i varrit.”",
+    "burimi": "Nesaiu 8/255."
+  },
+  {
+    "id": "lutja76",
+    "titulli": "Lutje 76",
+    "shqip": "“O Allahu im, që je Zoti i Xhibrilit, Mikailit dhe Israfilit, kërkoj mbrojtjen Tënde nga nxehtësia e zjarrit, dhe nga dënimi i varrit.”",
+    "burimi": "Nesaiu 8/278."
+  },
+  {
+    "id": "lutja77",
+    "titulli": "Lutje 77",
+    "shqip": "“O Allahu im, më frymëzo në udhëzim dhe më mbroj nga të këqijat e shpirtit tim.”",
+    "burimi": "Ahmedi 4/444, Tirmidhi 5/519."
+  },
+  {
+    "id": "lutja78",
+    "titulli": "Lutje 78",
+    "shqip": "“O Allahu im, të kërkoj dituri të dobishme, dhe kërkoj mbrojtjen Tënde nga dituria që nuk ka dobi.”",
+    "burimi": "Ibën Maxhe 2/1263."
+  },
+  {
+    "id": "lutja79",
+    "titulli": "Lutje 79",
+    "shqip": "“O Allahu im, më largo prej moralit të keq, prej epsheve të këqija, prej veprave të këqija dhe prej sëmundjeve të këqija.”",
+    "burimi": "Hakimi 1/532."
+  },
+  {
+    "id": "lutja80",
+    "titulli": "Lutje 80",
+    "shqip": "“O Allahu im, më bën të kënaqur me atë që më furnizon dhe ma bën të bekuar, si dhe ma zëvendëso mua çdo mungesë timen me të mirë.”",
+    "burimi": "Hakimi 1/510."
+  },
+  {
+    "id": "lutja81",
+    "titulli": "Lutje 81",
+    "shqip": "“O Allahu im, më llogarit me llogari të lehtë.”",
+    "burimi": "Ahmedi 6/48, Hakimi 1/255."
+  },
+  {
+    "id": "lutja82",
+    "titulli": "Lutje 82",
+    "shqip": "“O Allahu im, më ndihmo që të përmend e të falënderoj dhe më mundëso që të adhuroj sa më mirë.”",
+    "burimi": "Hakimi 1/499."
+  },
+  {
+    "id": "lutja83",
+    "titulli": "Lutje 83",
+    "shqip": "“O Allahu im, kërkoj mbrojtjen Tënde nga fundosja në borxhe, të mos na ngadhënjejë armiku dhe nga dashaligësia e armiqve.”",
+    "burimi": "Nesaiu 8/265."
+  },
+  {
+    "id": "lutja84",
+    "titulli": "Lutje 84",
+    "shqip": "“O Allahu im, kërkoj prej Teje jetë të pastër, vdekje të drejtë dhe kthim pa nënçmim e turpërim.”",
+    "burimi": "Musned el Bezar 2/442, Taberani."
+  },
+  {
+    "id": "lutja85",
+    "titulli": "Lutje 85",
+    "shqip": "“O Allahu im, më fal, më mëshiro, më udhëzo, më jep shëndet dhe më jep furnizim.”",
+    "burimi": "Muslimi 4/2078."
+  },
+  {
+    "id": "lutja86",
+    "titulli": "Lutje 86",
+    "shqip": "“O Allahu im, na shto të mirat e Tua e mos na i pakëso, na ndero e mos na nënçmo, na dhuro të mira e mos na privo, na bëj ngadhënjimtar, e jo të mposhtur, na bëj të jemi të kënaqur me Ty dhe Ti të jesh i kënaqur me ne.”",
+    "burimi": "Tirmidhi 5/326."
+  },
+  {
+    "id": "lutja87",
+    "titulli": "Lutje 87",
+    "shqip": "“O Allahu im, ke përsosur krijimtarinë time përsose edhe moralin tim.”",
+    "burimi": "Ahmedi 1/403."
+  },
+  {
+    "id": "lutja88",
+    "titulli": "Lutje 88",
+    "shqip": "“O Allahu im, më përforco dhe me bëj të udhëzuar dhe udhëzim për të tjerët.”",
+    "burimi": "Bazuar në lutjen për Xheririn (Fet’hul Bari 6/161)."
+  },
+  {
+    "id": "lutja89",
+    "titulli": "Lutje 89",
+    "shqip": "“O Allahu im, më dhuro urtësi, dituri, maturi, e atij që ia jep, i është dhënë mirësia më e madhe.”",
+    "burimi": "Bazuar në Kuran, [Bekare 269]."
+  }
+]

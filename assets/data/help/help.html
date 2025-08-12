@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Udhëzues i Plotë - Kurani Fisnik Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #059669;
+            --secondary-color: #047857;
+            --accent-color: #f59e0b;
+            --text-color: #1f2937;
+            --text-secondary-color: #4b5563;
+            --light-bg: #f9fafb;
+            --white: #ffffff;
+            --surface-bg: var(--white);
+            --border-color: #e5e7eb;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 2.5rem; font-family: Georgia, serif; }
+        .header p { margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.1rem; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 2rem; padding: 0.75rem 1.5rem;
+            background-color: var(--white); color: var(--primary-color);
+            text-decoration: none; font-weight: 600; border-radius: 99px;
+            box-shadow: var(--box-shadow); transition: all 0.2s ease-in-out;
+        }
+        .back-link:hover { transform: translateY(-2px); box-shadow: 0 7px 14px rgba(0,0,0,0.1); }
+        .section {
+            background-color: var(--white); padding: 2rem;
+            border-radius: var(--border-radius); margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        .section h2 {
+            font-size: 1.8rem; color: var(--primary-color); margin-top: 0;
+            margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.75rem; font-family: Georgia, serif;
+        }
+        .feature-list { list-style: none; padding: 0; margin: 0; }
+        .feature-item { display: flex; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .feature-icon {
+            flex-shrink: 0; width: 48px; height: 48px; display: flex;
+            align-items: center; justify-content: center;
+            background-color: rgba(var(--primary-color-rgb, 5, 150, 105), 0.1);
+            color: var(--primary-color); border-radius: 50%; font-size: 1.5rem;
+        }
+        .feature-description h3 { margin: 0 0 0.25rem 0; font-size: 1.2rem; color: var(--text-color); }
+        .feature-description p { margin: 0; color: var(--text-secondary-color); }
+        .feature-description p code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .footer { text-align: center; padding: 2rem; font-size: 0.9rem; color: var(--text-secondary-color); }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Udhëzues i Plotë</h1>
+        <p>Gjithçka që duhet të dini për të shfrytëzuar platformën "Kurani Fisnik Online"</p>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i><span>Kthehu te Faqja Kryesore</span></a>
+
+        <!-- Seksioni për Kontrollet Kryesore -->
+        <section class="section">
+            <h2>Paneli Kryesor i Kontrollit</h2>
+            <p>Ky është paneli që gjendet në krye të faqes kryesore dhe ju jep akses të shpejtë te funksionalitetet më të rëndësishme.</p>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-search"></i></div>
+                    <div class="feature-description">
+                        <h3>Kërkimi Inteligjent</h3>
+                        <p>Fusha kryesore e kërkimit ju lejon të gjeni çdo gjë shpejt. Mund të kërkoni për:
+                            <br>- <strong>Emrin ose numrin e sures:</strong> p.sh., <code>Fatiha</code> ose <code>1</code>.
+                            <br>- <strong>Një ajet specifik:</strong> p.sh., <code>2:255</code> për Ajetul Kursinë.
+                            <br>- <strong>Fjalë kyçe:</strong> p.sh., <code>namazi</code>, <code>paqja</code>, ose <code>مُوسَىٰ</code>.
+                        </p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-filter"></i></div>
+                    <div class="feature-description">
+                        <h3>Filtrat e Kërkimit</h3>
+                        <p>Personalizoni kërkimin tuaj. Zgjidhni nëse doni të kërkoni në tekstin <strong>Shqip</strong>, <strong>Arabisht</strong>, ose të dyja. Gjithashtu, mund ta kufizoni kërkimin vetëm brenda një <strong>Xhuzi</strong> specifik.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-language"></i></div>
+                    <div class="feature-description">
+                        <h3>Zgjedhja e Përkthimit</h3>
+                        <p>Zgjidhni midis përkthimeve të besueshme në gjuhën shqipe nga <strong>Sherif Ahmeti</strong>, <strong>Feti Mehdiu</strong>, dhe <strong>Efendi Nahi</strong> për të krahasuar dhe kuptuar më mirë tekstin.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-compass"></i></div>
+                    <div class="feature-description">
+                        <h3>Lundrim i Shpejtë</h3>
+                        <p>Përdorni menunë "Shko te Xhuzi" për të lundruar menjëherë në fillimin e cilitdo prej 30 xhuzeve të Kuranit Fisnik.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- ================== RIORGANIZIMI FILLON KËTU ================== -->
+
+        <!-- Seksioni për Kontrollet e Sures -->
+        <section class="section">
+            <h2>Kontrollet në Pamjen e Leximit</h2>
+            <p>Kur hapni një sure për ta lexuar, një shirit kontrolli shfaqet në krye të faqes. Ky shirit ofron veprime specifike për atë sure.</p>
+             <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-sort-numeric-down"></i></div>
+                    <div class="feature-description">
+                        <h3>Shko te Ajeti</h3>
+                        <p>Përdorni menunë rënëse për të kërcyer direkt te një ajet specifik brenda sures që po lexoni, pa pasur nevojë të bëni `scroll`.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-check-square"></i></div>
+                    <div class="feature-description">
+                        <h3>Modaliteti i Përzgjedhjes</h3>
+                        <p>Aktivizoni këtë modalitet për të zgjedhur disa ajete njëkohësisht. Pasi të keni zgjedhur ajetet, një shirit veprimesh do të shfaqet në fund, duke ju lejuar t'i kopjoni, ndani, ose t'i shtoni te të preferuarat të gjitha njëherësh.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-expand"></i></div>
+                    <div class="feature-description">
+                        <h3>Lexim pa Shpërqendrime</h3>
+                        <p>Aktivizoni modalitetin "fullscreen" për të fshehur të gjithë elementet e tjerë të faqes dhe për t'u fokusuar vetëm te teksti i Kuranit.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-play-circle"></i></div>
+                    <div class="feature-description">
+                        <h3>Luaj Gjithë Suren</h3>
+                        <p>Fillon luajtjen audio të të gjithë sures, ajet pas ajeti, pa ndërprerje. Klikimi përsëri e ndalon luajtjen.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Seksioni për Veprimet e Ajeteve -->
+        <section class="section">
+            <h2>Veprimet Specifike për çdo Ajet</h2>
+            <p>Poshtë çdo ajeti në pamjen e leximit, ju do të gjeni një sërë ikonash. Ja se çfarë bën secila prej tyre:</p>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-play"></i></div>
+                    <div class="feature-description">
+                        <h3>Dëgjo</h3>
+                        <p>Luan recitimin audio të ajetit përkatës. Nëse e klikoni përsëri, e ndalon atë.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                    <div class="feature-description">
+                        <h3>Shto te të Preferuarat</h3>
+                        <p>E shton ajetin në listën tuaj personale te tabi "Të Preferuarat". Klikimi përsëri e heq atë.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-copy"></i></div>
+                    <div class="feature-description">
+                        <h3>Kopjo</h3>
+                        <p>Kopjon tekstin e ajetit (arabisht dhe shqip) bashkë me referencën, gati për ta ngjitur kudo që dëshironi.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-share-alt"></i></div>
+                    <div class="feature-description">
+                        <h3>Ndaj</h3>
+                        <p>Hap menunë e ndarjes së pajisjes suaj për të dërguar një lidhje direkte drejt këtij ajeti te miqtë tuaj.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bookmark"></i></div>
+                    <div class="feature-description">
+                        <h3>Shenjo</h3>
+                        <p>E ruan këtë ajet si pikën tuaj të fundit të leximit, të cilën mund ta gjeni te tabi "Shenjuesit".</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-edit"></i></div>
+                    <div class="feature-description">
+                        <h3>Shënim</h3>
+                        <p>Hap një editor teksti ku mund të shkruani dhe të ruani shënimet dhe reflektimet tuaja personale për këtë ajet.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <div class="feature-description">
+                        <h3>Memorizo</h3>
+                        <p>E shton ajetin në listën tuaj te tabi "Memorizim" për t'ju ndihmuar në procesin e mësimit përmendësh.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-camera-retro"></i></div>
+                    <div class="feature-description">
+                        <h3>Gjenero Imazh</h3>
+                        <p>Hap një panel të fuqishëm ku mund të krijoni një imazh të bukur dhe të personalizuar të ajetit, gati për ta shkarkuar ose shpërndarë në rrjetet sociale.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- ================== FUNDI I RIORGANIZIMIT ================== -->
+
+        <!-- Seksioni për Tab-et -->
+        <section class="section">
+            <h2>Shpjegimi i Seksioneve (Tab-eve)</h2>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-book-quran"></i></div>
+                    <div class="feature-description">
+                        <h3>Kurani</h3>
+                        <p>Këtu gjendet zemra e aplikacionit. Fillimisht shfaqet lista e plotë e 114 sureve. Duke klikuar mbi një sure, ju kaloni në pamjen e leximit, ku mund të lexoni tekstin arabisht, përkthimin dhe transliterimin.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-stream"></i></div>
+                    <div class="feature-description">
+                        <h3>Indeksi Tematik</h3>
+                        <p>Një mjet i fuqishëm për studim, i cili i grupon ajetet e Kuranit sipas temave kryesore që ato trajtojnë. Zgjidhni një kategori dhe një nën-temë për të parë të gjitha ajetet përkatëse.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-spell-check"></i></div>
+                    <div class="feature-description">
+                        <h3>Texhvid</h3>
+                        <p>Mësoni rregullat e leximit të saktë të Kuranit. Ky seksion ofron shpjegime të detajuara dhe shembuj për çdo rregull. Gjithashtu, mund të testoni njohuritë tuaja me kuize interaktive.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                    <div class="feature-description">
+                        <h3>Të Preferuarat</h3>
+                        <p>Këtu ruhen të gjitha ajetet që keni shënuar si të preferuara. Është koleksioni juaj personal i ajeteve që ju kanë prekur më shumë, lehtësisht i aksesueshëm.</p>
+                    </div>
+                </li>
+                 <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <div class="feature-description">
+                        <h3>Memorizim</h3>
+                        <p>Një hapësirë e dedikuar për t'ju ndihmuar të mësoni përmendësh ajete. Shtoni ajete në këtë listë dhe përdorni veglat si fshehja e tekstit dhe përsëritja e audios për të praktikuar.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bookmark"></i></div>
+                    <div class="feature-description">
+                        <h3>Shenjuesit</h3>
+                        <p>Ky seksion ruan vendin e fundit ku keni vendosur një shenjues. Shërben si një pikë referimi e shpejtë për të vazhduar leximin ose studimin aty ku e keni lënë.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-edit"></i></div>
+                    <div class="feature-description">
+                        <h3>Shënimet</h3>
+                        <p>Të gjitha shënimet dhe reflektimet tuaja personale që keni mbajtur për ajete të ndryshme grupohen këtu. Mund t'i kërkoni dhe t'i filtroni lehtësisht.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+         <!-- Seksioni për Impostimet -->
+        <section class="section">
+            <h2>Shpjegimi i Impostimeve</h2>
+            <p>Paneli i cilësimeve, i cili hapet duke klikuar ikonën <i class="fas fa-cog"></i>, ju jep kontroll të plotë mbi pamjen dhe funksionimin e aplikacionit.</p>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                    <div class="feature-description">
+                        <h3>Tema Vizuale</h3>
+                        <p>Zgjidhni midis katër temave të ndryshme (E Ndritshme, Sepia, E Errët, Mesnatë) për të gjetur atë që është më e rehatshme për sytë tuaj.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-eye"></i></div>
+                    <div class="feature-description">
+                        <h3>Shfaqja e Tekstit</h3>
+                        <p>Keni kontroll të plotë për të shfaqur ose fshehur tekstin Arabisht, Transliterimin Latin dhe Përkthimin Shqip, sipas nevojës suaj.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-font"></i></div>
+                    <div class="feature-description">
+                        <h3>Fontet dhe Madhësia</h3>
+                        <p>Rregulloni madhësinë e tekstit shqip dhe arabisht në mënyrë të pavarur. Gjithashtu, mund të zgjidhni midis fonteve të ndryshme arabe për të gjetur stilin që ju pëlqen më shumë.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-volume-up"></i></div>
+                    <div class="feature-description">
+                        <h3>Audio Recitimi</h3>
+                        <p>Zgjidhni recituesin tuaj të preferuar nga një listë e recituesve të njohur dhe rregulloni shpejtësinë e leximit të audios.</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-database"></i></div>
+                    <div class="feature-description">
+                        <h3>Menaxhimi i të Dhënave</h3>
+                        <p>Eksportoni të gjitha të dhënat tuaja (preferencat, shënimet, etj.) në një skedar për t'i ruajtur ose transferuar në një pajisje tjetër. Gjithashtu, mund të importoni një skedar të tillë ose të rivendosni progresin tuaj të leximit.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>© <span id="current-year"></span> Kurani Fisnik Online. Të gjitha të drejtat të rezervuara.</p>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

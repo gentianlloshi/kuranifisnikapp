@@ -1,0 +1,302 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+// Providers
+import 'package:kurani_fisnik_app/presentation/providers/app_state_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/quran_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/audio_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/bookmark_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/note_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/memorization_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/notification_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/texhvid_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/word_by_word_provider.dart';
+
+// Pages and Widgets
+import 'package:kurani_fisnik_app/presentation/pages/home_page.dart';
+import 'package:kurani_fisnik_app/presentation/pages/enhanced_home_page.dart';
+
+// Data Sources
+import 'package:kurani_fisnik_app/data/datasources/local/quran_local_data_source.dart';
+import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dart';
+import 'package:kurani_fisnik_app/data/datasources/local/content_local_data_source.dart';
+
+// Repositories
+import 'package:kurani_fisnik_app/data/repositories/quran_repository_impl.dart';
+import 'package:kurani_fisnik_app/data/repositories/storage_repository_impl.dart';
+import 'package:kurani_fisnik_app/data/repositories/bookmark_repository_impl.dart';
+import 'package:kurani_fisnik_app/data/repositories/texhvid_repository_impl.dart';
+import 'package:kurani_fisnik_app/data/repositories/thematic_index_repository_impl.dart';
+
+// Use Cases
+import 'package:kurani_fisnik_app/domain/usecases/get_surahs_usecase.dart';
+import 'package:kurani_fisnik_app/domain/usecases/search_verses_usecase.dart';
+import 'package:kurani_fisnik_app/domain/usecases/get_surah_verses_usecase.dart' as get_verses;
+import 'package:kurani_fisnik_app/domain/usecases/settings_usecases.dart';
+import 'package:kurani_fisnik_app/domain/usecases/bookmark_usecases.dart';
+// Specific single-use use cases already exist inside grouped files; use ones from texhvid_usecases & thematic_index_usecases
+import 'package:kurani_fisnik_app/domain/usecases/texhvid_usecases.dart' show TexhvidUseCases; 
+import 'package:kurani_fisnik_app/domain/usecases/thematic_index_usecases.dart' show GetThematicIndexUseCase; 
+
+// Services
+import 'package:kurani_fisnik_app/core/services/notification_service.dart';
+import 'package:kurani_fisnik_app/core/services/audio_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
+
+  // Initialize Hive boxes
+  final quranBox = await Hive.openBox("quranBox");
+  final translationBox = await Hive.openBox("translationBox");
+  final thematicIndexBox = await Hive.openBox("thematicIndexBox");
+  final transliterationBox = await Hive.openBox("transliterationBox");
+  final wordByWordBox = await Hive.openBox("wordByWordBox");
+  final timestampBox = await Hive.openBox("timestampBox");
+
+  // Initialize services
+  final notificationService = NotificationService();
+  final audioService = AudioService();
+
+  await notificationService.initialize();
+  await audioService.initialize();
+
+  runApp(KuraniFisnikApp(
+    notificationService: notificationService,
+    audioService: audioService,
+    quranBox: quranBox,
+    translationBox: translationBox,
+    thematicIndexBox: thematicIndexBox,
+    transliterationBox: transliterationBox,
+    wordByWordBox: wordByWordBox,
+    timestampBox: timestampBox,
+  ));
+}
+
+class KuraniFisnikApp extends StatelessWidget {
+  final NotificationService notificationService;
+  final AudioService audioService;
+  final Box quranBox;
+  final Box translationBox;
+  final Box thematicIndexBox;
+  final Box transliterationBox;
+  final Box wordByWordBox;
+  final Box timestampBox;
+
+  const KuraniFisnikApp({
+    super.key,
+    required this.notificationService,
+    required this.audioService,
+    required this.quranBox,
+    required this.translationBox,
+    required this.thematicIndexBox,
+    required this.transliterationBox,
+    required this.wordByWordBox,
+    required this.timestampBox,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        // Services
+        Provider<AudioService>.value(value: audioService),
+        Provider<NotificationService>.value(value: notificationService),
+
+        // Data Sources
+        Provider<QuranLocalDataSource>(
+          create: (_) => QuranLocalDataSourceImpl(
+            quranBox: quranBox,
+            translationBox: translationBox,
+            thematicIndexBox: thematicIndexBox,
+            transliterationBox: transliterationBox,
+          ),
+        ),
+        Provider<StorageDataSource>(
+          create: (_) => StorageDataSourceImpl(),
+        ),
+        Provider<ContentLocalDataSource>(
+          create: (_) => ContentLocalDataSourceImpl(),
+        ),
+
+        // Repositories
+        ProxyProvider2<QuranLocalDataSource, StorageDataSource, QuranRepositoryImpl>(
+          update: (_, localDataSource, storageDataSource, __) =>
+              QuranRepositoryImpl(localDataSource, storageDataSource),
+        ),
+        ProxyProvider<StorageDataSource, StorageRepositoryImpl>(
+          update: (_, storageDataSource, __) => StorageRepositoryImpl(storageDataSource),
+        ),
+        ProxyProvider<StorageDataSource, BookmarkRepositoryImpl>(
+          update: (_, storageDataSource, __) => BookmarkRepositoryImpl(storageDataSource),
+        ),
+        // Texhvid & Thematic index repositories don't need StorageDataSource directly
+        Provider<TexhvidRepositoryImpl>(
+          create: (_) => TexhvidRepositoryImpl(),
+        ),
+        Provider<ThematicIndexRepositoryImpl>(
+          create: (_) => ThematicIndexRepositoryImpl(),
+        ),
+
+        // Use Cases
+        ProxyProvider<QuranRepositoryImpl, GetSurahsUseCase>(
+          update: (context, repo, previous) => GetSurahsUseCase(repo),
+        ),
+        ProxyProvider<QuranRepositoryImpl, SearchVersesUseCase>(
+          update: (context, repo, previous) => SearchVersesUseCase(repo),
+        ),
+        ProxyProvider<QuranRepositoryImpl, get_verses.GetSurahVersesUseCase>(
+          update: (context, repo, previous) => get_verses.GetSurahVersesUseCase(repo),
+        ),
+        ProxyProvider<StorageRepositoryImpl, GetSettingsUseCase>(
+          update: (_, repository, __) => GetSettingsUseCase(repository),
+        ),
+        ProxyProvider<StorageRepositoryImpl, SaveSettingsUseCase>(
+          update: (_, repository, __) => SaveSettingsUseCase(repository),
+        ),
+  // Bookmark / thematic use cases grouped
+        ProxyProvider<TexhvidRepositoryImpl, TexhvidUseCases>(
+          update: (_, repository, __) => TexhvidUseCases(repository),
+        ),
+        ProxyProvider<ThematicIndexRepositoryImpl, GetThematicIndexUseCase>(
+          update: (_, repository, __) => GetThematicIndexUseCase(repository),
+        ),
+
+        // Providers
+  // App state provider depends on settings use cases
+  ChangeNotifierProxyProvider2<GetSettingsUseCase, SaveSettingsUseCase, AppStateProvider>(
+          create: (_) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(_, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(_, listen: false)),
+          update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
+        ),
+        ChangeNotifierProxyProvider3<GetSurahsUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranProvider>(
+          create: (_) => QuranProvider(
+            getSurahsUseCase: Provider.of<GetSurahsUseCase>(_, listen:false),
+            searchVersesUseCase: Provider.of<SearchVersesUseCase>(_, listen:false),
+            getSurahVersesUseCase: Provider.of<get_verses.GetSurahVersesUseCase>(_, listen:false),
+          ),
+          update: (_, getSurahsUseCase, searchVersesUseCase, getSurahVersesUseCase, previous) => QuranProvider(
+            getSurahsUseCase: getSurahsUseCase,
+            searchVersesUseCase: searchVersesUseCase,
+            getSurahVersesUseCase: getSurahVersesUseCase,
+          ),
+        ),
+
+        // Additional Providers
+        ChangeNotifierProvider<AudioProvider>(
+          create: (_) => AudioProvider(),
+        ),
+        ProxyProvider<BookmarkRepositoryImpl, BookmarkUseCases>(
+          update: (_, repo, __) => BookmarkUseCases(repo),
+        ),
+        ChangeNotifierProxyProvider<BookmarkUseCases, BookmarkProvider>(
+          create: (_) => BookmarkProvider(bookmarkUseCases: Provider.of<BookmarkUseCases>(_, listen: false)),
+          update: (_, useCases, previous) => BookmarkProvider(bookmarkUseCases: useCases),
+        ),
+        ChangeNotifierProvider<NoteProvider>(
+          create: (_) => NoteProvider(),
+        ),
+        ChangeNotifierProvider<MemorizationProvider>(
+          create: (_) => MemorizationProvider(),
+        ),
+        ChangeNotifierProvider<NotificationProvider>(
+          create: (_) => NotificationProvider(),
+        ),
+        ChangeNotifierProxyProvider<TexhvidUseCases, TexhvidProvider>(
+          create: (_) => TexhvidProvider(texhvidUseCases: Provider.of<TexhvidUseCases>(_, listen:false)),
+          update: (_, texhvidUseCases, previous) => TexhvidProvider(texhvidUseCases: texhvidUseCases),
+        ),
+        ChangeNotifierProxyProvider<GetThematicIndexUseCase, ThematicIndexProvider>(
+          create: (_) => ThematicIndexProvider(getThematicIndexUseCase: Provider.of<GetThematicIndexUseCase>(_, listen:false)),
+          update: (_, getThematicIndexUseCase, previous) => ThematicIndexProvider(getThematicIndexUseCase: getThematicIndexUseCase),
+        ),
+        ChangeNotifierProvider<WordByWordProvider>(
+          create: (_) => WordByWordProvider(),
+        ),
+      ],
+      child: Consumer<AppStateProvider>(
+        builder: (context, appState, child) {
+          return MaterialApp(
+            title: 'Kurani Fisnik',
+            debugShowCheckedModeBanner: false,
+            theme: _buildTheme(appState.currentTheme),
+            home: const EnhancedHomePage(),
+            routes: {
+              '/home': (context) => const EnhancedHomePage(),
+              '/quran': (context) => const HomePage(),
+              '/search': (context) => const HomePage(),
+              '/bookmarks': (context) => const HomePage(),
+              '/notes': (context) => const HomePage(),
+              '/memorization': (context) => const HomePage(),
+              '/texhvid': (context) => const HomePage(),
+              '/thematic': (context) => const HomePage(),
+              '/settings': (context) => const HomePage(),
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  ThemeData _buildTheme(String themeName) {
+    switch (themeName) {
+      case 'dark':
+        return ThemeData.dark().copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.dark,
+          ),
+          scaffoldBackgroundColor: const Color(0xFF121212),
+          cardColor: const Color(0xFF1E1E1E),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF1E1E1E),
+            elevation: 0,
+          ),
+        );
+      case 'sepia':
+        return ThemeData.light().copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.brown,
+            brightness: Brightness.light,
+          ),
+          scaffoldBackgroundColor: const Color(0xFFF5F1E8),
+          cardColor: const Color(0xFFFAF7F0),
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.brown[100],
+            foregroundColor: Colors.brown[800],
+            elevation: 0,
+          ),
+        );
+      case 'midnight':
+        return ThemeData.dark().copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.indigo,
+            brightness: Brightness.dark,
+          ),
+          scaffoldBackgroundColor: const Color(0xFF0A0A0A),
+          cardColor: const Color(0xFF1A1A1A),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF1A1A1A),
+            elevation: 0,
+          ),
+        );
+      default: // light
+        return ThemeData.light().copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          scaffoldBackgroundColor: Colors.white,
+          cardColor: Colors.white,
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.blue[50],
+            foregroundColor: Colors.blue[800],
+            elevation: 0,
+          ),
+        );
+    }
+  }
+}

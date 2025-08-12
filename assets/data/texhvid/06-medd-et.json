@@ -1,0 +1,685 @@
+[
+  {
+    "id": "medd-muttasil",
+    "title": "MEDD MUTTASIL (المد المتصل - Zgjatimi i Bashkuar/Ngjitur)",
+    "slug": "medd-muttasil",
+    "pageNumber": 174,
+    "description": "Medd Muttasil ndodh kur pas njërës prej zanoreve të gjata (<span class='arabic-emphasis'>ا</span>, <span class='arabic-emphasis'>و</span>, <span class='arabic-emphasis'>ي</span>) vjen Hemzeja (<span class='arabic-emphasis'>ء</span>) në të njëjtën fjalë. Zgjatet 4 ose 5 kohë (hareke). Zgjatimi 6 kohë lejohet vetëm nëse Hemzeja është shkronja e fundit e fjalës dhe ndalemi te ajo.",
+    "examples": [
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "جَاءَ",
+            "pronunciation": "xhaaa\\'e"
+          },
+          {
+            "arabic": "السَّمَاءِ",
+            "pronunciation": "es-semaaa\\'i"
+          },
+          {
+            "arabic": "سُوءٌ",
+            "pronunciation": "suuu\\'un"
+          },
+          {
+            "arabic": "جِيءَ",
+            "pronunciation": "xhiii\\'e"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "muttasil-q1",
+        "text": "Sa zgjatet Medd Muttasil normalisht?",
+        "options": [
+          {
+            "id": "muttasil-q1-o1",
+            "text": "2 kohë",
+            "isCorrect": false
+          },
+          {
+            "id": "muttasil-q1-o2",
+            "text": "4 ose 5 kohë",
+            "isCorrect": true
+          },
+          {
+            "id": "muttasil-q1-o3",
+            "text": "6 kohë gjithmonë",
+            "isCorrect": false
+          },
+          {
+            "id": "muttasil-q1-o4",
+            "text": "3 kohë",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Muttasil zgjatet 4 ose 5 kohë. Zgjatimi 6 kohë lejohet vetëm kur ndalemi në Hemzenë në fund të fjalës."
+      }
+    ]
+  },
+  {
+    "id": "medd-munfasil",
+    "title": "MEDD MUNFASIL (المد المنفصل - Zgjatimi i Ndarë)",
+    "slug": "medd-munfasil",
+    "pageNumber": 176,
+    "description": "Medd Munfasil ndodh kur një zanore e gjatë (<span class='arabic-emphasis'>ا</span>, <span class='arabic-emphasis'>و</span>, <span class='arabic-emphasis'>ي</span>) është shkronja e fundit e një fjale, dhe fjala pasuese fillon me Hemze (<span class='arabic-emphasis'>ء</span>). Zgjatet 4 ose 5 kohë. Lejohet edhe zgjatimi 2 kohë (Kasr).",
+    "examples": [
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "يَا أَيُّهَا",
+            "pronunciation": "jaaa \\'ejjuha"
+          },
+          {
+            "arabic": "قَالُوا آمَنَّا",
+            "pronunciation": "kaaluuu \\'aamenna"
+          },
+          {
+            "arabic": "فِي أَنْفُسِكُمْ",
+            "pronunciation": "fiii \\'enfusikum"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "munfasil-q1",
+        "text": "Çfarë e karakterizon Medd Munfasil?",
+        "options": [
+          {
+            "id": "munfasil-q1-o1",
+            "text": "Zanorja e gjatë dhe Hemzeja janë në të njëjtën fjalë.",
+            "isCorrect": false
+          },
+          {
+            "id": "munfasil-q1-o2",
+            "text": "Zanorja e gjatë është në fund të një fjale dhe Hemzeja në fillim të fjalës tjetër.",
+            "isCorrect": true
+          },
+          {
+            "id": "munfasil-q1-o3",
+            "text": "Pas zanores së gjatë vjen Sukun.",
+            "isCorrect": false
+          },
+          {
+            "id": "munfasil-q1-o4",
+            "text": "Pas Hemzesë vjen zanore e gjatë.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Munfasil ndodh kur zanorja e gjatë është në fund të një fjale dhe Hemzeja (shkaku i zgjatimit) është në fillim të fjalës pasuese."
+      }
+    ]
+  },
+  {
+    "id": "medd-bedel",
+    "title": "MEDD BEDEL (مد البدل - Zgjatimi Zëvendësues)",
+    "slug": "medd-bedel",
+    "pageNumber": 180,
+    "description": "Medd Bedel ndodh kur Hemzeja (<span class='arabic-emphasis'>ء</span>) pasohet nga një zanore e gjatë (<span class='arabic-emphasis'>ا</span>, <span class='arabic-emphasis'>و</span>, <span class='arabic-emphasis'>ي</span>) dhe para Hemzesë nuk ka Sukun ose shkronjë tjetër Medd. Në thelb, është kur dy Hemze takohen, e para me zanore dhe e dyta me Sukun; Hemzeja e dytë shndërrohet në shkronjë Medd të përshtatshme me zanoren e Hemzesë së parë. Zgjatet 2 kohë.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Origjina: <span class='arabic-text text-xl'>ءَأْ ⇜ ءَادَمَ</span> <span class='arabic-emphasis'>⇜</span> <span class='arabic-text text-2xl'>آمَنَ</span>"
+      },
+      {
+        "type": "text",
+        "meaning": "Origjina: <span class='arabic-text text-xl'>ءُأْ ⇜ أُوتُوا</span> <span class='arabic-emphasis'>⇜</span> <span class='arabic-text text-2xl'>أُوتُوا</span>"
+      },
+      {
+        "type": "text",
+        "meaning": "Origjina: <span class='arabic-text text-xl'>ءِأْ ⇜ إِئْمَانًا</span> <span class='arabic-emphasis'>⇜</span> <span class='arabic-text text-2xl'>إِيمَانًا</span>"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "bedel-q1",
+        "text": "Kur ndodh Medd Bedel?",
+        "options": [
+          {
+            "id": "bedel-q1-o1",
+            "text": "Kur një zanore e gjatë pasohet nga Hemze.",
+            "isCorrect": false
+          },
+          {
+            "id": "bedel-q1-o2",
+            "text": "Kur Hemzeja pasohet nga një zanore e gjatë.",
+            "isCorrect": true
+          },
+          {
+            "id": "bedel-q1-o3",
+            "text": "Kur dy Hemze me zanore takohen.",
+            "isCorrect": false
+          },
+          {
+            "id": "bedel-q1-o4",
+            "text": "Kur një zanore e gjatë pasohet nga Sukun.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Bedel ndodh kur Hemzeja pasohet nga një shkronjë Medd (ا, و, ي). Shpesh është rezultat i shndërrimit të një Hemzeje të dytë me Sukun."
+      }
+    ]
+  },
+  {
+    "id": "medd-arid-li-sukun",
+    "title": "MEDD ARID LI-SUKUN (المد العارض للسكون - Zgjatimi i Rastit për Sukun)",
+    "slug": "medd-arid-li-sukun",
+    "pageNumber": 183,
+    "description": "Medd Arid li-Sukun ndodh kur pas një zanoreje të gjatë (<span class='arabic-emphasis'>ا</span>, <span class='arabic-emphasis'>و</span>, <span class='arabic-emphasis'>ي</span>) vjen një shkronjë me Sukun të rastit (Sukun Arid), pra Sukun që shfaqet vetëm për shkak të ndalimit në atë fjalë. Zgjatet 2, 4, ose 6 kohë.",
+    "examples": [
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "الْعَالَمِينَ",
+            "pronunciation": "(ndalesa te Niin) el-'aalemiin"
+          },
+          {
+            "arabic": "يُؤْمِنُونَ",
+            "pronunciation": "(ndalesa te Niin) ju'minuun"
+          },
+          {
+            "arabic": "نَسْتَعِينُ",
+            "pronunciation": "(ndalesa te Niin) nesta'iin"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "arid-li-sukun-q1",
+        "text": "Sa kohë mund të zgjatet Medd Arid li-Sukun?",
+        "options": [
+          {
+            "id": "arid-li-sukun-q1-o1",
+            "text": "Vetëm 2 kohë.",
+            "isCorrect": false
+          },
+          {
+            "id": "arid-li-sukun-q1-o2",
+            "text": "Vetëm 4 kohë.",
+            "isCorrect": false
+          },
+          {
+            "id": "arid-li-sukun-q1-o3",
+            "text": "2, 4, ose 6 kohë.",
+            "isCorrect": true
+          },
+          {
+            "id": "arid-li-sukun-q1-o4",
+            "text": "Vetëm 6 kohë.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Arid li-Sukun lejohet të zgjatet 2, 4, ose 6 kohë kur ndalemi te shkronja që ka Sukun të rastit pas shkronjës Medd."
+      }
+    ]
+  },
+  {
+    "id": "medd-lijn",
+    "title": "MEDD LIJN (مد اللين - Zgjatimi i Butë)",
+    "slug": "medd-lijn",
+    "pageNumber": 188,
+    "description": "Medd Lijn ndodh kur pas një shkronje Lijn (<span class='arabic-emphasis'>وْ</span> ose <span class='arabic-emphasis'>يْ</span> të cilave u paraprin Fet'ha) vjen një shkronjë me Sukun të rastit (Sukun Arid) për shkak të ndalimit. Zgjatet 2, 4, ose 6 kohë.",
+    "examples": [
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "خَوْفٌ",
+            "pronunciation": "(ndalesa te Faa) khawf"
+          },
+          {
+            "arabic": "بَيْتٌ",
+            "pronunciation": "(ndalesa te Taa) bejt"
+          },
+          {
+            "arabic": "قُرَيْشٍ",
+            "pronunciation": "(ndalesa te Shiin) kurejsh"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "lijn-q1",
+        "text": "Cili është kushti kryesor për Medd Lijn?",
+        "options": [
+          {
+            "id": "lijn-q1-o1",
+            "text": "Waw ose Jaa me Damma ose Kesra, pasuar nga Sukun Arid.",
+            "isCorrect": false
+          },
+          {
+            "id": "lijn-q1-o2",
+            "text": "Waw Sakin ose Jaa Sakin, të cilave u paraprin Fet'ha, pasuar nga Sukun Arid.",
+            "isCorrect": true
+          },
+          {
+            "id": "lijn-q1-o3",
+            "text": "Elif, pasuar nga Sukun Arid.",
+            "isCorrect": false
+          },
+          {
+            "id": "lijn-q1-o4",
+            "text": "Waw ose Jaa me Teshtid, pasuar nga Sukun Arid.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Lijn ndodh kur kemi Waw Sakin (وْ) ose Jaa Sakin (يْ) të paraprirë nga Fet'ha, dhe pas tyre vjen një shkronjë me Sukun Arid (për shkak të ndalimit)."
+      }
+    ]
+  },
+  {
+    "id": "medd-lazim",
+    "title": "MEDD LAZIM (المد اللازم - Zgjatimi i Domosdoshëm)",
+    "slug": "medd-lazim",
+    "pageNumber": 198,
+    "description": "Medd Lazim ndodh kur pas një shkronje Medd (<span class='arabic-emphasis'>ا</span>, <span class='arabic-emphasis'>و</span>, <span class='arabic-emphasis'>ي</span>) ose shkronje Lijn (<span class='arabic-emphasis'>وْ</span>, <span class='arabic-emphasis'>يْ</span> me Fet'ha para) vjen një Sukun origjinal (Sukun Asli), i cili është pjesë e fjalës dhe nuk hiqet as gjatë vazhdimit as gjatë ndalimit. Zgjatet gjithmonë 6 kohë.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Llojet e Medd Lazim:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. <span class='arabic-emphasis'>Medd Lazim Kelimij Muthekkal (المد اللازم الكلمي المثقل - Zgjatim i Domosdoshëm Fjalor i Rënduar):</span> Kur pas shkronjës Medd vjen një shkronjë me Teshtid (Shadda) në të njëjtën fjalë."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "الطَّآمَّةُ",
+            "pronunciation": "et-taaaammmeh"
+          },
+          {
+            "arabic": "الضَّآلِّينَ",
+            "pronunciation": "ed-daaalliin"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "2. <span class='arabic-emphasis'>Medd Lazim Kelimij Mukhaffef (المد اللازم الكلمي المخفف - Zgjatim i Domosdoshëm Fjalor i Lehtësuar):</span> Kur pas shkronjës Medd vjen një shkronjë me Sukun origjinal (jo Teshtid) në të njëjtën fjalë. Kjo ndodh vetëm te fjala <span class='arabic-text text-2xl'>ءَآلْـَٔــٰنَ</span> në dy vende në Kur'an (Sure Junus, ajetet 51 dhe 91)."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءَآلْـَٔــٰنَ",
+            "pronunciation": "aaaal\\'aane"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "3. <span class='arabic-emphasis'>Medd Lazim Harfij Muthekkal (المد اللازم الحرفي المثقل - Zgjatim i Domosdoshëm Shkronjor i Rënduar):</span> Kur një nga shkronjat fillestare të sureve (Huruf Mukatta'a), që lexohet me emrin e saj si fjalë tre shkronjëshe ku e mesmja është shkronjë Medd dhe e treta shkrihet (Idgam) në shkronjën pasuese."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "الٓمٓ",
+            "pronunciation": "(pjesa Laam-Miim) elif laaammiiim"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "4. <span class='arabic-emphasis'>Medd Lazim Harfij Mukhaffef (المد اللازم الحرفي المخفف - Zgjatim i Domosdoshëm Shkronjor i Lehtësuar):</span> Kur një nga shkronjat fillestare të sureve (Huruf Mukatta'a), që lexohet me emrin e saj si fjalë tre shkronjëshe ku e mesmja është shkronjë Medd dhe e treta ka Sukun origjinal dhe nuk shkrihet (Idgam) në shkronjën pasuese."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "صٓ",
+            "pronunciation": "saaad"
+          },
+          {
+            "arabic": "قٓ",
+            "pronunciation": "qaaaf"
+          },
+          {
+            "arabic": "نٓ",
+            "pronunciation": "nuuun"
+          },
+          {
+            "arabic": "الٓمٓرٰ",
+            "pronunciation": "(pjesa Miim te kjo) elif laaammiiimraa"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "lazim-q1",
+        "text": "Sa kohë zgjatet Medd Lazim?",
+        "options": [
+          {
+            "id": "lazim-q1-o1",
+            "text": "2 ose 4 kohë",
+            "isCorrect": false
+          },
+          {
+            "id": "lazim-q1-o2",
+            "text": "4 ose 5 kohë",
+            "isCorrect": false
+          },
+          {
+            "id": "lazim-q1-o3",
+            "text": "6 kohë",
+            "isCorrect": true
+          },
+          {
+            "id": "lazim-q1-o4",
+            "text": "2, 4, ose 6 kohë",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Lazim zgjatet gjithmonë 6 kohë."
+      },
+      {
+        "id": "lazim-q2",
+        "text": "Cili është shembulli i Medd Lazim Kelimij Mukhaffef (Fjalor i Lehtësuar) në Kur'an?",
+        "options": [
+          {
+            "id": "lazim-q2-o1",
+            "text": "<span class='arabic-text'>الطَّآمَّةُ</span>",
+            "isCorrect": false
+          },
+          {
+            "id": "lazim-q2-o2",
+            "text": "<span class='arabic-text'>ءَآلْـَٔــٰنَ</span>",
+            "isCorrect": true
+          },
+          {
+            "id": "lazim-q2-o3",
+            "text": "<span class='arabic-text'>الٓمٓ</span>",
+            "isCorrect": false
+          },
+          {
+            "id": "lazim-q2-o4",
+            "text": "<span class='arabic-text'>صٓ</span>",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Lazim Kelimij Mukhaffef gjendet vetëm te fjala <span class='arabic-text'>ءَآلْـَٔــٰنَ</span> në dy vende në Kur'an."
+      }
+    ]
+  },
+  {
+    "id": "medd-silah",
+    "title": "MEDD SILAH (الْمَدُّ الصِّلَةُ - Zgjatimi Lidhës)",
+    "slug": "medd-silah",
+    "pageNumber": 177,
+    "description": "Medd Silah është zgjatimi që i bëhet përemrit vetor mashkullor të vetës së tretë njëjës (<span class='arabic-emphasis'>ـه</span> / <span class='arabic-emphasis'>ـهِ</span> - hu/hi), kur ai gjendet mes dy shkronjave me zanore dhe nuk pasohet nga Hemze.<br/>Ka dy lloje:",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "1. Medd Silah Sughra (الصغرى - e Vogël)"
+      },
+      {
+        "type": "text",
+        "meaning": "Përemri <span class='arabic-emphasis'>ـه</span> / <span class='arabic-emphasis'>ـهِ</span> zgjatet 2 kohë (si Medd Tabiee) nëse nuk pasohet nga Hemze.<br/>Shembuj: <span class='arabic-text'>إِنَّهُ هُوَ</span> (innehuu huwe), <span class='arabic-text'>بِهِ بَصِيرًا</span> (bihii besiira)."
+      },
+      {
+        "type": "title",
+        "meaning": "2. Medd Silah Kubra (الكبرى - e Madhe)"
+      },
+      {
+        "type": "text",
+        "meaning": "Përemri <span class='arabic-emphasis'>ـه</span> / <span class='arabic-emphasis'>ـهِ</span> zgjatet 4-5 kohë (si Medd Munfasil) nëse pasohet nga Hemzetul Kat'.<br/>Shembuj: <span class='arabic-text'>عِنْدَهُ إِلَّا</span> (indehuuu illaa), <span class='arabic-text'>بِهِ أَحَدٌ</span> (bihiii ehadun)."
+      },
+      {
+        "type": "text",
+        "meaning": "Shënim: Nëse para ose pas përemrit <span class='arabic-emphasis'>ـه</span> / <span class='arabic-emphasis'>ـهِ</span> është shkronjë me Sukun, ose nëse vetë përemri ka Sukun (p.sh. <span class='arabic-text'>عَلَيْهْ</span> kur ndalemi), nuk bëhet Medd Silah."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "medd-silah-q1",
+        "text": "Çfarë ndodh me përemrin <span class='arabic-text'>ـهُ</span> në fjalën <span class='arabic-text'>إِنَّهُ أَنتَ</span> (duke supozuar se fjala tjetër fillon me Hemze)?",
+        "options": [
+          {
+            "id": "medd-silah-q1-o1",
+            "text": "Nuk zgjatet fare.",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-silah-q1-o2",
+            "text": "Bëhet Medd Silah Sughra (2 kohë).",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-silah-q1-o3",
+            "text": "Bëhet Medd Silah Kubra (4-5 kohë).",
+            "isCorrect": true
+          }
+        ],
+        "explanation": "Kur përemri vetor <span class='arabic-text'>ـهُ</span> (ose <span class='arabic-text'>ـهِ</span>) pasohet nga Hemze, bëhet Medd Silah Kubra, që zgjatet 4-5 kohë."
+      }
+    ]
+  },
+  {
+    "id": "medd-ferk",
+    "title": "MEDD FERK (الْمَدُّ الْفَرْقُ - Zgjatimi Dallues)",
+    "slug": "medd-ferk",
+    "pageNumber": 199,
+    "description": "Medd Ferk është një lloj Medd Lazim Kelimij. Ndodh kur Hemzeja pyetëse (<span class='arabic-emphasis'>أ</span>) hyn te një fjalë që fillon me Hemzetul Wasl të përcaktuesit (<span class='arabic-emphasis'>ال</span>). Hemzetul Wasl shndërrohet në Elif Meddije dhe zgjatet 6 kohë për të dalluar pyetjen nga pohimi (lajmi).",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Gjendet në tri fjalë, secila e përsëritur dy herë në Kur'an:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءَآلذَّكَرَيْنِ",
+            "pronunciation": "aaall-dhekerajn"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "(En'am, 143, 144)"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءَآللَّهُ",
+            "pronunciation": "aaall-llahu"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "(Junus, 59; Neml, 59)"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءَآلْـَٔــٰنَ",
+            "pronunciation": "aaaal-'aane (ky është edhe Medd Lazim Kelimij Mukhaffef)"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "(Junus, 51, 91)"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "medd-ferk-q1",
+        "text": "Sa kohë zgjatet Medd Ferk?",
+        "options": [
+          {
+            "id": "medd-ferk-q1-o1",
+            "text": "2 kohë.",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-ferk-q1-o2",
+            "text": "4 kohë.",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-ferk-q1-o3",
+            "text": "6 kohë.",
+            "isCorrect": true
+          }
+        ],
+        "explanation": "Medd Ferk zgjatet 6 kohë, sepse është një lloj Medd Lazim."
+      }
+    ]
+  },
+  {
+    "id": "medd-temkin",
+    "title": "MEDD TEMKIN (الْمَدُّ التَّمْكِينُ - Zgjatimi i Fuqizimit)",
+    "slug": "medd-temkin",
+    "pageNumber": 256,
+    "description": "Medd Temkin ndodh për të fuqizuar dhe shkoqitur shqiptimin e dy shkronjave Jaa (ي) ose dy shkronjave Waw (و) kur ato vijnë njëra pas tjetrës.<br/>Forma kryesore: Kur Jaa-ja e parë është Mushaddedah (me Teshtid) dhe Kesra, dhe pasohet nga Jaa Meddijjeh (ي sakin para kesrës). Zgjatet 2 kohë.<br/>Formë tjetër: Kur Waw-i i parë është Mushaddedah dhe Damma, dhe pasohet nga Waw Meddijjeh (و sakin para dammës). Zgjatet 2 kohë.<br/>Gjithashtu, kur një Waw Meddijjeh pasohet nga Waw me zanore, ose një Jaa Meddijjeh pasohet nga Jaa me zanore, bëhet Medd Temkin (2 kohë) për të shmangur Idgamin.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Jaa Mushaddedah me Kesra, pasuar nga Jaa Meddijjeh:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "النَّبِيِّينَ",
+            "pronunciation": "en-nebijjiiine"
+          },
+          {
+            "arabic": "حُيِّيتُمْ",
+            "pronunciation": "hujjiiitum"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Waw Meddijjeh, pasuar nga Waw me zanore:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "آمَنُوا وَعَمِلُوا",
+            "pronunciation": "aamenuu we 'amiluu"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Jaa Meddijjeh, pasuar nga Jaa me zanore:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "الَّذِي يُوَسْوِسُ",
+            "pronunciation": "elledhii juweswisu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "medd-temkin-q1",
+        "text": "Kur ndodh Medd Temkin në rastin e <span class='arabic-text'>النَّبِيِّينَ</span>?",
+        "options": [
+          {
+            "id": "medd-temkin-q1-o1",
+            "text": "Kur një Jaa me Sukun pasohet nga një Jaa me Fetha.",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-temkin-q1-o2",
+            "text": "Kur një Jaa me Teshtid dhe Kesra pasohet nga Jaa Sakin (Meddijjeh).",
+            "isCorrect": true
+          },
+          {
+            "id": "medd-temkin-q1-o3",
+            "text": "Kur dy Jaa me Fetha takohen.",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Temkin te <span class='arabic-text'>النَّبِيِّينَ</span> ndodh sepse Jaa-ja e parë (<span class='arabic-text'>يِّ</span>) është me Teshtid dhe Kesra, dhe pasohet nga Jaa Meddijjeh (<span class='arabic-text'>ي</span> e heshtur që zgjat Kesrën)."
+      }
+    ]
+  },
+  {
+    "id": "medd-iwad",
+    "title": "MEDD \\'IWAD (الْمَدُّ الْعِوَضُ - Zgjatimi Zëvendësues)",
+    "slug": "medd-iwad",
+    "pageNumber": 287,
+    "description": "Medd 'Iwad ndodh kur ndalemi në një fjalë që mbaron me Tenvin Fet'ha (◌ً). Në këtë rast, Tenvini zëvendësohet me një Elif Meddijjeh dhe zgjatet 2 kohë.<br/>Përjashtim: Nuk bëhet Medd 'Iwad nëse fjala mbaron me Taa Merbuta (ةً). Në këtë rast, ndalemi me Haa Sakin (هْ).",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Shembuj të Medd 'Iwad:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "عَلِيمًا",
+            "pronunciation": "Ndalimi: 'aliimaa"
+          },
+          {
+            "arabic": "مَاءً",
+            "pronunciation": "Ndalimi: maaa\\'aa"
+          },
+          {
+            "arabic": "هُدًى",
+            "pronunciation": "Ndalimi: hudaa"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull ku NUK bëhet Medd 'Iwad (me Taa Merbuta):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "رَحْمَةً",
+            "pronunciation": "Ndalimi: rahmeh"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "medd-iwad-q1",
+        "text": "Si ndalemi në fjalën <span class='arabic-text'>كِتَابًا</span>?",
+        "options": [
+          {
+            "id": "medd-iwad-q1-o1",
+            "text": "Duke lexuar <span class='arabic-text'>كِتَابَنْ</span>",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-iwad-q1-o2",
+            "text": "Duke lexuar <span class='arabic-text'>كِتَابَا</span> (zgjatet Elifi 2 kohë)",
+            "isCorrect": true
+          },
+          {
+            "id": "medd-iwad-q1-o3",
+            "text": "Duke lexuar <span class='arabic-text'>كِتَابْ</span>",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Kur ndalemi në Tenvin Fet'ha (përveç në Taa Merbuta), Tenvini zëvendësohet me Elif Meddijjeh dhe zgjatet 2 kohë. Pra, <span class='arabic-text'>كِتَابًا</span> lexohet <span class='arabic-text'>كِتَابَا</span>."
+      }
+    ]
+  }
+]

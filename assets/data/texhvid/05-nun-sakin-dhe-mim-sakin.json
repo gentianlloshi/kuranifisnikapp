@@ -1,0 +1,212 @@
+[
+  {
+    "id": "rregullat-e-nun-sakin-dhe-tenvin",
+    "title": "RREGULLAT E NUNIT SAKIN (نْ) DHE TENVINIT",
+    "slug": "rregullat-e-nun-sakin-dhe-tenvin",
+    "pageNumber": 229,
+    "description": "Nuni Sakin (<span class='arabic-emphasis'>نْ</span>) është shkronja Nun pa zanore. Tenvini (◌ً, ◌ٍ, ◌ٌ) është dyfishimi i zanores së shkurtër në fund të fjalës dhe fonetikisht përfundon me një Nun Sakin të palexuar. Kur Nuni Sakin ose Tenvini pasohet nga shkronja të ndryshme të alfabetit arab, ai i nënshtrohet katër rregullave kryesore:",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "1. EL-IDH'HAR (الإِظْهَارُ الْحَلْقِيُّ - Shqiptimi i Qartë Fytor)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nuni Sakin ose Tenvini lexohet qartë, pa zgjatim hundor (Ghunneh), kur pasohet nga njëra prej gjashtë shkronjave fytore: <span class='arabic-text text-xl'>ء ه ع ح غ خ</span>."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مِنْ ءَامَنَ",
+            "pronunciation": "min eemene"
+          },
+          {
+            "arabic": "عَذَابٌ أَلِيمٌ",
+            "pronunciation": "adhabun eliim"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "2. EL-IDGAM (الإِدْغَامُ - Bashkëngjitja/Shkrirja)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nuni Sakin ose Tenvini shkrihet me shkronjën pasuese. Ka dy lloje:<br/>a) <span class='arabic-emphasis'>Idgam me Ghunneh (الإدغام بِغُنَّة - Bashkëngjitje me Zgjatim Hundor)</span>: Kur pasohet nga njëra prej shkronjave <span class='arabic-text text-xl'>ي ن م و</span> (të përmbledhura në <span class='arabic-text text-xl'>يَنْمُو</span>).<br/>b) <span class='arabic-emphasis'>Idgam pa Ghunneh (الإدغام بِغَيْرِ غُنَّة - Bashkëngjitje pa Zgjatim Hundor)</span>: Kur pasohet nga <span class='arabic-text text-xl'>ل (Laam)</span> ose <span class='arabic-text text-xl'>ر (Raa)</span>."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مَنْ يَعْمَلْ",
+            "pronunciation": "mey ja'mel (me Ghunneh)"
+          },
+          {
+            "arabic": "مِنْ رَبِّهِمْ",
+            "pronunciation": "mir rabbihim (pa Ghunneh)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "3. EL-IKLAB (الإِقْلَابُ - Shndërrimi)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nuni Sakin ose Tenvini shndërrohet në Mim (<span class='arabic-emphasis'>م</span>) me Ghunneh, kur pasohet nga shkronja <span class='arabic-text text-xl'>ب (Baa')</span>."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مِنْ بَعْدِ",
+            "pronunciation": "mim ba'di"
+          },
+          {
+            "arabic": "سَمِيعٌ بَصِيرٌ",
+            "pronunciation": "semii'um besir"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "4. EL-IKHFA (الإِخْفَاءُ الْحَقِيقِيُّ - Fshehja e Vërtetë)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nuni Sakin ose Tenvini fshihet (lexohet mes Idh'harit dhe Idgamit) me Ghunneh, kur pasohet nga njëra prej 15 shkronjave të mbetura të alfabetit: <span class='arabic-text text-xl'>ت ث ج د ذ ز س ش ص ض ط ظ ف ق ك</span>."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "مِنْ تَحْتِهَا",
+            "pronunciation": "min tehtiha"
+          },
+          {
+            "arabic": "رَجُلًا سَلَامًا",
+            "pronunciation": "rexhulen seleamaa"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "nun-sakin-q1",
+        "text": "Cili rregull aplikohet kur Nuni Sakin (<span class='quiz-diacritic'>نْ</span>) pasohet nga shkronja <span class='arabic-text'>ب</span> (Baa')?",
+        "options": [
+          {
+            "id": "nun-sakin-q1-o1",
+            "text": "El-Idh'har (Shqiptim i Qartë)",
+            "isCorrect": false
+          },
+          {
+            "id": "nun-sakin-q1-o2",
+            "text": "El-Idgam (Bashkëngjitje)",
+            "isCorrect": false
+          },
+          {
+            "id": "nun-sakin-q1-o3",
+            "text": "El-Iklab (Shndërrim)",
+            "isCorrect": true
+          },
+          {
+            "id": "nun-sakin-q1-o4",
+            "text": "El-Ikhfa (Fshehje)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Kur Nuni Sakin ose Tenvini pasohet nga shkronja ب (Baa'), aplikohet rregulli El-Iklab, ku Nuni shndërrohet në Mim (م) me Ghunneh."
+      }
+    ]
+  },
+  {
+    "id": "rregullat-e-mim-sakin",
+    "title": "RREGULLAT E MIMIT SAKIN (مْ)",
+    "slug": "rregullat-e-mim-sakin",
+    "pageNumber": 243,
+    "description": "Mimi Sakin (<span class='arabic-emphasis'>مْ</span>) është shkronja Mim pa zanore. Kur Mimi Sakin pasohet nga shkronja të ndryshme të alfabetit arab, ai i nënshtrohet tre rregullave kryesore:",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "1. IKHFA ESH-SHEFEWI (الإِخْفَاءُ الشَّفَوِيُّ - Fshehja Buzore)"
+      },
+      {
+        "type": "text",
+        "meaning": "Mimi Sakin (<span class='arabic-emphasis'>مْ</span>) fshihet (lexohet me Ghunneh) kur pasohet nga shkronja <span class='arabic-text text-xl'>ب (Baa')</span>."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "تَرْمِيهِمْ بِحِجَارَةٍ",
+            "pronunciation": "termiihim bi-hixhaarah"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "2. IDGAM MITHLEJN SAGIR / IDGAM SHAFEWI (إِدْغَامُ المِثْلَيْنِ الصَغِير / الإدغام الشفوي - Bashkëngjitja e Dy të Njëjtave / Buzore)"
+      },
+      {
+        "type": "text",
+        "meaning": "Mimi Sakin (<span class='arabic-emphasis'>مْ</span>) shkrihet plotësisht me Ghunneh me Mim-in pasues (<span class='arabic-text text-xl'>م</span>)."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "لَكُمْ مَا",
+            "pronunciation": "lekum maa"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "3. IDH\\'HAR ESH-SHEFEWI (الإِظْهَارُ الشَّفَوِيُّ - Shqiptimi i Qartë Buzor)"
+      },
+      {
+        "type": "text",
+        "meaning": "Mimi Sakin (<span class='arabic-emphasis'>مْ</span>) lexohet qartë, pa Ghunneh, kur pasohet nga çdo shkronjë tjetër e alfabetit (përveç ب dhe م). Duhet kujdes i veçantë me shkronjat <span class='arabic-text text-xl'>و (Waw)</span> dhe <span class='arabic-text text-xl'>ف (Faa)</span> që të mos bëhet Ikhfa."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءَأَمْ لَمْ تُنْذِرْهُمْ",
+            "pronunciation": "e em lem tundhirhum"
+          },
+          {
+            "arabic": "عَلَيْهِمْ وَلَا",
+            "pronunciation": "alejhim welaa"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "mim-sakin-q1",
+        "text": "Cili rregull aplikohet kur Mimi Sakin (<span class='quiz-diacritic'>مْ</span>) pasohet nga shkronja <span class='arabic-text'>م</span> (Mim)?",
+        "options": [
+          {
+            "id": "mim-sakin-q1-o1",
+            "text": "Ikhfa Esh-Shefewi",
+            "isCorrect": false
+          },
+          {
+            "id": "mim-sakin-q1-o2",
+            "text": "Idgam Mithlejn Sagir / Idgam Shafewi",
+            "isCorrect": true
+          },
+          {
+            "id": "mim-sakin-q1-o3",
+            "text": "Idh'har Esh-Shefewi",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Kur Mimi Sakin pasohet nga një Mim tjetër, aplikohet Idgam Mithlejn Sagir (ose Idgam Shafewi), ku Mimi i parë shkrihet në të dytin me Ghunneh."
+      }
+    ]
+  }
+]

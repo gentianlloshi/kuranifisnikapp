@@ -1,0 +1,914 @@
+[
+  {
+    "numri": 1,
+    "emri_shqip": "El-Fatiha",
+    "emri_arab": "ٱلْفَاتِحَة",
+    "kuptimi": "Hapja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 7
+  },
+  {
+    "numri": 2,
+    "emri_shqip": "El-Bekare",
+    "emri_arab": "ٱلْبَقَرَة",
+    "kuptimi": "Lopa",
+    "vendi": "Medinë",
+    "numri_ajeteve": 286
+  },
+  {
+    "numri": 3,
+    "emri_shqip": "Ali Imran",
+    "emri_arab": "آلِ عِمْرَان",
+    "kuptimi": "Familja e Imranit",
+    "vendi": "Medinë",
+    "numri_ajeteve": 200
+  },
+  {
+    "numri": 4,
+    "emri_shqip": "En-Nisa",
+    "emri_arab": "ٱلنِّسَاء",
+    "kuptimi": "Gratë",
+    "vendi": "Medinë",
+    "numri_ajeteve": 176
+  },
+  {
+    "numri": 5,
+    "emri_shqip": "El-Maide",
+    "emri_arab": "ٱلْمَائِدَة",
+    "kuptimi": "Tryeza",
+    "vendi": "Medinë",
+    "numri_ajeteve": 120
+  },
+  {
+    "numri": 6,
+    "emri_shqip": "El-En'am",
+    "emri_arab": "ٱلْأَنْعَام",
+    "kuptimi": "Bagëtia",
+    "vendi": "Mekë",
+    "numri_ajeteve": 165
+  },
+  {
+    "numri": 7,
+    "emri_shqip": "El-A'raf",
+    "emri_arab": "ٱلْأَعْرَاف",
+    "kuptimi": "Lartësitë",
+    "vendi": "Mekë",
+    "numri_ajeteve": 206
+  },
+  {
+    "numri": 8,
+    "emri_shqip": "El-Enfal",
+    "emri_arab": "ٱلْأَنْفَال",
+    "kuptimi": "Plaçka e Luftës",
+    "vendi": "Medinë",
+    "numri_ajeteve": 75
+  },
+  {
+    "numri": 9,
+    "emri_shqip": "Et-Teube",
+    "emri_arab": "ٱلتَّوْبَة",
+    "kuptimi": "Pendimi",
+    "vendi": "Medinë",
+    "numri_ajeteve": 129
+  },
+  {
+    "numri": 10,
+    "emri_shqip": "Junus",
+    "emri_arab": "يُونُس",
+    "kuptimi": "Junusi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 109
+  },
+  {
+    "numri": 11,
+    "emri_shqip": "Hud",
+    "emri_arab": "هُود",
+    "kuptimi": "Hudi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 123
+  },
+  {
+    "numri": 12,
+    "emri_shqip": "Jusuf",
+    "emri_arab": "يُوسُف",
+    "kuptimi": "Jusufi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 111
+  },
+  {
+    "numri": 13,
+    "emri_shqip": "Er-R'ad",
+    "emri_arab": "ٱلرَّعْد",
+    "kuptimi": "Bubullima",
+    "vendi": "Medinë",
+    "numri_ajeteve": 43
+  },
+  {
+    "numri": 14,
+    "emri_shqip": "Ibrahim",
+    "emri_arab": "إِبْرَاهِيم",
+    "kuptimi": "Ibrahimi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 52
+  },
+  {
+    "numri": 15,
+    "emri_shqip": "El-Hixhr",
+    "emri_arab": "ٱلْحِجْر",
+    "kuptimi": "Lugina e Gurëve",
+    "vendi": "Mekë",
+    "numri_ajeteve": 99
+  },
+  {
+    "numri": 16,
+    "emri_shqip": "En-Nahl",
+    "emri_arab": "ٱلنَّحْل",
+    "kuptimi": "Bleta",
+    "vendi": "Mekë",
+    "numri_ajeteve": 128
+  },
+  {
+    "numri": 17,
+    "emri_shqip": "El-Isra",
+    "emri_arab": "ٱلْإِسْرَاء",
+    "kuptimi": "Udhëtimi i Natës",
+    "vendi": "Mekë",
+    "numri_ajeteve": 111
+  },
+  {
+    "numri": 18,
+    "emri_shqip": "El-Kehf",
+    "emri_arab": "ٱلْكَهْف",
+    "kuptimi": "Shpella",
+    "vendi": "Mekë",
+    "numri_ajeteve": 110
+  },
+  {
+    "numri": 19,
+    "emri_shqip": "Merjem",
+    "emri_arab": "مَرْيَم",
+    "kuptimi": "Merjemja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 98
+  },
+  {
+    "numri": 20,
+    "emri_shqip": "Ta-Ha",
+    "emri_arab": "طه",
+    "kuptimi": "Ta-Ha",
+    "vendi": "Mekë",
+    "numri_ajeteve": 135
+  },
+  {
+    "numri": 21,
+    "emri_shqip": "El-Enbija",
+    "emri_arab": "ٱلْأَنْبِيَاء",
+    "kuptimi": "Pejgamberët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 112
+  },
+  {
+    "numri": 22,
+    "emri_shqip": "El-Haxhxh",
+    "emri_arab": "ٱلْحَجّ",
+    "kuptimi": "Haxhi",
+    "vendi": "Medinë",
+    "numri_ajeteve": 78
+  },
+  {
+    "numri": 23,
+    "emri_shqip": "El-Mu'minun",
+    "emri_arab": "ٱلْمُؤْمِنُون",
+    "kuptimi": "Besimtarët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 118
+  },
+  {
+    "numri": 24,
+    "emri_shqip": "En-Nur",
+    "emri_arab": "ٱلنُّور",
+    "kuptimi": "Drita",
+    "vendi": "Medinë",
+    "numri_ajeteve": 64
+  },
+  {
+    "numri": 25,
+    "emri_shqip": "El-Furkan",
+    "emri_arab": "ٱلْفُرْقَان",
+    "kuptimi": "Dalluesi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 77
+  },
+  {
+    "numri": 26,
+    "emri_shqip": "Esh-Shu'ara'",
+    "emri_arab": "ٱلشُّعَرَاء",
+    "kuptimi": "Poetët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 227
+  },
+  {
+    "numri": 27,
+    "emri_shqip": "En-Neml",
+    "emri_arab": "ٱلنَّمْل",
+    "kuptimi": "Milingonat",
+    "vendi": "Mekë",
+    "numri_ajeteve": 93
+  },
+  {
+    "numri": 28,
+    "emri_shqip": "El-Kasas",
+    "emri_arab": "ٱلْقَصَص",
+    "kuptimi": "Rrëfimet",
+    "vendi": "Mekë",
+    "numri_ajeteve": 88
+  },
+  {
+    "numri": 29,
+    "emri_shqip": "El-Ankebut",
+    "emri_arab": "ٱلْعَنْكَبُوت",
+    "kuptimi": "Merimanga",
+    "vendi": "Mekë",
+    "numri_ajeteve": 69
+  },
+  {
+    "numri": 30,
+    "emri_shqip": "Er-Rum",
+    "emri_arab": "ٱلرُّوم",
+    "kuptimi": "Bizantinët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 60
+  },
+  {
+    "numri": 31,
+    "emri_shqip": "Lukman",
+    "emri_arab": "لُقْمَان",
+    "kuptimi": "Lukmani",
+    "vendi": "Mekë",
+    "numri_ajeteve": 34
+  },
+  {
+    "numri": 32,
+    "emri_shqip": "Es-Sexhde",
+    "emri_arab": "ٱلسَّجْدَة",
+    "kuptimi": "Sexhdja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 30
+  },
+  {
+    "numri": 33,
+    "emri_shqip": "El-Ahzab",
+    "emri_arab": "ٱلْأَحْزَاب",
+    "kuptimi": "Aleatët",
+    "vendi": "Medinë",
+    "numri_ajeteve": 73
+  },
+  {
+    "numri": 34,
+    "emri_shqip": "Sebe'",
+    "emri_arab": "سَبَأ",
+    "kuptimi": "Saba",
+    "vendi": "Mekë",
+    "numri_ajeteve": 54
+  },
+  {
+    "numri": 35,
+    "emri_shqip": "Fatir",
+    "emri_arab": "فَاطِر",
+    "kuptimi": "Krijuesi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 45
+  },
+  {
+    "numri": 36,
+    "emri_shqip": "Ja-Sin",
+    "emri_arab": "يس",
+    "kuptimi": "Ja Sin",
+    "vendi": "Mekë",
+    "numri_ajeteve": 83
+  },
+  {
+    "numri": 37,
+    "emri_shqip": "Es-Saffat",
+    "emri_arab": "ٱلصَّافَّات",
+    "kuptimi": "Të Renditurit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 182
+  },
+  {
+    "numri": 38,
+    "emri_shqip": "Sad",
+    "emri_arab": "ص",
+    "kuptimi": "Sad",
+    "vendi": "Mekë",
+    "numri_ajeteve": 88
+  },
+  {
+    "numri": 39,
+    "emri_shqip": "Ez-Zumer",
+    "emri_arab": "ٱلزُّمَر",
+    "kuptimi": "Grupet",
+    "vendi": "Mekë",
+    "numri_ajeteve": 75
+  },
+  {
+    "numri": 40,
+    "emri_shqip": "Gafir",
+    "emri_arab": "غَافِر",
+    "kuptimi": "Falësi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 85
+  },
+  {
+    "numri": 41,
+    "emri_shqip": "Fussilet",
+    "emri_arab": "فُصِّلَت",
+    "kuptimi": "Të Përpunuarat",
+    "vendi": "Mekë",
+    "numri_ajeteve": 54
+  },
+  {
+    "numri": 42,
+    "emri_shqip": "Esh-Shura",
+    "emri_arab": "ٱلشُّورىٰ",
+    "kuptimi": "Këshillimi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 53
+  },
+  {
+    "numri": 43,
+    "emri_shqip": "Ez-Zuhruf",
+    "emri_arab": "ٱلزُّخْرُف",
+    "kuptimi": "Stolitë",
+    "vendi": "Mekë",
+    "numri_ajeteve": 89
+  },
+  {
+    "numri": 44,
+    "emri_shqip": "Ed-Duhan",
+    "emri_arab": "ٱلدُّخَان",
+    "kuptimi": "Tymi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 59
+  },
+  {
+    "numri": 45,
+    "emri_shqip": "El-Xhathije",
+    "emri_arab": "ٱلْجَاثِيَة",
+    "kuptimi": "Gjunjëzimi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 37
+  },
+  {
+    "numri": 46,
+    "emri_shqip": "El-Ahkaf",
+    "emri_arab": "ٱلْأَحْقَاف",
+    "kuptimi": "Kodrat e Rërës",
+    "vendi": "Mekë",
+    "numri_ajeteve": 35
+  },
+  {
+    "numri": 47,
+    "emri_shqip": "Muhamed",
+    "emri_arab": "مُحَمَّد",
+    "kuptimi": "Muhamedi",
+    "vendi": "Medinë",
+    "numri_ajeteve": 38
+  },
+  {
+    "numri": 48,
+    "emri_shqip": "El-Feth",
+    "emri_arab": "ٱلْفَتْح",
+    "kuptimi": "Fitorja",
+    "vendi": "Medinë",
+    "numri_ajeteve": 29
+  },
+  {
+    "numri": 49,
+    "emri_shqip": "El-Huxhurat",
+    "emri_arab": "ٱلْحُجُرَات",
+    "kuptimi": "Dhomat",
+    "vendi": "Medinë",
+    "numri_ajeteve": 18
+  },
+  {
+    "numri": 50,
+    "emri_shqip": "Kaf",
+    "emri_arab": "ق",
+    "kuptimi": "Kaf",
+    "vendi": "Mekë",
+    "numri_ajeteve": 45
+  },
+  {
+    "numri": 51,
+    "emri_shqip": "Edh-Dharijat",
+    "emri_arab": "ٱلذَّارِيَات",
+    "kuptimi": "Erërat",
+    "vendi": "Mekë",
+    "numri_ajeteve": 60
+  },
+  {
+    "numri": 52,
+    "emri_shqip": "Et-Tur",
+    "emri_arab": "ٱلطُّور",
+    "kuptimi": "Mali",
+    "vendi": "Mekë",
+    "numri_ajeteve": 49
+  },
+  {
+    "numri": 53,
+    "emri_shqip": "En-Nexhm",
+    "emri_arab": "ٱلنَّجْم",
+    "kuptimi": "Ylli",
+    "vendi": "Mekë",
+    "numri_ajeteve": 62
+  },
+  {
+    "numri": 54,
+    "emri_shqip": "El-Kamer",
+    "emri_arab": "ٱلْقَمَر",
+    "kuptimi": "Hëna",
+    "vendi": "Mekë",
+    "numri_ajeteve": 55
+  },
+  {
+    "numri": 55,
+    "emri_shqip": "Er-Rrahman",
+    "emri_arab": "ٱلرَّحْمَٰن",
+    "kuptimi": "Mëshiruesi",
+    "vendi": "Medinë",
+    "numri_ajeteve": 78
+  },
+  {
+    "numri": 56,
+    "emri_shqip": "El-Vaki'a",
+    "emri_arab": "ٱلْوَاقِعَة",
+    "kuptimi": "Ngjarja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 96
+  },
+  {
+    "numri": 57,
+    "emri_shqip": "El-Hadid",
+    "emri_arab": "ٱلْحَدِيد",
+    "kuptimi": "Hekuri",
+    "vendi": "Medinë",
+    "numri_ajeteve": 29
+  },
+  {
+    "numri": 58,
+    "emri_shqip": "El-Muxhadele",
+    "emri_arab": "ٱلْمُجَادِلَة",
+    "kuptimi": "Debatuesja",
+    "vendi": "Medinë",
+    "numri_ajeteve": 22
+  },
+  {
+    "numri": 59,
+    "emri_shqip": "El-Hashr",
+    "emri_arab": "ٱلْحَشْر",
+    "kuptimi": "Tubimi",
+    "vendi": "Medinë",
+    "numri_ajeteve": 24
+  },
+  {
+    "numri": 60,
+    "emri_shqip": "El-Mumtehine",
+    "emri_arab": "ٱلْمُمْتَحَنَة",
+    "kuptimi": "E Sprovuara",
+    "vendi": "Medinë",
+    "numri_ajeteve": 13
+  },
+  {
+    "numri": 61,
+    "emri_shqip": "Es-Saff",
+    "emri_arab": "ٱلصَّفّ",
+    "kuptimi": "Rreshti",
+    "vendi": "Medinë",
+    "numri_ajeteve": 14
+  },
+  {
+    "numri": 62,
+    "emri_shqip": "El-Xhumu'a",
+    "emri_arab": "ٱلْجُمُعَة",
+    "kuptimi": "Dita e Xhuma",
+    "vendi": "Medinë",
+    "numri_ajeteve": 11
+  },
+  {
+    "numri": 63,
+    "emri_shqip": "El-Munafikun",
+    "emri_arab": "ٱلْمُنَافِقُون",
+    "kuptimi": "Hipokritët",
+    "vendi": "Medinë",
+    "numri_ajeteve": 11
+  },
+  {
+    "numri": 64,
+    "emri_shqip": "Et-Tegabun",
+    "emri_arab": "ٱلتَّغَابُن",
+    "kuptimi": "Humbja Reciproke",
+    "vendi": "Medinë",
+    "numri_ajeteve": 18
+  },
+  {
+    "numri": 65,
+    "emri_shqip": "Et-Talak",
+    "emri_arab": "ٱلطَّلَاق",
+    "kuptimi": "Divorci",
+    "vendi": "Medinë",
+    "numri_ajeteve": 12
+  },
+  {
+    "numri": 66,
+    "emri_shqip": "Et-Tahrim",
+    "emri_arab": "ٱلتَّحْرِيم",
+    "kuptimi": "Ndalimi",
+    "vendi": "Medinë",
+    "numri_ajeteve": 12
+  },
+  {
+    "numri": 67,
+    "emri_shqip": "El-Mulk",
+    "emri_arab": "ٱلْمُلْك",
+    "kuptimi": "Pushteti",
+    "vendi": "Mekë",
+    "numri_ajeteve": 30
+  },
+  {
+    "numri": 68,
+    "emri_shqip": "El-Kalem",
+    "emri_arab": "ٱلْقَلَم",
+    "kuptimi": "Pena",
+    "vendi": "Mekë",
+    "numri_ajeteve": 52
+  },
+  {
+    "numri": 69,
+    "emri_shqip": "El-Hakka",
+    "emri_arab": "ٱلْحَاقَّة",
+    "kuptimi": "Ngjarja e Përpiktë",
+    "vendi": "Mekë",
+    "numri_ajeteve": 52
+  },
+  {
+    "numri": 70,
+    "emri_shqip": "El-Me'arixh",
+    "emri_arab": "ٱلْمَعَارِج",
+    "kuptimi": "Shkallët e Ngjitjes",
+    "vendi": "Mekë",
+    "numri_ajeteve": 44
+  },
+  {
+    "numri": 71,
+    "emri_shqip": "Nuh",
+    "emri_arab": "نُوح",
+    "kuptimi": "Nuhu",
+    "vendi": "Mekë",
+    "numri_ajeteve": 28
+  },
+  {
+    "numri": 72,
+    "emri_shqip": "El-Xhinn",
+    "emri_arab": "ٱلْجِنّ",
+    "kuptimi": "Xhindët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 28
+  },
+  {
+    "numri": 73,
+    "emri_shqip": "El-Muzzemmil",
+    "emri_arab": "ٱلْمُزَّمِّل",
+    "kuptimi": "I Mbështjelluri",
+    "vendi": "Mekë",
+    "numri_ajeteve": 20
+  },
+  {
+    "numri": 74,
+    "emri_shqip": "El-Muddethir",
+    "emri_arab": "ٱلْمُدَّثِّر",
+    "kuptimi": "I Mbuluari",
+    "vendi": "Mekë",
+    "numri_ajeteve": 56
+  },
+  {
+    "numri": 75,
+    "emri_shqip": "El-Kijame",
+    "emri_arab": "ٱلْقِيَامَة",
+    "kuptimi": "Ringjallja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 40
+  },
+  {
+    "numri": 76,
+    "emri_shqip": "El-Insan",
+    "emri_arab": "ٱلْإِنْسَان",
+    "kuptimi": "Njeriu",
+    "vendi": "Medinë",
+    "numri_ajeteve": 31
+  },
+  {
+    "numri": 77,
+    "emri_shqip": "El-Murselat",
+    "emri_arab": "ٱلْمُرْسَلَات",
+    "kuptimi": "Të Dërguarit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 50
+  },
+  {
+    "numri": 78,
+    "emri_shqip": "En-Nebe'",
+    "emri_arab": "ٱلنَّبَأ",
+    "kuptimi": "Lajmi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 40
+  },
+  {
+    "numri": 79,
+    "emri_shqip": "En-Nazi'at",
+    "emri_arab": "ٱلنَّازِعَات",
+    "kuptimi": "Nxjerrësit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 46
+  },
+  {
+    "numri": 80,
+    "emri_shqip": "Abese",
+    "emri_arab": "عَبَسَ",
+    "kuptimi": "Ai u Vrenjt",
+    "vendi": "Mekë",
+    "numri_ajeteve": 42
+  },
+  {
+    "numri": 81,
+    "emri_shqip": "Et-Tekvir",
+    "emri_arab": "ٱلتَّكْوِير",
+    "kuptimi": "Mbështjellja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 29
+  },
+  {
+    "numri": 82,
+    "emri_shqip": "El-Infitar",
+    "emri_arab": "ٱلْإِنْفِطَار",
+    "kuptimi": "Çarja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 19
+  },
+  {
+    "numri": 83,
+    "emri_shqip": "El-Mutaffifin",
+    "emri_arab": "ٱلْمُطَفِّفِين",
+    "kuptimi": "Mashtruesit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 36
+  },
+  {
+    "numri": 84,
+    "emri_shqip": "El-Inshikak",
+    "emri_arab": "ٱلْإِنْشِقَاق",
+    "kuptimi": "Ndaja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 25
+  },
+  {
+    "numri": 85,
+    "emri_shqip": "El-Buruxh",
+    "emri_arab": "ٱلْبُرُوج",
+    "kuptimi": "Yjësitë",
+    "vendi": "Mekë",
+    "numri_ajeteve": 22
+  },
+  {
+    "numri": 86,
+    "emri_shqip": "Et-Tarik",
+    "emri_arab": "ٱلطَّارِق",
+    "kuptimi": "Udhëtari i Natës",
+    "vendi": "Mekë",
+    "numri_ajeteve": 17
+  },
+  {
+    "numri": 87,
+    "emri_shqip": "El-A'la",
+    "emri_arab": "ٱلْأَعْلَىٰ",
+    "kuptimi": "I Lartmadhërishmi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 19
+  },
+  {
+    "numri": 88,
+    "emri_shqip": "El-Gashije",
+    "emri_arab": "ٱلْغَاشِيَة",
+    "kuptimi": "Ngjarja Mbuluese",
+    "vendi": "Mekë",
+    "numri_ajeteve": 26
+  },
+  {
+    "numri": 89,
+    "emri_shqip": "El-Fexhr",
+    "emri_arab": "ٱلْفَجْر",
+    "kuptimi": "Agimi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 30
+  },
+  {
+    "numri": 90,
+    "emri_shqip": "El-Beled",
+    "emri_arab": "ٱلْبَلَد",
+    "kuptimi": "Qyteti",
+    "vendi": "Mekë",
+    "numri_ajeteve": 20
+  },
+  {
+    "numri": 91,
+    "emri_shqip": "Esh-Shems",
+    "emri_arab": "ٱلشَّمْس",
+    "kuptimi": "Dielli",
+    "vendi": "Mekë",
+    "numri_ajeteve": 15
+  },
+  {
+    "numri": 92,
+    "emri_shqip": "El-Lejl",
+    "emri_arab": "ٱللَّيْل",
+    "kuptimi": "Nata",
+    "vendi": "Mekë",
+    "numri_ajeteve": 21
+  },
+  {
+    "numri": 93,
+    "emri_shqip": "Ed-Duha",
+    "emri_arab": "ٱلضُّحَىٰ",
+    "kuptimi": "Paraditja",
+    "vendi": "Mekë",
+    "numri_ajeteve": 11
+  },
+  {
+    "numri": 94,
+    "emri_shqip": "Esh-Sherh",
+    "emri_arab": "ٱلشَّرْح",
+    "kuptimi": "Zgjerimi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 8
+  },
+  {
+    "numri": 95,
+    "emri_shqip": "Et-Tin",
+    "emri_arab": "ٱلتِّين",
+    "kuptimi": "Fiku",
+    "vendi": "Mekë",
+    "numri_ajeteve": 8
+  },
+  {
+    "numri": 96,
+    "emri_shqip": "El-Alek",
+    "emri_arab": "ٱلْعَلَق",
+    "kuptimi": "Gjaku i Ngjizur",
+    "vendi": "Mekë",
+    "numri_ajeteve": 19
+  },
+  {
+    "numri": 97,
+    "emri_shqip": "El-Kadr",
+    "emri_arab": "ٱلْقَدْر",
+    "kuptimi": "Nata e Kadrit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 5
+  },
+  {
+    "numri": 98,
+    "emri_shqip": "El-Bejjine",
+    "emri_arab": "ٱلْبَيِّنَة",
+    "kuptimi": "Prova e Qartë",
+    "vendi": "Medinë",
+    "numri_ajeteve": 8
+  },
+  {
+    "numri": 99,
+    "emri_shqip": "Ez-Zelzele",
+    "emri_arab": "ٱلزَّلْزَلَة",
+    "kuptimi": "Tërmeti",
+    "vendi": "Medinë",
+    "numri_ajeteve": 8
+  },
+  {
+    "numri": 100,
+    "emri_shqip": "El-Adijat",
+    "emri_arab": "ٱلْعَادِيَات",
+    "kuptimi": "Vrapuesit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 11
+  },
+  {
+    "numri": 101,
+    "emri_shqip": "El-Kari'a",
+    "emri_arab": "ٱلْقَارِعَة",
+    "kuptimi": "Gjëma",
+    "vendi": "Mekë",
+    "numri_ajeteve": 11
+  },
+  {
+    "numri": 102,
+    "emri_shqip": "Et-Tekathur",
+    "emri_arab": "ٱلتَّكَاثُر",
+    "kuptimi": "Gara për Shumë",
+    "vendi": "Mekë",
+    "numri_ajeteve": 8
+  },
+  {
+    "numri": 103,
+    "emri_shqip": "El-Asr",
+    "emri_arab": "ٱلْعَصْر",
+    "kuptimi": "Koha",
+    "vendi": "Mekë",
+    "numri_ajeteve": 3
+  },
+  {
+    "numri": 104,
+    "emri_shqip": "El-Humeze",
+    "emri_arab": "ٱلْهُمَزَة",
+    "kuptimi": "Përgojuesi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 9
+  },
+  {
+    "numri": 105,
+    "emri_shqip": "El-Fil",
+    "emri_arab": "ٱلْفِيل",
+    "kuptimi": "Elefanti",
+    "vendi": "Mekë",
+    "numri_ajeteve": 5
+  },
+  {
+    "numri": 106,
+    "emri_shqip": "Kurejsh",
+    "emri_arab": "قُرَيْش",
+    "kuptimi": "Kurejshët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 4
+  },
+  {
+    "numri": 107,
+    "emri_shqip": "El-Ma'un",
+    "emri_arab": "ٱلْمَاعُون",
+    "kuptimi": "Ndihma e Vogël",
+    "vendi": "Mekë",
+    "numri_ajeteve": 7
+  },
+  {
+    "numri": 108,
+    "emri_shqip": "El-Keuther",
+    "emri_arab": "ٱلْكَوْثَر",
+    "kuptimi": "Begatia",
+    "vendi": "Mekë",
+    "numri_ajeteve": 3
+  },
+  {
+    "numri": 109,
+    "emri_shqip": "El-Kafirun",
+    "emri_arab": "ٱلْكَافِرُون",
+    "kuptimi": "Jobesimtarët",
+    "vendi": "Mekë",
+    "numri_ajeteve": 6
+  },
+  {
+    "numri": 110,
+    "emri_shqip": "En-Nasr",
+    "emri_arab": "ٱلنَّصْر",
+    "kuptimi": "Ndihma",
+    "vendi": "Medinë",
+    "numri_ajeteve": 3
+  },
+  {
+    "numri": 111,
+    "emri_shqip": "El-Mesed",
+    "emri_arab": "ٱلْمَسَد",
+    "kuptimi": "Litari i Palmës",
+    "vendi": "Mekë",
+    "numri_ajeteve": 5
+  },
+  {
+    "numri": 112,
+    "emri_shqip": "El-Ihlas",
+    "emri_arab": "ٱلْإِخْلَاص",
+    "kuptimi": "Sinqeriteti",
+    "vendi": "Mekë",
+    "numri_ajeteve": 4
+  },
+  {
+    "numri": 113,
+    "emri_shqip": "El-Felek",
+    "emri_arab": "ٱلْفَلَق",
+    "kuptimi": "Agimi",
+    "vendi": "Mekë",
+    "numri_ajeteve": 5
+  },
+  {
+    "numri": 114,
+    "emri_shqip": "En-Nas",
+    "emri_arab": "ٱلنَّاس",
+    "kuptimi": "Njerëzit",
+    "vendi": "Mekë",
+    "numri_ajeteve": 6
+  }
+]

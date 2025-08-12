@@ -1,0 +1,301 @@
+[
+  {
+    "id": "tafkhim-tarqiq-raa",
+    "title": "TAFKHIM (Trashje) dhe TARQIQ (Hollim) i Shkronjës Raa (ر)",
+    "slug": "tafkhim-tarqiq-raa",
+    "pageNumber": 133,
+    "description": "Shkronja Raa (ر) mund të lexohet e trashë (Tafkhim) ose e hollë (Tarqiq) varësisht nga zanoret e saj dhe zanoret e shkronjave përreth.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Rastet kur Raa (ر) lexohet e TRASHË (Tafkhim):"
+      },
+      {
+        "type": "text",
+        "meaning": "1. Kur Raa ka Fet'ha (<span class='arabic-emphasis'>رَ</span>) ose Damme (<span class='arabic-emphasis'>رُ</span>). Shembuj: <span class='arabic-text'>رَسُولٌ</span>, <span class='arabic-text'>رُزِقُوا</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "2. Kur Raa është Sakin (<span class='arabic-emphasis'>رْ</span>) dhe para saj është shkronjë me Fet'ha ose Damme. Shembuj: <span class='arabic-text'>مَرْيَمَ</span>, <span class='arabic-text'>قُرْآنٌ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "3. Kur Raa është Sakin, para saj është shkronjë me Kesra të rastit (p.sh., Hemzetul Wasl). Shembull: <span class='arabic-text'>ٱرْجِعِي</span> (lexohet irxhi'ii, Raa e trashë)."
+      },
+      {
+        "type": "text",
+        "meaning": "4. Kur Raa është Sakin, para saj është shkronjë me Kesra origjinale, dhe pas Raa-së vjen një shkronjë Isti'la (e trashë) që nuk ka Kesra, në të njëjtën fjalë. Shembuj: <span class='arabic-text'>قِرْطَاسٍ</span>, <span class='arabic-text'>مِرْصَادًا</span>."
+      },
+      {
+        "type": "title",
+        "meaning": "Rastet kur Raa (ر) lexohet e HOLLË (Tarqiq):"
+      },
+      {
+        "type": "text",
+        "meaning": "1. Kur Raa ka Kesra (<span class='arabic-emphasis'>رِ</span>). Shembull: <span class='arabic-text'>رِجَالٌ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "2. Kur Raa është Sakin dhe para saj është shkronjë me Kesra origjinale, dhe pas Raa-së nuk vjen shkronjë Isti'la. Shembull: <span class='arabic-text'>فِرْعَوْنُ</span>."
+      },
+      {
+        "type": "text",
+        "meaning": "3. Kur Raa është Sakin dhe para saj është Jaa Sakin (<span class='arabic-emphasis'>يْ</span>). Shembull: <span class='arabic-text'>خَيْرٌ</span> (kur ndalemi), <span class='arabic-text'>بَصِيرٌ</span> (kur ndalemi)."
+      },
+      {
+        "type": "text",
+        "meaning": "4. Kur Raa është me Imale (lexim i anuar kah 'e' ose 'i', specifik për disa kiraete, por Raa e hollë). PDF-ja e përmend <span class='arabic-text'>مَجْر۪يهَا</span> (Hud, 41)."
+      },
+      {
+        "type": "title",
+        "meaning": "Raste kur lejohet edhe Trashja edhe Hollimi:"
+      },
+      {
+        "type": "text",
+        "meaning": "1. Kur Raa është Sakin, para saj është shkronjë me Kesra, dhe pas Raa-së vjen një shkronjë Isti'la me Kesra. Shembull: <span class='arabic-text'>فِرْقٍ</span> (hollimi preferohet)."
+      },
+      {
+        "type": "text",
+        "meaning": "2. Kur Raa është Sakin për shkak të ndalimit, para saj është shkronjë Isti'la Sakin, dhe para shkronjës Isti'la është Kesra. Shembull: <span class='arabic-text'>مِصْرْ</span> (kur ndalemi), <span class='arabic-text'>الْقِطْرْ</span> (kur ndalemi). Trashja preferohet për مِصْرْ, hollimi për الْقِطْرْ."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "raa-tafkhim-q1",
+        "text": "Si lexohet Raa (ر) në fjalën <span class='arabic-text'>رَسُولٌ</span>?",
+        "options": [
+          {
+            "id": "raa-tafkhim-q1-o1",
+            "text": "E hollë (Tarqiq)",
+            "isCorrect": false
+          },
+          {
+            "id": "raa-tafkhim-q1-o2",
+            "text": "E trashë (Tafkhim)",
+            "isCorrect": true
+          },
+          {
+            "id": "raa-tafkhim-q1-o3",
+            "text": "Lejohen të dyja",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Raa (ر) me Fet'ha lexohet e trashë (Tafkhim)."
+      }
+    ]
+  },
+  {
+    "id": "tafkhim-tarqiq-laam",
+    "title": "TAFKHIM (Trashje) dhe TARQIQ (Hollim) i Shkronjës Laam (ل)",
+    "slug": "tafkhim-tarqiq-laam",
+    "pageNumber": 135,
+    "description": "Shkronja Laam (ل) zakonisht lexohet e hollë (Tarqiq). Përjashtim bën vetëm Laam-i në emrin e Allahut (<span class='arabic-text'>الله</span>) dhe (<span class='arabic-text'>اللهم</span>), i cili mund të lexohet i trashë ose i hollë varësisht nga zanorja e shkronjës para tij.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Trashja (Tafkhim) e Laam-it në emrin e Allahut:"
+      },
+      {
+        "type": "text",
+        "meaning": "Laam-i në <span class='arabic-text'>الله</span> lexohet i trashë nëse shkronja para tij ka Fet'ha ose Damme."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قَالَ اللهُ",
+            "pronunciation": "Kaale-llahu (Laam e trashë)"
+          },
+          {
+            "arabic": "عَبْدُ اللهِ",
+            "pronunciation": "Abdu-llahi (Laam e trashë)"
+          }
+        ]
+      },
+      {
+        "type": "title",
+        "meaning": "Hollimi (Tarqiq) e Laam-it në emrin e Allahut:"
+      },
+      {
+        "type": "text",
+        "meaning": "Laam-i në <span class='arabic-text'>الله</span> lexohet i hollë nëse shkronja para tij ka Kesra."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "بِسْمِ اللهِ",
+            "pronunciation": "Bismi-llahi (Laam e hollë)"
+          },
+          {
+            "arabic": "لِلَّهِ",
+            "pronunciation": "Lillahi (Laam e hollë)"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Në të gjitha rastet tjera, Laam-i lexohet i hollë. Shembull: <span class='arabic-text'>لَعَلَّكُمْ</span>, <span class='arabic-text'>الْحَمْدُ</span>."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "laam-tafkhim-q1",
+        "text": "Si lexohet Laam-i në <span class='arabic-text'>إِنَّ اللهَ</span>?",
+        "options": [
+          {
+            "id": "laam-tafkhim-q1-o1",
+            "text": "E hollë",
+            "isCorrect": false
+          },
+          {
+            "id": "laam-tafkhim-q1-o2",
+            "text": "E trashë",
+            "isCorrect": true
+          }
+        ],
+        "explanation": "Në <span class='arabic-text'>إِنَّ اللهَ</span>, fjala para <span class='arabic-text'>الله</span> është <span class='arabic-text'>إِنَّ</span>, e cila mbaron me Fet'ha. Prandaj, Laam-i në <span class='arabic-text'>الله</span> lexohet i trashë."
+      }
+    ]
+  },
+  {
+    "id": "tafkhim-tarqiq-elif",
+    "title": "TAFKHIM (Trashje) dhe TARQIQ (Hollim) i Shkronjës Elif (ا)",
+    "slug": "tafkhim-tarqiq-elif",
+    "pageNumber": 132,
+    "description": "Shkronja Elif (ا) si zanore e gjatë nuk ka trashësi apo hollësi në vetvete, por ndjek statusin e shkronjës para saj.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Nëse shkronja para Elifit është e trashë (Mufekhame), Elifi lexohet i trashë. Shembuj:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "قَالَ",
+            "pronunciation": "Kaale (Elifi i trashë pas Kaaf-it të trashë)"
+          },
+          {
+            "arabic": "الصَّالِحِينَ",
+            "pronunciation": "Es-saalihiin (Elifi i trashë pas Saad-it)"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Nëse shkronja para Elifit është e hollë (Murakkake), Elifi lexohet i hollë. Shembuj:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "كَانَ",
+            "pronunciation": "Kaane (Elifi i hollë pas Kaaf-it të hollë)"
+          },
+          {
+            "arabic": "الْحَاقَّةُ",
+            "pronunciation": "El-haakkah (Elifi i parë i hollë pas Haa-së, Elifi i dytë i trashë pas Kaaf-it të trashë)"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "elif-tafkhim-q1",
+        "text": "Në fjalën <span class='arabic-text'>خَالِدِينَ</span>, si lexohet Elifi?",
+        "options": [
+          {
+            "id": "elif-tafkhim-q1-o1",
+            "text": "I hollë",
+            "isCorrect": false
+          },
+          {
+            "id": "elif-tafkhim-q1-o2",
+            "text": "I trashë",
+            "isCorrect": true
+          }
+        ],
+        "explanation": "Në <span class='arabic-text'>خَالِدِينَ</span>, Elifi vjen pas shkronjës <span class='arabic-text'>خ</span> (Khaa), e cila është shkronjë Isti'la (e trashë). Prandaj, Elifi lexohet i trashë."
+      }
+    ]
+  },
+  {
+    "id": "makharij-al-huruf-permbledhje",
+    "title": "MAKHARIXH AL-HURUF (Pikat e Artikulimit) - Përmbledhje",
+    "slug": "makharij-al-huruf-permbledhje",
+    "pageNumber": 64,
+    "description": "Shkronjat arabe artikulohen nga pesë zona kryesore në aparatin e të folurit. Kuptimi i këtyre zonave ndihmon në saktësimin e pikave të artikulimit për secilën shkronjë.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "1. El-Xhauf (الْجَوْفُ - Zbrazëtia e Gojës dhe Fytit)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nga kjo zonë dalin tre zanoret e gjata (Huruf el-Medd):<br/>- <span class='arabic-text'>ا</span> (Elif Sakin para Fet'hasë)<br/>- <span class='arabic-text'>و</span> (Waw Sakin para Dammesë)<br/>- <span class='arabic-text'>ي</span> (Jaa Sakin para Kesrës)"
+      },
+      {
+        "type": "title",
+        "meaning": "2. El-Halk (الْحَلْقُ - Fyti)"
+      },
+      {
+        "type": "text",
+        "meaning": "Ka tre pika artikulimi, secila me dy shkronja:<br/>- Fundi i fytit (afër gjoksit): <span class='arabic-text'>ء ، ه</span><br/>- Mesi i fytit: <span class='arabic-text'>ع ، ح</span><br/>- Fillimi i fytit (afër gojës): <span class='arabic-text'>غ ، خ</span>"
+      },
+      {
+        "type": "title",
+        "meaning": "3. El-Lisan (اللِّسَانُ - Gjuha)"
+      },
+      {
+        "type": "text",
+        "meaning": "Ka 10 pika artikulimi për 18 shkronja. Pikat kryesore përfshijnë rrënjën e gjuhës, mesin, anësoret dhe majën e saj, në kontakt me pjesë të ndryshme të qiellzës dhe dhëmbëve."
+      },
+      {
+        "type": "title",
+        "meaning": "4. Esh-Shefetan (الشَّفَتَانِ - Buzët)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nga buzët dalin 4 shkronja:<br/>- <span class='arabic-text'>ف</span> (nga buza e poshtme me dhëmbët e sipërm)<br/>- <span class='arabic-text'>و ، ب ، م</span> (nga bashkimi i dy buzëve, Waw-i si bashkëtingëllore)"
+      },
+      {
+        "type": "title",
+        "meaning": "5. El-Khajshum (الْخَيْشُومُ - Zgavra e Hundës)"
+      },
+      {
+        "type": "text",
+        "meaning": "Nga kjo zonë del cilësia Ghunneh (tingulli hundor), e cila është karakteristikë e shkronjave <span class='arabic-text'>ن</span> dhe <span class='arabic-text'>م</span>."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "makharij-summary-q1",
+        "text": "Cila zonë artikulimi përdoret për shkronjat <span class='arabic-text'>ع</span> dhe <span class='arabic-text'>ح</span>?",
+        "options": [
+          {
+            "id": "makharij-summary-q1-o1",
+            "text": "El-Xhauf (Zbrazëtia)",
+            "isCorrect": false
+          },
+          {
+            "id": "makharij-summary-q1-o2",
+            "text": "Mesi i El-Halk (Fytit)",
+            "isCorrect": true
+          },
+          {
+            "id": "makharij-summary-q1-o3",
+            "text": "El-Lisan (Gjuha)",
+            "isCorrect": false
+          },
+          {
+            "id": "makharij-summary-q1-o4",
+            "text": "El-Khajshum (Zgavra e Hundës)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronjat <span class='arabic-text'>ع</span> dhe <span class='arabic-text'>ح</span> artikulohen nga mesi i fytit (El-Halk)."
+      }
+    ]
+  }
+]

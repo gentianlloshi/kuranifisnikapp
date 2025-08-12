@@ -1,0 +1,527 @@
+[
+  {
+    "id": "hadithi1",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Më i miri prej jush është ai që e mëson Kuranin dhe ia mëson atë të tjerëve.",
+    "burimi": "Transmeton Buhariu"
+  },
+  {
+    "id": "hadithi2",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Lexojeni Kuranin, sepse ai do të vijë në Ditën e Gjykimit si ndërmjetësues për lexuesit e tij.",
+    "burimi": "Transmeton Muslimi"
+  },
+  {
+    "id": "hadithi3",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Kush lexon një shkronjë nga Libri i Allahut, do të ketë një të mirë (hasene), dhe e mira shpërblehet dhjetëfish. Unë nuk them se 'Elif Lam Mim' është një shkronjë, por 'Elif' është një shkronjë, 'Lam' është një shkronjë dhe 'Mim' është një shkronjë.",
+    "burimi": "Transmeton Tirmidhiu (Sahih)"
+  },
+  {
+    "id": "hadithi4",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Ai që e lexon Kuranin me mjeshtëri do të jetë me shkruesit (engjëjt) fisnikë e të bindur. Ndërsa ai që e lexon Kuranin dhe belbëzon gjatë leximit të tij, duke e pasur të vështirë, do të ketë dy shpërblime.",
+    "burimi": "Transmeton Buhariu dhe Muslimi"
+  },
+  {
+    "id": "hadithi5",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Në Ditën e Gjykimit do t'i thuhet lexuesit të Kuranit: 'Lexo, ngrihu dhe lexo bukur (me tertil) ashtu siç lexoje në dynja, sepse pozita jote do të jetë tek ajeti i fundit që do të lexosh'.",
+    "burimi": "Transmeton Ebu Davud dhe Tirmidhiu (Sahih)"
+  },
+  {
+    "id": "hadithi6",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Ai në zemrën e të cilit nuk ka asgjë nga Kurani, është si një shtëpi e rrënuar.",
+    "burimi": "Transmeton Tirmidhiu (Hasan Sahih)"
+  },
+  {
+    "id": "hadithi7",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Shembulli i besimtarit që lexon Kuranin është si shembulli i qitros: era e saj është e këndshme dhe shija e saj është e mirë.",
+    "burimi": "Transmeton Buhariu dhe Muslimi"
+  },
+  {
+    "id": "hadithi8",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Nuk lejohet zilia përveçse në dy raste: për një njeri të cilit Allahu i ka dhënë Kuranin dhe ai e lexon atë ditën dhe natën, dhe për një njeri të cilit Allahu i ka dhënë pasuri dhe ai e shpenzon atë ditën dhe natën.",
+    "burimi": "Transmeton Buhariu dhe Muslimi"
+  },
+  {
+    "id": "hadithi9",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Kurani është një ndërmjetësues, ndërmjetësimi i të cilit pranohet. Kushdo që e vendos atë para vetes, ai do ta udhëheqë drejt Xhenetit.",
+    "burimi": "Transmeton Ibn Hibban (Sahih)"
+  },
+  {
+    "id": "hadithi10",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Allahu ka familjet e Tij mesin e njerëzve.” E pyetën: “Kush janë ata, o i Dërguari i Allahut?” Ai tha: “Ata janë njerëzit e Kuranit; ata janë familja e Allahut dhe të veçantët e Tij.”",
+    "burimi": "Transmeton Ibn Maxhe dhe Ahmedi (Sahih)"
+  },
+  {
+    "id": "hadithi11",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Kushdo që e lexon Kuranin, e mëson përmendësh dhe vepron sipas tij, në Ditën e Gjykimit prindërve të tij do t'u vishet një kurorë, drita e së cilës është më e bukur se drita e diellit.",
+    "burimi": "Transmeton Ebu Davud (Hasan)"
+  },
+  {
+    "id": "hadithi12",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Zemrat ndryshken ashtu siç ndryshket hekuri.” Dikush e pyeti: “O i Dërguar i Allahut, cili është pastrimi i tyre?” Ai u përgjigj: “Leximi i Kuranit dhe përkujtimi i vdekjes.”",
+    "burimi": "Transmeton Bejhakiu"
+  },
+  {
+    "id": "hadithi13",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Shtëpitë tuaja ndriçojini me namaz dhe lexim të Kuranit.",
+    "burimi": "Transmeton Bejhakiu"
+  },
+  {
+    "id": "hadithi14",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Vërtet, Allahu i Lartësuar thotë: 'Këdo që leximi i Kuranit e largon nga përmendja Ime (dhikri) dhe nga lutjet ndaj Meje, Unë do t'i jap atij më të mirën nga ajo që u jap lypësve'.",
+    "burimi": "Transmeton Tirmidhiu (Hasan)"
+  },
+  {
+    "id": "hadithi15",
+    "tipi": "hadith",
+    "autor": "Profeti Muhamed ﷺ",
+    "thenia": "Agjërimi dhe Kurani do të ndërmjetësojnë për robin në Ditën e Kiametit. Agjërimi do të thotë: 'O Zot, unë e privova atë nga ushqimi dhe epshet gjatë ditës, pranoje ndërmjetësimin tim për të.' Dhe Kurani do të thotë: 'Unë e privova atë nga gjumi gjatë natës, pranoje ndërmjetësimin tim për të.' Dhe ndërmjetësimi i tyre do të pranohet.",
+    "burimi": "Transmeton Ahmedi (Sahih)"
+  },
+  {
+    "id": "thenie1",
+    "tipi": "thenie dijetari",
+    "autor": "Ebu Bekër es-Siddik (radijAllahu anhu)",
+    "thenia": "Të lexosh Kuranin duke parë në Mus'haf është adhurim.",
+    "burimi": "Shu'ab el-Iman nga el-Bejhaki"
+  },
+  {
+    "id": "thenie2",
+    "tipi": "thenie dijetari",
+    "autor": "Umer ibn el-Hattab (radijAllahu anhu)",
+    "thenia": "Vërtet, me këtë Libër (Kuranin) Allahu ngre lart disa popuj dhe poshtëron disa të tjerë.",
+    "burimi": "Pjesë e një hadithi që transmetohet nga Muslimi"
+  },
+  {
+    "id": "thenie3",
+    "tipi": "thenie dijetari",
+    "autor": "Uthman ibn Affan (radijAllahu anhu)",
+    "thenia": "Sikur zemrat tona të ishin të pastra, kurrë nuk do të ngopeshin nga Fjala e Allahut.",
+    "burimi": "Përmendet në 'El-Bideje we en-Nihaje' nga Ibn Kethir"
+  },
+  {
+    "id": "thenie4",
+    "tipi": "thenie dijetari",
+    "autor": "Uthman ibn Affan (radijAllahu anhu)",
+    "thenia": "Do të dëshiroja që të mos më kalonte asnjë ditë pa shikuar në Mus'haf (pa lexuar Kuran).",
+    "burimi": "Hiljetul-Eulija"
+  },
+  {
+    "id": "thenie5",
+    "tipi": "thenie dijetari",
+    "autor": "Ali ibn Ebi Talib (radijAllahu anhu)",
+    "thenia": "Nuk ka mirësi në adhurimin pa dije, dhe nuk ka mirësi në dijen pa kuptim, dhe nuk ka mirësi në leximin (e Kuranit) pa meditim.",
+    "burimi": "Xhami' Bejan el-'Ilm we Fadlihi"
+  },
+  {
+    "id": "thenie6",
+    "tipi": "thenie dijetari",
+    "autor": "Abdullah ibn Mes'ud (radijAllahu anhu)",
+    "thenia": "Kush dëshiron të dijë nëse e do Allahun, le ta paraqesë veten e tij para Kuranit. Nëse e do Kuranin, ai e do Allahun.",
+    "burimi": "Shu'ab el-Iman nga el-Bejhaki"
+  },
+  {
+    "id": "thenie7",
+    "tipi": "thenie dijetari",
+    "autor": "Abdullah ibn Mes'ud (radijAllahu anhu)",
+    "thenia": "Kur dëshironi dituri, atëherë thellohuni në Kuran, sepse në të gjendet dituria e të parëve dhe e të pasmëve.",
+    "burimi": "Musannef Ibn Ebi Shejbe"
+  },
+  {
+    "id": "thenie8",
+    "tipi": "thenie dijetari",
+    "autor": "Abdullah ibn Mes'ud (radijAllahu anhu)",
+    "thenia": "Lexuesi i Kuranit duhet të njihet nga nata e tij kur njerëzit flenë, nga dita e tij kur njerëzit hanë e pinë, dhe nga devotshmëria e tij kur njerëzit përzihen me të tjerët.",
+    "burimi": "Et-Tibjan fi Adabi Hamaletil-Kuran"
+  },
+  {
+    "id": "thenie9",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn Abasi (radijAllahu anhu)",
+    "thenia": "Të lexoj një sure dhe ta meditoj atë (tertilen) është më e dashur për mua sesa ta lexoj të gjithë Kuranin (pa meditim).",
+    "burimi": "Tefsiri i Taberiut"
+  },
+  {
+    "id": "thenie10",
+    "tipi": "thenie dijetari",
+    "autor": "Ebu Derda (radijAllahu anhu)",
+    "thenia": "Nuk ka gjë më të mirë se dy burra që e studiojnë Kuranin mes tyre; mëshira i mbulon ata.",
+    "burimi": "Fedail el-Kuran nga Ebu Ubejd"
+  },
+  {
+    "id": "thenie11",
+    "tipi": "thenie dijetari",
+    "autor": "El-Fudajl ibn Ijad (rahimehullah)",
+    "thenia": "Bartësi i Kuranit është bartës i flamurit të Islamit. Nuk i takon atij të argëtohet me ata që argëtohen, as të shkujdeset me ata që shkujdesen, për të madhëruar të drejtën e Kuranit.",
+    "burimi": "Ahkam el-Kuran nga el-Axhurri"
+  },
+  {
+    "id": "thenie12",
+    "tipi": "thenie dijetari",
+    "autor": "Hasan el-Basri (rahimehullah)",
+    "thenia": "Kurani është shpallur që të punohet sipas tij, por njerëzit e morën leximin e tij si punë (të vetme).",
+    "burimi": "Muhtesar Minhaxh el-Kasidin"
+  },
+  {
+    "id": "thenie13",
+    "tipi": "thenie dijetari",
+    "autor": "Hasan el-Basri (rahimehullah)",
+    "thenia": "Pasha Allahun, o bir i Ademit, nëse e lexon Kuranin dhe beson në të, pikëllimi yt në këtë botë do të zgjatet, frika jote do të shtohet dhe të qarat e tua do të shpeshtohen.",
+    "burimi": "Hiljetul-Eulija"
+  },
+  {
+    "id": "thenie14",
+    "tipi": "thenie dijetari",
+    "autor": "Imam Ebu Hanife (rahimehullah)",
+    "thenia": "Kushdo që e lexon Kuranin dhe mendon se Allahu nuk do ta falë, ai është prej atyre që i përqeshin ajetet e Allahut.",
+    "burimi": "El-Fikh el-Ebsat"
+  },
+  {
+    "id": "thenie15",
+    "tipi": "thenie dijetari",
+    "autor": "Imam Malik (rahimehullah)",
+    "thenia": "Kam lënë mes jush dy çështje, të cilat nëse i mbani fort, nuk do të humbisni kurrë: Librin e Allahut dhe Sunetin e të Dërguarit të Tij.",
+    "burimi": "Muwatta Imam Malik"
+  },
+  {
+    "id": "thenie16",
+    "tipi": "thenie dijetari",
+    "autor": "Imam Malik (rahimehullah)",
+    "thenia": "Dija nuk qëndron në transmetimin e shumtë. Dija është një dritë që Allahu e vendos në zemër. Thelbi i saj është ndjekja (e Kuranit dhe Sunetit) dhe largimi nga epshet.",
+    "burimi": "El-Intiqa' nga Ibn Abdil-Berr"
+  },
+  {
+    "id": "thenie17",
+    "tipi": "thenie dijetari",
+    "autor": "Imam esh-Shafi'i (rahimehullah)",
+    "thenia": "Ai e përfundonte leximin e Kuranit gjashtëdhjetë herë në Ramazan, të gjitha këto i lexonte në namaz.",
+    "burimi": "Sijar A'lam en-Nubala"
+  },
+  {
+    "id": "thenie18",
+    "tipi": "thenie dijetari",
+    "autor": "Imam esh-Shafi'i (rahimehullah)",
+    "thenia": "Kushdo që dëshiron dijen e kësaj bote, le t'i përmbahet Kuranit. Dhe kushdo që dëshiron dijen e botës tjetër, le t'i përmbahet Kuranit.",
+    "burimi": "El-Mexhmu' Sharh el-Muhadheb"
+  },
+  {
+    "id": "thenie19",
+    "tipi": "thenie dijetari",
+    "autor": "Imam Ahmedi (rahimehullah)",
+    "thenia": "E pashë Zotin tim në ëndërr dhe i thashë: 'O Zot, cila është vepra më e mirë me të cilën robërit e Tu mund të të afrohen?' Ai tha: 'Me Fjalën Time, o Ahmed.' Unë pyeta: 'Me kuptim apo pa kuptim?' Ai tha: 'Me kuptim dhe pa kuptim.'",
+    "burimi": "Medarixh es-Salikin"
+  },
+  {
+    "id": "thenie20",
+    "tipi": "thenie dijetari",
+    "autor": "Imam Ahmedi (rahimehullah)",
+    "thenia": "Të dashur për mua janë njerëzit e Kuranit, hadithit dhe fikhut.",
+    "burimi": "Menakib el-Imam Ahmed"
+  },
+  {
+    "id": "thenie21",
+    "tipi": "thenie dijetari",
+    "autor": "Sufjan eth-Theuri (rahimehullah)",
+    "thenia": "Nuk di ndonjë vepër më të mirë për t'iu afruar Allahut sesa leximi i Kuranit.",
+    "burimi": "El-Adhkar nga en-Neueui"
+  },
+  {
+    "id": "thenie22",
+    "tipi": "thenie dijetari",
+    "autor": "Katade (rahimehullah)",
+    "thenia": "Nuk është ulur askush me këtë Kuran, veçse është ngritur prej tij me një shtesë ose me një mangësi.",
+    "burimi": "Tefsir el-Kurtubi"
+  },
+  {
+    "id": "thenie23",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn Sirin (rahimehullah)",
+    "thenia": "Ajetet e Kuranit janë thesare, kështu që sa herë që hapet një thesar, është mirë të shikosh se çfarë ka brenda.",
+    "burimi": "El-Burhan fi Ulum al-Quran"
+  },
+  {
+    "id": "thenie24",
+    "tipi": "thenie dijetari",
+    "autor": "Imam el-Axhurri (rahimehullah)",
+    "thenia": "Më e pakta që duhet të bëjë lexuesi i Kuranit, i cili e dallon të lejuarën nga e ndaluara, është të lexojë çdo ditë një xhuz.",
+    "burimi": "Ahlak Hamalat al-Quran"
+  },
+  {
+    "id": "thenie25",
+    "tipi": "thenie dijetari",
+    "autor": "Imam en-Neueui (rahimehullah)",
+    "thenia": "Gjëja e parë me të cilën duhet të fillojë kërkuesi i dijes është mësimi përmendësh i Kuranit të Lavdishëm, sepse ai është më e rëndësishmja prej dijeve.",
+    "burimi": "Et-Tibjan fi Adabi Hamaletil-Kuran"
+  },
+  {
+    "id": "thenie26",
+    "tipi": "thenie dijetari",
+    "autor": "Muhamed ibn Ka'b el-Kuradhi (rahimehullah)",
+    "thenia": "Të lexoj në një natë suren 'El-Zelzele' dhe 'El-Karia', duke i përsëritur dhe medituar ato, është më e dashur për mua sesa të lexoj të gjithë Kuranin shpejt e pa menduar.",
+    "burimi": "Sijar A'lam en-Nubala"
+  },
+  {
+    "id": "thenie27",
+    "tipi": "thenie dijetari",
+    "autor": "Malik ibn Dinar (rahimehullah)",
+    "thenia": "O njerëz të Kuranit, çfarë ka mbjellë Kurani në zemrat tuaja? Sepse Kurani është pranvera e besimtarit, ashtu si shiu është pranvera e tokës.",
+    "burimi": "Hiljetul-Eulija"
+  },
+  {
+    "id": "thenie28",
+    "tipi": "thenie dijetari",
+    "autor": "Dawud ibn Abi Hind (rahimehullah)",
+    "thenia": "Kam lexuar Mus'hafin nga fillimi në fund për dyzet vjet rresht dhe nuk kam parë kurrë dy ditë të ngjashme (në kuptimet që më hapeshin).",
+    "burimi": "Sijar A'lam en-Nubala"
+  },
+  {
+    "id": "thenie29",
+    "tipi": "thenie dijetari",
+    "autor": "Shejhul Islam Ibn Tejmije (rahimehullah)",
+    "thenia": "U pendova që pjesën më të madhe të kohës sime ia kushtova diçkaje tjetër përveç kuptimeve të Kuranit.",
+    "burimi": "Dhejl Tabakat el-Hanabile"
+  },
+  {
+    "id": "thenie30",
+    "tipi": "thenie dijetari",
+    "autor": "Shejhul Islam Ibn Tejmije (rahimehullah)",
+    "thenia": "Kushdo që e mediton Kuranin duke kërkuar udhëzim prej tij, do t'i bëhet e qartë rruga e së vërtetës.",
+    "burimi": "Mexhmu' el-Fetava"
+  },
+  {
+    "id": "thenie31",
+    "tipi": "thenie dijetari",
+    "autor": "Shejhul Islam Ibn Tejmije (rahimehullah)",
+    "thenia": "Nuk kam parë diçka që e ushqen intelektin dhe shpirtin, e ruan trupin dhe siguron lumturinë më shumë sesa shikimi i vazhdueshëm në Librin e Allahut.",
+    "burimi": "Mexhmu' el-Fetava"
+  },
+  {
+    "id": "thenie32",
+    "tipi": "thenie dijetari",
+    "autor": "Shejhul Islam Ibn Tejmije (rahimehullah)",
+    "thenia": "Nevoja e ummetit për të kuptuar Kuranin është më e madhe se çdo nevojë tjetër.",
+    "burimi": "Mexhmu' el-Fetava"
+  },
+  {
+    "id": "thenie33",
+    "tipi": "thenie dijetari",
+    "autor": "Shejhul Islam Ibn Tejmije (rahimehullah)",
+    "thenia": "Baza e çdo të mire në këtë botë dhe në botën tjetër është devotshmëria ndaj Allahut, dhe kjo arrihet vetëm duke medituar Librin e Allahut dhe duke e kuptuar atë.",
+    "burimi": "Mexhmu' el-Fetava"
+  },
+  {
+    "id": "thenie34",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Nuk ka ilaç më të dobishëm për sëmundjet e zemrës sesa leximi i Kuranit me përsiatje dhe përulësi.",
+    "burimi": "Medarixh es-Salikin"
+  },
+  {
+    "id": "thenie35",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Nëse dëshiron të përfitosh nga Kurani, përqendroje zemrën tënde gjatë leximit dhe dëgjimit të tij. Vëri veshin dhe behu i pranishëm sikur Allahu po të flet ty drejtpërdrejt.",
+    "burimi": "El-Fevaid"
+  },
+  {
+    "id": "thenie36",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Meditimi i një ajeti është më i mirë se leximi i të gjithë Kuranit pa meditim dhe kuptim. Ai është më i dobishëm për zemrën dhe më i prirur për të arritur besimin.",
+    "burimi": "Miftah Dar es-Se'adeh"
+  },
+  {
+    "id": "thenie37",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Kurani largon të gjitha sëmundjet e zemrës dhe trupit, por jo çdokujt i jepet suksesi për t'u shëruar me të.",
+    "burimi": "Zad el-Me'ad"
+  },
+  {
+    "id": "thenie38",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Meditimi është shikimi i zemrës në kuptimet e ajeteve dhe mbledhja e mendjes për t'i kuptuar ato.",
+    "burimi": "Medarixh es-Salikin"
+  },
+  {
+    "id": "thenie39",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Nuk bashkohen kurrë në një zemër Fjala e të Gjithëmëshirshmit (Kurani) dhe meloditë e shejtanit (muzika).",
+    "burimi": "Ighathetu'l-Lehfan"
+  },
+  {
+    "id": "thenie40",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Kajjim (rahimehullah)",
+    "thenia": "Zemra ka nevojë për Kuranin siç ka nevojë peshku për ujin. Si mund të jetë gjendja e peshkut kur ai del nga uji?",
+    "burimi": "Miftah Dar es-Se'adeh"
+  },
+  {
+    "id": "thenie41",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Xheuzi (rahimehullah)",
+    "thenia": "O ti që lexon Kuranin! Nëse do ta kuptoje se kujt po i drejtohesh me fjalë, do të ndieje frikë. Dhe nëse do ta kuptoje se çfarë po lexon, do të meditoje dhe do të përuleshe.",
+    "burimi": "Et-Tebsirah"
+  },
+  {
+    "id": "thenie42",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Xheuzi (rahimehullah)",
+    "thenia": "Ju këshilloj të lexoni Kuranin me meditim. Kur të kaloni pranë një ajeti që ka nevojë për ty, ndaluni dhe përsëriteni atë.",
+    "burimi": "Sajd el-Khatir"
+  },
+  {
+    "id": "thenie43",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Xheuzi (rahimehullah)",
+    "thenia": "Leximi i Kuranit vepron në sëmundjet e zemrës ashtu siç vepron mjalti në sëmundjet e trupit.",
+    "burimi": "Et-Tebsirah"
+  },
+  {
+    "id": "thenie44",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Xheuzi (rahimehullah)",
+    "thenia": "Meditimi i Kuranit është çelësi i jetës së zemrës.",
+    "burimi": "Sajd el-Khatir"
+  },
+  {
+    "id": "thenie45",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Xheuzi (rahimehullah)",
+    "thenia": "Është e habitshme se si dikush mund të lexojë Kuranin dhe të mos ngrihet nga vendi i tij i ndryshuar.",
+    "burimi": "Sajd el-Khatir"
+  },
+  {
+    "id": "thenie46",
+    "tipi": "thenie dijetari",
+    "autor": "Imam el-Kurtubi (rahimehullah)",
+    "thenia": "Kush lexon Kuranin, Allahu ia ruan mendjen edhe nëse arrin moshën njëqind vjeçare.",
+    "burimi": "Tefsir el-Kurtubi"
+  },
+  {
+    "id": "thenie47",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn Rexheb el-Hanbeli (rahimehullah)",
+    "thenia": "Dashuria për Kuranin dhe dëshira për ta dëgjuar atë janë shenja të dashurisë së Allahut për robin e Tij, sepse Kurani është Fjala e Allahut.",
+    "burimi": "Lataif el-Me'arif"
+  },
+  {
+    "id": "thenie48",
+    "tipi": "thenie dijetari",
+    "autor": "Imam adh-Dhehebi (rahimehullah)",
+    "thenia": "Leximi i Kuranit me përulësi, meditim dhe me zë të bukur është nga veprat më të mira.",
+    "burimi": "El-Keba'ir"
+  },
+  {
+    "id": "thenie49",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn Kethir (rahimehullah)",
+    "thenia": "Kushdo që kërkon udhëzim në diçka tjetër përveç Kuranit, Allahu do ta lërë të humbur.",
+    "burimi": "Tefsir Ibn Kethir"
+  },
+  {
+    "id": "thenie50",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Abdurrahman es-Sa'di (rahimehullah)",
+    "thenia": "Leximi i Kuranit me meditim është një nga adhurimet më të mëdha. Ai e forcon besimin, e rrit sigurinë dhe e shton njohurinë për Zotin.",
+    "burimi": "Tejsir el-Kerim er-Rahman"
+  },
+  {
+    "id": "thenie51",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Abdurrahman es-Sa'di (rahimehullah)",
+    "thenia": "Meditimi i Librit të Allahut është çelësi i të gjitha dijeve. Prej tij nxirret çdo e mirë.",
+    "burimi": "Tejsir el-Kerim er-Rahman"
+  },
+  {
+    "id": "thenie52",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Muhamed el-Emin esh-Shinkiti (rahimehullah)",
+    "thenia": "Kurani nuk ia jep thesaret e tij askujt përveç atij që i afrohet me përulje dhe meditim të thellë, duke e kuptuar se është Fjala e Zotit të botëve.",
+    "burimi": "Adwa' el-Bejan"
+  },
+  {
+    "id": "thenie53",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Muhamed ibn Salih el-Uthejmin (rahimehullah)",
+    "thenia": "Sa herë që zemra ashpërsohet, kthehu te leximi i Kuranit, sepse ai e zbut atë. Nëse nuk zbutet, atëherë qaj për veten tënde, sepse kjo është një sëmundje e rëndë.",
+    "burimi": "Sherh el-Kafijeh esh-Shafijeh"
+  },
+  {
+    "id": "thenie54",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Muhamed ibn Salih el-Uthejmin (rahimehullah)",
+    "thenia": "Njeriu shpërblehet për leximin e Kuranit, pavarësisht nëse e kupton apo jo. Megjithatë, nuk ka dyshim se meditimi është më i plotë dhe më i mirë.",
+    "burimi": "Fetava Nur 'ala ed-Derb"
+  },
+  {
+    "id": "thenie55",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Abdul-Aziz ibn Baz (rahimehullah)",
+    "thenia": "Këshilla ime për çdo besimtar dhe besimtare është t'i kushtojnë vëmendje Librit të Allahut, ta lexojnë atë me meditim dhe kuptim, dhe ta përsërisin shpesh. Kjo është rruga e lumturisë.",
+    "burimi": "Mexhmu Fetava Ibn Baz"
+  },
+  {
+    "id": "thenie56",
+    "tipi": "thenie dijetari",
+    "autor": "Shejh Nasirudin el-Albani (rahimehullah)",
+    "thenia": "Obligimi ynë është të lexojmë Kuranin me meditim dhe të përpiqemi ta kuptojmë atë, pastaj të veprojmë sipas tij. Ky është qëllimi i shpalljes së tij.",
+    "burimi": "Silsiletul-Huda wen-Nur"
+  },
+  {
+    "id": "thenie57",
+    "tipi": "thenie dijetari",
+    "autor": "Ibn el-Mubarek (rahimehullah)",
+    "thenia": "Nuk di diçka më të lartë pas profetësisë sesa përhapja e dijes, dhe nuk di diçka më të mirë për t'u përhapur sesa Kurani.",
+    "burimi": "Tehdhib el-Kemal"
+  },
+  {
+    "id": "thenie58",
+    "tipi": "thenie dijetari",
+    "autor": "Ejjub es-Sihtijani (rahimehullah)",
+    "thenia": "E pashë një njeri nga banorët e Shamit që qante dhe i thashë: 'Pse po qan?' Ai tha: 'Një ajet nga Libri i Allahut ma theu zemrën: 'Dhe para tyre është Xhehenemi...' (El-Xhathije: 10)'.",
+    "burimi": "Sifatus-Safwa"
+  },
+  {
+    "id": "thenie59",
+    "tipi": "thenie dijetari",
+    "autor": "Ibrahim et-Tejmi (rahimehullah)",
+    "thenia": "Kushdo që i është dhënë dituri (nga Kurani) dhe nuk qan, ai meriton të mos ketë pasur kurrë dituri, sepse Allahu i ka përshkruar dijetarët duke thënë: '...dhe ata bien me fytyrë (në sexhde), duke qarë, dhe ai (Kurani) ua shton përuljen'. (El-Isra: 109)",
+    "burimi": "Fedail el-Kuran nga Ebu Ubejd"
+  },
+  {
+    "id": "thenie60",
+    "tipi": "thenie dijetari",
+    "autor": "Shekik el-Belkhi (rahimehullah)",
+    "thenia": "Ne kërkuam pesë gjëra dhe i gjetëm në pesë të tjera: kërkuam bereqetin e furnizimit dhe e gjetëm në namazin e Duha-së; kërkuam dritën e varrit dhe e gjetëm në leximin e Kuranit; kërkuam përgjigjen e Munkerit dhe Nekirit dhe e gjetëm në fjalën 'La ilahe il-lAllah'; kërkuam kalimin e Siratit dhe e gjetëm në agjërim dhe sadaka; kërkuam hijen e Arshit dhe e gjetëm në vetminë (për adhurim).",
+    "burimi": "Bustan el-Arifin"
+  }
+]

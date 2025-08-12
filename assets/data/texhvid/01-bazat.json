@@ -1,0 +1,640 @@
+[
+  {
+    "id": "elifi",
+    "title": "ELIFI (ا)",
+    "slug": "elifi",
+    "pageNumber": 6,
+    "description": "Elifi (ا) është shkronja e parë e alfabetit arab. Kjo shkronjë fillon të theksohet prej fundit të fytit dhe në të njejtën kohë i tërë fyti duhet të jet i lirë. ال (hemze) dhe ا (elif) janë një shkronjë dhe e zëvendësojnë njëra-tjetrën.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Nëse mbi (ا) elif vendoset َ viza (El-Fet'hatu), atëherë lexohet sikurse zanorja e."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَ",
+            "pronunciation": "e"
+          },
+          {
+            "arabic": "اَ",
+            "pronunciation": "e"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Nëse nën (ا) elif vendoset ِ viza (El-Kesretu), atëherë lexohet sikurse zanorja i."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اِ",
+            "pronunciation": "i"
+          },
+          {
+            "arabic": "اِ",
+            "pronunciation": "i"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Nëse mbi (ا) elifit vendoset shenja ُ (Ed-Dametu), atëherë lexohet sikurse zanorja u."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اُ",
+            "pronunciation": "u"
+          },
+          {
+            "arabic": "اُ",
+            "pronunciation": "u"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "elifi-q1",
+        "text": "Si lexohet Elifi (ا) kur ka një Fet'ha ( َ ) sipër?",
+        "options": [
+          {
+            "id": "elifi-q1-o1",
+            "text": "Sikurse zanorja 'i'",
+            "isCorrect": false
+          },
+          {
+            "id": "elifi-q1-o2",
+            "text": "Sikurse zanorja 'u'",
+            "isCorrect": false
+          },
+          {
+            "id": "elifi-q1-o3",
+            "text": "Sikurse zanorja 'e'",
+            "isCorrect": true
+          },
+          {
+            "id": "elifi-q1-o4",
+            "text": "Nuk lexohet",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Elifi me Fet'ha (اَ) lexohet si zanorja 'e'."
+      }
+    ]
+  },
+  {
+    "id": "shenjat-e-shkronjave",
+    "title": "SHENJAT E SHKRONJAVE (Diakritikat)",
+    "slug": "shenjat-e-shkronjave",
+    "pageNumber": 6,
+    "description": "Shenjat diakritike (hareket) përdoren në gjuhën arabe për të treguar zanoret e shkurtra dhe shenja të tjera të rëndësishme fonetike.",
+    "examples": [
+      {
+        "type": "title",
+        "meaning": "Zanoret e Shkurtra:"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>فَتْحَة (Fet'ha)</span>: Shenja <span class='arabic-emphasis'>◌َ</span> vendoset mbi shkronjë dhe tregon zanoren e shkurtër 'e'. Shembull: <span class='arabic-text text-2xl'>بَ</span> (be)"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>كَسْرَة (Kesra)</span>: Shenja <span class='arabic-emphasis'>◌ِ</span> vendoset nën shkronjë dhe tregon zanoren e shkurtër 'i'. Shembull: <span class='arabic-text text-2xl'>بِ</span> (bi)"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>ضَمَّة (Damma)</span>: Shenja <span class='arabic-emphasis'>◌ُ</span> vendoset mbi shkronjë dhe tregon zanoren e shkurtër 'u'. Shembull: <span class='arabic-text text-2xl'>بُ</span> (bu)"
+      },
+      {
+        "type": "title",
+        "meaning": "Shenja të Tjera:"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>سُكُون (Sukun)</span>: Shenja <span class='arabic-emphasis'>◌ْ</span> tregon mungesën e zanores, pra shkronja është e heshtur. Shembull: <span class='arabic-text text-2xl'>اَبْ</span> (eb)"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "diacritics-q1",
+        "text": "Cila shenjë përdoret për të treguar zanoren e shkurtër 'u'?",
+        "options": [
+          {
+            "id": "diacritics-q1-o1",
+            "text": "El-Fet'hatu (<span class='quiz-diacritic'>◌َ</span>)",
+            "isCorrect": false
+          },
+          {
+            "id": "diacritics-q1-o2",
+            "text": "El-Kesretu (<span class='quiz-diacritic'>◌ِ</span>)",
+            "isCorrect": false
+          },
+          {
+            "id": "diacritics-q1-o3",
+            "text": "Ed-Dametu (<span class='quiz-diacritic'>◌ُ</span>)",
+            "isCorrect": true
+          },
+          {
+            "id": "diacritics-q1-o4",
+            "text": "Es-Sukun (<span class='quiz-diacritic'>◌ْ</span>)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Ed-Dametu (◌ُ) përdoret për të treguar zanoren e shkurtër 'u'."
+      },
+      {
+        "id": "diacritics-q2",
+        "text": "Çfarë tregon shenja Es-Sukun (<span class='quiz-diacritic'>◌ْ</span>)?",
+        "options": [
+          {
+            "id": "diacritics-q2-o1",
+            "text": "Zanoren e shkurtër 'e'",
+            "isCorrect": false
+          },
+          {
+            "id": "diacritics-q2-o2",
+            "text": "Mungesën e zanores (shkronjë e heshtur)",
+            "isCorrect": true
+          },
+          {
+            "id": "diacritics-q2-o3",
+            "text": "Zanoren e shkurtër 'i'",
+            "isCorrect": false
+          },
+          {
+            "id": "diacritics-q2-o4",
+            "text": "Dyfishimin e shkronjës",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Es-Sukun (◌ْ) tregon që shkronja nuk ka zanore, pra është e heshtur."
+      }
+    ]
+  },
+  {
+    "id": "sukuni",
+    "title": "SUKUNI (ْ)",
+    "slug": "sukuni",
+    "pageNumber": 7,
+    "description": "Es-sukun (<span class='arabic-emphasis'>◌ْ</span>) do të thotë heshtje, qetësi. Kur mbi elifin (ا), vendoset Es-sukun (<span class='arabic-text text-2xl'>اْ</span>) atëherë lexohet 'Ë'. Kjo rregull vlenë te të gjitha shkronjat. Sukuni shkruhet në mes dhe në fund të fjalës që do të thotë nuk shkruhet në fillim të fjalës. Pra, gjithmon fjala fillon me njërën prej zanoreve tjera E, I, U.",
+    "examples": [
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اْ",
+            "pronunciation": "ë"
+          },
+          {
+            "arabic": "بْ",
+            "pronunciation": "b"
+          },
+          {
+            "arabic": "تْ",
+            "pronunciation": "t"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Shembuj leximi:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "اَبْ",
+            "pronunciation": "eb"
+          },
+          {
+            "arabic": "اِذْ",
+            "pronunciation": "idh"
+          },
+          {
+            "arabic": "اُفْ",
+            "pronunciation": "uf"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "sukun-q1",
+        "text": "Çfarë tregon shenja Es-Sukun (<span class='quiz-diacritic'>◌ْ</span>) kur vendoset mbi një shkronjë?",
+        "options": [
+          {
+            "id": "sukun-q1-o1",
+            "text": "Shkronja lexohet me zanoren 'e'",
+            "isCorrect": false
+          },
+          {
+            "id": "sukun-q1-o2",
+            "text": "Shkronja është e heshtur (pa zanore)",
+            "isCorrect": true
+          },
+          {
+            "id": "sukun-q1-o3",
+            "text": "Shkronja lexohet me zanoren 'u'",
+            "isCorrect": false
+          },
+          {
+            "id": "sukun-q1-o4",
+            "text": "Shkronja dyfishohet",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Es-Sukun (◌ْ) tregon heshtje, pra shkronja nuk ka zanore."
+      },
+      {
+        "id": "sukun-q2",
+        "text": "Ku mund të shkruhet Sukuni në një fjalë?",
+        "options": [
+          {
+            "id": "sukun-q2-o1",
+            "text": "Vetëm në fillim të fjalës",
+            "isCorrect": false
+          },
+          {
+            "id": "sukun-q2-o2",
+            "text": "Vetëm në fund të fjalës",
+            "isCorrect": false
+          },
+          {
+            "id": "sukun-q2-o3",
+            "text": "Në mes dhe në fund të fjalës",
+            "isCorrect": true
+          },
+          {
+            "id": "sukun-q2-o4",
+            "text": "Kudo në fjalë",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Sukuni shkruhet në mes dhe në fund të fjalës, por kurrë në fillim."
+      }
+    ]
+  },
+  {
+    "id": "hemzeja",
+    "title": "HEMZEJA (ء)",
+    "slug": "hemzeja",
+    "pageNumber": 8,
+    "description": "Hemzeja (ء) është motërzim i Elifit (ا). Ndonjëherë edhe elifi (ا) edhe Hemzeja (ء) shkruhen së bashku. Ndonjëherë Hemzeja (ء) shkruhet në vete dhe e zëvendëson elifin. Ndryshe Hemzeja edhe quhet Elifi i Shkurtuar. Për dallim nga Elifi, Hemzeja ndonjëherë shkruhet së bashku me bashtinglloren Jaun (ي) dhe va-un (و) dhe atëherë kur ta merr kuptimin e shkronjës i dhe u.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Shembull i Elifit dhe Hemzesë së bashku:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "أَ",
+            "pronunciation": "e"
+          },
+          {
+            "arabic": "إِ",
+            "pronunciation": "i"
+          },
+          {
+            "arabic": "أُ",
+            "pronunciation": "u"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull i Hemzesë së vetme:"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ءَ",
+            "pronunciation": "e"
+          },
+          {
+            "arabic": "ءِ",
+            "pronunciation": "i"
+          },
+          {
+            "arabic": "ءُ",
+            "pronunciation": "u"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull i Hemzesë me Jaun (ي) dhe Vaun (و):"
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "ئِ",
+            "pronunciation": "i"
+          },
+          {
+            "arabic": "ؤُ",
+            "pronunciation": "u"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "hemze-q1",
+        "text": "Cila është një nga format e shkrimit të Hemzesë?",
+        "options": [
+          {
+            "id": "hemze-q1-o1",
+            "text": "Vetëm si Elif (ا)",
+            "isCorrect": false
+          },
+          {
+            "id": "hemze-q1-o2",
+            "text": "Vetëm e vetme (ء)",
+            "isCorrect": false
+          },
+          {
+            "id": "hemze-q1-o3",
+            "text": "E bashkuar me Elif (أ إ ئ ؤ), ose e vetme (ء)",
+            "isCorrect": true
+          },
+          {
+            "id": "hemze-q1-o4",
+            "text": "Gjithmonë me Sukun",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Hemzeja mund të shkruhet e bashkuar me Elif (أ إ ئ ؤ) në forma të ndryshme, ose e vetme (ء)."
+      }
+    ]
+  },
+  {
+    "id": "zanoret-e-gjata",
+    "title": "ZANORET E GJATA (Medd Tabiee)",
+    "slug": "zanoret-e-gjata",
+    "pageNumber": 9,
+    "description": "Veçori e gjuhës arabe është se përbëhet prej zanoreve të dyfishta, rrespektivisht prej zanoreve të gjata dhe zanoreve të shkurta. Zanoret e gjata formohen kur një shkronjë me Fet'ha pasohet nga Elif (ا), një shkronjë me Kesra pasohet nga Jaa (ي), ose një shkronjë me Damma pasohet nga Waw (و). Këto quhen edhe Medd Tabiee (Zgjatim Natyror) dhe zgjaten sa dy kohë (sa dy zanore të shkurtra).",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Zanorja e gjatë 'aa': Kur një shkronjë me Fet'ha (◌َ) pasohet nga Elif (ا). Shembull: <span class='arabic-text text-2xl'>بَا</span> (baa)"
+      },
+      {
+        "type": "text",
+        "meaning": "Zanorja e gjatë 'ii': Kur një shkronjë me Kesra (◌ِ) pasohet nga Jaa (ي). Shembull: <span class='arabic-text text-2xl'>بِي</span> (bii)"
+      },
+      {
+        "type": "text",
+        "meaning": "Zanorja e gjatë 'uu': Kur një shkronjë me Damma (◌ُ) pasohet nga Waw (و). Shembull: <span class='arabic-text text-2xl'>بُو</span> (buu)"
+      },
+      {
+        "type": "text",
+        "meaning": "Kjo rregull vlen edhe për El-Hemzetu (ء) e cila është motërzim i Elifit, si dhe për të gjitha shkronjat e alfabetit arab."
+      },
+      {
+        "type": "arabic-group",
+        "items": [
+          {
+            "arabic": "آ",
+            "pronunciation": "aa"
+          },
+          {
+            "arabic": "إِي",
+            "pronunciation": "ii"
+          },
+          {
+            "arabic": "أُو",
+            "pronunciation": "uu"
+          }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "medd-tabiee-q1",
+        "text": "Si formohet zanorja e gjatë 'uu' (Medd Tabiee)?",
+        "options": [
+          {
+            "id": "medd-tabiee-q1-o1",
+            "text": "Shkronjë me Fet'ha + Elif (ا)",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-tabiee-q1-o2",
+            "text": "Shkronjë me Damma (◌ُ) + Waw (و)",
+            "isCorrect": true
+          },
+          {
+            "id": "medd-tabiee-q1-o3",
+            "text": "Shkronjë me Kesra + Jaa (ي)",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-tabiee-q1-o4",
+            "text": "Shkronjë me Sukun + Elif (ا)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Zanorja e gjatë 'uu' formohet kur një shkronjë me Damma (◌ُ) pasohet nga shkronja Waw (و)."
+      },
+      {
+        "id": "medd-tabiee-q2",
+        "text": "Sa zgjatet një Medd Tabiee (Zgjatim Natyror)?",
+        "options": [
+          {
+            "id": "medd-tabiee-q2-o1",
+            "text": "Një kohë (sa një zanore e shkurtër)",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-tabiee-q2-o2",
+            "text": "Dy kohë (sa dy zanore të shkurtra)",
+            "isCorrect": true
+          },
+          {
+            "id": "medd-tabiee-q2-o3",
+            "text": "Tri kohë",
+            "isCorrect": false
+          },
+          {
+            "id": "medd-tabiee-q2-o4",
+            "text": "Katër kohë",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Medd Tabiee zgjatet sa dy kohë, ekuivalente me dy zanore të shkurtra."
+      }
+    ]
+  },
+  {
+    "id": "tenvini",
+    "title": "TENVINI (Nunimi)",
+    "slug": "tenvini",
+    "pageNumber": 11,
+    "description": "TENVINI (Nunimi) është shenjë e cila shkruhet gjithmonë në fund të fjalës dhe asnjëherë nuk vjen në fillim apo në mes. Ndryshe edhe quhet dyfishim i zanores në të shkruar por jo në të lexuar. Ai tregon praninë e një Nuni (<span class='arabic-emphasis'>نْ</span>) të heshtur (sakin) në fund të fjalës, edhe pse ky Nun nuk shkruhet.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>فَتْحَتَيْنِ (Fethaten)</span>: Dy Fet'ha (<span class='arabic-emphasis'>◌ً</span>) mbi shkronjën e fundit. Lexohet si zanorja 'e' e ndjekur nga tingulli 'n'. Shembull: <span class='arabic-text text-2xl'>بًا</span> (ben)"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>كَسْرَتَيْنِ (Kesreten)</span>: Dy Kesra (<span class='arabic-emphasis'>◌ٍ</span>) nën shkronjën e fundit. Lexohet si zanorja 'i' e ndjekur nga tingulli 'n'. Shembull: <span class='arabic-text text-2xl'>بٍ</span> (bin)"
+      },
+      {
+        "type": "text",
+        "meaning": "<span class='arabic-emphasis'>ضَمَّتَيْنِ (Dammeten)</span>: Dy Damma (<span class='arabic-emphasis'>◌ٌ</span>) mbi shkronjën e fundit. Lexohet si zanorja 'u' e ndjekur nga tingulli 'n'. Shembull: <span class='arabic-text text-2xl'>بٌ</span> (bun)"
+      },
+      {
+        "type": "text",
+        "meaning": "Vërejtje: Tenvini (Nunimi) shkruhet gjithmonë vetëm në fund të fjalës."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "tenvin-q1",
+        "text": "Cila nga këto shenja është Tenvin që tregon tingullin 'un'?",
+        "options": [
+          {
+            "id": "tenvin-q1-o1",
+            "text": "Fethaten (<span class='quiz-diacritic'>◌ً</span>)",
+            "isCorrect": false
+          },
+          {
+            "id": "tenvin-q1-o2",
+            "text": "Kesreten (<span class='quiz-diacritic'>◌ٍ</span>)",
+            "isCorrect": false
+          },
+          {
+            "id": "tenvin-q1-o3",
+            "text": "Dammeten (<span class='quiz-diacritic'>◌ٌ</span>)",
+            "isCorrect": true
+          },
+          {
+            "id": "tenvin-q1-o4",
+            "text": "Sukun (<span class='quiz-diacritic'>◌ْ</span>)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Dammeten (◌ٌ) është Tenvini që tregon tingullin 'un' në fund të fjalës, si p.sh., <span class='arabic-text'>كِتَابٌ</span> (kitabun)."
+      },
+      {
+        "id": "tenvin-q2",
+        "text": "Ku vendoset Tenvini në një fjalë?",
+        "options": [
+          {
+            "id": "tenvin-q2-o1",
+            "text": "Në fillim të fjalës",
+            "isCorrect": false
+          },
+          {
+            "id": "tenvin-q2-o2",
+            "text": "Në mes të fjalës",
+            "isCorrect": false
+          },
+          {
+            "id": "tenvin-q2-o3",
+            "text": "Në fund të fjalës",
+            "isCorrect": true
+          },
+          {
+            "id": "tenvin-q2-o4",
+            "text": "Pas çdo zanoreje të gjatë",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Tenvini (Nunimi) shkruhet gjithmonë vetëm në fund të fjalës."
+      }
+    ]
+  },
+  {
+    "id": "teshtidi",
+    "title": "TESHTIDI (Shadda - ــّـ)",
+    "slug": "teshtidi",
+    "pageNumber": 13,
+    "description": "TESHDID (<span class='arabic-emphasis'>◌ّ</span>) do të thotë përforcues, shtrëngues apo dyfishues. Në gjuhën arabe të gjitha shkronjat i nënshtrohen përsëritjes, përforcimit apo dyfishimit e cila bëhet nëpërmjet TESHDIDIT (<span class='arabic-emphasis'>◌ّ</span>). Teshtidi shkruhet mbi shkronjë, dhe atëherë ajo shkronjë është e dyfisht dhe përforcohet. Shkronja me Teshtid lexohet duke e mbajtur pak zërin në të, sikur të ishin dy shkronja: e para me Sukun dhe e dyta me zanoren që mban Teshtidi.",
+    "examples": [
+      {
+        "type": "text",
+        "meaning": "Shembull: Fjala <span class='arabic-text text-2xl'>رَبَّ</span> (rabba). Shkronja <span class='arabic-text text-2xl'>ب</span> (Ba) ka Teshtid dhe Fet'ha. Kjo lexohet sikur <span class='arabic-text text-2xl'>رَبْ + بَ</span> (rab+ba)."
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull tjetër: <span class='arabic-text text-2xl'>اُمِّ</span> (ummi). Shkronja <span class='arabic-text text-2xl'>م</span> (Mim) ka Teshtid dhe Kesra. Lexohet sikur <span class='arabic-text text-2xl'>اُمْ + مِ</span> (um+mi)."
+      },
+      {
+        "type": "text",
+        "meaning": "Shembull tjetër: <span class='arabic-text text-2xl'>يَظُنُّ</span> (jadhunnu). Shkronja <span class='arabic-text text-2xl'>ن</span> (Nun) ka Teshtid dhe Damma. Lexohet sikur <span class='arabic-text text-2xl'>يَظُنْ + نُ</span> (jadhun+nu)."
+      },
+      {
+        "type": "text",
+        "meaning": "Vërejtje: Teshtidi shkruhet vetëm në mes dhe në fund të fjalës."
+      }
+    ],
+    "quiz": [
+      {
+        "id": "teshtid-q1",
+        "text": "Çfarë tregon shenja Teshtid (<span class='quiz-diacritic'>◌ّ</span>) mbi një shkronjë?",
+        "options": [
+          {
+            "id": "teshtid-q1-o1",
+            "text": "Shkronja është e heshtur",
+            "isCorrect": false
+          },
+          {
+            "id": "teshtid-q1-o2",
+            "text": "Shkronja është e dyfishuar dhe e përforcuar",
+            "isCorrect": true
+          },
+          {
+            "id": "teshtid-q1-o3",
+            "text": "Shkronja ka një zanore të gjatë",
+            "isCorrect": false
+          },
+          {
+            "id": "teshtid-q1-o4",
+            "text": "Shkronja ka Tenvin",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Teshtidi (Shadda) tregon që shkronja lexohet e dyfishuar: një herë me Sukun dhe pastaj me zanoren që e shoqëron Teshtidin."
+      },
+      {
+        "id": "teshtid-q2",
+        "text": "Si lexohet shkronja <span class='arabic-text'>بّ</span> në fjalën <span class='arabic-text'>رَبِّ</span>?",
+        "options": [
+          {
+            "id": "teshtid-q2-o1",
+            "text": "<span class='arabic-text'>رَبِ</span> (rabi)",
+            "isCorrect": false
+          },
+          {
+            "id": "teshtid-q2-o2",
+            "text": "<span class='arabic-text'>رَبْبِ</span> (rabbi)",
+            "isCorrect": true
+          },
+          {
+            "id": "teshtid-q2-o3",
+            "text": "<span class='arabic-text'>رَابِ</span> (raabi)",
+            "isCorrect": false
+          },
+          {
+            "id": "teshtid-q2-o4",
+            "text": "<span class='arabic-text'>رَبْ</span> (rab)",
+            "isCorrect": false
+          }
+        ],
+        "explanation": "Shkronja <span class='arabic-text'>ب</span> me Teshtid dhe Kesra (<span class='arabic-text'>بِّ</span>) në fjalën <span class='arabic-text'>رَبِّ</span> lexohet si <span class='arabic-text'>رَبْ + بِ</span> (rab+bi)."
+      }
+    ]
+  }
+]
