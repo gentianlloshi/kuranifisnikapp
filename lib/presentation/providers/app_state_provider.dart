@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/usecases/settings_usecases.dart';
 
@@ -43,8 +44,8 @@ class AppStateProvider extends ChangeNotifier {
         _settings = loadedSettings;
         notifyListeners();
       }
-    } catch (e) {
-      debugPrint('Error loading settings: $e');
+    } catch (e, st) {
+      Logger.e('Error loading settings', e, st, tag: 'AppState');
     }
   }
 
@@ -105,8 +106,8 @@ class AppStateProvider extends ChangeNotifier {
       await _saveSettingsUseCase!.call(newSettings);
       _settings = newSettings;
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error saving settings: $e');
+    } catch (e, st) {
+      Logger.e('Error saving settings', e, st, tag: 'AppState');
     }
   }
 }

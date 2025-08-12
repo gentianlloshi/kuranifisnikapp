@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 
 // Clean converter for texhvid JS data to JSON.
 // Usage: dart run tool/convert_texhvid.dart [--force]
@@ -42,8 +43,8 @@ Future<void> main(List<String> args) async {
       dynamic data;
       try { data = jsonDecode(lit); } catch (e) { stderr.writeln('JSON decode failed for ${file.path}: $e'); failed++; continue; }
       final pretty = const JsonEncoder.withIndent('  ').convert(data);
-      await File(outPath).writeAsString(pretty + '\n');
-      print('Converted: ${file.path}');
+  await File(outPath).writeAsString(pretty + '\n');
+  Logger.i('Converted: ${file.path}', tag: 'TexhvidConvert');
       converted++;
     } catch (e, st) {
       stderr.writeln('Failure converting ${file.path}: $e');
@@ -51,7 +52,7 @@ Future<void> main(List<String> args) async {
       failed++;
     }
   }
-  print('Done. Converted=$converted Skipped(existing JSON)=$skipped Failed=$failed');
+  Logger.i('Done. Converted=$converted Skipped(existing JSON)=$skipped Failed=$failed', tag: 'TexhvidConvert');
 }
 
 String _stripLineCommentsPreserveUrls(String input) {

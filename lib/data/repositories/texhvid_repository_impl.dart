@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:kurani_fisnik_app/domain/entities/texhvid_rule.dart';
 import 'package:kurani_fisnik_app/domain/repositories/texhvid_repository.dart';
 
@@ -47,9 +48,10 @@ class TexhvidRepositoryImpl implements TexhvidRepository {
           );
           rules.add(rule);
         }
-      } catch (e) {
+      } catch (e, st) {
         // If file doesn't exist or has issues, continue with other files
-        print('Error loading $filePath: $e');
+        Logger.w('Failed loading $filePath: $e', tag: 'TexhvidRepository');
+        Logger.d('Stack: $st', tag: 'TexhvidRepository');
       }
     }
 

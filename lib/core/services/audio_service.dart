@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import '../../domain/entities/verse.dart';
@@ -518,7 +519,6 @@ class AudioService {
   }
 
   void _log(String message) {
-    // ignore: avoid_print
-    print('[AudioService] $message');
+    Logger.d(message, tag: 'AudioService');
   }
 }

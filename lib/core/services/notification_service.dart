@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import '../../domain/entities/prayer.dart';
@@ -53,8 +54,7 @@ class NotificationService {
   }
 
   void _onNotificationTapped(NotificationResponse response) {
-    // Handle notification tap
-    print('Notification tapped: ${response.payload}');
+    Logger.i('Notification tapped payload=${response.payload}', tag: 'NotificationService');
   }
 
   Future<void> scheduleDailyPrayerNotification(List<Prayer> prayers) async {
