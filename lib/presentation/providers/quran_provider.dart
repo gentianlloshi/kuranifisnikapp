@@ -4,6 +4,7 @@ import 'inverted_index_builder.dart' as idx;
 import '../../domain/entities/surah.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
+import 'package:kurani_fisnik_app/core/utils/result.dart';
 import '../../domain/usecases/search_verses_usecase.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 
@@ -172,10 +173,15 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahs() async {
     _setLoading(true);
     try {
-      _surahs = await _getSurahsUseCase!.call();
-      _error = null;
+      final res = await _getSurahsUseCase!.call();
+      if (res is Success<List<Surah>>) {
+        _surahs = res.value;
+        _error = null;
+      } else {
+        _error = res.error?.message ?? 'Unknown error';
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = e.toString(); // fallback if unexpected exception
     } finally {
       _setLoading(false);
     }

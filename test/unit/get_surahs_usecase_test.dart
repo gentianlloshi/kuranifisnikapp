@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_usecase.dart';
+import 'package:kurani_fisnik_app/core/utils/result.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
@@ -48,10 +49,10 @@ void main() {
       fakeRepository = FakeQuranRepository(tSurahs);
       getSurahsUseCase = GetSurahsUseCase(fakeRepository);
       // Act
-      final result = await getSurahsUseCase.call();
-
-      // Assert
-      expect(result, tSurahs);
+  final result = await getSurahsUseCase.call();
+  // Assert
+  expect(result, isA<Success<List<Surah>>>());
+  expect((result as Success<List<Surah>>).value, tSurahs);
       expect(fakeRepository.getAllSurahsCallCount, 1);
     });
   });

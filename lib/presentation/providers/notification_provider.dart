@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 
 class NotificationProvider extends ChangeNotifier {
   bool _notificationsEnabled = true;
@@ -29,7 +30,7 @@ class NotificationProvider extends ChangeNotifier {
 
   Future<void> showTestNotification() async {
     // TODO: Implement test notification
-    debugPrint('Test notification triggered');
+  Logger.i('Test notification triggered', tag: 'NotificationProvider');
   }
 
   Future<void> loadRandomPrayer() async {

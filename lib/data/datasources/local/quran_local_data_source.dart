@@ -68,7 +68,11 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
     try {
       final String jsonString = await rootBundle.loadString('assets/data/$translationKey.json');
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
+      final sw = Stopwatch()..start();
+      final Map<String, dynamic> jsonData = await compute(_decodeJsonMap, jsonString);
+      if (sw.elapsedMilliseconds > 50) {
+        debugPrint('Decoded translation $translationKey in ${sw.elapsedMilliseconds}ms (isolate)');
+      }
       await _translationBox.put(translationKey, jsonData);
       return jsonData;
     } catch (e) {
@@ -100,7 +104,11 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
     try {
       final String jsonString = await rootBundle.loadString('assets/data/transliterations.json');
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
+      final sw = Stopwatch()..start();
+      final Map<String, dynamic> jsonData = await compute(_decodeJsonMap, jsonString);
+      if (sw.elapsedMilliseconds > 50) {
+        debugPrint('Decoded transliterations in ${sw.elapsedMilliseconds}ms (isolate)');
+      }
       await _transliterationBox.put('transliterations', jsonData);
       return jsonData;
     } catch (e) {
@@ -158,4 +166,8 @@ List<dynamic> _parseQuranDataIsolate(Map<String, String?> payload) {
     });
   }
   return out;
+}
+
+Map<String, dynamic> _decodeJsonMap(String jsonStr) {
+  return json.decode(jsonStr) as Map<String, dynamic>;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
@@ -13,15 +14,16 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<List<Surah>> getAllSurahs() async {
+  final sw = Stopwatch()..start();
     // Try to get from cache first
     List<Surah> surahs = await _storageDataSource.getCachedQuranData();
     if (surahs.isNotEmpty) {
-      debugPrint('Loaded Quran data from cache');
+  Logger.i('Loaded Quran data from cache', tag: 'QuranRepo');
       // Kontrollo nëse mungojnë përkthimet / transliterimet (kjo ndodhi para se të shtonim logjikën e bashkimit)
       final needsTranslation = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTranslation == null);
       final needsTransliteration = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTransliteration == null);
       if (needsTranslation || needsTransliteration) {
-        debugPrint('Merging missing translation / transliteration into cached data...');
+  Logger.i('Merging missing translation / transliteration into cached data...', tag: 'QuranRepo');
         if (needsTranslation) {
           await _loadAndMergeTranslation('sq_ahmeti', surahs);
         }
@@ -31,19 +33,20 @@ class QuranRepositoryImpl implements QuranRepository {
         // Ruaj përsëri cache me të dhënat e pasuruara
         await _storageDataSource.cacheQuranData(surahs);
       }
-      return surahs;
+  Logger.d('getAllSurahs (cache) ${sw.elapsedMilliseconds}ms', tag: 'Perf');
+  return surahs;
     }
 
     // If not in cache, load from local assets and then cache it
-    debugPrint('Loading Quran data from assets and caching...');
-    surahs = await _localDataSource.getQuranData();
+  Logger.i('Loading Quran data from assets and caching...', tag: 'QuranRepo');
+  surahs = await _localDataSource.getQuranData();
     await _storageDataSource.cacheQuranData(surahs);
     
   // Load default translation and transliteration and merge with Arabic text
   await _loadAndMergeTranslation('sq_ahmeti', surahs);
   await _loadAndMergeTransliteration(surahs);
   await _storageDataSource.cacheQuranData(surahs); // cache pas bashkimit
-    
+    Logger.d('getAllSurahs (fresh) ${sw.elapsedMilliseconds}ms', tag: 'Perf');
     return surahs;
   }
 
@@ -66,7 +69,7 @@ class QuranRepositoryImpl implements QuranRepository {
           }
         }
     } catch (e) {
-      debugPrint('Error loading translation $translationKey: $e');
+  Logger.w('Error loading translation $translationKey: $e', tag: 'QuranRepo');
     }
   }
 
@@ -88,7 +91,7 @@ class QuranRepositoryImpl implements QuranRepository {
         }
       }
     } catch (e) {
-      debugPrint('Error loading transliterations: $e');
+  Logger.w('Error loading transliterations: $e', tag: 'QuranRepo');
     }
   }
 
@@ -127,12 +130,12 @@ class QuranRepositoryImpl implements QuranRepository {
     // Try to get from cache first
     Map<String, dynamic> translation = await _storageDataSource.getCachedTranslationData(translationKey);
     if (translation.isNotEmpty) {
-      debugPrint('Loaded translation $translationKey from cache');
+  Logger.i('Loaded translation $translationKey from cache', tag: 'QuranRepo');
       return translation;
     }
 
     // If not in cache, load from local assets and then cache it
-    debugPrint('Loading translation $translationKey from assets and caching...');
+  Logger.i('Loading translation $translationKey from assets and caching...', tag: 'QuranRepo');
     translation = await _localDataSource.getTranslationData(translationKey);
     await _storageDataSource.cacheTranslationData(translationKey, translation);
     return translation;

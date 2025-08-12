@@ -32,13 +32,14 @@ class AudioService {
   AudioState _currentState = AudioState.stopped;
   Verse? _currentVerse;
   List<Verse> _currentPlaylist = [];
-  int _currentIndex = 0;
+  int _currentIndex = 0; // mirrors player.currentIndex; kept for legacy callers
   bool _isRepeatMode = false;
-  bool _isAutoPlayNext = true;
+  bool _isAutoPlayNext = true; // with ConcatenatingAudioSource this is always true unless disabled
   List<WordTimestamp> _currentWordTimestamps = []; // Store current word timestamps
   String? _preferredReciter; // user selected preferred reciter (folder name)
-  bool _completionHandled = false; // guard against duplicate completed events causing skips
+  bool _isAdvancing = false; // legacy guard (no longer needed with currentIndexStream) – will be removed after validation
   final Set<String> _prefetchedUrls = <String>{}; // remember prefetched remote URLs
+  ConcatenatingAudioSource? _playlistSource; // active playlist audio source
 
   // Tunables
   static const int _maxRetries = 3;
@@ -66,8 +67,17 @@ class AudioService {
       await session.configure(const AudioSessionConfiguration.music());
 
       // Listen to player state changes
-      _audioPlayer.playerStateStream.listen((playerState) {
-        _updateState(playerState);
+      _audioPlayer.playerStateStream.listen(_updateState);
+
+      // Track current index changes from just_audio (single source of truth)
+      _audioPlayer.currentIndexStream.listen((idx) {
+        if (idx == null || idx < 0) return;
+        if (idx >= 0 && idx < _currentPlaylist.length) {
+          _currentIndex = idx;
+          final verse = _currentPlaylist[idx];
+          _currentVerse = verse;
+          _currentVerseController.add(verse);
+        }
       });
 
       // Listen to position changes
@@ -81,13 +91,11 @@ class AudioService {
         _durationController.add(duration);
       });
 
-      // Listen to playback completion
+      // Rely on just_audio's internal advancement. For single verse playback we'll still observe completion -> stopped state.
       _audioPlayer.processingStateStream.listen((processingState) {
-        if (processingState == ProcessingState.completed) {
-          if (!_completionHandled) {
-            _completionHandled = true;
-            _onPlaybackCompleted();
-          }
+        if (processingState == ProcessingState.completed && _playlistSource == null) {
+          // Single verse ended
+          stop();
         }
       });
 
@@ -103,8 +111,8 @@ class AudioService {
       _currentVerse = verse;
       _currentVerseController.add(verse);
       _currentWordTimestamps = wordTimestamps ?? []; // Set word timestamps
-      _currentWordIndexController.add(null); // Reset word index
-  _completionHandled = false; // new verse => allow completion handler once
+  _currentWordIndexController.add(null); // Reset word index
+  // DO NOT reset _isAdvancing here; wait until verse actually starts playing to avoid race with completion events.
 
       final audioUrl = await _resolveAudioUrlWithFallback(verse);
       if (audioUrl == null) {
@@ -134,8 +142,9 @@ class AudioService {
           await Future.delayed(backoff);
         }
       }
-  // Fire-and-forget prefetch of next verse in playlist for smoother gapless playback
-  _prefetchNextInPlaylist();
+  // Now that playback has successfully started, allow completion handler again.
+  _isAdvancing = false;
+      // No manual prefetch when single verse – playlist prefetch handled separately.
       
     } catch (e) {
       _log('Error playing verse: $e');
@@ -145,40 +154,30 @@ class AudioService {
 
   Future<void> playPlaylist(List<Verse> verses, {int startIndex = 0}) async {
     if (verses.isEmpty) return;
-
+    _setState(AudioState.loading);
     _currentPlaylist = verses;
     _currentIndex = startIndex.clamp(0, verses.length - 1);
-  _completionHandled = false;
-    
-    // Note: For playlist, word-by-word highlighting would require passing timestamps for each verse in the playlist.
-    // This is a more complex scenario and might need a different approach (e.g., loading timestamps dynamically).
-    await playVerse(verses[_currentIndex]);
+    _playlistSource?.clear();
+    // Build sources (prefer local cached files if present / prefetch flag)
+    final children = <AudioSource>[];
+    for (final v in verses) {
+      final url = await _resolveAudioUrlWithFallback(v);
+      if (url == null) continue; // skip missing
+      String? path;
+      if (_prefetchBeforePlay) {
+        path = await _ensureLocalFile(url);
+      }
+      final effective = path != null ? Uri.file(path) : Uri.parse(url);
+      children.add(AudioSource.uri(effective));
+    }
+    final source = ConcatenatingAudioSource(children: children);
+    _playlistSource = source;
+    await _audioPlayer.setAudioSource(source, initialIndex: _currentIndex);
+    await _audioPlayer.play();
+    _isAdvancing = false;
   }
 
-  void _prefetchNextInPlaylist() {
-    if (!_prefetchBeforePlay) return; // respect flag
-    if (_currentPlaylist.isEmpty) return;
-    final nextIndex = _currentIndex + 1;
-    if (nextIndex >= _currentPlaylist.length) return;
-    final nextVerse = _currentPlaylist[nextIndex];
-    // Resolve and prefetch asynchronously
-    () async {
-      try {
-        final url = await _resolveAudioUrlWithFallback(nextVerse);
-        if (url == null) return;
-        // Already local or downloaded
-        String effective = url.startsWith('file://') ? url.substring(7) : url;
-        if (_prefetchedUrls.contains(effective)) return;
-        // Ensure local file (this will download if needed)
-        final local = await _ensureLocalFile(url);
-        if (local != null) {
-          _prefetchedUrls.add(effective);
-        }
-      } catch (_) {
-        // ignore prefetch errors
-      }
-    }();
-  }
+  void _prefetchNextInPlaylist() {/* obsolete with ConcatenatingAudioSource - retained for compatibility */}
 
   Future<void> play() async {
     try {
@@ -221,41 +220,26 @@ class AudioService {
   }
 
   Future<void> playNext() async {
-    if (_currentPlaylist.isEmpty) return;
-
-    if (_currentIndex < _currentPlaylist.length - 1) {
-      _currentIndex++;
-  _completionHandled = false;
-      await playVerse(_currentPlaylist[_currentIndex]);
-    } else if (_isRepeatMode) {
-      _currentIndex = 0;
-  _completionHandled = false;
-      await playVerse(_currentPlaylist[_currentIndex]);
-    } else {
-      await stop();
+    if (_playlistSource != null) {
+      try { await _audioPlayer.seekToNext(); } catch (_) {}
     }
   }
 
   Future<void> playPrevious() async {
-    if (_currentPlaylist.isEmpty) return;
-
-    if (_currentIndex > 0) {
-      _currentIndex--;
-  _completionHandled = false;
-      await playVerse(_currentPlaylist[_currentIndex]);
-    } else if (_isRepeatMode) {
-      _currentIndex = _currentPlaylist.length - 1;
-  _completionHandled = false;
-      await playVerse(_currentPlaylist[_currentIndex]);
+    if (_playlistSource != null) {
+      try { await _audioPlayer.seekToPrevious(); } catch (_) {}
     }
   }
 
   void toggleRepeatMode() {
     _isRepeatMode = !_isRepeatMode;
+    _audioPlayer.setLoopMode(_isRepeatMode ? LoopMode.all : LoopMode.off);
   }
 
   void toggleAutoPlayNext() {
+    // With ConcatenatingAudioSource auto-advance is inherent; method retained for API compatibility.
     _isAutoPlayNext = !_isAutoPlayNext;
+    _audioPlayer.setLoopMode(_isAutoPlayNext ? (_isRepeatMode ? LoopMode.all : LoopMode.off) : LoopMode.off);
   }
 
   Future<void> setVolume(double volume) async {
@@ -293,13 +277,7 @@ class AudioService {
     _stateController.add(state);
   }
 
-  void _onPlaybackCompleted() {
-    if (_isAutoPlayNext && _currentPlaylist.isNotEmpty) {
-      playNext();
-    } else {
-      stop();
-    }
-  }
+  void _onPlaybackCompleted() {/* obsolete with playlist-driven advancement */}
 
   void _updateCurrentWordIndex(Duration currentPosition) {
     if (_currentWordTimestamps.isEmpty) {
@@ -312,7 +290,6 @@ class AudioService {
       final timestamp = _currentWordTimestamps[i];
       final startMs = timestamp.start;
       final endMs = timestamp.end;
-
       if (currentPosition.inMilliseconds >= startMs && currentPosition.inMilliseconds < endMs) {
         foundIndex = i;
         break;
