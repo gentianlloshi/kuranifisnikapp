@@ -62,6 +62,14 @@ class AudioService {
 
   Future<void> initialize() async {
     try {
+      if (_disposed) {
+        _disposed = false; // revive if previously soft-disposed
+      }
+      if (_currentState != AudioState.stopped || _audioPlayer.playerState.playing || _audioPlayer.playerState.processingState != ProcessingState.idle) {
+        // Already initialized (or in use); idempotent return.
+        _log('initialize() called while already active - idempotent no-op');
+        return;
+      }
       // Initialize audio session
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
@@ -486,13 +494,15 @@ class AudioService {
     return totalSize;
   }
 
+  bool _disposed = false;
+
   void dispose() {
-    _audioPlayer.dispose();
-    _stateController.close();
-    _positionController.close();
-    _durationController.close();
-    _currentVerseController.close();
-    _currentWordIndexController.close(); // Close new stream
+    // Intentionally left as soft-dispose; singleton retained for app lifetime.
+    if (_disposed) return;
+    try {
+      _audioPlayer.stop();
+    } catch (_) {}
+    _disposed = true;
   }
 
   void _log(String message) {
