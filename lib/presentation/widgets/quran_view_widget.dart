@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/bookmark_provider.dart';
@@ -135,10 +136,9 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     }
     // Fallback approximate scroll
     if (_scrollController.hasClients) {
-      final targetOffset = _computeScrollOffsetForIndex(index, verses).clamp(
-        0,
-        _scrollController.position.maxScrollExtent,
-      );
+      final raw = _computeScrollOffsetForIndex(index, verses).toDouble();
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      final targetOffset = math.min(math.max(0.0, raw), maxExtent);
       _scrollController.animateTo(
         targetOffset,
         duration: const Duration(milliseconds: 420),
