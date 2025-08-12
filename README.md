@@ -28,7 +28,7 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 
 #### Funksionalitetet Kryesore
 - ✅ **Leximi i Kuranit** - Pamje e plotë e Kuranit me përkthime dhe mbështetje për lazy loading të ajeteve.
-- ✅ **Kërkimi në tekst** - Kërkim i fuqishëm në ajete dhe përkthime
+- ✅ **Kërkimi në tekst** - Indeks i invertuar (prefix + normalizim diakritik) në isolate + highlight i qartë
 - ✅ **Sistemi i favoriteve** - Ruajtja e ajeteve të preferuara
 - ✅ **Shënimet personale** - Mbajtja e shënimeve për ajete
 - ✅ **Cilësimet e aplikacionit** - Personalizimi i përvojës
@@ -39,13 +39,17 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 - ✅ **Gjenerimi i imazheve** - Krijimi i imazheve të personalizuara nga ajetet
 - ✅ **Indeksi tematik** - Gjetur ajete sipas temave dhe koncepteve
 - ✅ **Memorizimi i ajeteve** - Mjete të plota për memorizimin e ajeteve
-- ✅ **Luajtja e audios** - Audio për ajetet me funksionalitet të plotë shkarkimi dhe luajtje offline.
+- ✅ **Luajtja e audios** - Playback i qëndrueshëm (skip-free) me prefetch të ajetit vijues & highlight sipas fjalëve (në zhvillim)
 
 ### 🚀 Optimizime dhe Përmirësime
 
-- ✅ **Lazy Loading për të Dhënat e Mëdha**: Implementuar për ngarkimin e ajeteve në `QuranViewWidget` duke përdorur `ListView.builder` dhe `ScrollController` për të ngarkuar ajete vetëm kur ato janë të nevojshme. Kjo përmirëson ndjeshëm performancën dhe përdorimin e memories për suret e gjata.
-- ✅ **Caching i të Dhënave**: Të dhënat e Kuranit, përkthimet, indeksi tematik dhe transliterimet tani ruhen në cache duke përdorur Hive. Kjo redukton kohën e ngarkimit të të dhënave pas shkarkimit fillestar dhe përmirëson përvojën e përdoruesit offline.
-- ✅ **Funksionaliteti i Përmirësuar i Audios**: Moduli i audios është përmirësuar për të mbështetur shkarkimin e ajeteve dhe sureve të plota për luajtje offline. Përdoruesit tani mund të shkarkojnë audio për ajetet individuale ose sure të tëra dhe t'i dëgjojnë ato pa lidhje interneti. Gjithashtu, është shtuar një tregues i progresit të shkarkimit në `AudioPlayerWidget`.
+- ✅ **Lazy Loading Ajete**: `ListView.builder` + ngarkim incremental për sure të gjata.
+- ✅ **Caching i të Dhënave**: Surah / përkthime / transliterime / index tematik në Hive (offline ready).
+- ✅ **Parsimi në Isolate**: JSON voluminoz zhvendosur off-main për të reduktuar frame skips në start.
+- ✅ **Indeksi i Kërkimit**: Ndërtim në isolate + debounce 350ms → kërkime të rrjedhshme gjatë shkrimit.
+- ✅ **Highlight i Rafinuar**: Sfondo i verdhë me kontrast të lartë (dark-mode toned) për rezultatet e kërkimit.
+- ✅ **Auto-Scroll Audio**: Ajeti aktiv ruhet në ekran (ensureVisible alignment 0.1 + throttling + suppression pas scroll manual).
+- ✅ **Audio Stability**: Eliminim i skipeve me playlist të menaxhuar + prefetch ajeti vijues.
 
 ### 🧪 Testimi
 
@@ -192,5 +196,13 @@ Për pyetje ose sugjerime, kontaktoni:
 ---
 
 **Shënim**: Ky aplikacion është krijuar për qëllime edukative dhe fetare. Përmbajtja e Kuranit është marrë nga burime të besueshme, por rekomandohet verifikimi me burime zyrtare për studime të thella.
+
+---
+### 🔄 Roadmap i Afërt
+- Persistim i indeksit të kërkimit (shmang rebuild çdo hapje)
+- Field-weighted ranking (Arabic > Translation > Transliteration)
+- Mini-player i përhershëm në fund gjatë navigimit
+- Opsion për çaktivizim auto-scroll / reduktim animacionesh
+- Light stemming për forma fjalësh (-it, -in, -ve)
 
 

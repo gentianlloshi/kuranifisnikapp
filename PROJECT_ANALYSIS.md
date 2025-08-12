@@ -573,3 +573,34 @@ Fazat e ardhshme për të avancuar përvojën audio:
 
 ---
 **Ky dokument u zgjerua më 10 Gusht 2025 për të reflektuar përmirësimet e fundit pa ndryshuar bazën arkitekturore origjinale.**
+
+---
+## 🆕 Përditësim 12 Gusht 2025 (Search Refactor Phase 1 & Auto-Scroll Refinement)
+
+### 🔍 Search Refactor (Phase 1)
+- Shtuar `SearchIndexManager` (encapsulation e ndërtimit & query) + debounce qendrore (350ms).
+- Ndërtimi i indeksit tani izolohet nga UI; query latency e ulët pas ngrohjes.
+- UI highlight i përmirësuar (sfond i verdhë me kontrast adaptiv dark/light).
+
+### 📜 Auto-Scroll Audio
+- Integruar ensureVisible (alignment 0.1) për çdo ajet aktiv gjatë playback.
+- Throttle 350ms + suppression 3s pas scroll manual për të respektuar ndërhyrjen e përdoruesit.
+- Animated highlight (container fade) për ajetin aktual.
+
+### ⚠️ Ende Për T’u Adresuar (Phase 2 Plan)
+| Zonë | Gaps | Veprimi Planifikuar |
+|------|------|---------------------|
+| Search Build | Koleksioni i vargjeve ende në main | Combine collection + build në një compute |
+| Persistence | Indeksi rindërtohet çdo hapje | Serializim + version hash |
+| Instrumentation | Mungojnë timing spans të hollësishme | Shto performance_metrics util |
+| Ranking | Vetëm bonus translation | Field weights + (opsional) proximity |
+| Morphology | Pa stemming të lehtë | Suffix stripping i kufizuar (-it, -in, -ve) |
+| Accessibility | Auto-scroll pa toggle | Setting për Auto-Scroll + Reduce Motion |
+
+### 🎯 Success Metrics të Reja
+- Frame skips gjatë build fazës: target asnjë > 32ms seri 16 korniza.
+- Persisted load i indeksit < 150ms.
+- p95 query latency < 15ms (pas warmup).
+
+### ✅ Status Përditësimi
+CODI BAZË i stabilizuar; fokusi zhvendoset në rafinim & persistencë.

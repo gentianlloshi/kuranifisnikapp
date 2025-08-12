@@ -2,7 +2,7 @@
 
 This document captures intentional shortcuts and their implications, plus remediation plan (Sprint oriented) for the Kurani Fisnik Flutter App.
 
-_Last updated: 2025-08-12 (updated with performance & auto-scroll UX analysis)_
+_Last updated: 2025-08-12 (post search refactor phase 1, auto-scroll refinement)_
 
 ## 1. Removed Providers (Bookmark / Memorization) – Placeholder UI
 - Shortcut: Removed provider usages; left FAB actions with SnackBars.
@@ -75,14 +75,17 @@ _Last updated: 2025-08-12 (updated with performance & auto-scroll UX analysis)_
 - Remediation: Script to count & categorize warnings per commit.
 
 ## 15. Heavy JSON Parsing on Main Isolate (Startup Frame Skips)
-- Shortcut: Large translation / transliteration JSON decode + merge executed synchronously during initial UI build.
-- Risk: Skipped 80–190 frames; degraded first impression; battery/cpu spikes.
-- Remediation: Phase loading (core metadata first), defer heavy assets, move decoding to compute isolates, lazy load on demand.
+- Status: PARTIALLY MITIGATED
+- Shortcut: Large translation / transliteration JSON decode + merge executed synchronously during initial UI build (initial state).
+- Current: Core large JSON parsing moved to isolates; frame skips reduced but still present during search index build surah collection.
+- Risk: Residual skipped frames (40–230) during initial index activities; battery/cpu spikes.
+- Remediation (Next): Combine verse collection + index build fully off-main; throttle progress notifications; instrumentation of frame timings.
 
 ## 16. Missing Auto-Scroll for Currently Playing Verse (Critical UX Gap)
-- Shortcut: Audio index change not bound to scroll position; no automatic alignment of active verse in reader view.
-- Risk: Breaks “hands-free” listening; users lose context; perceived unpolished.
-- Remediation: Verse widgets keyed (GlobalKey or index-based itemPositions via ScrollablePositionedList); subscribe to currentIndexStream; invoke ensureVisible with smooth alignment & throttle; configurable auto-scroll toggle.
+- Status: ADDRESSED (PHASE 1) / REFINEMENTS PENDING
+- Implemented: GlobalKey measurement + ensureVisible alignment=0.1 + throttle + suppression after recent manual scroll (3s window) + animated highlight of current verse.
+- Remaining Gaps: User preference toggle, improved precision for large dynamic font changes, accessibility (reduce motion) mode, scroll easing adaptation when distance large.
+- Follow-up: Expose toggle in settings; pre-measure heuristic average line height to reduce fallback offset variance.
 
 ## 17. MediaCodec / Dead Thread Legacy Logs
 - Shortcut: Historical recreate/dispose pattern produced handler-on-dead-thread warnings; some vendor MediaCodec noise left unfiltered.
@@ -99,11 +102,46 @@ _Last updated: 2025-08-12 (updated with performance & auto-scroll UX analysis)_
 - Risk: Minor duration estimation drift; negligible UX impact.
 - Remediation: (Optional) Offline integrity validation + ignore at runtime.
 
+## 20. Search Index Persistence Missing
+- Shortcut: Index rebuilt every launch; no disk snapshot.
+- Risk: Repeated cold cost; battery & startup jank on slower devices.
+- Remediation: Serialize index + metadata (version hash) to app documents; load fast path.
+
+## 21. Search Index Partial Off-Main Collection
+- Shortcut: Verse collection loop (1..114) still sequential on main before isolate build (pre-refactor plan). Phase 1 introduced manager & debounce but not consolidated build.
+- Risk: Frame skips during collection; user perceives sluggishness.
+- Remediation: Single compute for collection+build; stream/estimate progress; avoid main isolate awaits.
+
+## 22. Insufficient Performance Instrumentation
+- Shortcut: Limited coarse Stopwatch logs only for JSON parsing.
+- Risk: Hard to correlate frame skips with phases; blind optimization.
+- Remediation: Timing spans (build start/end, batches, query latency) + SchedulerBinding frame timing logs (debug only).
+
+## 23. Missing Index Query Micro-Optimizations
+- Shortcut: Lowercase conversion & token scanning repeated per query.
+- Risk: Unnecessary per-keystroke CPU.
+- Remediation: Precompute lowercase translation, early candidate short-circuiting, intersection pruning, deferred highlight span generation.
+
+## 24. Morphological Normalization (Albanian) Absent
+- Shortcut: Exact surface tokens only (with diacritic folding), no stemming.
+- Risk: Misses inflected forms (e.g., -it, -in) reducing recall.
+- Remediation: Light suffix stripping list (configurable) applied symmetrically to corpus & queries; feature-flag.
+
+## 25. Debounce Centralization Done; Legacy Local Debounce Leftovers
+- Status: CLEANED (SearchWidget local Timer removed) – keep for audit trail.
+- Risk: Divergent future reintroductions.
+- Remediation: Document provider-level debounce contract (350ms) & enforce single entry point.
+
+## 26. Verse Highlight Styling Accessibility Review Pending
+- Shortcut: High-contrast background color chosen without WCAG contrast measurement for dark mode edge cases.
+- Risk: Potential low readability for users with contrast sensitivity.
+- Remediation: Add contrast check utility & optional outline focus ring; provide user setting to switch highlight style (underline only / background).
+
 ---
 ## Risk Levels
-High: 1,7,8,13,16
-Medium: 3,9,11,12,14,15
-Low: 2,4,5,6,10,17,18,19
+High: 1,7,8,13,15,20,21
+Medium: 3,9,11,12,14,16,22,24
+Low: 2,4,5,6,10,17,18,19,23,25,26
 
 ---
 ## Sprint 1 (Proposed Targets)
