@@ -24,6 +24,9 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   final Map<String, double> _verseHeights = {}; // verseKey -> measured height
   final Map<String, double> _cumulativeOffsets = {}; // verseKey -> cumulative offset before this verse
   bool _layoutReady = false;
+  bool _autoScrollEnabled = true; // future: expose as user setting
+  DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
+  static const Duration _autoScrollThrottle = Duration(milliseconds: 350);
 
   @override
   void initState() {
@@ -90,6 +93,60 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     });
   }
 
+  bool _isVerseRoughlyVisible(int index, List<Verse> verses) {
+    if (!_scrollController.hasClients) return false;
+    final scrollOffset = _scrollController.offset;
+    final viewport = _scrollController.position.viewportDimension;
+    // Approximate position using measured heights if available, else fallback fixed height
+    double top = 0;
+    for (int i = 0; i < index; i++) {
+      final v = verses[i];
+      top += (_verseHeights[v.verseKey] ?? 220) + 16; // card + spacing
+      if (top > scrollOffset + viewport) break; // early exit
+    }
+    final v = verses[index];
+    final height = (_verseHeights[v.verseKey] ?? 220) + 16;
+    final bottom = top + height;
+    return (bottom >= scrollOffset) && (top <= scrollOffset + viewport * 0.95);
+  }
+
+  Future<void> _autoScrollToVerse(String verseKey, List<Verse> verses) async {
+    if (!_autoScrollEnabled) return;
+    final now = DateTime.now();
+    if (now.difference(_lastAutoScroll) < _autoScrollThrottle) return; // throttle
+    final index = verses.indexWhere((v) => v.verseKey == verseKey);
+    if (index < 0) return;
+    if (_isVerseRoughlyVisible(index, verses)) return; // already visible enough
+    _lastAutoScroll = now;
+    await Future.delayed(const Duration(milliseconds: 10)); // allow build/layout settle
+    if (!mounted) return;
+    final key = _verseKeys[verseKey];
+    final ctx = key?.currentContext;
+    if (ctx != null) {
+      try {
+        await Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 420),
+          alignment: 0.1,
+          curve: Curves.easeInOutCubic,
+        );
+        return;
+      } catch (_) {/* fallback below */}
+    }
+    // Fallback approximate scroll
+    if (_scrollController.hasClients) {
+      final targetOffset = _computeScrollOffsetForIndex(index, verses).clamp(
+        0,
+        _scrollController.position.maxScrollExtent,
+      );
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<QuranProvider, AppStateProvider, BookmarkProvider>(
@@ -115,15 +172,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
         if (currentPlayingKey != null && currentPlayingKey != _lastPlayingVerseKey) {
           _lastPlayingVerseKey = currentPlayingKey;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            final verses = quranProvider.currentVerses;
-            final index = verses.indexWhere((v) => v.verseKey == currentPlayingKey);
-            if (index >= 0 && _scrollController.hasClients) {
-              _scrollController.animateTo(
-                index * 220.0, // approximate card height
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-              );
-            }
+            _autoScrollToVerse(currentPlayingKey, quranProvider.currentVerses);
           });
         }
         if (quranProvider.currentSurah == null) {
