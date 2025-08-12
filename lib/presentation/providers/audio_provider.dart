@@ -163,7 +163,8 @@ class AudioProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _audioService.dispose();
-    super.dispose();
+  // Do NOT dispose the singleton AudioService here; it's app-scoped to avoid
+  // recreating underlying platform player (which caused dead-thread warnings).
+  super.dispose();
   }
 }

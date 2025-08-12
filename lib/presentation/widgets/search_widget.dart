@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:provider/provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
@@ -15,12 +14,9 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedTranslation = 'sq_ahmeti';
-  Timer? _debounce;
-  static const _debounceDuration = Duration(milliseconds: 350);
 
   @override
   void dispose() {
-  _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -75,19 +71,14 @@ class _SearchWidgetState extends State<SearchWidget> {
                       ),
                     ),
                     onChanged: (query) {
-                      setState(() {});
-                      _debounce?.cancel();
+                      setState(() {}); // Update clear icon state
                       if (query.trim().isEmpty) {
                         quranProvider.clearSearch();
-                        return;
+                      } else {
+                        quranProvider.searchVersesDebounced(query.trim());
                       }
-                      _debounce = Timer(_debounceDuration, () {
-                        if (mounted && _searchController.text.trim().isNotEmpty) {
-                          _performSearch(quranProvider, _searchController.text.trim());
-                        }
-                      });
                     },
-                    onSubmitted: (query) => _performSearch(quranProvider, query),
+                    onSubmitted: (query) => quranProvider.searchVerses(query.trim()),
                   ),
                   const SizedBox(height: 12),
                   
@@ -328,16 +319,22 @@ class SearchResultItem extends StatelessWidget {
         ));
       }
       
-      // Add highlighted match
+      // Add highlighted match (Option A refined: soft yellow background, bold dark text)
+      final highlightBg = theme.brightness == Brightness.dark
+          ? theme.colorScheme.secondaryContainer.withOpacity(0.35)
+          : const Color(0xFFFFF59D); // light yellow 200-ish
+      final highlightColor = theme.brightness == Brightness.dark
+          ? theme.colorScheme.onSecondaryContainer
+          : Colors.black;
       spans.add(TextSpan(
         text: text.substring(index, index + query.length),
         style: TextStyle(
           fontFamily: 'Lora',
-            fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+          fontSize: (settings.fontSizeTranslation - 2).toDouble(),
           height: 1.3,
           fontWeight: FontWeight.w700,
-          color: theme.colorScheme.onSecondaryContainer,
-          backgroundColor: theme.colorScheme.secondaryContainer.withOpacity(0.6),
+          color: highlightColor,
+          backgroundColor: highlightBg,
         ),
       ));
       

@@ -1,17 +1,20 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'inverted_index_builder.dart' as idx;
 import '../../domain/entities/surah.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
 import 'package:kurani_fisnik_app/core/utils/result.dart';
 import '../../domain/usecases/search_verses_usecase.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
+import 'search_index_manager.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
   final SearchVersesUseCase? _searchVersesUseCase;
   final GetSurahVersesUseCase? _getSurahVersesUseCase;
+
+  final SearchIndexManager? _indexManager; // null in simple ctor
 
   QuranProvider({
     required GetSurahsUseCase getSurahsUseCase,
@@ -19,8 +22,11 @@ class QuranProvider extends ChangeNotifier {
     required GetSurahVersesUseCase getSurahVersesUseCase,
   })  : _getSurahsUseCase = getSurahsUseCase,
         _searchVersesUseCase = searchVersesUseCase,
-        _getSurahVersesUseCase = getSurahVersesUseCase {
-    // Auto-load surahs on creation to populate UI
+        _getSurahVersesUseCase = getSurahVersesUseCase,
+        _indexManager = SearchIndexManager(
+          getSurahsUseCase: getSurahsUseCase,
+          getSurahVersesUseCase: getSurahVersesUseCase,
+        ) {
     _init();
   }
 
@@ -28,7 +34,8 @@ class QuranProvider extends ChangeNotifier {
   QuranProvider.simple()
       : _getSurahsUseCase = null,
         _searchVersesUseCase = null,
-        _getSurahVersesUseCase = null;
+        _getSurahVersesUseCase = null,
+        _indexManager = null;
   
   Future<void> _init() async {
     if (_surahs.isEmpty && _getSurahsUseCase != null) {
@@ -49,117 +56,13 @@ class QuranProvider extends ChangeNotifier {
   static const int _pageSize = 20;
   // Pending scroll target (verse number) after loading a surah, used for smooth scroll from search / bookmarks
   int? _pendingScrollVerseNumber;
-  // Search indexing
-  bool _isBuildingIndex = false;
+  // Search indexing (delegated)
+  bool _isBuildingIndex = false; // mirrors manager state for UI convenience
+  double _indexProgress = 0;
   bool get isBuildingIndex => _isBuildingIndex;
-  Map<String, List<String>>? _invertedIndex; // token -> list of verseKeys
-  final Map<String, Verse> _verseCache = {}; // verseKey -> Verse
-
-  Future<void> _ensureSearchIndex() async {
-    if (_invertedIndex != null || _isBuildingIndex) return;
-    _isBuildingIndex = true;
-    notifyListeners();
-    try {
-  // Collect raw verse records including translation, transliteration, arabic
-      final List<Map<String, dynamic>> raw = [];
-      // Load surahs list if needed
-      if (_surahs.isEmpty && _getSurahsUseCase != null) {
-        await loadSurahs();
-      }
-      // Iterate all surah numbers 1..114
-      if (_getSurahVersesUseCase != null) {
-        for (int s = 1; s <= 114; s++) {
-          try {
-            final verses = await _getSurahVersesUseCase!.call(s);
-            for (final v in verses) {
-              final key = '${v.surahNumber}:${v.number}';
-              _verseCache[key] = v;
-              raw.add({
-                'key': key,
-                't': (v.textTranslation ?? '').toString(),
-                'tr': (v.textTransliteration ?? '').toString(),
-                'ar': (v.textArabic ?? '').toString(),
-              });
-            }
-          } catch (_) {
-            // continue other surahs
-          }
-        }
-      }
-      // Build inverted index in isolate
-  _invertedIndex = await compute(idx.buildInvertedIndex, raw);
-    } catch (_) {
-      _invertedIndex = null; // fallback will trigger
-    } finally {
-      _isBuildingIndex = false;
-      notifyListeners();
-    }
-  }
-
-  // Token-based search using inverted index
-  List<Verse> _searchIndexQuery(String query) {
-    if (_invertedIndex == null) return [];
-  final tokens = _expandQueryTokens(query);
-    if (tokens.isEmpty) return [];
-    // Collect union first for scoring
-    final candidateKeys = <String, int>{}; // key -> score
-    for (final t in tokens) {
-      final list = _invertedIndex![t];
-      if (list == null) continue;
-      for (final k in list) {
-        candidateKeys.update(k, (s) => s + 1, ifAbsent: () => 1);
-      }
-    }
-    if (candidateKeys.isEmpty) return [];
-
-    // Scoring: exact full-token matches weighted higher than prefix-only matches
-    final Set<String> fullTokens = _tokenize(query).map((e)=>e.toLowerCase()).toSet();
-    List<_ScoredVerse> scored = [];
-    candidateKeys.forEach((key, hitCount) {
-      final verse = _verseCache[key];
-      if (verse == null) return;
-      int score = hitCount * 10; // base weight per token hit
-      // Add bonuses for full-token presence (not just prefix). We treat any full token not found as penalty.
-      for (final ft in fullTokens) {
-        final verseText = (verse.textTranslation ?? '').toLowerCase();
-        if (verseText.contains(ft)) {
-          score += 25;
-        }
-      }
-      scored.add(_ScoredVerse(verse, score));
-    });
-    scored.sort((a,b){
-      final c = b.score.compareTo(a.score);
-      if (c != 0) return c;
-      final s = a.verse.surahNumber.compareTo(b.verse.surahNumber);
-      if (s != 0) return s;
-      return a.verse.number.compareTo(b.verse.number);
-    });
-    return scored.map((e)=>e.verse).toList();
-  }
-
-  List<String> _tokenize(String text) {
-    final lower = text.toLowerCase();
-    final parts = lower.split(RegExp(r'[^a-zçëšžáéíóúâêîôûäöü0-9]+'));
-    return parts.where((p) => p.isNotEmpty).toList();
-  }
-
-  List<String> _expandQueryTokens(String query){
-    final raw = _tokenize(query);
-    final result = <String>[];
-    for (final r in raw){
-      if (r.length <= 2){
-        // allow direct small token to leverage prefix index
-        result.add(r);
-        continue;
-      }
-      result.add(r);
-      // also add normalized form (strip diacritics for ç, ë etc.)
-      final norm = r.replaceAll('ç','c').replaceAll('ë','e');
-      if (norm != r) result.add(norm);
-    }
-    return result.toSet().toList();
-  }
+  double get indexProgress => _indexProgress;
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 350);
 
   List<Surah> get surahs => _surahs;
   List<Verse> get currentVerses => _pagedVerses;
@@ -193,15 +96,33 @@ class QuranProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    // Ensure index built
-    await _ensureSearchIndex();
-    if (_invertedIndex != null) {
-      // Fast path using index
-      _searchResults = _searchIndexQuery(query);
-      _error = null;
-      notifyListeners();
-    } else {
-      // Fallback to original use case
+    if (_indexManager != null) {
+      try {
+        await _indexManager!.ensureBuilt(onProgress: (p) {
+          _isBuildingIndex = true;
+          _indexProgress = p;
+          notifyListeners();
+        });
+        _isBuildingIndex = false;
+        _searchResults = _indexManager!.search(query);
+        _error = null;
+        notifyListeners();
+      } catch (e) {
+        // fallback to original use case if provided
+        if (_searchVersesUseCase != null) {
+          _setLoading(true);
+          try {
+            _searchResults = await _searchVersesUseCase!.call(query);
+            _error = null;
+          } catch (e2) {
+            _error = e2.toString();
+            _searchResults = [];
+          } finally {
+            _setLoading(false);
+          }
+        }
+      }
+    } else if (_searchVersesUseCase != null) {
       _setLoading(true);
       try {
         _searchResults = await _searchVersesUseCase!.call(query);
@@ -213,6 +134,13 @@ class QuranProvider extends ChangeNotifier {
         _setLoading(false);
       }
     }
+  }
+
+  void searchVersesDebounced(String query) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      searchVerses(query);
+    });
   }
 
   Future<void> loadSurahVerses(int surahId) async {
@@ -326,10 +254,11 @@ class QuranProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
 }
 
-class _ScoredVerse {
-  final Verse verse;
-  final int score;
-  _ScoredVerse(this.verse, this.score);
-}
