@@ -309,3 +309,57 @@ Log structured events: `search.build.start`, `search.build.complete {duration_ms
 ---
 End of unified action plan.
 
+## 22. Performance Phase 2 Implementation Plan (Post Phase 1 Commit)
+
+This extends Section 21 with concrete execution details for the next sprint focused on eliminating main-thread jank (40–230 skipped frames observed).
+
+### 22.1 Instrumentation Tasks
+- Add lightweight timing helper (Stopwatch wrapper) in a new `performance_metrics.dart` under `core/utils`.
+- Hook spans into: index ensure start, per 10-surah batch (when still on main), isolate build start/complete, first query, each query (length + candidate count).
+- Use `SchedulerBinding.instance.addTimingsCallback` (debug only) to log long frame (>32ms) occurrences correlated with active phase.
+
+### 22.2 Combined Off-Main Collection & Build
+Replace sequential verse collection loop with a single compute function that:
+1. Loads/parses all surah JSON slices (pure data) inside isolate.
+2. Builds inverted index directly (no intermediate raw list transferred back beyond final index map).
+3. Returns: { index, versesMeta (count), versionHash }.
+Progress: since streaming progress from compute is non-trivial, show an indeterminate progress or estimated percentage based on elapsed time vs historical median (persist last build duration to preferences).
+
+### 22.3 Progress Throttling
+Provide a throttled setter in provider that only notifies when (now - lastNotify) >120ms OR progressDelta >0.02.
+
+### 22.4 Persistence Outline
+File: `search_index_v1.json` in app documents.
+Schema: {"v": "<hash>", "bMillis": <int>, "count": <int>, "i": { token: ["s:v", ...] }}.
+Hash inputs: app build version + size & modified timestamp of translation assets.
+Load flow: attempt read+decode+validate (basic sanity: count>6000, i.size>50). If fail, delete and rebuild.
+Write strategy: write to temp file then atomic rename to avoid corruption.
+
+### 22.5 Query Micro-Optimizations
+- Pre-store lowercase translation in verse cache to avoid toLowerCase per query.
+- Short-circuit candidate accumulation if all full tokens already reached a theoretical max (e.g., all tokens found in some verses) — skip extra work.
+
+### 22.6 Optional Cancel Support
+Maintain a cancellation token in manager; if user clears search while building, set flag; isolate result ignored if canceled (still allow persistence unless canceled).
+
+### 22.7 Validation & Metrics Targets
+After implementation run a scripted stress test (random 2–12 char queries at 150ms interval for 5 minutes) and record:
+- Average query latency.
+- 95th percentile latency.
+- Max frame time spikes (expect elimination of >500ms stalls).
+
+### 22.8 Rollout Plan
+Phase behind debug flag `enableSearchIndexPersistence` for first release; collect crash/user feedback; then default to on.
+
+### 22.9 Task Checklist
+1. Timing helper & logging.
+2. Combined compute build.
+3. Throttled progress updates.
+4. Persistence load/save.
+5. Lowercase translation cache & micro opts.
+6. Stress test script (dev-only) + log analysis.
+7. (Optional) cancellation.
+
+---
+End Section 22.
+
