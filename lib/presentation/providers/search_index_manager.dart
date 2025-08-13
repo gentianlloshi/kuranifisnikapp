@@ -67,7 +67,13 @@ class SearchIndexManager {
     }
   }
 
-  List<Verse> search(String query) {
+  List<Verse> search(
+    String query, {
+    int? juzFilter, // if set, restrict to verses in this Juz
+    bool includeTranslation = true,
+    bool includeArabic = true,
+    bool includeTransliteration = true,
+  }) {
     if (_invertedIndex == null) return [];
     final tokens = _expandQueryTokens(query);
     if (tokens.isEmpty) return [];
@@ -85,10 +91,25 @@ class SearchIndexManager {
     candidateScores.forEach((key, base) {
       final verse = _verseCache[key];
       if (verse == null) return;
+      if (juzFilter != null && verse.juz != juzFilter) return;
       int score = base * 10;
-      final translation = (verse.textTranslation ?? '').toLowerCase();
-      for (final ft in fullTokens) {
-        if (translation.contains(ft)) score += 25;
+      if (includeTranslation) {
+        final translation = (verse.textTranslation ?? '').toLowerCase();
+        for (final ft in fullTokens) {
+          if (translation.contains(ft)) score += 25;
+        }
+      }
+      if (includeArabic) {
+        final ar = (verse.textArabic ?? '').toLowerCase();
+        for (final ft in fullTokens) {
+          if (ar.contains(ft)) score += 15; // lower weight
+        }
+      }
+      if (includeTransliteration) {
+        final tr = (verse.textTransliteration ?? '').toLowerCase();
+        for (final ft in fullTokens) {
+          if (tr.contains(ft)) score += 10; // lowest weight
+        }
       }
       scored.add(_ScoredVerse(verse, score));
     });

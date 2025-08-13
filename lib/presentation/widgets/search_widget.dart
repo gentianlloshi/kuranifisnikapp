@@ -14,6 +14,10 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedTranslation = 'sq_ahmeti';
+  int? _selectedJuz; // 1..30
+  bool _filterTranslation = true;
+  bool _filterArabic = true;
+  bool _filterTransliteration = true;
 
   @override
   void dispose() {
@@ -82,11 +86,12 @@ class _SearchWidgetState extends State<SearchWidget> {
                   ),
                   const SizedBox(height: 12),
                   
-                  // Translation filter
+                  // Filters row (translation selection + Juz + field toggles)
                   Row(
                     children: [
-                      const Text('Përkthimi: '),
+                      // Translation dropdown
                       Expanded(
+                        flex: 2,
                         child: DropdownButton<String>(
                           value: _selectedTranslation,
                           isExpanded: true,
@@ -95,17 +100,76 @@ class _SearchWidgetState extends State<SearchWidget> {
                             DropdownMenuItem(value: 'sq_mehdiu', child: Text('Mehdiu')),
                             DropdownMenuItem(value: 'sq_nahi', child: Text('Nahi')),
                           ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _selectedTranslation = value;
-                              });
-                              if (_searchController.text.trim().isNotEmpty) {
-                                _performSearch(quranProvider, _searchController.text);
-                              }
+                          onChanged: (v) {
+                            if (v == null) return;
+                            setState(() => _selectedTranslation = v);
+                            // (Future) tie translation filter weighting
+                            if (_searchController.text.trim().isNotEmpty) {
+                              _performSearch(quranProvider, _searchController.text.trim());
                             }
                           },
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Juz selector
+                      Expanded(
+                        child: DropdownButton<int?>(
+                          value: _selectedJuz,
+                          isExpanded: true,
+                          hint: const Text('Juz'),
+                          items: [
+                            const DropdownMenuItem<int?>(value: null, child: Text('Të gjithë')),
+                            ...List.generate(30, (i) => DropdownMenuItem<int?>(value: i + 1, child: Text('Juz ${i + 1}'))),
+                          ],
+                          onChanged: (v) {
+                            setState(() => _selectedJuz = v);
+                            quranProvider.setJuzFilter(v);
+                            if (_searchController.text.trim().isNotEmpty) {
+                              _performSearch(quranProvider, _searchController.text.trim());
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Field toggles
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: -4,
+                    children: [
+                      FilterChip(
+                        label: const Text('Përkthimi'),
+                        selected: _filterTranslation,
+                        onSelected: (sel) {
+                          setState(() => _filterTranslation = sel);
+                          quranProvider.setFieldFilters(translation: sel);
+                          if (_searchController.text.trim().isNotEmpty) {
+                            _performSearch(quranProvider, _searchController.text.trim());
+                          }
+                        },
+                      ),
+                      FilterChip(
+                        label: const Text('Arabisht'),
+                        selected: _filterArabic,
+                        onSelected: (sel) {
+                          setState(() => _filterArabic = sel);
+                          quranProvider.setFieldFilters(arabic: sel);
+                          if (_searchController.text.trim().isNotEmpty) {
+                            _performSearch(quranProvider, _searchController.text.trim());
+                          }
+                        },
+                      ),
+                      FilterChip(
+                        label: const Text('Transliterim'),
+                        selected: _filterTransliteration,
+                        onSelected: (sel) {
+                          setState(() => _filterTransliteration = sel);
+                          quranProvider.setFieldFilters(transliteration: sel);
+                          if (_searchController.text.trim().isNotEmpty) {
+                            _performSearch(quranProvider, _searchController.text.trim());
+                          }
+                        },
                       ),
                     ],
                   ),

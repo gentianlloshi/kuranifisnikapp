@@ -90,6 +90,28 @@ class QuranProvider extends ChangeNotifier {
     }
   }
 
+  int? _activeJuzFilter;
+  bool _filterTranslation = true;
+  bool _filterArabic = true;
+  bool _filterTransliteration = true;
+
+  void setJuzFilter(int? juz) {
+    _activeJuzFilter = juz;
+    notifyListeners();
+  }
+
+  void setFieldFilters({bool? translation, bool? arabic, bool? transliteration}) {
+    if (translation != null) _filterTranslation = translation;
+    if (arabic != null) _filterArabic = arabic;
+    if (transliteration != null) _filterTransliteration = transliteration;
+    notifyListeners();
+  }
+
+  int? get activeJuzFilter => _activeJuzFilter;
+  bool get filterTranslation => _filterTranslation;
+  bool get filterArabic => _filterArabic;
+  bool get filterTransliteration => _filterTransliteration;
+
   Future<void> searchVerses(String query) async {
     if (query.trim().isEmpty) {
       _searchResults = [];
@@ -104,7 +126,13 @@ class QuranProvider extends ChangeNotifier {
           notifyListeners();
         });
         _isBuildingIndex = false;
-        _searchResults = _indexManager!.search(query);
+        _searchResults = _indexManager!.search(
+          query,
+          juzFilter: _activeJuzFilter,
+          includeTranslation: _filterTranslation,
+          includeArabic: _filterArabic,
+          includeTransliteration: _filterTransliteration,
+        );
         _error = null;
         notifyListeners();
       } catch (e) {
