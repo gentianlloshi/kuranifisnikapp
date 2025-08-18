@@ -1,58 +1,71 @@
 import 'package:flutter/material.dart';
+import '../../domain/entities/word_by_word.dart';
+import '../../domain/entities/verse.dart';
+import '../../domain/usecases/get_word_by_word_data_usecase.dart';
+import '../../domain/usecases/get_timestamp_data_usecase.dart';
 
 class WordByWordProvider extends ChangeNotifier {
-  Map<String, dynamic> _wordByWordData = {};
-  Map<String, dynamic> _timestampData = {};
-  List<dynamic> _currentWordByWordVerses = [];
+  final GetWordByWordDataUseCase getWordByWordDataUseCase;
+  final GetTimestampDataUseCase getTimestampDataUseCase;
+
+  WordByWordProvider({required this.getWordByWordDataUseCase, required this.getTimestampDataUseCase});
+
   bool _isLoading = false;
   String? _error;
+  int? _currentSurahId;
+  final Map<int, WordByWordVerse> _verses = {}; // verseNumber -> data
+  final Map<int, List<WordTimestamp>> _timestamps = {}; // verseNumber -> timestamps
 
-  Map<String, dynamic> get wordByWordData => _wordByWordData;
-  Map<String, dynamic> get timestampData => _timestampData;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  List<dynamic> get currentWordByWordVerses => _currentWordByWordVerses;
+  List<WordByWordVerse> get currentWordByWordVerses => _verses.values.toList()..sort((a,b)=>a.verseNumber.compareTo(b.verseNumber));
+  Map<int, List<WordTimestamp>> get allTimestamps => _timestamps; // expose full map for playlist playback
 
-  Future<void> loadWordByWordData(String verseKey) async {
-    _setLoading(true);
-    try {
-      // TODO: Implement actual word-by-word data loading
-      _wordByWordData = {};
-      _error = null;
-  _currentWordByWordVerses = []; // placeholder
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> loadTimestampData(String verseKey) async {
-    _setLoading(true);
-    try {
-      // TODO: Implement actual timestamp data loading
-      _timestampData = {};
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  List<Map<String, dynamic>> getWordsForVerse(String verseKey) {
-    if (_wordByWordData.containsKey(verseKey)) {
-      return List<Map<String, dynamic>>.from(_wordByWordData[verseKey] ?? []);
-    }
-    return [];
-  }
-
-  Map<String, dynamic>? getTimestampsForVerse(String verseKey) {
-    return _timestampData[verseKey];
-  }
-
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  Future<void> ensureLoaded(int surahId) async {
+  if (_currentSurahId == surahId && _verses.isNotEmpty) return;
+  if (_isLoading) return; // prevent concurrent loads
+    _isLoading = true;
+    _error = null;
     notifyListeners();
+    try {
+      final wbw = await getWordByWordDataUseCase.call(surahId);
+      final ts = await getTimestampDataUseCase.call(surahId);
+      _verses
+        ..clear()
+        ..addEntries(wbw.map((v) => MapEntry(v.verseNumber, v)));
+      _timestamps
+        ..clear()
+        ..addEntries(ts.map((t) => MapEntry(t.verseNumber, t.wordTimestamps)));
+      _currentSurahId = surahId;
+      // Simple integrity check: log mismatches (debug print for now)
+      for (final v in wbw) {
+        final t = _timestamps[v.verseNumber];
+        if (t != null && (t.length - v.words.length).abs() > 1) {
+          debugPrint('[WordByWordProvider] MISMATCH sure=$surahId verse=${v.verseNumber} words=${v.words.length} ts=${t.length}');
+        }
+      }
+    } catch (e) {
+      // Fallback: leave _verses empty so UI can decide to build naive tokens (optional)
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  WordByWordVerse? getVerseWordData(int verseNumber) => _verses[verseNumber];
+  List<WordTimestamp>? getVerseTimestamps(int verseNumber) => _timestamps[verseNumber];
+
+  // Helper to build naive data if API fails (optional usage from UI)
+  WordByWordVerse buildNaiveFromVerse(Verse verse) {
+    final tokens = verse.textArabic.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    int cursor = 0;
+    final words = <WordData>[];
+    for (final t in tokens) {
+      final start = cursor;
+      cursor += t.length + 1;
+      words.add(WordData(arabic: t, translation: '', transliteration: '', charStart: start, charEnd: start + t.length));
+    }
+    return WordByWordVerse(verseNumber: verse.number, words: words);
   }
 }

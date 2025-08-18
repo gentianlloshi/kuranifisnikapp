@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
 import '../../domain/entities/verse.dart';
+import '../theme/theme.dart';
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key});
@@ -17,7 +18,28 @@ class _SearchWidgetState extends State<SearchWidget> {
   int? _selectedJuz; // 1..30
   bool _filterTranslation = true;
   bool _filterArabic = true;
-  bool _filterTransliteration = true;
+  bool _filterTransliteration = true; // now persisted
+
+  @override
+  void initState() {
+    super.initState();
+    // Hydrate from persisted settings after first frame to ensure provider ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = context.read<AppStateProvider>();
+      setState(() {
+        _filterArabic = appState.searchInArabic;
+        _filterTranslation = appState.searchInTranslation;
+  _selectedJuz = appState.searchJuz;
+  _filterTransliteration = appState.searchInTransliteration;
+      });
+      context.read<QuranProvider>().setJuzFilter(_selectedJuz);
+      context.read<QuranProvider>().setFieldFilters(
+        translation: _filterTranslation,
+        arabic: _filterArabic,
+  transliteration: _filterTransliteration,
+      );
+    });
+  }
 
   @override
   void dispose() {
@@ -123,6 +145,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ],
                           onChanged: (v) {
                             setState(() => _selectedJuz = v);
+                            context.read<AppStateProvider>().updateSearchFilters(juz: v);
                             quranProvider.setJuzFilter(v);
                             if (_searchController.text.trim().isNotEmpty) {
                               _performSearch(quranProvider, _searchController.text.trim());
@@ -143,6 +166,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                         selected: _filterTranslation,
                         onSelected: (sel) {
                           setState(() => _filterTranslation = sel);
+                          context.read<AppStateProvider>().updateSearchFilters(inTranslation: sel);
                           quranProvider.setFieldFilters(translation: sel);
                           if (_searchController.text.trim().isNotEmpty) {
                             _performSearch(quranProvider, _searchController.text.trim());
@@ -154,6 +178,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                         selected: _filterArabic,
                         onSelected: (sel) {
                           setState(() => _filterArabic = sel);
+                          context.read<AppStateProvider>().updateSearchFilters(inArabic: sel);
                           quranProvider.setFieldFilters(arabic: sel);
                           if (_searchController.text.trim().isNotEmpty) {
                             _performSearch(quranProvider, _searchController.text.trim());
@@ -165,6 +190,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                         selected: _filterTransliteration,
                         onSelected: (sel) {
                           setState(() => _filterTransliteration = sel);
+                          context.read<AppStateProvider>().updateTransliterationFilter(sel);
                           quranProvider.setFieldFilters(transliteration: sel);
                           if (_searchController.text.trim().isNotEmpty) {
                             _performSearch(quranProvider, _searchController.text.trim());
@@ -325,8 +351,7 @@ class SearchResultItem extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
                     verse.textArabic,
-                    style: TextStyle(
-                      fontFamily: 'AmiriQuran',
+                    style: theme.textTheme.bodyArabic.copyWith(
                       fontSize: (settings.fontSizeArabic - 4).toDouble(),
                       height: 1.6,
                     ),
@@ -355,15 +380,14 @@ class SearchResultItem extends StatelessWidget {
     if (query.isEmpty) {
       return TextSpan(
         text: text,
-        style: TextStyle(
-          fontFamily: 'Lora',
+        style: theme.textTheme.bodyLarge?.copyWith(
           fontSize: (settings.fontSizeTranslation - 2).toDouble(),
           height: 1.4,
         ),
       );
     }
 
-    final List<TextSpan> spans = [];
+  final List<InlineSpan> spans = [];
     final String lowerText = text.toLowerCase();
     final String lowerQuery = query.toLowerCase();
     
@@ -375,8 +399,7 @@ class SearchResultItem extends StatelessWidget {
       if (index > start) {
         spans.add(TextSpan(
           text: text.substring(start, index),
-          style: TextStyle(
-            fontFamily: 'Lora',
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontSize: (settings.fontSizeTranslation - 2).toDouble(),
             height: 1.4,
           ),
@@ -384,21 +407,33 @@ class SearchResultItem extends StatelessWidget {
       }
       
       // Add highlighted match (Option A refined: soft yellow background, bold dark text)
-      final highlightBg = theme.brightness == Brightness.dark
-          ? theme.colorScheme.secondaryContainer.withOpacity(0.35)
-          : const Color(0xFFFFF59D); // light yellow 200-ish
-      final highlightColor = theme.brightness == Brightness.dark
-          ? theme.colorScheme.onSecondaryContainer
-          : Colors.black;
-      spans.add(TextSpan(
-        text: text.substring(index, index + query.length),
-        style: TextStyle(
-          fontFamily: 'Lora',
-          fontSize: (settings.fontSizeTranslation - 2).toDouble(),
-          height: 1.3,
-          fontWeight: FontWeight.w700,
-          color: highlightColor,
-          backgroundColor: highlightBg,
+      final bool isDark = theme.brightness == Brightness.dark;
+      final highlightBg = isDark
+          ? theme.colorScheme.tertiary.withOpacity(0.28)
+          : theme.colorScheme.tertiaryContainer; // reuse tertiaryContainer as semantic highlight
+      final highlightColor = isDark
+          ? theme.colorScheme.onTertiaryContainer
+          : theme.colorScheme.onTertiaryContainer;
+      final matchText = text.substring(index, index + query.length);
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+          decoration: BoxDecoration(
+            color: highlightBg,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            matchText,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+              height: 1.25,
+              fontWeight: FontWeight.w700,
+              color: highlightColor,
+            ),
+          ),
         ),
       ));
       
@@ -410,15 +445,14 @@ class SearchResultItem extends StatelessWidget {
     if (start < text.length) {
       spans.add(TextSpan(
         text: text.substring(start),
-        style: TextStyle(
-          fontFamily: 'Lora',
+        style: theme.textTheme.bodyLarge?.copyWith(
           fontSize: (settings.fontSizeTranslation - 2).toDouble(),
           height: 1.4,
         ),
       ));
     }
     
-    return TextSpan(children: spans);
+  return TextSpan(children: spans);
   }
 
   void _navigateToVerse(BuildContext context) {

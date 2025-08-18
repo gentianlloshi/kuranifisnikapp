@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../core/services/audio_service.dart';
+import 'word_by_word_provider.dart';
 import '../../domain/entities/verse.dart';
+import '../../domain/entities/word_by_word.dart';
 
 class AudioProvider extends ChangeNotifier {
   final AudioService _audioService = AudioService();
@@ -78,8 +80,42 @@ class AudioProvider extends ChangeNotifier {
     } catch (e) { _error = e.toString(); notifyListeners(); }
   }
 
-  Future<void> playSurah(List<Verse> verses, {int startIndex = 0}) async {
-    try { await _audioService.playPlaylist(verses, startIndex: startIndex); } catch (e) { _error = e.toString(); notifyListeners(); }
+  // Playback with optional real timestamps; falls back to synthetic spacing if missing.
+  Future<void> playVerseWithWordData(Verse verse, WordByWordVerse? wbw, {List<WordTimestamp>? timestamps}) async {
+    if (timestamps != null && timestamps.isNotEmpty && wbw != null && wbw.words.isNotEmpty) {
+      // Align lengths if they mismatch
+      List<WordTimestamp> adjusted = timestamps;
+      if (timestamps.length != wbw.words.length) {
+        final m = timestamps.length < wbw.words.length ? timestamps.length : wbw.words.length;
+        adjusted = timestamps.take(m).toList();
+      }
+      try { await _audioService.playVerse(verse, wordTimestamps: adjusted); } catch (e) { _error = e.toString(); notifyListeners(); }
+      return;
+    }
+    if (wbw == null || wbw.words.isEmpty) { return playVerse(verse); }
+    const perWordMs = 600; // synthetic fallback
+    final synthetic = <WordTimestamp>[];
+    for (int i = 0; i < wbw.words.length; i++) {
+      final start = i * perWordMs;
+      final end = (i + 1) * perWordMs;
+      synthetic.add(WordTimestamp(start: start, end: end));
+    }
+    try { await _audioService.playVerse(verse, wordTimestamps: synthetic); } catch (e) { _error = e.toString(); notifyListeners(); }
+  }
+
+  Future<void> playSurah(List<Verse> verses, {int startIndex = 0, WordByWordProvider? wbwProvider}) async {
+    try {
+      Map<int, List<WordTimestamp>>? map;
+      if (wbwProvider != null) {
+        // Ensure surah data loaded (idempotent)
+        final surahId = verses.isNotEmpty ? (verses.first.surahId ?? verses.first.surahNumber) : null;
+        if (surahId != null) {
+          await wbwProvider.ensureLoaded(surahId);
+          map = wbwProvider.allTimestamps;
+        }
+      }
+      await _audioService.playPlaylist(verses, startIndex: startIndex, allTimestamps: map ?? const {});
+    } catch (e) { _error = e.toString(); notifyListeners(); }
   }
 
   Future<void> togglePlayPause() async {

@@ -1,5 +1,6 @@
 import '../../core/services/audio_service.dart';
 import '../entities/verse.dart';
+import '../entities/word_by_word.dart';
 
 class PlayVerseUseCase {
   final AudioService _audioService;
@@ -16,8 +17,8 @@ class PlaySurahUseCase {
 
   PlaySurahUseCase(this._audioService);
 
-  Future<void> call(List<Verse> verses, {int startIndex = 0}) async {
-    await _audioService.playPlaylist(verses, startIndex: startIndex);
+  Future<void> call(List<Verse> verses, {int startIndex = 0, Map<int, List<WordTimestamp>>? allTimestamps}) async {
+    await _audioService.playPlaylist(verses, startIndex: startIndex, allTimestamps: allTimestamps ?? const {});
   }
 }
 

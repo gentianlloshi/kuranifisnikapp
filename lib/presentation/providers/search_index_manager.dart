@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
@@ -19,6 +22,10 @@ class SearchIndexManager {
   bool get isBuilt => _invertedIndex != null;
   bool get isBuilding => _building;
 
+  // Persistence constants
+  static const int _snapshotVersion = 1; // bump if tokenization / weighting changes
+  static const String _snapshotFile = 'search_index_v$_snapshotVersion.json';
+
   SearchIndexManager({
     required this.getSurahsUseCase,
     required this.getSurahVersesUseCase,
@@ -27,13 +34,18 @@ class SearchIndexManager {
   /// Ensures the index is built. Multiple concurrent callers will await the same future.
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
     if (_invertedIndex != null) return;
+    // Try fast-path load from snapshot
+    if (await _tryLoadSnapshot()) {
+      if (onProgress != null) onProgress(1.0);
+      return;
+    }
     if (_building) {
       return _buildCompleter?.future;
     }
     _building = true;
     _buildCompleter = Completer<void>();
     try {
-      final List<Map<String, dynamic>> raw = [];
+  final List<Map<String, dynamic>> raw = [];
       for (int s = 1; s <= 114; s++) {
         try {
           final verses = await getSurahVersesUseCase.call(s);
@@ -58,6 +70,8 @@ class SearchIndexManager {
       if (onProgress != null) onProgress(0.55);
       _invertedIndex = await compute(idx.buildInvertedIndex, raw);
       if (onProgress != null) onProgress(1.0);
+  // Persist snapshot (fire & forget)
+  unawaited(_saveSnapshot());
     } catch (_) {
       _invertedIndex = null;
       rethrow;
@@ -142,6 +156,70 @@ class SearchIndexManager {
       if (norm != r) result.add(norm);
     }
     return result.toSet().toList();
+  }
+}
+
+extension on SearchIndexManager {
+  Future<File> _snapshotPath() async {
+    final dir = await getApplicationDocumentsDirectory();
+  return File('${dir.path}/${SearchIndexManager._snapshotFile}');
+  }
+
+  Future<bool> _tryLoadSnapshot() async {
+    try {
+      final file = await _snapshotPath();
+      if (!await file.exists()) return false;
+      final content = await file.readAsString();
+      final jsonMap = json.decode(content) as Map<String, dynamic>;
+      final version = jsonMap['version'] as int?;
+  if (version != SearchIndexManager._snapshotVersion) return false; // mismatch version
+      final inv = (jsonMap['index'] as Map<String, dynamic>).map((k, v) => MapEntry(k, (v as List).cast<String>()));
+      final versesJson = (jsonMap['verses'] as Map<String, dynamic>);
+      versesJson.forEach((k, v) {
+        final obj = v as Map<String, dynamic>;
+        _verseCache[k] = Verse(
+          surahId: obj['surahNumber'] as int,
+          verseNumber: obj['number'] as int,
+          arabicText: obj['ar'] as String? ?? '',
+          translation: obj['t'] as String?,
+          transliteration: obj['tr'] as String?,
+          verseKey: obj['verseKey'] as String? ?? k,
+          juz: obj['juz'] as int?,
+        );
+      });
+      _invertedIndex = inv;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _saveSnapshot() async {
+    if (_invertedIndex == null) return;
+    try {
+      final file = await _snapshotPath();
+      final versesMap = <String, dynamic>{};
+      _verseCache.forEach((k, v) {
+        versesMap[k] = {
+          'surahNumber': v.surahNumber,
+          'number': v.number,
+          'verseKey': v.verseKey,
+          'ar': v.textArabic,
+          't': v.textTranslation,
+          'tr': v.textTransliteration,
+          'juz': v.juz,
+        };
+      });
+      final payload = json.encode({
+  'version': SearchIndexManager._snapshotVersion,
+        'index': _invertedIndex,
+        'verses': versesMap,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+      await file.writeAsString(payload, flush: true);
+    } catch (_) {
+      // ignore persistence failure silently
+    }
   }
 }
 

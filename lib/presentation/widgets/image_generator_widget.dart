@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
+import '../theme/theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -244,12 +245,11 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
             if (_textController.text.isNotEmpty) ...[
               Text(
                 _textController.text,
-                style: TextStyle(
+                style: Theme.of(context).textTheme.bodyArabic.copyWith(
                   color: _textColor,
                   fontSize: _fontSize,
-                  fontWeight: FontWeight.w600,
                   height: 1.4,
-                  fontFamily: 'Amiri',
+                  fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
               ),

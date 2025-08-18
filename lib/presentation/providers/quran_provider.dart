@@ -136,7 +136,6 @@ class QuranProvider extends ChangeNotifier {
         _error = null;
         notifyListeners();
       } catch (e) {
-        // fallback to original use case if provided
         if (_searchVersesUseCase != null) {
           _setLoading(true);
           try {
@@ -148,9 +147,15 @@ class QuranProvider extends ChangeNotifier {
           } finally {
             _setLoading(false);
           }
+        } else {
+          _error = e.toString();
+          _searchResults = [];
+          notifyListeners();
         }
       }
-    } else if (_searchVersesUseCase != null) {
+      return;
+    }
+    if (_searchVersesUseCase != null) {
       _setLoading(true);
       try {
         _searchResults = await _searchVersesUseCase!.call(query);

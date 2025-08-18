@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../providers/quran_provider.dart';
+import '../theme/theme.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/word_by_word_provider.dart';
+import '../providers/memorization_provider.dart';
 import '../widgets/verse_notes_indicator.dart';
 import '../widgets/surah_list_widget.dart';
 import '../../domain/entities/verse.dart';
@@ -25,11 +29,115 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   final Map<String, double> _verseHeights = {}; // verseKey -> measured height
   final Map<String, double> _cumulativeOffsets = {}; // verseKey -> cumulative offset before this verse
   bool _layoutReady = false;
-  bool _autoScrollEnabled = true; // future: expose as user setting
   DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _autoScrollThrottle = Duration(milliseconds: 350);
   DateTime _lastUserScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _manualScrollSuppressionWindow = Duration(seconds: 3); // pause auto-scroll shortly after user interacts
+  static const bool kUseNewVerseHighlight = true; // feature flag for new highlight spec
+  // Selection mode state
+  bool _selectionMode = false;
+  final Set<String> _selectedVerseKeys = <String>{};
+
+  // Centralized highlight decoration builder (verse-level)
+  BoxDecoration _buildVerseHighlightDecoration(BuildContext context, {required bool isActive}) {
+    final scheme = Theme.of(context).colorScheme;
+    if (!isActive) return const BoxDecoration();
+    // Refined spec: subtle fill + left accent bar
+    final accent = scheme.primary;
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: accent.withOpacity(0.12),
+      border: Border(left: BorderSide(color: accent, width: 3)),
+    );
+  }
+
+  void _showVerseOptions(BuildContext context, Verse verse) {
+    // Delegate to VerseWidget's modal for consistency
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => _VerseOptionsSheet(
+        verse: verse,
+        onPlay: () => context.read<AudioProvider>().playVerse(verse),
+        onPlayFromHere: () {
+          final q = context.read<QuranProvider>();
+          final verses = q.currentVerses;
+          final startIndex = verses.indexWhere((v) => v.number == verse.number);
+          if (startIndex != -1) {
+            final wbwProv = context.read<WordByWordProvider>();
+            context.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
+          }
+        },
+        onToggleMemorization: () {
+          final mem = context.read<MemorizationProvider>();
+          final key = '${verse.surahNumber}:${verse.number}';
+          mem.toggleVerseMemorization(key);
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  BoxDecoration _mergeSelectionDecoration(BuildContext context, {required BoxDecoration base, required bool isSelected}) {
+    if (!isSelected) return base;
+    final scheme = Theme.of(context).colorScheme;
+    // Layer selection indication (semi-transparent primaryContainer + border)
+    final selectionColor = scheme.primaryContainer.withOpacity(0.35);
+    return base.copyWith(
+      color: base.color == null ? selectionColor : Color.alphaBlend(selectionColor, base.color!),
+      border: base.border ?? Border.all(color: scheme.primary.withOpacity(0.6), width: 2),
+    );
+  }
+
+  void _enterSelection(String verseKey) {
+    setState(() {
+      _selectionMode = true;
+      _selectedVerseKeys.add(verseKey);
+    });
+  }
+
+  void _toggleSelection(String verseKey) {
+    if (!_selectionMode) {
+      _enterSelection(verseKey);
+      return;
+    }
+    setState(() {
+      if (_selectedVerseKeys.contains(verseKey)) {
+        _selectedVerseKeys.remove(verseKey);
+        if (_selectedVerseKeys.isEmpty) _selectionMode = false;
+      } else {
+        _selectedVerseKeys.add(verseKey);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    if (!_selectionMode) return;
+    setState(() {
+      _selectedVerseKeys.clear();
+      _selectionMode = false;
+    });
+  }
+
+  Future<void> _bookmarkSelected() async {
+    final bookmarkProvider = context.read<BookmarkProvider>();
+    for (final key in _selectedVerseKeys) {
+      await bookmarkProvider.toggleBookmark(key);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('U aplikuan shënjimet për ${_selectedVerseKeys.length} ajete')), // localization later
+      );
+    }
+    _clearSelection();
+  }
+
+  void _shareSelected() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Do të ndahet ${_selectedVerseKeys.length} ajete (së shpejti)')),
+    );
+  }
+
+  // Removed word style builder (moved into VerseWidget for direct reuse)
 
   @override
   void initState() {
@@ -119,7 +227,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   }
 
   Future<void> _autoScrollToVerse(String verseKey, List<Verse> verses) async {
-    if (!_autoScrollEnabled) return;
+    final appState = context.read<AppStateProvider>();
+    if (!appState.autoScrollEnabled) return;
     final now = DateTime.now();
     if (now.difference(_lastAutoScroll) < _autoScrollThrottle) return; // throttle
   // Suppress if user manually scrolled recently to respect user control
@@ -134,10 +243,22 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     final ctx = key?.currentContext;
     if (ctx != null) {
       try {
+        double alignment = 0.1; // default
+        if (appState.adaptiveAutoScroll) {
+          // Use measured height to adjust alignment: taller verses align nearer top
+          final h = _verseHeights[verseKey] ?? 260;
+          if (h > 600) {
+            alignment = 0.02;
+          } else if (h > 400) {
+            alignment = 0.05;
+          } else if (h > 300) {
+            alignment = 0.08;
+          }
+        }
         await Scrollable.ensureVisible(
           ctx,
           duration: const Duration(milliseconds: 420),
-          alignment: 0.1, // keep verse near top for readability (approx top padding)
+          alignment: alignment,
           curve: Curves.easeInOutCubic,
         );
         return;
@@ -184,16 +305,29 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
             _autoScrollToVerse(currentPlayingKey, quranProvider.currentVerses);
           });
         }
-        if (quranProvider.currentSurah == null) {
+  if (quranProvider.currentSurah == null) {
           // Show list of surahs directly so user can choose
           return const SurahListWidget();
         }
 
         final surah = quranProvider.currentSurah!;
         final verses = quranProvider.currentVerses;
+        // Load real word-by-word + timestamps if feature enabled
+        if (context.read<AppStateProvider>().showWordByWord) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<WordByWordProvider>().ensureLoaded(surah.number);
+          });
+        }
 
         return Column(
           children: [
+            if (_selectionMode)
+              _SelectionBar(
+                count: _selectedVerseKeys.length,
+                onCancel: _clearSelection,
+                onBookmark: _bookmarkSelected,
+                onShare: _shareSelected,
+              ),
             // Surah header
             Container(
               width: double.infinity,
@@ -217,15 +351,17 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Text(
-                            surah.nameArabic,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontFamily: 'AmiriQuran',
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Text(
+                              surah.nameArabic,
+                              textAlign: TextAlign.right,
+                              style: Theme.of(context).textTheme.bodyArabic.copyWith(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ),
                         ),
@@ -268,31 +404,39 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                         future: bookmarkProvider.isBookmarked(verse.verseKey),
                         builder: (context, snapshot) {
                           final isBm = snapshot.data ?? false;
-                          final currentPlaying = Provider.of<AudioProvider>(context).currentTrack?.verseKey;
-                          final currentWordIdx = Provider.of<AudioProvider>(context).currentWordIndex;
-                          final wbw = Provider.of<WordByWordProvider>(context).currentWordByWordVerses.firstWhere(
-                            (element) => element.verseNumber == verse.number,
-                            orElse: () => WordByWordVerse(verseNumber: verse.number, words: []),
-                          );
+                          final currentPlaying = Provider.of<AudioProvider>(context).currentTrack?.verseKey; // only verse-level listening here (no word index)
+                          final wbwProvider = Provider.of<WordByWordProvider>(context);
+                          var wbw = wbwProvider.getVerseWordData(verse.number);
+                          wbw ??= wbwProvider.error != null ? wbwProvider.buildNaiveFromVerse(verse) : null;
                           final isCurrent = currentPlaying == verse.verseKey;
-                          return AnimatedContainer(
+                          final isSelected = _selectedVerseKeys.contains(verse.verseKey);
+                          final baseDecoration = _buildVerseHighlightDecoration(context, isActive: isCurrent);
+                          final decoration = _mergeSelectionDecoration(context, base: baseDecoration, isSelected: isSelected);
+                          final reduceMotion = appState.reduceMotion;
+                          final duration = reduceMotion ? Duration.zero : const Duration(milliseconds: 300);
+                          return GestureDetector(
                             key: key,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: isCurrent
-                                  ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.35)
-                                  : null,
-                            ),
-                            child: VerseWidget(
-                              verse: verse,
-                              settings: appState.settings,
-                              isBookmarked: isBm,
-                              onBookmarkToggle: () => bookmarkProvider.toggleBookmark(verse.verseKey),
-                              currentPlayingVerseKey: currentPlaying,
-                              currentWordIndex: currentWordIdx,
-                              wordByWordData: wbw,
+                            onLongPress: () => _toggleSelection(verse.verseKey),
+                            onTap: () {
+                              if (_selectionMode) {
+                                _toggleSelection(verse.verseKey);
+                              } else {
+                                // default tap: open options bottom sheet
+                                _showVerseOptions(context, verse);
+                              }
+                            },
+                            child: AnimatedContainer(
+                              duration: duration,
+                              curve: Curves.easeInOut,
+                              decoration: decoration,
+                              child: VerseWidget(
+                                verse: verse,
+                                settings: appState.settings,
+                                isBookmarked: isBm,
+                                onBookmarkToggle: () => bookmarkProvider.toggleBookmark(verse.verseKey),
+                                currentPlayingVerseKey: currentPlaying,
+                                wordByWordData: wbw,
+                              ),
                             ),
                           );
                         },
@@ -315,7 +459,6 @@ class VerseWidget extends StatelessWidget {
   final bool isBookmarked;
   final VoidCallback onBookmarkToggle;
   final String? currentPlayingVerseKey;
-  final int? currentWordIndex;
   final WordByWordVerse? wordByWordData;
 
   const VerseWidget({
@@ -325,7 +468,6 @@ class VerseWidget extends StatelessWidget {
     required this.isBookmarked,
     required this.onBookmarkToggle,
     this.currentPlayingVerseKey,
-    this.currentWordIndex,
     this.wordByWordData,
   });
 
@@ -333,92 +475,157 @@ class VerseWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool isCurrentVersePlaying = currentPlayingVerseKey == verse.verseKey;
+    TextStyle _buildWordArabicStyle(BuildContext context, {required bool isHighlighted, required double baseSize}) {
+      final t = Theme.of(context).textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.65);
+      if (!isHighlighted) return t;
+      return t.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold);
+    }
     
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Verse number and actions
-            Row(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(10),
+        elevation: 0,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    verse.number.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      decoration: ShapeDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.07),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: Text(
+                        verse.number.toString(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary.withOpacity(0.9),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Wrap(
+                          spacing: 0,
+                          runSpacing: -4,
+                          alignment: WrapAlignment.end,
+                          children: [
+                            IconButton(
+                              iconSize: 20,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                              icon: Icon(
+                                isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                                color: isBookmarked ? theme.colorScheme.primary : null,
+                                size: 20,
+                              ),
+                              tooltip: isBookmarked ? 'Hiq shenjën' : 'Shëno',
+                              onPressed: onBookmarkToggle,
+                            ),
+                            Consumer<WordByWordProvider>(
+                              builder: (context, wbwProv, _) => IconButton(
+                                iconSize: 20,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                                icon: const Icon(Icons.play_arrow, size: 20),
+                                tooltip: 'Luaj ajetin me highlight',
+                                onPressed: () async {
+                                  await wbwProv.ensureLoaded(verse.surahNumber);
+                                  final data = wbwProv.getVerseWordData(verse.number);
+                                  final ts = wbwProv.getVerseTimestamps(verse.number);
+                                  context.read<AudioProvider>().playVerseWithWordData(verse, data, timestamps: ts);
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 36,
+                              height: 32,
+                              child: Center(
+                                child: VerseNotesIndicator(
+                                  verseKey: '${verse.surahNumber}:${verse.number}',
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              iconSize: 20,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                              icon: const Icon(Icons.share, size: 18),
+                              tooltip: 'Ndaj',
+                              onPressed: () => _shareVerse(context, verse),
+                            ),
+                            Consumer<MemorizationProvider>(
+                              builder: (context, mem, _) {
+                                final key = '${verse.surahNumber}:${verse.number}';
+                                final isMem = mem.isVerseMemorized(key);
+                                return IconButton(
+                                  iconSize: 20,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                                  icon: Icon(
+                                    isMem ? Icons.psychology : Icons.psychology_outlined,
+                                    color: isMem ? theme.colorScheme.primary : null,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Memorizim',
+                                  onPressed: () => mem.toggleVerseMemorization(key),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              iconSize: 20,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                              icon: const Icon(Icons.more_vert, size: 20),
+                              tooltip: 'Opsione',
+                              onPressed: () => _showVerseOptions(context, verse),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                    color: isBookmarked ? theme.primaryColor : null,
-                  ),
-                  onPressed: onBookmarkToggle,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: () => _playVerse(context, verse),
-                ),
-                VerseNotesIndicator(verseKey: '${verse.surahNumber}:${verse.number}'),
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: () => _shareVerse(context, verse),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () => _showVerseOptions(context, verse),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            
-            // Arabic text
+                const SizedBox(height: 6),
+                
+                // Arabic text
             if (settings.showArabic)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: settings.showWordByWord && wordByWordData != null && wordByWordData!.words.isNotEmpty
-                    ? Wrap(
-                        alignment: WrapAlignment.end,
-                        textDirection: TextDirection.rtl,
-                        children: List.generate(wordByWordData!.words.length, (index) {
-                          final word = wordByWordData!.words[index];
-                          final isHighlighted = isCurrentVersePlaying && currentWordIndex == index;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 1.0),
-                            child: Text(
-                              word.arabic,
-                              textDirection: TextDirection.rtl,
-                              style: TextStyle(
-                                fontFamily: 'AmiriQuran',
-                                fontSize: settings.fontSizeArabic.toDouble(),
-                                height: 1.8,
-                                color: isHighlighted ? theme.primaryColor : theme.textTheme.bodyLarge?.color,
-                                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                          );
-                        }),
-                      )
-                    : Text(
-                        verse.textArabic,
-                        style: TextStyle(
-                          fontFamily: 'AmiriQuran',
-                          fontSize: settings.fontSizeArabic.toDouble(),
-                          height: 1.8,
+                    ? Align(
+                        alignment: Alignment.centerRight,
+                        child: _WordByWordLine(
+                          verseKey: verse.verseKey,
+                          words: wordByWordData!.words,
+                          baseSize: settings.fontSizeArabic.toDouble(),
                         ),
-                        textAlign: TextAlign.right,
-                        textDirection: TextDirection.rtl,
+                      )
+                    : Align(
+                        alignment: Alignment.centerRight,
+                        child: Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text(
+                            verse.textArabic,
+                            style: Theme.of(context).textTheme.bodyArabic.copyWith(
+                                  fontSize: settings.fontSizeArabic.toDouble(),
+                                  height: 1.65,
+                                ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
                       ),
               ),
             
@@ -428,26 +635,27 @@ class VerseWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   verse.textTranslation!,
-                  style: TextStyle(
-                    fontFamily: 'Lora',
-                    fontSize: settings.fontSizeTranslation.toDouble(),
-                    height: 1.6,
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontSize: settings.fontSizeTranslation.toDouble(),
+                        height: 1.55,
+                      ),
                 ),
               ),
             
-            // Transliteration
-            if (settings.showTransliteration && verse.textTransliteration != null)
-              Text(
-                verse.textTransliteration!,
-                style: TextStyle(
-                  fontSize: settings.fontSizeTranslation.toDouble() - 2,
-                  fontStyle: FontStyle.italic,
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  height: 1.4,
-                ),
-              ),
-          ],
+                // Transliteration
+                if (settings.showTransliteration && verse.textTransliteration != null)
+                  Text(
+                    verse.textTransliteration!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: (settings.fontSizeTranslation.toDouble() - 2).clamp(10, 100),
+                          fontStyle: FontStyle.italic,
+                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          height: 1.4,
+                        ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -463,7 +671,8 @@ class VerseWidget extends StatelessWidget {
     final startIndex = verses.indexWhere((v) => v.number == verse.number);
     
     if (startIndex != -1) {
-      context.read<AudioProvider>().playSurah(verses, startIndex: startIndex);
+  final wbwProv = context.read<WordByWordProvider>();
+  context.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
     }
   }
 
@@ -519,6 +728,161 @@ class VerseWidget extends StatelessWidget {
               Navigator.pop(context);
               // TODO: Implement add to memorization functionality
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WordByWordLine extends StatelessWidget {
+  final String verseKey;
+  final List<WordData> words;
+  final double baseSize;
+  const _WordByWordLine({required this.verseKey, required this.words, required this.baseSize});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Selector<AudioProvider, _VerseWordState>(
+        selector: (_, audio) => _VerseWordState(audio.currentTrack?.verseKey, audio.currentWordIndex),
+        shouldRebuild: (prev, next) => (prev.verseKey == verseKey || next.verseKey == verseKey) && prev != next,
+        builder: (context, state, _) {
+          final bool isActiveVerse = state.verseKey == verseKey;
+          final activeIndex = isActiveVerse ? state.wordIndex : null;
+          final appState = context.read<AppStateProvider>();
+          final glow = appState.wordHighlightGlow && !appState.reduceMotion;
+          final baseStyle = theme.textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.65);
+          final spans = <InlineSpan>[];
+          for (int i = 0; i < words.length; i++) {
+            final w = words[i];
+            final highlighted = activeIndex == i;
+            final style = highlighted
+                ? baseStyle.copyWith(
+                    // Keep Arabic color but overlay background softly
+                    background: Paint()
+                      ..color = theme.colorScheme.primary.withOpacity(0.18)
+                      ..style = PaintingStyle.fill,
+                    fontWeight: FontWeight.w600,
+                    shadows: glow
+                        ? [
+                            Shadow(
+                              color: theme.colorScheme.primary.withOpacity(0.55),
+                              blurRadius: 10,
+                              offset: const Offset(0, 1.2),
+                            ),
+                            Shadow(
+                              color: theme.colorScheme.primary.withOpacity(0.35),
+                              blurRadius: 18,
+                            ),
+                          ]
+                        : null,
+                  )
+                : baseStyle;
+            spans.add(TextSpan(text: w.arabic, style: style));
+            if (i != words.length - 1) spans.add(const TextSpan(text: ' '));
+          }
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: RichText(
+              textAlign: TextAlign.right,
+              text: TextSpan(children: spans),
+              textDirection: TextDirection.rtl,
+            ),
+          );
+        });
+  }
+}
+
+@immutable
+class _VerseWordState {
+  final String? verseKey;
+  final int? wordIndex;
+  const _VerseWordState(this.verseKey, this.wordIndex);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _VerseWordState && runtimeType == other.runtimeType && verseKey == other.verseKey && wordIndex == other.wordIndex;
+  @override
+  int get hashCode => Object.hash(verseKey, wordIndex);
+}
+
+// _WordToken removed in RichText refactor (spans used instead)
+
+class _SelectionBar extends StatelessWidget {
+  final int count;
+  final VoidCallback onCancel;
+  final VoidCallback onBookmark;
+  final VoidCallback onShare;
+  const _SelectionBar({required this.count, required this.onCancel, required this.onBookmark, required this.onShare});
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      elevation: 2,
+      color: scheme.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Anulo',
+                onPressed: onCancel,
+              ),
+              Text('$count të përzgjedhura', style: Theme.of(context).textTheme.titleMedium),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.bookmark_add_outlined),
+                tooltip: 'Shëno',
+                onPressed: onBookmark,
+              ),
+              IconButton(
+                icon: const Icon(Icons.share),
+                tooltip: 'Ndaj',
+                onPressed: onShare,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VerseOptionsSheet extends StatelessWidget {
+  final Verse verse;
+  final VoidCallback onPlay;
+  final VoidCallback onPlayFromHere;
+  final VoidCallback onToggleMemorization;
+  const _VerseOptionsSheet({required this.verse, required this.onPlay, required this.onPlayFromHere, required this.onToggleMemorization});
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.play_arrow),
+            title: const Text('Luaj këtë ajet'),
+            onTap: () {
+              Navigator.pop(context);
+              onPlay();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.playlist_play),
+            title: const Text('Luaj nga ky ajet'),
+            onTap: () {
+              Navigator.pop(context);
+              onPlayFromHere();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.psychology),
+            title: const Text('Ndrysho Status Memorizimi'),
+            onTap: onToggleMemorization,
           ),
         ],
       ),

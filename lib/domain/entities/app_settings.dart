@@ -19,6 +19,19 @@ class AppSettings {
   final double playbackSpeed;
   final bool autoPlay;
   final String preferredReciter;
+  // Search filter preferences
+  final bool searchInArabic;
+  final bool searchInTranslation;
+  final bool searchInTransliteration;
+  final int? searchJuz; // null => all
+  // Reading experience
+  final bool autoScrollEnabled;
+  // Accessibility / motion
+  final bool reduceMotion;
+  // Adaptive auto-scroll alignment based on verse height
+  final bool adaptiveAutoScroll;
+  // Visual enhancement: glow effect on active word highlight
+  final bool wordHighlightGlow;
 
   const AppSettings({
     this.theme = 'light',
@@ -38,6 +51,14 @@ class AppSettings {
     this.playbackSpeed = 1.0,
     this.autoPlay = false,
     this.preferredReciter = 'default',
+  this.searchInArabic = true,
+  this.searchInTranslation = true,
+  this.searchInTransliteration = true,
+  this.searchJuz = null,
+  this.autoScrollEnabled = true,
+  this.reduceMotion = false,
+  this.adaptiveAutoScroll = true,
+  this.wordHighlightGlow = true,
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -59,6 +80,14 @@ class AppSettings {
       playbackSpeed: (json['playbackSpeed'] ?? 1.0).toDouble(),
       autoPlay: json['autoPlay'] ?? false,
       preferredReciter: json['preferredReciter'] ?? 'default',
+  searchInArabic: json['searchInArabic'] ?? true,
+  searchInTranslation: json['searchInTranslation'] ?? true,
+  searchInTransliteration: json['searchInTransliteration'] ?? true,
+  searchJuz: json['searchJuz'],
+  autoScrollEnabled: json['autoScrollEnabled'] ?? true,
+  reduceMotion: json['reduceMotion'] ?? false,
+  adaptiveAutoScroll: json['adaptiveAutoScroll'] ?? true,
+  wordHighlightGlow: json['wordHighlightGlow'] ?? true,
     );
   }
 
@@ -81,6 +110,14 @@ class AppSettings {
       'playbackSpeed': playbackSpeed,
       'autoPlay': autoPlay,
       'preferredReciter': preferredReciter,
+  'searchInArabic': searchInArabic,
+  'searchInTranslation': searchInTranslation,
+  'searchInTransliteration': searchInTransliteration,
+  'searchJuz': searchJuz,
+  'autoScrollEnabled': autoScrollEnabled,
+  'reduceMotion': reduceMotion,
+  'adaptiveAutoScroll': adaptiveAutoScroll,
+  'wordHighlightGlow': wordHighlightGlow,
     };
   }
 
@@ -102,6 +139,14 @@ class AppSettings {
     double? playbackSpeed,
     bool? autoPlay,
     String? preferredReciter,
+    bool? searchInArabic,
+    bool? searchInTranslation,
+  bool? searchInTransliteration,
+    int? searchJuz,
+    bool? autoScrollEnabled,
+  bool? reduceMotion,
+  bool? adaptiveAutoScroll,
+  bool? wordHighlightGlow,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -121,6 +166,14 @@ class AppSettings {
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       autoPlay: autoPlay ?? this.autoPlay,
       preferredReciter: preferredReciter ?? this.preferredReciter,
+      searchInArabic: searchInArabic ?? this.searchInArabic,
+      searchInTranslation: searchInTranslation ?? this.searchInTranslation,
+  searchInTransliteration: searchInTransliteration ?? this.searchInTransliteration,
+      searchJuz: searchJuz ?? this.searchJuz,
+      autoScrollEnabled: autoScrollEnabled ?? this.autoScrollEnabled,
+  reduceMotion: reduceMotion ?? this.reduceMotion,
+  adaptiveAutoScroll: adaptiveAutoScroll ?? this.adaptiveAutoScroll,
+  wordHighlightGlow: wordHighlightGlow ?? this.wordHighlightGlow,
     );
   }
 

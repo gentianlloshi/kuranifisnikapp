@@ -13,6 +13,7 @@ import 'package:kurani_fisnik_app/presentation/providers/notification_provider.d
 import 'package:kurani_fisnik_app/presentation/providers/texhvid_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/word_by_word_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/surah_selection_provider.dart';
 
 // Pages and Widgets
 import 'package:kurani_fisnik_app/presentation/pages/home_page.dart';
@@ -29,6 +30,10 @@ import 'package:kurani_fisnik_app/data/repositories/storage_repository_impl.dart
 import 'package:kurani_fisnik_app/data/repositories/bookmark_repository_impl.dart';
 import 'package:kurani_fisnik_app/data/repositories/texhvid_repository_impl.dart';
 import 'package:kurani_fisnik_app/data/repositories/thematic_index_repository_impl.dart';
+import 'package:kurani_fisnik_app/data/datasources/local/word_by_word_local_data_source.dart';
+import 'package:kurani_fisnik_app/data/repositories/word_by_word_repository_impl.dart';
+import 'package:kurani_fisnik_app/domain/usecases/get_word_by_word_data_usecase.dart';
+import 'package:kurani_fisnik_app/domain/usecases/get_timestamp_data_usecase.dart';
 
 // Use Cases
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_usecase.dart';
@@ -43,6 +48,8 @@ import 'package:kurani_fisnik_app/domain/usecases/thematic_index_usecases.dart' 
 // Services
 import 'package:kurani_fisnik_app/core/services/notification_service.dart';
 import 'package:kurani_fisnik_app/core/services/audio_service.dart';
+import 'presentation/theme/design_tokens.dart';
+import 'presentation/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,6 +129,12 @@ class KuraniFisnikApp extends StatelessWidget {
         Provider<ContentLocalDataSource>(
           create: (_) => ContentLocalDataSourceImpl(),
         ),
+        Provider<WordByWordLocalDataSource>(
+          create: (_) => WordByWordLocalDataSourceImpl(
+            wordByWordBox: wordByWordBox,
+            timestampBox: timestampBox,
+          ),
+        ),
 
         // Repositories
         ProxyProvider2<QuranLocalDataSource, StorageDataSource, QuranRepositoryImpl>(
@@ -140,6 +153,9 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         Provider<ThematicIndexRepositoryImpl>(
           create: (_) => ThematicIndexRepositoryImpl(),
+        ),
+        ProxyProvider<WordByWordLocalDataSource, WordByWordRepositoryImpl>(
+          update: (_, ds, __) => WordByWordRepositoryImpl(localDataSource: ds),
         ),
 
         // Use Cases
@@ -164,6 +180,12 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         ProxyProvider<ThematicIndexRepositoryImpl, GetThematicIndexUseCase>(
           update: (_, repository, __) => GetThematicIndexUseCase(repository),
+        ),
+        ProxyProvider<WordByWordRepositoryImpl, GetWordByWordDataUseCase>(
+          update: (_, repo, __) => GetWordByWordDataUseCase(repository: repo),
+        ),
+        ProxyProvider<WordByWordRepositoryImpl, GetTimestampDataUseCase>(
+          update: (_, repo, __) => GetTimestampDataUseCase(repository: repo),
         ),
 
         // Providers
@@ -213,27 +235,54 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => ThematicIndexProvider(getThematicIndexUseCase: Provider.of<GetThematicIndexUseCase>(_, listen:false)),
           update: (_, getThematicIndexUseCase, previous) => ThematicIndexProvider(getThematicIndexUseCase: getThematicIndexUseCase),
         ),
-        ChangeNotifierProvider<WordByWordProvider>(
-          create: (_) => WordByWordProvider(),
+        ChangeNotifierProxyProvider2<GetWordByWordDataUseCase, GetTimestampDataUseCase, WordByWordProvider>(
+          create: (_) => WordByWordProvider(
+            getWordByWordDataUseCase: Provider.of<GetWordByWordDataUseCase>(_, listen: false),
+            getTimestampDataUseCase: Provider.of<GetTimestampDataUseCase>(_, listen: false),
+          ),
+          update: (_, wUse, tUse, prev) => WordByWordProvider(
+            getWordByWordDataUseCase: wUse,
+            getTimestampDataUseCase: tUse,
+          ),
+        ),
+        ChangeNotifierProvider<SurahSelectionProvider>(
+          create: (_) => SurahSelectionProvider(),
         ),
       ],
       child: Consumer<AppStateProvider>(
         builder: (context, appState, child) {
-          return MaterialApp(
-            title: 'Kurani Fisnik',
-            debugShowCheckedModeBanner: false,
-            theme: _buildTheme(appState.currentTheme),
-            home: const EnhancedHomePage(),
-            routes: {
-              '/home': (context) => const EnhancedHomePage(),
-              '/quran': (context) => const HomePage(),
-              '/search': (context) => const HomePage(),
-              '/bookmarks': (context) => const HomePage(),
-              '/notes': (context) => const HomePage(),
-              '/memorization': (context) => const HomePage(),
-              '/texhvid': (context) => const HomePage(),
-              '/thematic': (context) => const HomePage(),
-              '/settings': (context) => const HomePage(),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              // Breakpoints: <360 0.95, 360-599 1.0, 600-839 1.1, >=840 1.2
+              double scaleFactor;
+              if (width < 360) {
+                scaleFactor = 0.95;
+              } else if (width < 600) {
+                scaleFactor = 1.0;
+              } else if (width < 840) {
+                scaleFactor = 1.1;
+              } else {
+                scaleFactor = 1.2;
+              }
+              final theme = _resolveTheme(appState.currentTheme, scaleFactor: scaleFactor);
+              return MaterialApp(
+                title: 'Kurani Fisnik',
+                debugShowCheckedModeBanner: false,
+                theme: theme,
+                home: const EnhancedHomePage(),
+                routes: {
+                  '/home': (context) => const EnhancedHomePage(),
+                  '/quran': (context) => const HomePage(),
+                  '/search': (context) => const HomePage(),
+                  '/bookmarks': (context) => const HomePage(),
+                  '/notes': (context) => const HomePage(),
+                  '/memorization': (context) => const HomePage(),
+                  '/texhvid': (context) => const HomePage(),
+                  '/thematic': (context) => const HomePage(),
+                  '/settings': (context) => const HomePage(),
+                },
+              );
             },
           );
         },
@@ -241,62 +290,16 @@ class KuraniFisnikApp extends StatelessWidget {
     );
   }
 
-  ThemeData _buildTheme(String themeName) {
+  ThemeData _resolveTheme(String themeName, {double scaleFactor = 1.0}) {
     switch (themeName) {
       case 'dark':
-        return ThemeData.dark().copyWith(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.dark,
-          ),
-          scaffoldBackgroundColor: const Color(0xFF121212),
-          cardColor: const Color(0xFF1E1E1E),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF1E1E1E),
-            elevation: 0,
-          ),
-        );
+        return buildAppTheme(buildMinimalDarkScheme(), scaleFactor: scaleFactor);
       case 'sepia':
-        return ThemeData.light().copyWith(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.brown,
-            brightness: Brightness.light,
-          ),
-          scaffoldBackgroundColor: const Color(0xFFF5F1E8),
-          cardColor: const Color(0xFFFAF7F0),
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.brown[100],
-            foregroundColor: Colors.brown[800],
-            elevation: 0,
-          ),
-        );
+        return buildAppTheme(buildSepiaScheme(Brightness.light), scaleFactor: scaleFactor);
       case 'midnight':
-        return ThemeData.dark().copyWith(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.indigo,
-            brightness: Brightness.dark,
-          ),
-          scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-          cardColor: const Color(0xFF1A1A1A),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF1A1A1A),
-            elevation: 0,
-          ),
-        );
-      default: // light
-        return ThemeData.light().copyWith(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.light,
-          ),
-          scaffoldBackgroundColor: Colors.white,
-          cardColor: Colors.white,
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.blue[50],
-            foregroundColor: Colors.blue[800],
-            elevation: 0,
-          ),
-        );
+        return buildAppTheme(buildDeepBlueScheme(Brightness.dark), scaleFactor: scaleFactor);
+      default:
+        return buildAppTheme(buildDeepBlueScheme(Brightness.light), scaleFactor: scaleFactor);
     }
   }
 }

@@ -6,6 +6,7 @@ import '../providers/quran_provider.dart';
 import '../providers/note_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/texhvid_provider.dart';
+import '../providers/memorization_provider.dart';
 
 // Widgets
 import '../widgets/quran_view_widget.dart';
@@ -250,6 +251,8 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
   }
 
   void _showQuickNavigation(BuildContext context) {
+    final surahController = TextEditingController();
+    final verseController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -258,21 +261,16 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              controller: surahController,
               decoration: const InputDecoration(
                 labelText: 'Numri i Sures (1-114)',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
-              onSubmitted: (value) {
-                final surahNumber = int.tryParse(value);
-                if (surahNumber != null && surahNumber >= 1 && surahNumber <= 114) {
-                  Navigator.pop(context);
-                  context.read<QuranProvider>().navigateToSurah(surahNumber);
-                }
-              },
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: verseController,
               decoration: const InputDecoration(
                 labelText: 'Numri i Ajetit (opsional)',
                 border: OutlineInputBorder(),
@@ -286,13 +284,24 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
             onPressed: () => Navigator.pop(context),
             child: const Text('Anulo'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to specified surah/verse
-            },
-            child: const Text('Shko'),
-          ),
+            ElevatedButton(
+              onPressed: () {
+                final surahNumber = int.tryParse(surahController.text.trim());
+                final verseNumber = int.tryParse(verseController.text.trim());
+                if (surahNumber == null || surahNumber < 1 || surahNumber > 114) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Numër sureje i pavlefshëm')));
+                  return;
+                }
+                Navigator.pop(context);
+                if (verseNumber != null && verseNumber > 0) {
+                  context.read<QuranProvider>().openSurahAtVerse(surahNumber, verseNumber);
+                } else {
+                  context.read<QuranProvider>().navigateToSurah(surahNumber);
+                }
+                _tabController.animateTo(0); // switch to Quran tab
+              },
+              child: const Text('Shko'),
+            ),
         ],
       ),
     );
@@ -315,13 +324,54 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
   }
 
   void _addToMemorization() {
-    final quranProvider = context.read<QuranProvider>();
-    if (quranProvider.currentSurah != null) {
-      // TODO integrate real memorization logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('U shtua për memorizim (placeholder)')),
-      );
-    }
+    final surahController = TextEditingController();
+    final verseController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Shto për Memorizim'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: surahController,
+              decoration: const InputDecoration(
+                labelText: 'Sure (1-114)',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: verseController,
+              decoration: const InputDecoration(
+                labelText: 'Ajeti',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Anulo')),
+          ElevatedButton(
+            onPressed: () {
+              final surah = int.tryParse(surahController.text.trim());
+              final verse = int.tryParse(verseController.text.trim());
+              if (surah == null || surah < 1 || surah > 114 || verse == null || verse < 1) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Të dhëna të pavlefshme')));
+                return;
+              }
+              final key = '$surah:$verse';
+              context.read<MemorizationProvider>().toggleVerseMemorization(key);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ajeti $key u shtua/ndryshua')));
+            },
+            child: const Text('Ruaj'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _startTexhvidQuiz() {

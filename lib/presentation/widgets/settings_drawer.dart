@@ -147,6 +147,31 @@ class SettingsDrawer extends StatelessWidget {
                       appState.updateDisplayOptions(showWordByWord: value);
                     },
                   ),
+                  const Divider(height: 24),
+                  SwitchListTile(
+                    title: const Text('Auto-scroll gjatë dëgjimit'),
+                    value: settings.autoScrollEnabled,
+                    onChanged: (v) => appState.updateAutoScroll(v),
+                    subtitle: const Text('Lëviz automatikisht te ajeti që po lexohet.'),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Auto-scroll adaptiv'),
+                    value: settings.adaptiveAutoScroll,
+                    onChanged: settings.autoScrollEnabled ? (v) => appState.updateAdaptiveAutoScroll(v) : null,
+                    subtitle: const Text('Rregullon pozicionimin sipas gjatësisë së ajetit.'),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Redukto animacionet'),
+                    value: settings.reduceMotion,
+                    onChanged: (v) => appState.updateReduceMotion(v),
+                    subtitle: const Text('Çaktivizon animacionet e panevojshme për komoditet.'),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Theksim me efekt glow'),
+                    value: settings.wordHighlightGlow,
+                    onChanged: settings.reduceMotion ? null : (v) => appState.updateWordHighlightGlow(v),
+                    subtitle: const Text('Shton një shkëlqim të butë mbi fjalën aktive.'),
+                  ),
                 ],
               ),
 

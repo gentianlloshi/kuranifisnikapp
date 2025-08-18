@@ -342,4 +342,23 @@ Cache not updating | Old schema persisted | Bump `_cacheVersion`.
 This WBW system cleanly separates concerns: **data ingestion**, **caching**, **synchronization**, and **presentation**. Expansion of segment timestamps into per-word granularity unifies the rendering and reduces complexity in the UI layer. Performance optimizations (isolate parsing, pointer advancement, throttled position sampling) ensure smooth playback and visual alignment.
 
 ---
-*Document version: 1.1 | Cache schema version: 2 (added throttle + pointer optimization)*
+---
+## 24. Recent UX Refinements (Post v1.1)
+Addition | Description | Rationale
+---------|-------------|----------
+Adaptive Auto-Scroll Alignment | Dynamically chooses scroll alignment (0.02–0.10) based on measured verse height. | Long verses need to start nearer top to keep more content in view; short verses feel better slightly lower.
+Glow Word Highlight (optional) | Soft dual-shadow + translucent background behind active word. Toggle `wordHighlightGlow` & respects `reduceMotion`. | Improves visual focus without harsh color blocks; accessible (can be disabled for motion sensitivity/performance).
+Settings Toggles | `adaptiveAutoScroll`, `wordHighlightGlow` exposed in settings drawer. | User control & experimentation.
+
+Technical Notes:
+- Alignment thresholds currently heuristic: >600px → 0.02, >400px → 0.05, >300px → 0.08 else 0.10. Can be externalized to a config map if future tuning needed.
+- Glow skips when `reduceMotion` true to avoid visual noise & extra layer compositing.
+- Shadows add negligible cost (single RichText rebuild) due to span-level style only on active word.
+
+Potential Next Steps:
+- Cache verse height class after first measurement to avoid repeated threshold checks.
+- Provide alternative emphasis style (underline pulse) for users who dislike glow.
+- Expose alignment thresholds in an advanced debug/settings panel.
+
+---
+*Document version: 1.2 | Cache schema version: 2 (added adaptive auto-scroll + glow option)*

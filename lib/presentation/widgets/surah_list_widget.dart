@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/theme.dart';
 import '../providers/quran_provider.dart';
 import '../providers/audio_provider.dart';
+import '../providers/word_by_word_provider.dart';
 import '../../domain/entities/surah.dart';
+import '../providers/surah_selection_provider.dart';
 
 class SurahListWidget extends StatelessWidget {
   const SurahListWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuranProvider>(
-      builder: (context, quranProvider, child) {
+    return Consumer2<QuranProvider, SurahSelectionProvider>(
+      builder: (context, quranProvider, selectionProvider, child) {
         if (quranProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -53,129 +56,254 @@ class SurahListWidget extends StatelessWidget {
           );
         }
 
-        return ListView.builder(
-          itemCount: surahs.length,
-          itemBuilder: (context, index) {
-            final surah = surahs[index];
-            return SurahListItem(
-              surah: surah,
-              onTap: () => _onSurahTap(context, surah),
-            );
-          },
+  final selection = selectionProvider;
+  final selectionMode = selection.selectionMode;
+  return Stack(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                // Refined breakpoints using an approximate target tile width
+                const double targetTileWidth = 320;
+                int columns = (width / targetTileWidth).floor().clamp(1, 6);
+                // Ensure legacy breakpoints minimums still honored
+                if (width < 600) columns = 1;
+                if (columns == 1) {
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 96),
+                    itemCount: surahs.length,
+                    itemBuilder: (context, index) {
+                      final surah = surahs[index];
+                      final selected = selection.isSelected(surah.number);
+                      return SurahListItem(
+                        surah: surah,
+                        selected: selected,
+                        selectionMode: selectionMode,
+                        onTap: () => selectionMode ? selection.toggle(surah.number) : _onSurahTap(context, surah),
+                        onLongPress: () => selection.toggle(surah.number),
+                        onPlay: () => _playSingleSurah(context, surah),
+                      );
+                    },
+                  );
+                }
+                return GridView.builder(
+                  padding: const EdgeInsets.only(bottom: 96, left: 4, right: 4, top: 4),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    mainAxisSpacing: 6,
+                    crossAxisSpacing: 6,
+                    childAspectRatio: 3.6,
+                  ),
+                  itemCount: surahs.length,
+                  itemBuilder: (context, index) {
+                    final surah = surahs[index];
+          final selected = selection.isSelected(surah.number);
+                    return Card(
+                      elevation: 0,
+                      margin: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      clipBehavior: Clip.antiAlias,
+                      child: SurahListItem(
+                        surah: surah,
+                        selected: selected,
+            selectionMode: selectionMode,
+            onTap: () => selectionMode ? selection.toggle(surah.number) : _onSurahTap(context, surah),
+            onLongPress: () => selection.toggle(surah.number),
+                        onPlay: () => _playSingleSurah(context, surah),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+      if (selectionMode)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _SelectionActionBar(
+          count: selection.count,
+          onCancel: selection.clear,
+          onPrimary: () => _playSelected(context, selection.selectedIds),
+          onDownload: () => _downloadSelected(context, selection.selectedIds),
+                ),
+              ),
+          ],
         );
       },
     );
   }
 
   void _onSurahTap(BuildContext context, Surah surah) {
-    // Load the selected surah and switch to the reading tab
     _loadSurah(context, surah);
   }
 
   void _loadSurah(BuildContext context, Surah surah) {
     context.read<QuranProvider>().loadSurah(surah.number);
-  // Removed tab animation: in the current layout the list and reader share the same view
-  // and calling DefaultTabController here caused an exception when no controller was present.
+  }
+
+  void _playSingleSurah(BuildContext context, Surah surah) {
+    final wbw = context.read<WordByWordProvider>();
+    context.read<AudioProvider>().playSurah(surah.verses, wbwProvider: wbw);
+  }
+
+  void _playSelected(BuildContext context, List<int> selected) {
+    if (selected.isEmpty) return;
+    final q = context.read<QuranProvider>();
+    final first = selected.first;
+    final surah = q.surahs.firstWhere((s) => s.number == first, orElse: () => q.surahs.first);
+    _playSingleSurah(context, surah);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Luajti ${selected.length} sure (multi playlist TODO)')));
+    context.read<SurahSelectionProvider>().clear();
+  }
+
+  void _downloadSelected(BuildContext context, List<int> selected) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Shkarkimi i ${selected.length} sureve (skeleton)')));
   }
 }
 
 class SurahListItem extends StatelessWidget {
   final Surah surah;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onPlay;
+  final bool selectionMode;
+  final bool selected;
 
   const SurahListItem({
     super.key,
     required this.surah,
     required this.onTap,
+    this.onLongPress,
+    this.onPlay,
+    this.selectionMode = false,
+    this.selected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: theme.primaryColor,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              surah.number.toString(),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    final muted = theme.textTheme.bodySmall?.color?.withOpacity(0.7);
+    final borderColor = selected ? theme.colorScheme.primary : theme.dividerColor.withOpacity(0.15);
+    final bgOverlay = selected ? theme.colorScheme.primary.withOpacity(0.10) : Colors.transparent;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: selected ? 2 : 1),
+        color: bgOverlay,
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    surah.nameTranslation,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  if (selectionMode)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(
+                        selected ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: selected ? theme.colorScheme.primary : theme.iconTheme.color?.withOpacity(0.5),
+                        size: 20,
+                      ),
+                    ),
+                  Expanded(
+                    child: Text(
+                      surah.nameTranslation,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
-                  Text(
-                    surah.nameTransliteration,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.play_arrow, color: theme.colorScheme.primary),
+                    splashRadius: 20,
+                    onPressed: onPlay,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text('Nr. ${surah.number} • ${surah.versesCount} ajete',
+                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(surah.revelation, style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                  const Spacer(),
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Text(
+                      surah.nameArabic,
+                      style: theme.textTheme.bodyArabic.copyWith(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            Text(
-              surah.nameArabic,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontFamily: 'AmiriQuran',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-        subtitle: Row(
-          children: [
-            Icon(
-              surah.revelation == 'Mekke' ? Icons.location_city : Icons.location_on,
-              size: 16,
-              color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '${surah.revelation} • ${surah.versesCount} ajete',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
-              ),
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.play_arrow),
-              onPressed: () => _playSurah(context, surah),
-            ),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
-        onTap: onTap,
       ),
     );
   }
-
-  void _playSurah(BuildContext context, Surah surah) {
-    context.read<AudioProvider>().playSurah(surah.verses);
-  }
 }
 
+class _SelectionActionBar extends StatelessWidget {
+  final int count;
+  final VoidCallback onCancel;
+  final VoidCallback onPrimary;
+  final VoidCallback onDownload;
+  const _SelectionActionBar({
+    required this.count,
+    required this.onCancel,
+    required this.onPrimary,
+    required this.onDownload,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      elevation: 8,
+      color: scheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Text('$count zgjedhur', style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            IconButton(
+              tooltip: 'Shkarko (skeleton)',
+              icon: const Icon(Icons.download),
+              onPressed: onDownload,
+            ),
+            FilledButton.icon(
+              onPressed: onPrimary,
+              icon: const Icon(Icons.playlist_play),
+              label: const Text('Luaj'),
+            ),
+            const SizedBox(width: 8),
+            TextButton.icon(
+              onPressed: onCancel,
+              icon: const Icon(Icons.close),
+              label: const Text('Anulo'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

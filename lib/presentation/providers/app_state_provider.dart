@@ -34,6 +34,14 @@ class AppStateProvider extends ChangeNotifier {
   bool get showTransliteration => _settings.showTransliteration;
   bool get showVerseNumbers => _settings.showVerseNumbers;
   bool get showWordByWord => _settings.showWordByWord;
+  bool get searchInArabic => _settings.searchInArabic;
+  bool get searchInTranslation => _settings.searchInTranslation;
+  bool get searchInTransliteration => _settings.searchInTransliteration;
+  int? get searchJuz => _settings.searchJuz;
+  bool get autoScrollEnabled => _settings.autoScrollEnabled;
+  bool get reduceMotion => _settings.reduceMotion;
+  bool get adaptiveAutoScroll => _settings.adaptiveAutoScroll;
+  bool get wordHighlightGlow => _settings.wordHighlightGlow;
 
   Future<void> _loadSettings() async {
     if (_getSettingsUseCase == null) return; // Skip loading if no use case
@@ -81,6 +89,40 @@ class AppStateProvider extends ChangeNotifier {
 
   Future<void> updatePreferredReciter(String reciter) async {
     final newSettings = _settings.copyWith(preferredReciter: reciter);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateSearchFilters({bool? inArabic, bool? inTranslation, int? juz}) async {
+    final newSettings = _settings.copyWith(
+      searchInArabic: inArabic,
+      searchInTranslation: inTranslation,
+      searchJuz: juz,
+    );
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateTransliterationFilter(bool enabled) async {
+    final newSettings = _settings.copyWith(searchInTransliteration: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateAutoScroll(bool enabled) async {
+    final newSettings = _settings.copyWith(autoScrollEnabled: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateReduceMotion(bool enabled) async {
+    final newSettings = _settings.copyWith(reduceMotion: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateAdaptiveAutoScroll(bool enabled) async {
+    final newSettings = _settings.copyWith(adaptiveAutoScroll: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateWordHighlightGlow(bool enabled) async {
+    final newSettings = _settings.copyWith(wordHighlightGlow: enabled);
     await _updateSettings(newSettings);
   }
 

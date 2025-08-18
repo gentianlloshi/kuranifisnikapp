@@ -64,7 +64,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
   }
 
   Widget _buildMemorizationStats(MemorizationProvider provider) {
-    final stats = provider.getMemorizationStats();
+  final stats = provider.getMemorizationStats();
     
     return Card(
       child: Padding(
@@ -85,7 +85,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                 Expanded(
                   child: _buildStatCard(
                     'Ajete të memorizuara',
-                    '${stats['totalVerses']}',
+                    '${stats['memorized']}',
                     Icons.bookmark,
                     Colors.green,
                   ),
@@ -94,7 +94,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                 Expanded(
                   child: _buildStatCard(
                     'Sure me memorizim',
-                    '${stats['surahsWithMemorization']}',
+                    '${stats['total']}',
                     Icons.book,
                     Colors.blue,
                   ),
@@ -218,7 +218,13 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                     onPressed: () => _showRemoveConfirmation(context, verseKey, memorizationProvider),
                   ),
                   onTap: () {
-                    // TODO: Navigate to verse
+                    final sn = int.tryParse(parts[0]);
+                    final vn = int.tryParse(verseNumber);
+                    if (sn != null && vn != null) {
+                      quranProvider.openSurahAtVerse(sn, vn);
+                      // switch to Quran tab by popping until home uses tab index? Simpler: show snackbar
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('U hap Sure $sn, Ajeti $vn')));
+                    }
                   },
                 );
               }).toList(),
