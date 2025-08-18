@@ -133,6 +133,18 @@ _Last updated: 2025-08-12 (post search refactor phase 1, auto-scroll refinement)
 - Remediation: Document provider-level debounce contract (350ms) & enforce single entry point.
 
 ## 26. Verse Highlight Styling Accessibility Review Pending
+
+## 27. Word-by-Word Timestamp Engine Initial Implementation
+- Status: NEWLY IMPLEMENTED
+- Implemented: Segment expansion (phrase → per-word), cache versioning (v2), pointer-based incremental advancement with throttle (55ms), duplicate log suppression for verse advancement.
+- Risk: Frame skips still present early (unrelated residual parsing); potential drift if future timestamp formats vary; synthetic allocation for missing tail words simplistic linear distribution.
+- Remediation: Add formal tests (parser expansion correctness, pointer seek backwards), introduce adaptive throttle (reduce when device under load), optional binary search path for backward seeks (already partially implemented).
+
+## 28. Log Volume & Performance Instrumentation Gaps (Audio / WBW)
+- Status: NEW
+- Shortcut: High-frequency playlist advancement logs (partially reduced), no timing metrics around word index update cost or throttle hit ratio.
+- Risk: Hard to reason about remaining frame skips; noisy logs hamper issue triage.
+- Remediation: Introduce lightweight metrics aggregator (counts: updates processed vs skipped, avg loop time), gated by debug flag; rate-limit advancement logs (500ms window) globally.
 - Shortcut: High-contrast background color chosen without WCAG contrast measurement for dark mode edge cases.
 - Risk: Potential low readability for users with contrast sensitivity.
 - Remediation: Add contrast check utility & optional outline focus ring; provide user setting to switch highlight style (underline only / background).

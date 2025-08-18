@@ -36,10 +36,18 @@ class AudioService {
   bool _isRepeatMode = false;
   bool _isAutoPlayNext = true; // with ConcatenatingAudioSource this is always true unless disabled
   List<WordTimestamp> _currentWordTimestamps = []; // Store current word timestamps
+  Map<int, List<WordTimestamp>> _allSurahTimestamps = {}; // verseNumber -> timestamps for playlist mode
   String? _preferredReciter; // user selected preferred reciter (folder name)
   bool _isAdvancing = false; // legacy guard (no longer needed with currentIndexStream) – will be removed after validation
   final Set<String> _prefetchedUrls = <String>{}; // remember prefetched remote URLs
   ConcatenatingAudioSource? _playlistSource; // active playlist audio source
+
+  // Word sync optimization state
+  int _wordPtr = 0; // current pointer into _currentWordTimestamps (monotonic advance during playback)
+  int _lastEmittedWord = -1; // last emitted word index (to suppress duplicate stream events)
+  int _lastLoggedVerse = -1; // to suppress duplicate advance playlist logs
+  int _lastWordUpdateMs = 0; // throttle position processing
+  static const int _wordThrottleMs = 55; // ~18 fps sampling for highlight (tune 40-70ms)
 
   // Tunables
   static const int _maxRetries = 3;
@@ -85,6 +93,27 @@ class AudioService {
           final verse = _currentPlaylist[idx];
           _currentVerse = verse;
           _currentVerseController.add(verse);
+          // Update word timestamps when advancing in playlist
+          if (_allSurahTimestamps.isNotEmpty) {
+            _currentWordTimestamps = _allSurahTimestamps[verse.verseNumber] ?? [];
+            _wordPtr = 0;
+            _lastEmittedWord = -1;
+            _currentWordIndexController.add(null);
+            if (_currentWordTimestamps.isNotEmpty) {
+              _currentWordIndexController.add(0); // pre-emit first
+              _lastEmittedWord = 0;
+            }
+            // Debug playlist advancement
+            if (verse.verseNumber != _lastLoggedVerse) {
+              // ignore: avoid_print
+              print('[AudioService] advance playlist verse=${verse.verseKey} verseNumber=${verse.verseNumber} ts=${_currentWordTimestamps.length} availableKeys=${_allSurahTimestamps.keys.take(8).toList()}');
+              _lastLoggedVerse = verse.verseNumber;
+            }
+            if (_currentWordTimestamps.isEmpty) {
+              // ignore: avoid_print
+              print('[AudioService][WARN] No timestamps for verseNumber=${verse.verseNumber}');
+            }
+          }
         }
       });
 
@@ -118,8 +147,12 @@ class AudioService {
       _setState(AudioState.loading);
       _currentVerse = verse;
       _currentVerseController.add(verse);
-      _currentWordTimestamps = wordTimestamps ?? []; // Set word timestamps
-  _currentWordIndexController.add(null); // Reset word index
+      _currentWordTimestamps = wordTimestamps ?? [];
+      _currentWordIndexController.add(null);
+      if (_currentWordTimestamps.isNotEmpty) {
+        // Pre-emit first word index so UI highlights instantly
+        _currentWordIndexController.add(0);
+      }
   // DO NOT reset _isAdvancing here; wait until verse actually starts playing to avoid race with completion events.
 
       final audioUrl = await _resolveAudioUrlWithFallback(verse);
@@ -160,11 +193,12 @@ class AudioService {
     }
   }
 
-  Future<void> playPlaylist(List<Verse> verses, {int startIndex = 0}) async {
+  Future<void> playPlaylist(List<Verse> verses, {required Map<int, List<WordTimestamp>> allTimestamps, int startIndex = 0}) async {
     if (verses.isEmpty) return;
     _setState(AudioState.loading);
     _currentPlaylist = verses;
     _currentIndex = startIndex.clamp(0, verses.length - 1);
+    _allSurahTimestamps = allTimestamps;
     _playlistSource?.clear();
     // Build sources (prefer local cached files if present / prefetch flag)
     final children = <AudioSource>[];
@@ -181,6 +215,26 @@ class AudioService {
     final source = ConcatenatingAudioSource(children: children);
     _playlistSource = source;
     await _audioPlayer.setAudioSource(source, initialIndex: _currentIndex);
+    // Pre-initialize current verse + timestamps before playback starts so UI can highlight immediately
+    if (_currentPlaylist.isNotEmpty) {
+      final initialVerse = _currentPlaylist[_currentIndex];
+      _currentVerse = initialVerse;
+      _currentVerseController.add(initialVerse);
+      if (_allSurahTimestamps.isNotEmpty) {
+        _currentWordTimestamps = _allSurahTimestamps[initialVerse.verseNumber] ?? [];
+        _currentWordIndexController.add(null);
+        if (_currentWordTimestamps.isNotEmpty) {
+          _currentWordIndexController.add(0);
+        }
+        // Debug log
+        // ignore: avoid_print
+        print('[AudioService] init playlist verse=${initialVerse.verseNumber} ts=${_currentWordTimestamps.length}');
+        if (_currentWordTimestamps.isEmpty) {
+          // ignore: avoid_print
+          print('[AudioService][WARN] Initial verse has no timestamps. Keys loaded: ${_allSurahTimestamps.keys.length}');
+        }
+      }
+    }
     await _audioPlayer.play();
     _isAdvancing = false;
   }
@@ -211,6 +265,7 @@ class AudioService {
       _currentVerse = null;
       _currentVerseController.add(null);
       _currentWordTimestamps = []; // Clear timestamps on stop
+  _allSurahTimestamps = {};
       _currentWordIndexController.add(null); // Clear word index on stop
       _setState(AudioState.stopped);
     } catch (e) {
@@ -292,18 +347,61 @@ class AudioService {
       _currentWordIndexController.add(null);
       return;
     }
-
-    int? foundIndex;
-    for (int i = 0; i < _currentWordTimestamps.length; i++) {
-      final timestamp = _currentWordTimestamps[i];
-      final startMs = timestamp.start;
-      final endMs = timestamp.end;
-      if (currentPosition.inMilliseconds >= startMs && currentPosition.inMilliseconds < endMs) {
-        foundIndex = i;
-        break;
+    final int posMs = currentPosition.inMilliseconds;
+    // Throttle: only process if enough time passed OR we might have crossed boundary to next word
+    if (posMs - _lastWordUpdateMs < _wordThrottleMs) {
+      // Early exit unless we obviously surpassed next boundary
+      if (_wordPtr + 1 < _currentWordTimestamps.length && posMs < _currentWordTimestamps[_wordPtr + 1].start) {
+        return; // still inside current word
       }
     }
-    _currentWordIndexController.add(foundIndex);
+    _lastWordUpdateMs = posMs;
+
+    // Fast path: advance pointer forward while position >= start of next word
+    while (_wordPtr + 1 < _currentWordTimestamps.length && posMs >= _currentWordTimestamps[_wordPtr + 1].start) {
+      _wordPtr++;
+    }
+    // Handle seek backwards (position before current word start)
+    if (posMs < _currentWordTimestamps[_wordPtr].start) {
+      // Binary search to find correct index
+      int low = 0;
+      int high = _wordPtr;
+      while (low < high) {
+        final mid = (low + high) >> 1;
+        if (_currentWordTimestamps[mid].start <= posMs) {
+          low = mid + 1;
+        } else {
+          high = mid;
+        }
+      }
+      // Adjust pointer to previous that actually starts before posMs
+      if (low > 0 && _currentWordTimestamps[low].start > posMs) {
+        _wordPtr = low - 1;
+      } else {
+        _wordPtr = low.clamp(0, _currentWordTimestamps.length - 1);
+      }
+    }
+
+    // Validate we are inside word range; if after end of last word keep pointer at last
+    if (_wordPtr >= _currentWordTimestamps.length) {
+      _wordPtr = _currentWordTimestamps.length - 1;
+    }
+    final currentTs = _currentWordTimestamps[_wordPtr];
+    if (posMs < currentTs.start) {
+      // Rare guard (due to binary search rounding) - shift back until correct
+      while (_wordPtr > 0 && posMs < _currentWordTimestamps[_wordPtr].start) {
+        _wordPtr--;
+      }
+    } else if (posMs >= currentTs.end) {
+      while (_wordPtr + 1 < _currentWordTimestamps.length && posMs >= _currentWordTimestamps[_wordPtr].end) {
+        _wordPtr++;
+      }
+    }
+
+    if (_wordPtr != _lastEmittedWord) {
+      _lastEmittedWord = _wordPtr;
+      _currentWordIndexController.add(_wordPtr);
+    }
   }
 
   Future<String?> _resolveAudioUrlWithFallback(Verse verse) async {

@@ -36,10 +36,12 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 
 #### Funksionalitete të Avancuara
 - ✅ **Texhvid dhe kuizet** - Mësimi i rregullave të leximit me kuize interaktive
-- ✅ **Gjenerimi i imazheve** - Krijimi i imazheve të personalizuara nga ajetet
 - ✅ **Indeksi tematik** - Gjetur ajete sipas temave dhe koncepteve
-- ✅ **Memorizimi i ajeteve** - Mjete të plota për memorizimin e ajeteve
-- ✅ **Luajtja e audios** - Playback i qëndrueshëm (skip-free) me prefetch të ajetit vijues & highlight sipas fjalëve (në zhvillim)
+- ✅ **Luajtja e audios** - Playlist i plotë për sure, prefetch i skedarëve, retry & cache lokale
+- ✅ **Highlight Word-by-Word (Audio Sync)** - Sinkronizim i fjalëve me audio me shtrirje të segmenteve frazë → fjalë + pointer incremental (performant)
+- 🟡 **Memorizimi i ajeteve** - Bazë funksionale; mungojnë mjete të avancuara (maskim teksti, SRS)
+- 🟡 **Gjenerimi i imazheve** - Implementim ekziston por kërkon rifaktorizim UI + temë të re eksporti
+
 
 ### 🚀 Optimizime dhe Përmirësime
 
@@ -48,8 +50,9 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 - ✅ **Parsimi në Isolate**: JSON voluminoz zhvendosur off-main për të reduktuar frame skips në start.
 - ✅ **Indeksi i Kërkimit**: Ndërtim në isolate + debounce 350ms → kërkime të rrjedhshme gjatë shkrimit.
 - ✅ **Highlight i Rafinuar**: Sfondo i verdhë me kontrast të lartë (dark-mode toned) për rezultatet e kërkimit.
-- ✅ **Auto-Scroll Audio**: Ajeti aktiv ruhet në ekran (ensureVisible alignment 0.1 + throttling + suppression pas scroll manual).
-- ✅ **Audio Stability**: Eliminim i skipeve me playlist të menaxhuar + prefetch ajeti vijues.
+- ✅ **Auto-Scroll Audio**: Ajeti aktiv mbahet në viewport (alignment 0.1 + throttling + suppression pas scroll manual).
+- ✅ **Audio Stability**: Eliminim i ndërprerjeve me `ConcatenatingAudioSource` + prefetch/depozitim lokalisht.
+- ✅ **Word Index Engine**: Pointer incremental + throttling (≈55ms) → zero skanime të plota për çdo frame.
 
 ### 🧪 Testimi
 
