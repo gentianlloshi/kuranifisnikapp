@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/audio_provider.dart';
 import '../../domain/entities/verse.dart';
+import '../theme/theme.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final bool mini;
@@ -33,19 +34,18 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           content = _buildFullPlayer(context, audioProvider, currentVerse);
         }
 
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
-              ),
-            ],
+        final scheme = Theme.of(context).colorScheme;
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: context.spaceLg, vertical: context.spaceSm),
+          child: Material(
+            elevation: 2,
+            color: scheme.surface,
+            borderRadius: BorderRadius.circular(context.radiusCard.x),
+            child: Padding(
+              padding: EdgeInsets.all(context.spaceLg),
+              child: content,
+            ),
           ),
-          child: content,
         );
       },
     );
@@ -56,9 +56,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       children: [
         Icon(
           audioProvider.isPlaying ? Icons.volume_up : Icons.volume_off,
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: context.spaceSm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +77,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ],
           ),
         ),
-        IconButton(
+    IconButton(
           onPressed: audioProvider.isLoading
               ? null
               : () => audioProvider.togglePlayPause(),
@@ -87,7 +87,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 : audioProvider.isPlaying
                     ? Icons.pause
                     : Icons.play_arrow,
-            color: Theme.of(context).primaryColor,
+      color: Theme.of(context).colorScheme.primary,
           ),
         ),
         IconButton(
@@ -127,7 +127,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           ],
         ),
         
-        const SizedBox(height: 12),
+  SizedBox(height: context.spaceMd),
         
         // Progress bar
         Column(
@@ -167,7 +167,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           ],
         ),
         
-        const SizedBox(height: 12),
+  SizedBox(height: context.spaceMd),
         
         // Control buttons
         Row(
@@ -182,23 +182,21 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ),
             
             // Play/Pause button
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                shape: BoxShape.circle,
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: EdgeInsets.all(context.spaceSm),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                elevation: 0,
               ),
-              child: IconButton(
-                onPressed: audioProvider.isLoading 
-                    ? null 
-                    : () => audioProvider.togglePlayPause(),
-                icon: Icon(
-                  audioProvider.isLoading
-                      ? Icons.hourglass_empty
-                      : audioProvider.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                  color: Colors.white,
-                ),
+              onPressed: audioProvider.isLoading ? null : () => audioProvider.togglePlayPause(),
+              child: Icon(
+                audioProvider.isLoading
+                    ? Icons.hourglass_empty
+                    : audioProvider.isPlaying
+                        ? Icons.pause
+                        : Icons.play_arrow,
               ),
             ),
             
@@ -228,7 +226,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+  SizedBox(height: context.spaceLg),
         // Download button
         _buildDownloadButton(context, audioProvider, currentVerse),
       ],
@@ -315,8 +313,8 @@ class AudioOptionsSheet extends StatefulWidget {
 class _AudioOptionsSheetState extends State<AudioOptionsSheet> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: EdgeInsets.all(context.spaceLg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,14 +323,14 @@ class _AudioOptionsSheetState extends State<AudioOptionsSheet> {
             'Opsionet e Audio-s',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: context.spaceXl + context.spaceSm),
           
           // Volume control
           Text(
             'Volumi',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.spaceSm),
           Row(
             children: [
               const Icon(Icons.volume_down),
@@ -346,14 +344,14 @@ class _AudioOptionsSheetState extends State<AudioOptionsSheet> {
             ],
           ),
           
-          const SizedBox(height: 16),
+          SizedBox(height: context.spaceMd),
           
           // Playback speed control
           Text(
             'Shpejtësia e Leximit',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.spaceSm),
           Row(
             children: [
               const Text('0.5x'),
@@ -371,7 +369,7 @@ class _AudioOptionsSheetState extends State<AudioOptionsSheet> {
             ],
           ),
           
-          const SizedBox(height: 16),
+          SizedBox(height: context.spaceMd),
           
           // Repeat mode toggle
           SwitchListTile(
@@ -381,7 +379,7 @@ class _AudioOptionsSheetState extends State<AudioOptionsSheet> {
             onChanged: (_) => widget.audioProvider.toggleRepeatMode(),
           ),
           
-          const SizedBox(height: 16),
+          SizedBox(height: context.spaceMd),
           
           // Close button
           SizedBox(
