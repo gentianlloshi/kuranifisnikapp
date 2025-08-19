@@ -76,6 +76,10 @@ class AppPalettes {
   static const darkTextPrimary = Color(0xFFF2F8F7);
   static const darkTextMuted = Color(0xFF9AB5B0);
   static const darkDivider = Color(0xFF2C3937);
+  // Overlay tints for dark tonal elevation (applied via alpha blending on surface)
+  static const darkOverlayLow = Color(0xFF6FBFAF); // primary tint (4%-8%)
+  static const darkOverlayMed = Color(0xFF52A896); // accent tint (8%-12%)
+  static const darkOverlayHigh = Color(0xFF86D3C4); // secondary tint (12%-16%)
 }
 
 ColorScheme buildSepiaScheme(Brightness brightness) {
@@ -155,7 +159,7 @@ ColorScheme buildMinimalDarkScheme() {
     brightness: Brightness.dark,
     primary: AppPalettes.darkPrimary,
     onPrimary: Colors.black,
-    primaryContainer: AppPalettes.darkPrimaryContainer,
+  primaryContainer: AppPalettes.darkPrimaryContainer,
     onPrimaryContainer: AppPalettes.darkTextPrimary,
     secondary: AppPalettes.darkSecondary,
     onSecondary: Colors.black,
@@ -171,9 +175,9 @@ ColorScheme buildMinimalDarkScheme() {
     onErrorContainer: AppPalettes.darkTextPrimary,
     background: AppPalettes.darkBackground,
     onBackground: AppPalettes.darkTextPrimary,
-    surface: AppPalettes.darkSurface,
+  surface: AppPalettes.darkSurface,
     onSurface: AppPalettes.darkTextPrimary,
-    surfaceVariant: AppPalettes.darkSurfaceVariant,
+  surfaceVariant: AppPalettes.darkSurfaceVariant,
     onSurfaceVariant: AppPalettes.darkTextMuted,
     outline: AppPalettes.darkDivider,
     outlineVariant: AppPalettes.darkDivider,

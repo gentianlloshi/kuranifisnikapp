@@ -160,3 +160,12 @@ class BottomSheetWrapper extends StatelessWidget {
     );
   }
 }
+
+extension DarkSurfaces on ColorScheme {
+  // Provides softly elevated tonal surfaces for dark mode; for light returns original surface.
+  Color surfaceElevated(int level) {
+    if (brightness != Brightness.dark || level <= 0) return surface;
+    final double alpha = switch (level) { 1 => 0.04, 2 => 0.08, 3 => 0.12, 4 => 0.16, _ => 0.20 };
+    return Color.alphaBlend(primary.withOpacity(alpha), surface);
+  }
+}
