@@ -760,44 +760,54 @@ class _WordByWordLine extends StatelessWidget {
           final activeIndex = isActiveVerse ? state.wordIndex : null;
           final appState = context.read<AppStateProvider>();
           final glow = appState.wordHighlightGlow && !appState.reduceMotion;
-          final baseStyle = theme.textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.65);
-          final spans = <InlineSpan>[];
+          final baseStyle = theme.textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.6);
+          final List<InlineSpan> spans = [];
+          final animDuration = appState.reduceMotion ? Duration.zero : const Duration(milliseconds: 220);
           for (int i = 0; i < words.length; i++) {
             final w = words[i];
             final highlighted = activeIndex == i;
-            final style = highlighted
-                ? baseStyle.copyWith(
-                    // Keep Arabic color but overlay background softly
-                    background: Paint()
-                      ..color = theme.colorScheme.primary.withOpacity(0.18)
-                      ..style = PaintingStyle.fill,
-                    fontWeight: FontWeight.w600,
-                    shadows: glow
-                        ? [
-                            Shadow(
-                              color: theme.colorScheme.primary.withOpacity(0.55),
-                              blurRadius: 10,
-                              offset: const Offset(0, 1.2),
-                            ),
-                            Shadow(
-                              color: theme.colorScheme.primary.withOpacity(0.35),
-                              blurRadius: 18,
-                            ),
-                          ]
-                        : null,
-                  )
-                : baseStyle;
-            spans.add(TextSpan(text: w.arabic, style: style));
-            if (i != words.length - 1) spans.add(const TextSpan(text: ' '));
+            spans.add(
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: AnimatedContainer(
+                  duration: animDuration,
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  decoration: highlighted
+                      ? BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                          boxShadow: glow
+                              ? [
+                                  BoxShadow(
+                                    color: theme.colorScheme.primary.withOpacity(0.5),
+                                    blurRadius: 12,
+                                    spreadRadius: 2,
+                                  ),
+                                ]
+                              : null,
+                        )
+                      : null,
+                  child: Text(
+                    w.arabic,
+                    style: highlighted
+                        ? baseStyle.copyWith(fontWeight: FontWeight.w600, color: baseStyle.color)
+                        : baseStyle,
+                  ),
+                ),
+              ),
+            );
+            if (i != words.length - 1) {
+              spans.add(const WidgetSpan(child: SizedBox(width: 4)));
+            }
           }
           return Directionality(
-            textDirection: TextDirection.rtl,
-            child: RichText(
-              textAlign: TextAlign.right,
-              text: TextSpan(children: spans),
               textDirection: TextDirection.rtl,
-            ),
-          );
+              child: RichText(
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.right,
+                text: TextSpan(children: spans),
+              ));
         });
   }
 }
