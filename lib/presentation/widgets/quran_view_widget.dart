@@ -56,24 +56,27 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     // Delegate to VerseWidget's modal for consistency
     showModalBottomSheet(
       context: context,
-      builder: (context) => _VerseOptionsSheet(
-        verse: verse,
-        onPlay: () => context.read<AudioProvider>().playVerse(verse),
-        onPlayFromHere: () {
-          final q = context.read<QuranProvider>();
-          final verses = q.currentVerses;
-          final startIndex = verses.indexWhere((v) => v.number == verse.number);
-          if (startIndex != -1) {
-            final wbwProv = context.read<WordByWordProvider>();
-            context.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
-          }
-        },
-        onToggleMemorization: () {
-          final mem = context.read<MemorizationProvider>();
-          final key = '${verse.surahNumber}:${verse.number}';
-          mem.toggleVerseMemorization(key);
-          Navigator.pop(context);
-        },
+      showDragHandle: true,
+      builder: (context) => BottomSheetWrapper(
+        child: _VerseOptionsSheet(
+          verse: verse,
+          onPlay: () => context.read<AudioProvider>().playVerse(verse),
+          onPlayFromHere: () {
+            final q = context.read<QuranProvider>();
+            final verses = q.currentVerses;
+            final startIndex = verses.indexWhere((v) => v.number == verse.number);
+            if (startIndex != -1) {
+              final wbwProv = context.read<WordByWordProvider>();
+              context.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
+            }
+          },
+          onToggleMemorization: () {
+            final mem = context.read<MemorizationProvider>();
+            final key = '${verse.surahNumber}:${verse.number}';
+            mem.toggleVerseMemorization(key);
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -696,50 +699,53 @@ class VerseWidget extends StatelessWidget {
   void _showVerseOptions(BuildContext context, Verse verse) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.play_arrow),
-            title: const Text('Luaj këtë ajet'),
-            onTap: () {
-              Navigator.pop(context);
-              _playVerse(context, verse);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.playlist_play),
-            title: const Text('Luaj nga ky ajet'),
-            onTap: () {
-              Navigator.pop(context);
-              _playFromVerse(context, verse);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.copy),
-            title: const Text('Kopjo'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Implement copy functionality
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.note_add),
-            title: const Text('Shto shënim'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Implement add note functionality
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.school),
-            title: const Text('Shto në memorim'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Implement add to memorization functionality
-            },
-          ),
-        ],
+      showDragHandle: true,
+      builder: (context) => BottomSheetWrapper(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.play_arrow),
+              title: const Text('Luaj këtë ajet'),
+              onTap: () {
+                Navigator.pop(context);
+                _playVerse(context, verse);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.playlist_play),
+              title: const Text('Luaj nga ky ajet'),
+              onTap: () {
+                Navigator.pop(context);
+                _playFromVerse(context, verse);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy),
+              title: const Text('Kopjo'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Implement copy functionality
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.note_add),
+              title: const Text('Shto shënim'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Implement add note functionality
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.school),
+              title: const Text('Shto në memorim'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Implement add to memorization functionality
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

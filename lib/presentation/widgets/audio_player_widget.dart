@@ -293,7 +293,10 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   void _showAudioOptions(BuildContext context, AudioProvider audioProvider) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => AudioOptionsSheet(audioProvider: audioProvider),
+      showDragHandle: true,
+      builder: (context) => BottomSheetWrapper(
+        child: AudioOptionsSheet(audioProvider: audioProvider),
+      ),
     );
   }
 }

@@ -110,3 +110,31 @@ extension Radii on BuildContext {
   Radius get radiusCard => AppRadii.card;
   Radius get radiusPanel => AppRadii.panel;
 }
+
+/// Unified bottom sheet container helper for consistent styling.
+class BottomSheetWrapper extends StatelessWidget {
+  final Widget child;
+  final bool useSafe;
+  final EdgeInsets? padding;
+  const BottomSheetWrapper({super.key, required this.child, this.useSafe = true, this.padding});
+  @override
+  Widget build(BuildContext context) {
+    final pad = padding ?? EdgeInsets.symmetric(horizontal: context.spaceLg, vertical: context.spaceLg);
+    final content = Padding(padding: pad, child: child);
+    final inner = useSafe ? SafeArea(top: false, child: content) : content;
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.vertical(top: context.radiusPanel),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.15),
+            blurRadius: 18,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: inner,
+    );
+  }
+}

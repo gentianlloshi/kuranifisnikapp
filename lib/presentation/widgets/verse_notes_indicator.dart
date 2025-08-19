@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/theme.dart';
 import '../providers/note_provider.dart';
 import '../../domain/entities/note.dart';
 import 'note_editor_dialog.dart';
@@ -39,9 +40,13 @@ class VerseNotesIndicator extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => VerseNotesBottomSheet(
-        verseKey: verseKey,
-        noteProvider: noteProvider,
+      showDragHandle: true,
+      builder: (context) => BottomSheetWrapper(
+        padding: EdgeInsets.only(left: context.spaceLg, right: context.spaceLg, top: context.spaceSm, bottom: MediaQuery.of(context).viewInsets.bottom + context.spaceLg),
+        child: VerseNotesBottomSheet(
+          verseKey: verseKey,
+          noteProvider: noteProvider,
+        ),
       ),
     );
   }
@@ -61,91 +66,64 @@ class VerseNotesBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final notes = noteProvider.getNotesForVerseSync(verseKey);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.3,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: Column(
-            children: [
-              // Handle
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
-                  borderRadius: BorderRadius.circular(2),
+    return LayoutBuilder(builder: (context, _) {
+      return Column(
+        children: [
+          // Header
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: context.spaceSm),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.note,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-              ),
-              
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.note,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Shënimet për ajeti $verseKey',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          if (notes.isNotEmpty)
-                            Text(
-                              '${notes.length} shënim${notes.length > 1 ? 'e' : ''}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                        ],
+                SizedBox(width: context.spaceSm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Shënimet për ajeti $verseKey',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => _addNote(context),
-                      icon: const Icon(Icons.add),
-                      tooltip: 'Shto shënim të ri',
-                    ),
-                  ],
+                      if (notes.isNotEmpty)
+                        Text(
+                          '${notes.length} shënim${notes.length > 1 ? 'e' : ''}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              
-              const Divider(height: 1),
-              
-              // Notes list
-              Expanded(
-                child: notes.isEmpty
-                    ? _buildEmptyState(context)
-                    : ListView.builder(
-                        controller: scrollController,
-                        itemCount: notes.length,
-                        itemBuilder: (context, index) {
-                          final note = notes[index];
-                          return _buildNoteItem(context, note);
-                        },
-                      ),
-              ),
-            ],
+                IconButton(
+                  onPressed: () => _addNote(context),
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Shto shënim të ri',
+                ),
+              ],
+            ),
           ),
-        );
-      },
-    );
+          const Divider(height: 1),
+          Expanded(
+            child: notes.isEmpty
+                ? _buildEmptyState(context)
+                : ListView.builder(
+                    itemCount: notes.length,
+                    itemBuilder: (context, index) {
+                      final note = notes[index];
+                      return _buildNoteItem(context, note);
+                    },
+                  ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(context.spaceXl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -154,18 +132,18 @@ class VerseNotesBottomSheet extends StatelessWidget {
               size: 64,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spaceLg),
             Text(
               'Nuk ka shënime për këtë ajet',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: context.spaceSm),
             Text(
               'Shtoni shënimin e parë duke klikuar butonin +',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spaceLg),
             ElevatedButton.icon(
               onPressed: () => _addNote(context),
               icon: const Icon(Icons.add),
@@ -179,7 +157,7 @@ class VerseNotesBottomSheet extends StatelessWidget {
 
   Widget _buildNoteItem(BuildContext context, Note note) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: EdgeInsets.symmetric(horizontal: context.spaceSm, vertical: context.spaceXs),
       child: ListTile(
         title: Text(
           note.content,
@@ -189,7 +167,7 @@ class VerseNotesBottomSheet extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
+            SizedBox(height: context.spaceSm),
             Text(
               'Krijuar: ${_formatDate(note.createdAt)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -197,9 +175,9 @@ class VerseNotesBottomSheet extends StatelessWidget {
               ),
             ),
             if (note.tags.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: context.spaceSm),
               Wrap(
-                spacing: 4,
+                spacing: context.spaceXs,
                 children: note.tags.map((tag) => Chip(
                   label: Text(
                     tag,

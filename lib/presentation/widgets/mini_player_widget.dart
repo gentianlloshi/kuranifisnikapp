@@ -87,42 +87,35 @@ class MiniPlayerWidget extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (ctx) => WillPopScope(
         onWillPop: () async { audio.isPlayerExpanded = false; return true; },
-        child: DraggableScrollableSheet(
-          initialChildSize: 0.5,
-            minChildSize: 0.4,
-            maxChildSize: 0.95,
-            expand: false,
-            builder: (context, controller) {
-              return SingleChildScrollView(
-                controller: controller,
-                child: Padding(
-                  padding: EdgeInsets.all(context.spaceLg),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Text('Leximi i Ajetit', style: Theme.of(context).textTheme.titleMedium),
-                          const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              audio.isPlayerExpanded = false;
-                              Navigator.pop(context);
-                            },
-                          )
-                        ],
-                      ),
-                      SizedBox(height: context.spaceMd),
-                      _FullPlayerCore(),
-                    ],
-                  ),
+        child: BottomSheetWrapper(
+          padding: EdgeInsets.all(context.spaceLg),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Text('Leximi i Ajetit', style: Theme.of(context).textTheme.titleMedium),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        audio.isPlayerExpanded = false;
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
                 ),
-              );
-            }),
+                SizedBox(height: context.spaceMd),
+                _FullPlayerCore(),
+              ],
+            ),
+          ),
+        ),
       ),
     ).whenComplete(() => audio.isPlayerExpanded = false);
   }
