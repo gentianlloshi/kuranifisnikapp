@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/theme.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/quran_provider.dart';
 import '../../domain/entities/bookmark.dart';
@@ -25,18 +26,18 @@ class BookmarksWidget extends StatelessWidget {
                   size: 64,
                   color: Theme.of(context).colorScheme.error,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: context.spaceLg),
                 Text(
                   'Gabim në ngarkimin e favoriteve',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: context.spaceSm),
                 Text(
                   bookmarkProvider.error!,
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: context.spaceLg),
                 ElevatedButton(
                   onPressed: () => bookmarkProvider.loadBookmarks(),
                   child: const Text('Provo përsëri'),
@@ -49,29 +50,32 @@ class BookmarksWidget extends StatelessWidget {
         final bookmarks = bookmarkProvider.bookmarks;
         
         if (bookmarks.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.bookmark_border, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'Nuk keni favorit të ruajtur',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Shtoni ajete në favorit duke klikuar ikonën e bookmark-ut',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.all(context.spaceLg),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.bookmark_border, size: 64, color: Theme.of(context).colorScheme.outline.withOpacity(0.6)),
+                  SizedBox(height: context.spaceLg),
+                  Text(
+                    'Nuk keni favorit të ruajtur',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                  ),
+                  SizedBox(height: context.spaceSm),
+                  Text(
+                    'Shtoni ajete në favorit duke klikuar ikonën e bookmark-ut',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           );
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(context.spaceLg),
           itemCount: bookmarks.length,
           itemBuilder: (context, index) {
             final bookmark = bookmarks[index];
@@ -142,12 +146,12 @@ class BookmarkItem extends StatelessWidget {
     final verseNumber = parts.length > 1 ? parts[1] : '';
     
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: context.spaceMd),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(context.spaceLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,17 +159,17 @@ class BookmarkItem extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor,
-                      borderRadius: BorderRadius.circular(12),
+                    padding: EdgeInsets.symmetric(horizontal: context.spaceSm, vertical: context.spaceXs),
+                    decoration: ShapeDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.10),
+                      shape: const StadiumBorder(),
                     ),
                     child: Text(
                       'Sure $surahNumber, Ajeti $verseNumber',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ),
@@ -179,7 +183,7 @@ class BookmarkItem extends StatelessWidget {
               ),
               
               // Bookmark date
-              const SizedBox(height: 8),
+              SizedBox(height: context.spaceSm),
               Text(
                 'Ruajtur më ${_formatDate(bookmark.createdAt)}',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -189,24 +193,21 @@ class BookmarkItem extends StatelessWidget {
               
               // Note (if exists)
               if (bookmark.note != null && bookmark.note!.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: context.spaceSm),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(context.spaceSm),
                   decoration: BoxDecoration(
-                    color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: theme.dividerColor,
-                    ),
+                    color: theme.colorScheme.surfaceVariant.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.note,
                         size: 16,
-                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: context.spaceSm),
                       Expanded(
                         child: Text(
                           bookmark.note!,

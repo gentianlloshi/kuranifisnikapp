@@ -528,14 +528,14 @@ class VerseWidget extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.topRight,
                         child: Wrap(
-                          spacing: 0,
-                          runSpacing: -4,
+                          spacing: context.spaceXs,
+                          runSpacing: -context.spaceXs,
                           alignment: WrapAlignment.end,
                           children: [
                             IconButton(
                               iconSize: 20,
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                              constraints: BoxConstraints(minWidth: 36, minHeight: 32 + context.spaceXs),
                               icon: Icon(
                                 isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                                 color: isBookmarked ? theme.colorScheme.primary : null,
@@ -544,11 +544,11 @@ class VerseWidget extends StatelessWidget {
                               tooltip: isBookmarked ? 'Hiq shenjën' : 'Shëno',
                               onPressed: onBookmarkToggle,
                             ),
-                            Consumer<WordByWordProvider>(
+              Consumer<WordByWordProvider>(
                               builder: (context, wbwProv, _) => IconButton(
                                 iconSize: 20,
                                 padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                constraints: BoxConstraints(minWidth: 36, minHeight: 32 + context.spaceXs),
                                 icon: const Icon(Icons.play_arrow, size: 20),
                                 tooltip: 'Luaj ajetin me highlight',
                                 onPressed: () async {
@@ -561,7 +561,7 @@ class VerseWidget extends StatelessWidget {
                             ),
                             SizedBox(
                               width: 36,
-                              height: 32,
+                              height: 32 + context.spaceXs,
                               child: Center(
                                 child: VerseNotesIndicator(
                                   verseKey: '${verse.surahNumber}:${verse.number}',
@@ -571,7 +571,7 @@ class VerseWidget extends StatelessWidget {
                             IconButton(
                               iconSize: 20,
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                              constraints: BoxConstraints(minWidth: 36, minHeight: 32 + context.spaceXs),
                               icon: const Icon(Icons.share, size: 18),
                               tooltip: 'Ndaj',
                               onPressed: () => _shareVerse(context, verse),
@@ -583,7 +583,7 @@ class VerseWidget extends StatelessWidget {
                                 return IconButton(
                                   iconSize: 20,
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                                  constraints: BoxConstraints(minWidth: 36, minHeight: 32 + context.spaceXs),
                                   icon: Icon(
                                     isMem ? Icons.psychology : Icons.psychology_outlined,
                                     color: isMem ? theme.colorScheme.primary : null,
@@ -597,7 +597,7 @@ class VerseWidget extends StatelessWidget {
                             IconButton(
                               iconSize: 20,
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 36, minHeight: 32),
+                              constraints: BoxConstraints(minWidth: 36, minHeight: 32 + context.spaceXs),
                               icon: const Icon(Icons.more_vert, size: 20),
                               tooltip: 'Opsione',
                               onPressed: () => _showVerseOptions(context, verse),

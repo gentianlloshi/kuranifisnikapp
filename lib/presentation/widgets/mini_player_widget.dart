@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/quran_provider.dart';
+import '../theme/theme.dart';
 
 class MiniPlayerWidget extends StatelessWidget {
   const MiniPlayerWidget({super.key});
@@ -28,7 +29,7 @@ class MiniPlayerWidget extends StatelessWidget {
             child: InkWell(
               onTap: () => _openFull(context),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: context.spaceLg, vertical: context.spaceSm),
                 child: Row(
                   children: [
                     IconButton(
@@ -50,7 +51,7 @@ class MiniPlayerWidget extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: context.spaceXs),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(3),
                             child: LinearProgressIndicator(
@@ -97,7 +98,7 @@ class MiniPlayerWidget extends StatelessWidget {
               return SingleChildScrollView(
                 controller: controller,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(context.spaceLg),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -115,7 +116,7 @@ class MiniPlayerWidget extends StatelessWidget {
                           )
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: context.spaceMd),
                       _FullPlayerCore(),
                     ],
                   ),
@@ -145,7 +146,7 @@ class _FullPlayerCore extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text('Sure ${verse.surahNumber} • Ajeti ${verse.number}', style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 12),
+          SizedBox(height: context.spaceMd),
           Slider(
             value: audio.progress.clamp(0.0, 1.0),
             onChanged: (v) => audio.seekToProgress(v),
@@ -157,7 +158,7 @@ class _FullPlayerCore extends StatelessWidget {
               Text(_fmt(dur), style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.spaceLg),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
