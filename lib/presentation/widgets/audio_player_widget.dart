@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/audio_provider.dart';
 import '../../domain/entities/verse.dart';
 import '../theme/theme.dart';
+import 'sheet_header.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final bool mini;
@@ -322,11 +323,13 @@ class _AudioOptionsSheetState extends State<AudioOptionsSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Opsionet e Audio-s',
-            style: Theme.of(context).textTheme.titleLarge,
+          SheetHeader(
+            title: 'Opsionet e Audio-s',
+            leadingIcon: Icons.settings_voice,
+            onClose: () => Navigator.of(context).maybePop(),
+            divider: false,
           ),
-          SizedBox(height: context.spaceXl + context.spaceSm),
+          SizedBox(height: context.spaceMd),
           
           // Volume control
           Text(

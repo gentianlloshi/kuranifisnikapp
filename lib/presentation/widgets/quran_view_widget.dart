@@ -15,6 +15,7 @@ import '../widgets/verse_notes_indicator.dart';
 import '../widgets/surah_list_widget.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart';
+import 'sheet_header.dart';
 
 class QuranViewWidget extends StatefulWidget {
   const QuranViewWidget({super.key});
@@ -889,6 +890,12 @@ class _VerseOptionsSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          SheetHeader(
+            title: 'Ajeti ${verse.number}',
+            subtitle: 'Sure ${verse.surahNumber}',
+            leadingIcon: Icons.menu_book,
+            onClose: () => Navigator.of(context).maybePop(),
+          ),
           ListTile(
             leading: const Icon(Icons.play_arrow),
             title: const Text('Luaj këtë ajet'),

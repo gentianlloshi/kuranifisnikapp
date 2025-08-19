@@ -4,6 +4,7 @@ import '../theme/theme.dart';
 import '../providers/note_provider.dart';
 import '../../domain/entities/note.dart';
 import 'note_editor_dialog.dart';
+import 'sheet_header.dart';
 
 class VerseNotesIndicator extends StatelessWidget {
   final String verseKey;
@@ -69,41 +70,19 @@ class VerseNotesBottomSheet extends StatelessWidget {
     return LayoutBuilder(builder: (context, _) {
       return Column(
         children: [
-          // Header
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: context.spaceSm),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.note,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                SizedBox(width: context.spaceSm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Shënimet për ajeti $verseKey',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      if (notes.isNotEmpty)
-                        Text(
-                          '${notes.length} shënim${notes.length > 1 ? 'e' : ''}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _addNote(context),
-                  icon: const Icon(Icons.add),
-                  tooltip: 'Shto shënim të ri',
-                ),
-              ],
-            ),
+          SheetHeader(
+            title: 'Shënimet për ajeti $verseKey',
+            subtitle: notes.isNotEmpty ? '${notes.length} shënim${notes.length > 1 ? 'e' : ''}' : null,
+            leadingIcon: Icons.note,
+            actions: [
+              IconButton(
+                onPressed: () => _addNote(context),
+                icon: const Icon(Icons.add),
+                tooltip: 'Shto shënim të ri',
+              ),
+            ],
+            onClose: () => Navigator.of(context).maybePop(),
           ),
-          const Divider(height: 1),
           Expanded(
             child: notes.isEmpty
                 ? _buildEmptyState(context)

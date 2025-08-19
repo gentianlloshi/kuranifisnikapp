@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/quran_provider.dart';
 import '../theme/theme.dart';
+import 'sheet_header.dart';
 
 class MiniPlayerWidget extends StatelessWidget {
   const MiniPlayerWidget({super.key});
@@ -97,18 +98,13 @@ class MiniPlayerWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Text('Leximi i Ajetit', style: Theme.of(context).textTheme.titleMedium),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        audio.isPlayerExpanded = false;
-                        Navigator.pop(context);
-                      },
-                    )
-                  ],
+                SheetHeader(
+                  title: 'Leximi i Ajetit',
+                  leadingIcon: Icons.play_circle_fill,
+                  onClose: () {
+                    audio.isPlayerExpanded = false;
+                    Navigator.pop(context);
+                  },
                 ),
                 SizedBox(height: context.spaceMd),
                 _FullPlayerCore(),
