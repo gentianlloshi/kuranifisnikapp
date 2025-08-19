@@ -93,3 +93,20 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
     ),
   );
 }
+
+// Convenience extensions for spacing & radii in widgets (future gradual adoption)
+extension Space on BuildContext {
+  double get spaceXxs => AppSpacing.xxs;
+  double get spaceXs => AppSpacing.xs;
+  double get spaceSm => AppSpacing.sm;
+  double get spaceMd => AppSpacing.md;
+  double get spaceLg => AppSpacing.lg;
+  double get spaceXl => AppSpacing.xl;
+  double get spaceXxl => AppSpacing.xxl;
+}
+
+extension Radii on BuildContext {
+  Radius get radiusSmall => AppRadii.small;
+  Radius get radiusCard => AppRadii.card;
+  Radius get radiusPanel => AppRadii.panel;
+}

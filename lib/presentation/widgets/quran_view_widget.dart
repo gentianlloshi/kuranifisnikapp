@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../providers/quran_provider.dart';
 import '../theme/theme.dart';
+import '../theme/theme.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/audio_provider.dart';
@@ -331,7 +332,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
             // Surah header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(8,8,8,8),
+              padding: EdgeInsets.fromLTRB(context.spaceSm, context.spaceSm, context.spaceSm, context.spaceSm),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                 border: Border(
@@ -397,7 +398,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                 },
                 child: ListView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(context.spaceLg),
                   itemCount: verses.length + (quranProvider.hasMoreVerses ? 1 : 0), // Add 1 for loading indicator
                   itemBuilder: (context, index) {
                     if (index == verses.length) {
@@ -491,7 +492,7 @@ class VerseWidget extends StatelessWidget {
     }
     
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  padding: EdgeInsets.only(bottom: context.spaceMd),
       child: Material(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
@@ -500,7 +501,7 @@ class VerseWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           onTap: () {},
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            padding: EdgeInsets.fromLTRB(context.spaceMd, context.spaceMd, context.spaceMd, context.spaceSm),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -607,12 +608,12 @@ class VerseWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: context.spaceSm),
                 
                 // Arabic text
             if (settings.showArabic)
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.only(bottom: context.spaceMd),
                 child: settings.showWordByWord && wordByWordData != null && wordByWordData!.words.isNotEmpty
                     ? Align(
                         alignment: Alignment.centerRight,
@@ -641,7 +642,7 @@ class VerseWidget extends StatelessWidget {
             // Translation
             if (settings.showTranslation && verse.textTranslation != null)
               Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.only(bottom: context.spaceSm),
                 child: Text(
                   verse.textTranslation!,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
