@@ -32,7 +32,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _autoScrollThrottle = Duration(milliseconds: 350);
   DateTime _lastUserScroll = DateTime.fromMillisecondsSinceEpoch(0);
-  static const Duration _manualScrollSuppressionWindow = Duration(seconds: 3); // pause auto-scroll shortly after user interacts
+  static const Duration _manualScrollSuppressionWindow = Duration(seconds: 5); // pause auto-scroll 5s after user interacts (spec)
   static const bool kUseNewVerseHighlight = true; // feature flag for new highlight spec
   // Selection mode state
   bool _selectionMode = false;
@@ -243,8 +243,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     final ctx = key?.currentContext;
     if (ctx != null) {
       try {
-        double alignment = 0.1; // default
-        if (appState.adaptiveAutoScroll) {
+  double alignment = 0.5; // center by default per spec
+  if (appState.adaptiveAutoScroll) {
           // Use measured height to adjust alignment: taller verses align nearer top
           final h = _verseHeights[verseKey] ?? 260;
           if (h > 600) {
@@ -387,17 +387,25 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
             ),
             // Verses list
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: verses.length + (quranProvider.hasMoreVerses ? 1 : 0), // Add 1 for loading indicator
-                itemBuilder: (context, index) {
-                  if (index == verses.length) {
-                    // Last item, show loading indicator if more verses are available
-                    return quranProvider.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : const SizedBox.shrink();
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is UserScrollNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null)) {
+                    // Mark manual user interaction to pause auto-scroll window
+                    _lastUserScroll = DateTime.now();
                   }
+                  return false;
+                },
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: verses.length + (quranProvider.hasMoreVerses ? 1 : 0), // Add 1 for loading indicator
+                  itemBuilder: (context, index) {
+                    if (index == verses.length) {
+                      // Last item, show loading indicator if more verses are available
+                      return quranProvider.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : const SizedBox.shrink();
+                    }
                   final verse = verses[index];
                   final key = _verseKeys.putIfAbsent(verse.verseKey, () => GlobalKey());
                       return FutureBuilder<bool>(
@@ -441,7 +449,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                           );
                         },
                       );
-                },
+                  },
+                ),
               ),
             ),
           ],

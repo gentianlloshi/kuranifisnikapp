@@ -15,6 +15,7 @@ import '../widgets/bookmarks_widget.dart';
 import '../widgets/notes_widget.dart';
 import '../widgets/memorization_widget.dart';
 import '../widgets/audio_player_widget.dart';
+import '../widgets/mini_player_widget.dart';
 import '../widgets/texhvid_widget.dart';
 import '../widgets/thematic_index_widget.dart';
 import '../widgets/image_generator_widget.dart';
@@ -162,24 +163,15 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
       endDrawer: const SettingsDrawer(),
       body: Column(
         children: [
-          // Audio Player Mini Widget
-          Consumer<AudioProvider>(
-            builder: (context, audioProvider, child) {
-              if (audioProvider.currentTrack != null && 
-                  !audioProvider.isPlayerExpanded) {
-                return const AudioPlayerWidget(mini: true);
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-          
-          // Main Content
+          // Main Content (tabs)
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: _tabs.map((tab) => tab.widget).toList(),
             ),
           ),
+          // Global Mini Player (persistent at bottom)
+          const MiniPlayerWidget(),
         ],
       ),
       floatingActionButton: _buildFloatingActionButton(),
