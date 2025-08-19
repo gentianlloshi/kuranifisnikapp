@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
+import '../theme/theme.dart';
+import 'sheet_header.dart';
 
 class ThematicIndexWidget extends StatefulWidget {
   const ThematicIndexWidget({super.key});
@@ -219,63 +221,41 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(16),
+      showDragHandle: true,
+      builder: (context) => BottomSheetWrapper(
+        padding: EdgeInsets.only(
+          left: context.spaceLg,
+          right: context.spaceLg,
+          top: context.spaceSm,
+          bottom: MediaQuery.of(context).viewInsets.bottom + context.spaceLg,
+        ),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.75,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      subthemeName,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
+              SheetHeader(
+                title: subthemeName,
+                subtitle: '${verses.length} ajete',
+                leadingIcon: Icons.topic,
+                onClose: () => Navigator.of(context).maybePop(),
               ),
-              Text(
-                '${verses.length} ajete',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const Divider(),
-              
-              // Verses List
               Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
+                child: ListView.separated(
                   itemCount: verses.length,
+                  separatorBuilder: (_, __) => SizedBox(height: context.spaceXs),
                   itemBuilder: (context, index) {
                     final verseRef = verses[index] as String;
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         title: Text(
                           verseRef,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         subtitle: Text(
                           _getVerseDescription(verseRef),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                              ),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {

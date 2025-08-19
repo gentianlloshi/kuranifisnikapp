@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/texhvid_provider.dart';
 import 'package:kurani_fisnik_app/domain/entities/texhvid_rule.dart';
+import '../theme/theme.dart';
+import 'sheet_header.dart';
 
 class TexhvidWidget extends StatefulWidget {
   const TexhvidWidget({super.key});
@@ -298,38 +300,26 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(16),
+      showDragHandle: true,
+      builder: (context) => BottomSheetWrapper(
+        padding: EdgeInsets.only(
+          left: context.spaceLg,
+          right: context.spaceLg,
+          top: context.spaceSm,
+          bottom: MediaQuery.of(context).viewInsets.bottom + context.spaceLg,
+        ),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.75,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      rule.title,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
+              SheetHeader(
+                title: rule.title,
+                subtitle: 'Rregull i Texhvidit',
+                leadingIcon: Icons.school,
+                onClose: () => Navigator.of(context).maybePop(),
               ),
-              const Divider(),
-              
-              // Content
               Expanded(
                 child: SingleChildScrollView(
-                  controller: scrollController,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -337,23 +327,22 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                         rule.description,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      const SizedBox(height: 16),
-                      
+                      SizedBox(height: context.spaceLg),
                       if (rule.examples.isNotEmpty) ...[
                         Text(
                           'Shembuj:',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: context.spaceSm),
                         ...rule.examples.map((example) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            '• $example',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        )),
+                              padding: EdgeInsets.only(bottom: context.spaceXs),
+                              child: Text(
+                                '• $example',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            )),
                       ],
                     ],
                   ),

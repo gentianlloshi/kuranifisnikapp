@@ -47,32 +47,43 @@ extension TextThemeContext on BuildContext {
 ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
   // Scale factor applied to base text theme (responsive typography)
   final baseTextTheme = buildBaseTextTheme(latinFont: 'Lora', arabicFont: 'AmiriQuran', scaleFactor: scaleFactor);
+  final bool isDark = scheme.brightness == Brightness.dark;
+  // Derived elevated surface colors (soft layering) for dark mode contrast improvement
+  final Color surface1 = isDark ? scheme.surface : scheme.surface;
+  final Color surface2 = isDark ? Color.alphaBlend(scheme.primary.withOpacity(0.04), scheme.surface) : scheme.surface;
+  final Color surface3 = isDark ? Color.alphaBlend(scheme.primary.withOpacity(0.08), scheme.surface) : scheme.surface;
+  final Color surface4 = isDark ? Color.alphaBlend(scheme.primary.withOpacity(0.12), scheme.surface) : scheme.surface;
+  final Color dividerColor = isDark ? scheme.outline.withOpacity(0.35) : scheme.outline.withOpacity(0.6);
+  final Color outlineVariant = isDark ? scheme.outlineVariant.withOpacity(0.35) : scheme.outlineVariant;
 
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: scheme.background,
-  textTheme: baseTextTheme,
+    scaffoldBackgroundColor: isDark ? surface1 : scheme.background,
+    textTheme: baseTextTheme,
+    canvasColor: surface1,
+    dialogBackgroundColor: surface2,
+    cardColor: surface2,
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
+      backgroundColor: surface2,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
       titleTextStyle: baseTextTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
       iconTheme: IconThemeData(color: scheme.onSurface),
     ),
-  cardTheme: CardThemeData(
-      color: scheme.surface,
+    cardTheme: CardThemeData(
+      color: surface2,
       elevation: AppElevation.level1,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(AppRadii.card),
         side: BorderSide(color: Colors.transparent),
       ),
-      shadowColor: scheme.shadow.withOpacity(0.08),
+      shadowColor: isDark ? Colors.black.withOpacity(0.6) : scheme.shadow.withOpacity(0.08),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: scheme.surface,
+      backgroundColor: surface2,
       elevation: AppElevation.level1,
       selectedItemColor: scheme.primary,
       unselectedItemColor: scheme.onSurface.withOpacity(0.6),
@@ -80,17 +91,28 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
       type: BottomNavigationBarType.fixed,
     ),
     dividerTheme: DividerThemeData(
-      color: scheme.outline.withOpacity(0.6),
+      color: dividerColor,
       thickness: 0.6,
       space: 0.6,
     ),
     iconTheme: IconThemeData(color: scheme.onSurface),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: scheme.surfaceVariant,
+      backgroundColor: isDark ? surface3 : scheme.surfaceVariant,
       behavior: SnackBarBehavior.floating,
-      contentTextStyle: baseTextTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+      contentTextStyle: baseTextTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant.withOpacity(isDark ? 0.9 : 1)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card.x)),
     ),
+    tooltipTheme: TooltipThemeData(
+      decoration: BoxDecoration(
+        color: isDark ? surface4 : scheme.inverseSurface,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: dividerColor.withOpacity(0.4)),
+      ),
+      textStyle: baseTextTheme.bodySmall?.copyWith(color: isDark ? scheme.onSurface : scheme.onInverseSurface),
+    ),
+    dividerColor: dividerColor,
+    highlightColor: scheme.primary.withOpacity(0.08),
+    splashColor: scheme.primary.withOpacity(0.12),
   );
 }
 
