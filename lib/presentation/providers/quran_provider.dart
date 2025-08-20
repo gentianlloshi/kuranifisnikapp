@@ -28,6 +28,9 @@ class QuranProvider extends ChangeNotifier {
           getSurahVersesUseCase: getSurahVersesUseCase,
         ) {
     _init();
+  // Start incremental search index build in background
+  // Progress updates will be forwarded via ensureBuilt on demand; here we just kick it off.
+  unawaited(_indexManager?.ensureBuilt());
   }
 
   // Simplified constructor for basic functionality without use cases
