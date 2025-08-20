@@ -66,6 +66,22 @@ class _SearchWidgetState extends State<SearchWidget> {
               ),
               child: Column(
                 children: [
+                  // Index progress (shown while building)
+                  if (quranProvider.isBuildingIndex && quranProvider.indexProgress < 0.999)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: context.spaceMd),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LinearProgressIndicator(value: quranProvider.indexProgress <= 0 ? null : quranProvider.indexProgress),
+                          SizedBox(height: context.spaceXs),
+                          Text(
+                            'Indeximi i Kërkimit... ${(quranProvider.indexProgress * 100).toStringAsFixed(0)}%',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
+                      ),
+                    ),
                   // Search field
                   TextField(
                     controller: _searchController,
@@ -213,7 +229,16 @@ class _SearchWidgetState extends State<SearchWidget> {
             
             // Search results
             Expanded(
-              child: _buildSearchResults(quranProvider, appState),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (n) {
+                  if (n is UserScrollNotification || n is ScrollUpdateNotification) {
+                    // inform provider for adaptive throttling
+                    quranProvider.notifyUserScrollActivity();
+                  }
+                  return false;
+                },
+                child: _buildSearchResults(quranProvider, appState),
+              ),
             ),
           ],
         );
