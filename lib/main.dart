@@ -37,6 +37,7 @@ import 'package:kurani_fisnik_app/domain/usecases/get_timestamp_data_usecase.dar
 
 // Use Cases
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_usecase.dart';
+import 'package:kurani_fisnik_app/domain/usecases/get_surahs_arabic_only_usecase.dart';
 import 'package:kurani_fisnik_app/domain/usecases/search_verses_usecase.dart';
 import 'package:kurani_fisnik_app/domain/usecases/get_surah_verses_usecase.dart' as get_verses;
 import 'package:kurani_fisnik_app/domain/usecases/settings_usecases.dart';
@@ -107,6 +108,10 @@ void main() async {
   // First frame callback instrumentation
   WidgetsBinding.instance.addPostFrameCallback((_) {
     Logger.i('Startup: first frame in ${_startupSw.elapsedMilliseconds}ms', tag: 'Startup');
+    // Defer a microtask to allow any phase 2 meta timing to be recorded by providers then output summary marker.
+    Future.microtask(() {
+      Logger.i('PerfSummary: firstFrameMs=${_startupSw.elapsedMilliseconds}', tag: 'PerfSummary');
+    });
   });
 }
 
@@ -189,6 +194,9 @@ class KuraniFisnikApp extends StatelessWidget {
         ProxyProvider<QuranRepositoryImpl, GetSurahsUseCase>(
           update: (context, repo, previous) => GetSurahsUseCase(repo),
         ),
+        ProxyProvider<QuranRepositoryImpl, GetSurahsArabicOnlyUseCase>(
+          update: (context, repo, previous) => GetSurahsArabicOnlyUseCase(repo),
+        ),
         ProxyProvider<QuranRepositoryImpl, SearchVersesUseCase>(
           update: (context, repo, previous) => SearchVersesUseCase(repo),
         ),
@@ -221,14 +229,16 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(_, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(_, listen: false)),
           update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
         ),
-        ChangeNotifierProxyProvider3<GetSurahsUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranProvider>(
+        ChangeNotifierProxyProvider4<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranProvider>(
           create: (_) => QuranProvider(
             getSurahsUseCase: Provider.of<GetSurahsUseCase>(_, listen:false),
+            getSurahsArabicOnlyUseCase: Provider.of<GetSurahsArabicOnlyUseCase>(_, listen:false),
             searchVersesUseCase: Provider.of<SearchVersesUseCase>(_, listen:false),
             getSurahVersesUseCase: Provider.of<get_verses.GetSurahVersesUseCase>(_, listen:false),
           ),
-          update: (_, getSurahsUseCase, searchVersesUseCase, getSurahVersesUseCase, previous) => QuranProvider(
+          update: (_, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, previous) => QuranProvider(
             getSurahsUseCase: getSurahsUseCase,
+            getSurahsArabicOnlyUseCase: getSurahsArabicOnlyUseCase,
             searchVersesUseCase: searchVersesUseCase,
             getSurahVersesUseCase: getSurahVersesUseCase,
           ),

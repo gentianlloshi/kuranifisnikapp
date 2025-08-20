@@ -5,6 +5,7 @@ import '../../domain/entities/surah.dart';
 import '../../domain/entities/surah_meta.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
+import '../../domain/usecases/get_surahs_arabic_only_usecase.dart';
 import 'package:kurani_fisnik_app/core/utils/result.dart';
 import '../../domain/usecases/search_verses_usecase.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
@@ -13,6 +14,7 @@ import 'package:kurani_fisnik_app/core/utils/logger.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
+  final GetSurahsArabicOnlyUseCase? _getSurahsArabicOnlyUseCase;
   final SearchVersesUseCase? _searchVersesUseCase;
   final GetSurahVersesUseCase? _getSurahVersesUseCase;
 
@@ -21,9 +23,11 @@ class QuranProvider extends ChangeNotifier {
 
   QuranProvider({
     required GetSurahsUseCase getSurahsUseCase,
+    required GetSurahsArabicOnlyUseCase getSurahsArabicOnlyUseCase,
     required SearchVersesUseCase searchVersesUseCase,
     required GetSurahVersesUseCase getSurahVersesUseCase,
   })  : _getSurahsUseCase = getSurahsUseCase,
+        _getSurahsArabicOnlyUseCase = getSurahsArabicOnlyUseCase,
         _searchVersesUseCase = searchVersesUseCase,
         _getSurahVersesUseCase = getSurahVersesUseCase,
         _indexManager = SearchIndexManager(
@@ -42,15 +46,15 @@ class QuranProvider extends ChangeNotifier {
   // Simplified constructor for basic functionality without use cases
   QuranProvider.simple()
       : _getSurahsUseCase = null,
+        _getSurahsArabicOnlyUseCase = null,
         _searchVersesUseCase = null,
         _getSurahVersesUseCase = null,
         _indexManager = null;
   
   Future<void> _init() async {
-  if (_surahsMeta.isEmpty && _getSurahsUseCase != null) {
-      // Defer to next event loop so first frame can paint.
+    if (_surahsMeta.isEmpty && _getSurahsArabicOnlyUseCase != null) {
       Future.delayed(const Duration(milliseconds: 10), () async {
-        await loadSurahs();
+        await loadSurahMetasArabicOnly();
       });
     }
   }
@@ -114,6 +118,31 @@ class QuranProvider extends ChangeNotifier {
       }
     } catch (e) {
       _error = e.toString(); // fallback if unexpected exception
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> loadSurahMetasArabicOnly() async {
+    _setLoading(true);
+    try {
+      final surahs = await _getSurahsArabicOnlyUseCase!.call();
+      final sw = Stopwatch()..start();
+      final all = surahs.map((s) => SurahMeta.fromSurah(s)).toList();
+      _surahsMeta = [];
+      const batchSize = 25;
+      for (int i = 0; i < all.length; i += batchSize) {
+        final end = (i + batchSize) > all.length ? all.length : (i + batchSize);
+        _surahsMeta.addAll(all.sublist(i, end));
+        notifyListeners();
+        if (end < all.length) {
+          await Future.delayed(const Duration(milliseconds: 1));
+        }
+      }
+      Logger.d('Loaded Arabic-only metas count=${_surahsMeta.length} in ${sw.elapsedMilliseconds}ms', tag: 'StartupPhase');
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
     } finally {
       _setLoading(false);
     }
@@ -225,7 +254,11 @@ class QuranProvider extends ChangeNotifier {
 
   Future<void> navigateToSurah(int surahNumber) async {
     if (_surahsMeta.isEmpty) {
-      await loadSurahs();
+      if (_getSurahsArabicOnlyUseCase != null) {
+        await loadSurahMetasArabicOnly();
+      } else if (_getSurahsUseCase != null) {
+        await loadSurahs();
+      }
     }
     final meta = _surahsMeta.firstWhere(
       (s) => s.number == surahNumber,
