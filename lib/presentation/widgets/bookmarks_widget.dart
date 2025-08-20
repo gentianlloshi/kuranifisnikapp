@@ -200,9 +200,14 @@ class BookmarkItem extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(context.spaceSm),
                   decoration: BoxDecoration(
-                    color: dark
-                        ? Color.alphaBlend(scheme.primary.withOpacity(0.08), scheme.surfaceElevated(2))
-                        : scheme.surfaceVariant.withOpacity(0.55),
+                    // Unified elevated tonal background for note container across themes.
+                    // We start from an elevated surface (level 2 in dark for extra separation, 1 in light)
+                    // then softly tint with primary for contextual accent.
+                    color: () {
+                      final base = scheme.surfaceElevated(dark ? 2 : 1);
+                      final tintOpacity = dark ? 0.08 : 0.05;
+                      return Color.alphaBlend(scheme.primary.withOpacity(tintOpacity), base);
+                    }(),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
