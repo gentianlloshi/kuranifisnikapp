@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/i18n/app_localizations.dart';
+import '../providers/bookmark_provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
 import '../../domain/entities/verse.dart';
@@ -413,12 +415,12 @@ class SearchResultItem extends StatelessWidget {
                         onPressed: () async {
                           await bookmarkProvider.toggleBookmark(key);
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(isMarked ? 'U hoq nga favoritët' : 'U shtua në favoritë'),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
+                          final locale = Localizations.localeOf(context);
+                          final strings = Strings(Strings.resolve(locale));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(isMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added')),
+                            duration: const Duration(seconds: 2),
+                          ));
                         },
                       );
                     },

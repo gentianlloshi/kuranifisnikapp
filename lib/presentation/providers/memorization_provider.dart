@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../data/datasources/local/memorization_hive_datasource.dart';
 
 class MemorizationProvider extends ChangeNotifier {
-  final Map<String, bool> _memorizedVerses = {};
-  final List<String> _memorizationList = [];
+  final MemorizationHiveDataSource _ds = MemorizationHiveDataSource();
+  Map<String, bool> _memorizedVerses = {};
+  List<String> _memorizationList = [];
   bool _isLoading = false;
   String? _error;
 
@@ -14,7 +16,8 @@ class MemorizationProvider extends ChangeNotifier {
   Future<void> loadMemorizationData() async {
     _setLoading(true);
     try {
-      // TODO: Implement actual memorization data loading from repository
+      _memorizedVerses = await _ds.loadMemorizedVerses();
+      _memorizationList = await _ds.loadList();
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -38,7 +41,7 @@ class MemorizationProvider extends ChangeNotifier {
       }
       _error = null;
       notifyListeners();
-      // TODO: Implement actual memorization data saving to repository
+  await _ds.persist(_memorizedVerses, _memorizationList);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -67,9 +70,10 @@ class MemorizationProvider extends ChangeNotifier {
   }
 
   Future<void> removeVerseFromMemorization(String verseKey) async {
-    _memorizedVerses.remove(verseKey);
-    _memorizationList.remove(verseKey);
-    notifyListeners();
+  _memorizedVerses.remove(verseKey);
+  _memorizationList.remove(verseKey);
+  notifyListeners();
+  await _ds.persist(_memorizedVerses, _memorizationList);
   }
 
   bool isVerseMemorized(String verseKey) {

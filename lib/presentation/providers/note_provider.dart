@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/note.dart';
+import '../../data/datasources/local/note_hive_datasource.dart';
 
 class NoteProvider extends ChangeNotifier {
+  final NoteHiveDataSource _ds = NoteHiveDataSource();
   List<Note> _notes = [];
   List<Note> _filteredNotes = [];
   String _searchQuery = '';
@@ -21,8 +23,7 @@ class NoteProvider extends ChangeNotifier {
   Future<void> loadNotes() async {
     _setLoading(true);
     try {
-      // TODO: Implement actual note loading from repository
-      _notes = [];
+      _notes = await _ds.getAllNotes();
   _filteredNotes = _notes;
   _rebuildTags();
       _error = null;
@@ -48,12 +49,12 @@ class NoteProvider extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      _notes.add(note);
+  _notes.add(note);
   _filteredNotes = _applyFilters();
   _rebuildTags();
       _error = null;
       notifyListeners();
-      // TODO: Implement actual note saving to repository
+  await _ds.saveNote(note);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -69,7 +70,7 @@ class NoteProvider extends ChangeNotifier {
   _filteredNotes = _applyFilters();
   _rebuildTags();
         notifyListeners();
-        // TODO: Implement actual note updating in repository
+  await _ds.saveNote(_notes[index]);
       }
     } catch (e) {
       _error = e.toString();
@@ -84,7 +85,10 @@ class NoteProvider extends ChangeNotifier {
   _filteredNotes = _applyFilters();
   _rebuildTags();
       notifyListeners();
-      // TODO: Implement actual note deletion from repository
+      // Persist deletion
+      for (final note in _notes.where((n) => n.id == noteId)) {
+        await _ds.deleteNote(note.id);
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();

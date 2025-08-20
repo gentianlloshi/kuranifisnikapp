@@ -17,6 +17,7 @@ import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart';
 import 'sheet_header.dart';
 import 'package:flutter/services.dart';
+import '../../core/services/share_service.dart';
 import '../widgets/note_editor_dialog.dart';
 
 class QuranViewWidget extends StatefulWidget {
@@ -733,11 +734,10 @@ class VerseWidget extends StatelessWidget {
   }
 
   void _shareVerse(BuildContext context, Verse verse) {
-    final text = '${verse.textArabic}\n\n${verse.textTranslation ?? ''}\n\n(${verse.surahNumber}:${verse.number})';
-    // Placeholder: integrate share_plus later. For now copy to clipboard & notify.
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Teksti u kopjua – ndarja e avancuar së shpejti')),
+    ShareService.shareVerse(
+      arabic: verse.textArabic,
+      translation: verse.textTranslation,
+      reference: '(${verse.surahNumber}:${verse.number})',
     );
   }
 
