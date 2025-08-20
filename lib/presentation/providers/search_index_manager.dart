@@ -21,6 +21,14 @@ class SearchIndexManager {
   // Incremental state
   int _nextSurahToIndex = 1; // 1..114
   bool _incrementalMode = false; // true if using incremental background build
+  // Progress stream
+  final StreamController<SearchIndexProgress> _progressController = StreamController<SearchIndexProgress>.broadcast();
+  Stream<SearchIndexProgress> get progressStream => _progressController.stream;
+
+  // Adaptive throttling (user activity)
+  DateTime? _lastUserScrollEvent;
+  static const Duration _scrollQuietDuration = Duration(milliseconds: 300); // need this long of quiet to resume
+  static const Duration _maxPausePerBatch = Duration(seconds: 2); // don't stall forever
 
   bool get isBuilt => _invertedIndex != null;
   bool get isBuilding => _building;
@@ -39,7 +47,8 @@ class SearchIndexManager {
     if (_invertedIndex != null) return;
     // Try fast-path load from snapshot
     if (await _tryLoadSnapshot()) {
-      if (onProgress != null) onProgress(1.0);
+  _emitProgress(1.0);
+  if (onProgress != null) onProgress(1.0); // backward compatibility
       return;
     }
     if (_building) {
@@ -62,17 +71,19 @@ class SearchIndexManager {
               'ar': (v.textArabic ?? '').toString(),
             });
           }
-          if (onProgress != null) {
-            onProgress(s / 114.0 * 0.5);
-          }
+      final p = s / 114.0 * 0.5;
+      _emitProgress(p);
+      if (onProgress != null) onProgress(p);
           await Future<void>.delayed(const Duration(milliseconds: 1));
         } catch (_) {
           // Skip surah silently
         }
       }
-      if (onProgress != null) onProgress(0.55);
+    _emitProgress(0.55);
+    if (onProgress != null) onProgress(0.55);
       _invertedIndex = await compute(idx.buildInvertedIndex, raw);
-      if (onProgress != null) onProgress(1.0);
+    _emitProgress(1.0);
+    if (onProgress != null) onProgress(1.0);
       // Persist snapshot (fire & forget)
       unawaited(_saveSnapshot());
     } catch (_) {
@@ -102,6 +113,7 @@ class SearchIndexManager {
             _building = false;
             _incrementalMode = false;
             _buildCompleter?.complete();
+            _emitProgress(1.0);
             if (onProgress != null) onProgress(1.0);
             return;
           }
@@ -116,14 +128,17 @@ class SearchIndexManager {
               _indexVerse(v);
             }
           } catch (_) {/* skip */}
-          if (onProgress != null) onProgress(s / 114.0);
+          final p = s / 114.0;
+          _emitProgress(p);
+          if (onProgress != null) onProgress(p);
           if (s % 5 == 0 || s == 114) {
             unawaited(_saveSnapshot(partial: s != 114));
           }
           // Yield to UI
-          await Future<void>.delayed(const Duration(milliseconds: 1));
+          await _applyAdaptiveThrottle();
         }
         _incrementalMode = false;
+        _emitProgress(1.0);
         if (onProgress != null) onProgress(1.0);
       } finally {
         _building = false;
@@ -263,6 +278,49 @@ class SearchIndexManager {
     }
     return sb.toString();
   }
+
+  /// Public API for UI to notify that user scrolled (used for adaptive throttling)
+  void notifyUserScrollEvent() {
+    _lastUserScrollEvent = DateTime.now();
+  }
+
+  /// Dispose resources
+  void dispose() {
+    _progressController.close();
+  }
+
+  void _emitProgress(double progress) {
+    try {
+      final indexedSurahs = _invertedIndex == null
+          ? 0
+          : (_incrementalMode
+              ? (_nextSurahToIndex - 1).clamp(0, 114)
+              : 114);
+      _progressController.add(SearchIndexProgress(
+        progress: progress.clamp(0, 1),
+        incremental: _incrementalMode,
+        complete: progress >= 0.999,
+        indexedSurahs: indexedSurahs,
+        totalSurahs: 114,
+      ));
+    } catch (_) {}
+  }
+
+  Future<void> _applyAdaptiveThrottle() async {
+    // If no scroll events recently just minimal yield
+    if (_lastUserScrollEvent == null) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      return;
+    }
+    final start = DateTime.now();
+    while (_lastUserScrollEvent != null &&
+        DateTime.now().difference(_lastUserScrollEvent!) < _scrollQuietDuration) {
+      if (DateTime.now().difference(start) > _maxPausePerBatch) break; // hard cap
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    // After pause, always yield a tiny delay to keep UI responsive
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+  }
 }
 
 extension on SearchIndexManager {
@@ -344,4 +402,20 @@ class _ScoredVerse {
   final Verse verse;
   final int score;
   _ScoredVerse(this.verse, this.score);
+}
+
+/// Progress event for search index building
+class SearchIndexProgress {
+  final double progress; // 0..1
+  final bool incremental; // true if still in incremental mode
+  final bool complete; // true when fully built
+  final int indexedSurahs; // counted surahs so far (114 when complete)
+  final int totalSurahs;
+  const SearchIndexProgress({
+    required this.progress,
+    required this.incremental,
+    required this.complete,
+    required this.indexedSurahs,
+    required this.totalSurahs,
+  });
 }

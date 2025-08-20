@@ -15,6 +15,7 @@ class QuranProvider extends ChangeNotifier {
   final GetSurahVersesUseCase? _getSurahVersesUseCase;
 
   final SearchIndexManager? _indexManager; // null in simple ctor
+  StreamSubscription<SearchIndexProgress>? _indexProgressSub;
 
   QuranProvider({
     required GetSurahsUseCase getSurahsUseCase,
@@ -28,9 +29,14 @@ class QuranProvider extends ChangeNotifier {
           getSurahVersesUseCase: getSurahVersesUseCase,
         ) {
     _init();
-  // Start incremental search index build in background
-  // Progress updates will be forwarded via ensureBuilt on demand; here we just kick it off.
-  unawaited(_indexManager?.ensureBuilt());
+    // Subscribe to live progress stream
+    _indexProgressSub = _indexManager?.progressStream.listen((evt) {
+      _isBuildingIndex = !evt.complete;
+      _indexProgress = evt.progress;
+      notifyListeners();
+    });
+    // Start incremental (non-blocking) build
+    _indexManager?.ensureIncrementalBuild();
   }
 
   // Simplified constructor for basic functionality without use cases
@@ -122,40 +128,18 @@ class QuranProvider extends ChangeNotifier {
       return;
     }
     if (_indexManager != null) {
-      try {
-        await _indexManager!.ensureBuilt(onProgress: (p) {
-          _isBuildingIndex = true;
-          _indexProgress = p;
-          notifyListeners();
-        });
-        _isBuildingIndex = false;
-        _searchResults = _indexManager!.search(
-          query,
-          juzFilter: _activeJuzFilter,
-          includeTranslation: _filterTranslation,
-          includeArabic: _filterArabic,
-          includeTransliteration: _filterTransliteration,
-        );
-        _error = null;
-        notifyListeners();
-      } catch (e) {
-        if (_searchVersesUseCase != null) {
-          _setLoading(true);
-          try {
-            _searchResults = await _searchVersesUseCase!.call(query);
-            _error = null;
-          } catch (e2) {
-            _error = e2.toString();
-            _searchResults = [];
-          } finally {
-            _setLoading(false);
-          }
-        } else {
-          _error = e.toString();
-          _searchResults = [];
-          notifyListeners();
-        }
-      }
+      // Kick incremental build if not started yet (returns immediately)
+      _indexManager!.ensureIncrementalBuild();
+      // Perform search over currently indexed subset (results will improve as index grows)
+      _searchResults = _indexManager!.search(
+        query,
+        juzFilter: _activeJuzFilter,
+        includeTranslation: _filterTranslation,
+        includeArabic: _filterArabic,
+        includeTransliteration: _filterTransliteration,
+      );
+      _error = null;
+      notifyListeners();
       return;
     }
     if (_searchVersesUseCase != null) {
@@ -293,7 +277,14 @@ class QuranProvider extends ChangeNotifier {
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    _indexProgressSub?.cancel();
+    _indexManager?.dispose();
     super.dispose();
+  }
+
+  // UI can call this when user actively scrolls verses; forwards to index manager for adaptive throttling
+  void notifyUserScrollActivity() {
+    _indexManager?.notifyUserScrollEvent();
   }
 
 }
