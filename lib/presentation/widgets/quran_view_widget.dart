@@ -836,7 +836,7 @@ class _WordByWordLine extends StatelessWidget {
           final baseStyle = theme.textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.6);
           final List<InlineSpan> spans = [];
           final animDuration = appState.reduceMotion ? Duration.zero : const Duration(milliseconds: 220);
-          // Render in the natural Arabic order (right-to-left) while keeping list order intact.
+          // Render words once in logical (original) order; RichText with RTL will place first word on the right.
           for (int i = 0; i < words.length; i++) {
             final w = words[i];
             final highlighted = activeIndex == i;
@@ -847,9 +847,7 @@ class _WordByWordLine extends StatelessWidget {
             spans.add(
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: AnimatedContainer(
+                child: AnimatedContainer(
                   duration: animDuration,
                   curve: Curves.easeOutCubic,
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -868,13 +866,12 @@ class _WordByWordLine extends StatelessWidget {
                               : null,
                         )
                       : null,
-                    child: Text(
-                      w.arabic,
-                      textDirection: TextDirection.rtl,
-                      style: highlighted
-                          ? baseStyle.copyWith(fontWeight: FontWeight.w600, color: baseStyle.color)
-                          : baseStyle,
-                    ),
+                  child: Text(
+                    w.arabic,
+                    style: highlighted
+                        ? baseStyle.copyWith(fontWeight: FontWeight.w600, color: baseStyle.color)
+                        : baseStyle,
+                    textAlign: TextAlign.right,
                   ),
                 ),
               ),

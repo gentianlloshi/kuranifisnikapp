@@ -35,8 +35,10 @@ class QuranProvider extends ChangeNotifier {
       _indexProgress = evt.progress;
       notifyListeners();
     });
-    // Start incremental (non-blocking) build
-    _indexManager?.ensureIncrementalBuild();
+    // Defer starting the incremental build slightly to allow first frame to render.
+    Future.delayed(const Duration(milliseconds: 400), () {
+      _indexManager?.ensureIncrementalBuild();
+    });
   }
 
   // Simplified constructor for basic functionality without use cases
