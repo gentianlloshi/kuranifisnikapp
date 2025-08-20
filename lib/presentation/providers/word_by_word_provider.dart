@@ -28,8 +28,11 @@ class WordByWordProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final wbw = await getWordByWordDataUseCase.call(surahId);
-      final ts = await getTimestampDataUseCase.call(surahId);
+  // Fetch word-by-word data and timestamps concurrently to reduce UI stall.
+  final wbwFuture = getWordByWordDataUseCase.call(surahId);
+  final tsFuture = getTimestampDataUseCase.call(surahId);
+  final wbw = await wbwFuture;
+  final ts = await tsFuture;
       _verses
         ..clear()
         ..addEntries(wbw.map((v) => MapEntry(v.verseNumber, v)));
