@@ -44,12 +44,32 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   BoxDecoration _buildVerseHighlightDecoration(BuildContext context, {required bool isActive}) {
     final scheme = Theme.of(context).colorScheme;
     if (!isActive) return const BoxDecoration();
-    // Refined spec: subtle fill + left accent bar
-    final accent = scheme.primary;
+    final bool dark = scheme.brightness == Brightness.dark;
+    // Layer base elevated surface then blend a primary tint for active verse.
+    final baseSurface = scheme.surfaceElevated(2);
+    final tint = dark ? scheme.primary.withOpacity(0.18) : scheme.primary.withOpacity(0.10);
+    final blended = Color.alphaBlend(tint, baseSurface);
+    final accent = dark ? scheme.primaryContainer : scheme.primary;
     return BoxDecoration(
       borderRadius: BorderRadius.circular(10),
-      color: accent.withOpacity(0.12),
-      border: Border(left: BorderSide(color: accent, width: 3)),
+      color: blended,
+      border: Border(left: BorderSide(color: accent.withOpacity(dark ? 0.9 : 1.0), width: 3)),
+      boxShadow: dark
+          ? [
+              BoxShadow(
+                color: scheme.primary.withOpacity(0.25),
+                blurRadius: 14,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
+              ),
+            ]
+          : [
+              BoxShadow(
+                color: scheme.primary.withOpacity(0.12),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
     );
   }
 
@@ -85,11 +105,12 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   BoxDecoration _mergeSelectionDecoration(BuildContext context, {required BoxDecoration base, required bool isSelected}) {
     if (!isSelected) return base;
     final scheme = Theme.of(context).colorScheme;
-    // Layer selection indication (semi-transparent primaryContainer + border)
-    final selectionColor = scheme.primaryContainer.withOpacity(0.35);
+    // Layer selection indication (adaptive overlay)
+    final bool dark = scheme.brightness == Brightness.dark;
+    final selectionColor = (dark ? scheme.primary.withOpacity(0.22) : scheme.primaryContainer.withOpacity(0.35));
     return base.copyWith(
       color: base.color == null ? selectionColor : Color.alphaBlend(selectionColor, base.color!),
-      border: base.border ?? Border.all(color: scheme.primary.withOpacity(0.6), width: 2),
+      border: base.border ?? Border.all(color: scheme.primary.withOpacity(dark ? 0.5 : 0.6), width: 2),
     );
   }
 
@@ -496,9 +517,11 @@ class VerseWidget extends StatelessWidget {
     }
     
     return Padding(
-  padding: EdgeInsets.only(bottom: context.spaceMd),
+      padding: EdgeInsets.only(bottom: context.spaceMd),
       child: Material(
-        color: theme.colorScheme.surface,
+        color: isCurrentVersePlaying
+            ? theme.colorScheme.surfaceElevated(2)
+            : theme.colorScheme.surfaceElevated(1),
         borderRadius: BorderRadius.circular(10),
         elevation: 0,
         child: InkWell(
@@ -774,6 +797,10 @@ class _WordByWordLine extends StatelessWidget {
           for (int i = 0; i < words.length; i++) {
             final w = words[i];
             final highlighted = activeIndex == i;
+      final bool dark = theme.colorScheme.brightness == Brightness.dark;
+      final highlightBg = dark
+        ? theme.colorScheme.primary.withOpacity(0.28)
+        : theme.colorScheme.primary.withOpacity(0.15);
             spans.add(
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
@@ -783,12 +810,12 @@ class _WordByWordLine extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   decoration: highlighted
                       ? BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.15),
+              color: highlightBg,
                           borderRadius: BorderRadius.circular(6),
                           boxShadow: glow
                               ? [
                                   BoxShadow(
-                                    color: theme.colorScheme.primary.withOpacity(0.5),
+                  color: theme.colorScheme.primary.withOpacity(dark ? 0.55 : 0.45),
                                     blurRadius: 12,
                                     spreadRadius: 2,
                                   ),
