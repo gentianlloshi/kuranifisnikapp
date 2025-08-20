@@ -145,8 +145,11 @@ class BookmarkItem extends StatelessWidget {
     final surahNumber = parts.isNotEmpty ? parts[0] : '';
     final verseNumber = parts.length > 1 ? parts[1] : '';
     
+    final scheme = theme.colorScheme;
+    final bool dark = scheme.brightness == Brightness.dark;
     return Card(
       margin: EdgeInsets.only(bottom: context.spaceMd),
+      color: scheme.surfaceElevated(1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -161,14 +164,14 @@ class BookmarkItem extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: context.spaceSm, vertical: context.spaceXs),
                     decoration: ShapeDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.10),
+                      color: scheme.primary.withOpacity(dark ? 0.20 : 0.10),
                       shape: const StadiumBorder(),
                     ),
                     child: Text(
                       'Sure $surahNumber, Ajeti $verseNumber',
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
+                        color: scheme.onPrimaryContainer,
                         letterSpacing: 0.3,
                       ),
                     ),
@@ -197,7 +200,9 @@ class BookmarkItem extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(context.spaceSm),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant.withOpacity(0.35),
+                    color: dark
+                        ? Color.alphaBlend(scheme.primary.withOpacity(0.08), scheme.surfaceElevated(2))
+                        : scheme.surfaceVariant.withOpacity(0.55),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -205,7 +210,7 @@ class BookmarkItem extends StatelessWidget {
                       Icon(
                         Icons.note,
                         size: 16,
-                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+                        color: scheme.onSurfaceVariant.withOpacity(0.75),
                       ),
                       SizedBox(width: context.spaceSm),
                       Expanded(

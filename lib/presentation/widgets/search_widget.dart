@@ -378,19 +378,22 @@ class SearchResultItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    final isDark = theme.brightness == Brightness.dark;
+  final scheme = theme.colorScheme;
+  final isDark = scheme.brightness == Brightness.dark;
+  final surface = scheme.surfaceElevated(isDark ? 1 : 0);
+  final baseBlend = isDark
+    ? Color.alphaBlend(scheme.primary.withOpacity(0.06), surface)
+    : Color.alphaBlend(scheme.primary.withOpacity(0.03), surface);
   return Card(
-    color: isDark
-      ? theme.colorScheme.surface.withOpacity(0.85)
-      : Color.alphaBlend(theme.colorScheme.primary.withOpacity(0.03), theme.colorScheme.surface),
-    elevation: isDark ? 0 : 3,
+  color: baseBlend,
+  elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => _navigateToVerse(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(context.spaceLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

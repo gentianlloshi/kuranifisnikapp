@@ -359,7 +359,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
               width: double.infinity,
               padding: EdgeInsets.fromLTRB(context.spaceSm, context.spaceSm, context.spaceSm, context.spaceSm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.surfaceElevated(1),
                 border: Border(
                   bottom: BorderSide(
                     color: Theme.of(context).dividerColor.withOpacity(0.4),
