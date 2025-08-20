@@ -11,4 +11,8 @@ abstract class QuranRepository {
   Future<Map<String, dynamic>> getThematicIndex();
   Future<Map<String, dynamic>> getTransliterations();
   Future<List<Verse>> searchVerses(String query, {String? translationKey});
+  // On-demand enrichment
+  Future<void> ensureSurahTranslation(int surahNumber, {String translationKey = 'sq_ahmeti'});
+  Future<void> ensureSurahTransliteration(int surahNumber);
+  bool isSurahFullyEnriched(int surahNumber);
 }

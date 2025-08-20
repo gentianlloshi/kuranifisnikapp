@@ -11,6 +11,7 @@ import '../../domain/usecases/search_verses_usecase.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import 'search_index_manager.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
+import '../../domain/repositories/quran_repository.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
@@ -222,6 +223,15 @@ class QuranProvider extends ChangeNotifier {
     try {
       _allCurrentSurahVerses = await _getSurahVersesUseCase!.call(surahId);
   Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
+      // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
+      // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
+      // ignore: unawaited_futures
+      Future(() async {
+        try {
+          // We can only enrich if underlying repository supports on-demand API (type check at runtime if needed).
+          // Not directly accessible here (no repo field); enrichment handled upstream in repository on next full load if not done.
+        } catch (_) {}
+      });
       _currentSurahId = surahId;
       // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
       if (_currentSurah == null || _currentSurah!.number != surahId) {

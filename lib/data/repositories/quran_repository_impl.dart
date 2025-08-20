@@ -9,6 +9,9 @@ import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dar
 class QuranRepositoryImpl implements QuranRepository {
   final QuranLocalDataSource _localDataSource;
   final StorageDataSource _storageDataSource;
+  // Track which surahs have translation / transliteration merged (by translation key)
+  final Map<String, Set<int>> _translationMerged = {}; // key -> set of surahNumbers
+  final Set<int> _transliterationMerged = <int>{};
 
   QuranRepositoryImpl(this._localDataSource, this._storageDataSource);
 
@@ -63,10 +66,15 @@ class QuranRepositoryImpl implements QuranRepository {
       }
       
         for (final surah in surahsToUpdate) {
+          bool any = false;
           for (int i = 0; i < surah.verses.length; i++) {
             final verse = surah.verses[i];
             final verseKey = '${verse.surahNumber}:${verse.number}';
             surah.verses[i] = verse.copyWith(textTranslation: () => translationMap[verseKey]);
+            any = true;
+          }
+          if (any) {
+            (_translationMerged[translationKey] ??= <int>{}).add(surah.number);
           }
         }
     } catch (e) {
@@ -89,6 +97,7 @@ class QuranRepositoryImpl implements QuranRepository {
               surah.verses[i] = verse.copyWith(transliteration: transliteration);
             }
           }
+          _transliterationMerged.add(surah.number);
         }
       }
     } catch (e) {
@@ -107,8 +116,8 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<List<Verse>> getSurahVerses(int surahNumber) async {
-    final surah = await getSurah(surahNumber);
-    return surah.verses;
+  final surah = await getSurah(surahNumber);
+  return surah.verses;
   }
 
   @override
@@ -167,5 +176,32 @@ class QuranRepositoryImpl implements QuranRepository {
       final translationMatch = verse.textTranslation?.toLowerCase().contains(queryLower) ?? false;
       return arabicMatch || translationMatch;
     }).toList();
+  }
+
+  // On-demand enrichment implementations
+  @override
+  Future<void> ensureSurahTranslation(int surahNumber, {String translationKey = 'sq_ahmeti'}) async {
+    final already = _translationMerged[translationKey]?.contains(surahNumber) ?? false;
+    if (already) return;
+    final surahs = await getArabicOnly();
+    final target = surahs.firstWhere((s) => s.number == surahNumber, orElse: () => throw Exception('Surah $surahNumber not found'));
+    await _loadAndMergeTranslation(translationKey, [target]);
+    await _storageDataSource.cacheQuranData(surahs); // persist enriched one
+  }
+
+  @override
+  Future<void> ensureSurahTransliteration(int surahNumber) async {
+    if (_transliterationMerged.contains(surahNumber)) return;
+    final surahs = await getArabicOnly();
+    final target = surahs.firstWhere((s) => s.number == surahNumber, orElse: () => throw Exception('Surah $surahNumber not found'));
+    await _loadAndMergeTransliteration([target]);
+    await _storageDataSource.cacheQuranData(surahs);
+  }
+
+  @override
+  bool isSurahFullyEnriched(int surahNumber) {
+    final hasTrans = (_translationMerged['sq_ahmeti']?.contains(surahNumber) ?? false);
+    final hasTranslit = _transliterationMerged.contains(surahNumber);
+    return hasTrans && hasTranslit;
   }
 }
