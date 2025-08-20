@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../../domain/entities/word_by_word.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
-import 'package:provider/provider.dart';
-import '../../../presentation/providers/app_state_provider.dart';
 
 abstract class WordByWordLocalDataSource {
   Future<List<WordByWordVerse>> getWordByWordData(int surahNumber);
@@ -42,7 +40,8 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
     try {
       final String jsonString = await rootBundle.loadString('assets/data/word/$surahNumber.json');
       final verses = await compute(_parseWordByWordJson, jsonString);
-      await _wordByWordBox.put(boxKey, verses.map((v) => v.toJson()).toList());
+  // _wordByWordBox is guaranteed non-null after lazy open above
+  await _wordByWordBox!.put(boxKey, verses.map((v) => v.toJson()).toList());
   // ignore: avoid_print
   Logger.d('loaded asset words surah=$surahNumber count=${verses.length}', tag: 'WBW');
       return verses;
@@ -67,7 +66,8 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
     try {
       final String jsonString = await rootBundle.loadString('assets/data/time/time$surahNumber.json');
       final timestamps = await compute(_parseTimestampJson, jsonString);
-      await _timestampBox.put(boxKey, timestamps.map((t) => t.toJson()).toList());
+  // _timestampBox is guaranteed non-null after lazy open above
+  await _timestampBox!.put(boxKey, timestamps.map((t) => t.toJson()).toList());
   // ignore: avoid_print
   Logger.d('loaded asset ts surah=$surahNumber count=${timestamps.length}', tag: 'WBW');
       return timestamps;
@@ -83,7 +83,8 @@ List<WordByWordVerse> _parseWordByWordJson(String jsonString) {
   final List<WordByWordVerse> verses = [];
   jsonData.forEach((key, value) {
     final verseNum = int.parse(key);
-    final List<dynamic> arr = (value as Map<String, dynamic>)['words'] as List<dynamic>? ?? (value as Map<String,dynamic>).values.firstWhere((v)=>v is List, orElse: ()=>[]) as List<dynamic>;
+  final mapVal = value as Map<String, dynamic>;
+  final List<dynamic> arr = mapVal['words'] as List<dynamic>? ?? mapVal.values.firstWhere((v)=>v is List, orElse: ()=>[]) as List<dynamic>;
     final words = <WordData>[];
     int cursor = 0;
     for (final w in arr) {
