@@ -229,18 +229,20 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(_, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(_, listen: false)),
           update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
         ),
-        ChangeNotifierProxyProvider4<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranProvider>(
+        ChangeNotifierProxyProvider5<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, QuranProvider>(
           create: (_) => QuranProvider(
             getSurahsUseCase: Provider.of<GetSurahsUseCase>(_, listen:false),
             getSurahsArabicOnlyUseCase: Provider.of<GetSurahsArabicOnlyUseCase>(_, listen:false),
             searchVersesUseCase: Provider.of<SearchVersesUseCase>(_, listen:false),
             getSurahVersesUseCase: Provider.of<get_verses.GetSurahVersesUseCase>(_, listen:false),
+            quranRepository: Provider.of<QuranRepositoryImpl>(_, listen:false),
           ),
-          update: (_, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, previous) => QuranProvider(
+          update: (_, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, repo, previous) => QuranProvider(
             getSurahsUseCase: getSurahsUseCase,
             getSurahsArabicOnlyUseCase: getSurahsArabicOnlyUseCase,
             searchVersesUseCase: searchVersesUseCase,
             getSurahVersesUseCase: getSurahVersesUseCase,
+            quranRepository: repo,
           ),
         ),
 

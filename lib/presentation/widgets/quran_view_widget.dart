@@ -401,13 +401,36 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                           alignment: Alignment.centerRight,
                           child: Directionality(
                             textDirection: TextDirection.rtl,
-                            child: Text(
-                              surah.nameArabic,
-                              textAlign: TextAlign.right,
-                              style: Theme.of(context).textTheme.bodyArabic.copyWith(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  surah.nameArabic,
+                                  textAlign: TextAlign.right,
+                                  style: Theme.of(context).textTheme.bodyArabic.copyWith(
+                                        fontSize: 26,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                Builder(
+                                  builder: (ctx) {
+                                    final repo = Provider.of<QuranRepository?>(ctx, listen: false);
+                                    final enriched = repo?.isSurahFullyEnriched(surah.number) ?? true;
+                                    if (enriched) return const SizedBox.shrink();
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 6.0),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text('…', style: Theme.of(context).textTheme.labelSmall),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ),

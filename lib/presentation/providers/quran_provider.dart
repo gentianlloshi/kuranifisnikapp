@@ -18,6 +18,7 @@ class QuranProvider extends ChangeNotifier {
   final GetSurahsArabicOnlyUseCase? _getSurahsArabicOnlyUseCase;
   final SearchVersesUseCase? _searchVersesUseCase;
   final GetSurahVersesUseCase? _getSurahVersesUseCase;
+  final QuranRepository? _quranRepository; // for on-demand enrichment
 
   final SearchIndexManager? _indexManager; // null in simple ctor
   StreamSubscription<SearchIndexProgress>? _indexProgressSub;
@@ -27,10 +28,12 @@ class QuranProvider extends ChangeNotifier {
     required GetSurahsArabicOnlyUseCase getSurahsArabicOnlyUseCase,
     required SearchVersesUseCase searchVersesUseCase,
     required GetSurahVersesUseCase getSurahVersesUseCase,
+    QuranRepository? quranRepository,
   })  : _getSurahsUseCase = getSurahsUseCase,
         _getSurahsArabicOnlyUseCase = getSurahsArabicOnlyUseCase,
         _searchVersesUseCase = searchVersesUseCase,
         _getSurahVersesUseCase = getSurahVersesUseCase,
+        _quranRepository = quranRepository,
         _indexManager = SearchIndexManager(
           getSurahsUseCase: getSurahsUseCase,
           getSurahVersesUseCase: getSurahVersesUseCase,
@@ -50,6 +53,7 @@ class QuranProvider extends ChangeNotifier {
         _getSurahsArabicOnlyUseCase = null,
         _searchVersesUseCase = null,
         _getSurahVersesUseCase = null,
+        _quranRepository = null,
         _indexManager = null;
   
   Future<void> _init() async {
@@ -226,12 +230,20 @@ class QuranProvider extends ChangeNotifier {
       // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
       // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
       // ignore: unawaited_futures
-      Future(() async {
-        try {
-          // We can only enrich if underlying repository supports on-demand API (type check at runtime if needed).
-          // Not directly accessible here (no repo field); enrichment handled upstream in repository on next full load if not done.
-        } catch (_) {}
-      });
+      if (_quranRepository != null) {
+        // Fire-and-forget enrichment: translation then transliteration.
+        Future(() async {
+          try {
+            if (!_quranRepository!.isSurahFullyEnriched(surahId)) {
+              await _quranRepository!.ensureSurahTranslation(surahId);
+              await _quranRepository!.ensureSurahTransliteration(surahId);
+              Logger.d('Surah $surahId enriched on-demand', tag: 'LazySurah');
+            }
+          } catch (e) {
+            Logger.w('Enrichment failed surah=$surahId err=$e', tag: 'LazySurah');
+          }
+        });
+      }
       _currentSurahId = surahId;
       // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
       if (_currentSurah == null || _currentSurah!.number != surahId) {
