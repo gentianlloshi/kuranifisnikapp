@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/notification_provider.dart';
+import '../theme/theme.dart';
 
 class NotificationsWidget extends StatefulWidget {
   const NotificationsWidget({super.key});
@@ -24,14 +25,14 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     return Consumer<NotificationProvider>(
       builder: (context, notificationProvider, child) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(context.spaceLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Notification Settings Card
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(context.spaceLg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -39,7 +40,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                         'Cilësimet e Njoftimeve',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: context.spaceLg),
                       
                       SwitchListTile(
                         title: const Text('Aktivizo njoftime ditore'),
@@ -50,7 +51,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                             : (value) => notificationProvider.toggleNotifications(value),
                       ),
                       
-                      const SizedBox(height: 16),
+                      SizedBox(height: context.spaceLg),
                       
                       Row(
                         children: [
@@ -63,7 +64,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                               label: const Text('Test Njoftimi'),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: context.spaceLg),
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: notificationProvider.isLoading
@@ -77,14 +78,14 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                       ),
                       
                       if (notificationProvider.isLoading)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 16),
-                          child: Center(child: CircularProgressIndicator()),
+                        Padding(
+                          padding: EdgeInsets.only(top: context.spaceLg),
+                          child: const Center(child: CircularProgressIndicator()),
                         ),
                       
                       if (notificationProvider.error != null)
                         Padding(
-                          padding: const EdgeInsets.only(top: 16),
+                          padding: EdgeInsets.only(top: context.spaceLg),
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
@@ -123,13 +124,13 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                 ),
               ),
               
-              const SizedBox(height: 16),
+              SizedBox(height: context.spaceLg),
               
               // Current Prayer Card
               if (notificationProvider.currentPrayer != null)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(context.spaceLg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -139,7 +140,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                               Icons.wb_sunny,
                               color: Theme.of(context).primaryColor,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: context.spaceSm),
                             Text(
                               'Lutja e Ditës',
                               style: Theme.of(context).textTheme.titleMedium,
@@ -151,7 +152,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: context.spaceMd),
                         Text(
                           notificationProvider.currentPrayer!,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -163,13 +164,13 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                   ),
                 ),
               
-              const SizedBox(height: 16),
+              SizedBox(height: context.spaceLg),
               
               // Current Hadith Card
               if (notificationProvider.currentHadith != null)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(context.spaceLg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -179,7 +180,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                               Icons.nights_stay,
                               color: Theme.of(context).primaryColor,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: context.spaceSm),
                             Text(
                               'Hadithi i Ditës',
                               style: Theme.of(context).textTheme.titleMedium,
@@ -191,7 +192,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: context.spaceMd),
                         Text(
                           notificationProvider.currentHadith!,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -203,13 +204,13 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                   ),
                 ),
               
-              const SizedBox(height: 16),
+              SizedBox(height: context.spaceLg),
               
               // Information Card
               Card(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(context.spaceLg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -219,7 +220,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                             Icons.info_outline,
                             color: Theme.of(context).primaryColor,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: context.spaceSm),
                           Text(
                             'Informacion',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -228,7 +229,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: context.spaceMd),
                       const Text(
                         '• Njoftime për lutje dërgohen çdo ditë në orën 04:00\n'
                         '• Njoftime për hadithe dërgohen çdo ditë në orën 20:00\n'

@@ -4,6 +4,7 @@ import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
 import '../../domain/entities/verse.dart';
 import '../theme/theme.dart';
+import 'sheet_header.dart';
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key});
@@ -55,16 +56,11 @@ class _SearchWidgetState extends State<SearchWidget> {
           children: [
             // Search input and filters
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(context.spaceLg),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: Theme.of(context).colorScheme.surfaceElevated(1),
+                borderRadius: BorderRadius.circular(context.radiusCard.x),
+                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4)),
               ),
               child: Column(
                 children: [
@@ -74,6 +70,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     decoration: InputDecoration(
                       hintText: 'Kërko në Kuran...',
                       prefixIcon: const Icon(Icons.search),
+                      contentPadding: EdgeInsets.symmetric(horizontal: context.spaceMd, vertical: context.spaceSm),
                       suffix: Consumer<QuranProvider>(
                         builder: (ctx, qp, _) => qp.isBuildingIndex
                             ? const SizedBox(
@@ -106,7 +103,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     },
                     onSubmitted: (query) => quranProvider.searchVerses(query.trim()),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: context.spaceMd),
                   
                   // Filters row (translation selection + Juz + field toggles)
                   Row(
@@ -132,7 +129,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: context.spaceSm),
                       // Juz selector
                       Expanded(
                         child: DropdownButton<int?>(
@@ -155,11 +152,11 @@ class _SearchWidgetState extends State<SearchWidget> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.spaceSm),
                   // Field toggles
                   Wrap(
-                    spacing: 8,
-                    runSpacing: -4,
+                    spacing: context.spaceSm,
+                    runSpacing: -context.spaceXs,
                     children: [
                       FilterChip(
                         label: const Text('Përkthimi'),
@@ -199,6 +196,15 @@ class _SearchWidgetState extends State<SearchWidget> {
                       ),
                     ],
                   ),
+                  // Future: Advanced filters button triggers bottom sheet
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.tune),
+                      label: const Text('Filtrat'),
+                      onPressed: () => _showFiltersSheet(context),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -208,6 +214,64 @@ class _SearchWidgetState extends State<SearchWidget> {
               child: _buildSearchResults(quranProvider, appState),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showFiltersSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return BottomSheetWrapper(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SheetHeader(
+                title: 'Filtrat e Kërkimit',
+                leadingIcon: Icons.tune,
+                onClose: () => Navigator.of(ctx).maybePop(),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(
+                  spacing: context.spaceSm,
+                  runSpacing: context.spaceXs,
+                  children: [
+                    FilterChip(
+                      label: const Text('Përkthimi'),
+                      selected: _filterTranslation,
+                      onSelected: (sel) {
+                        setState(() => _filterTranslation = sel);
+                        context.read<AppStateProvider>().updateSearchFilters(inTranslation: sel);
+                        context.read<QuranProvider>().setFieldFilters(translation: sel);
+                      },
+                    ),
+                    FilterChip(
+                      label: const Text('Arabisht'),
+                      selected: _filterArabic,
+                      onSelected: (sel) {
+                        setState(() => _filterArabic = sel);
+                        context.read<AppStateProvider>().updateSearchFilters(inArabic: sel);
+                        context.read<QuranProvider>().setFieldFilters(arabic: sel);
+                      },
+                    ),
+                    FilterChip(
+                      label: const Text('Transliterim'),
+                      selected: _filterTransliteration,
+                      onSelected: (sel) {
+                        setState(() => _filterTransliteration = sel);
+                        context.read<AppStateProvider>().updateTransliterationFilter(sel);
+                        context.read<QuranProvider>().setFieldFilters(transliteration: sel);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: context.spaceLg),
+            ],
+          ),
         );
       },
     );

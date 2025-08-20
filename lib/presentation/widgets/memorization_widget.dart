@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/memorization_provider.dart';
 import '../providers/quran_provider.dart';
+import '../theme/theme.dart';
 
 class MemorizationWidget extends StatefulWidget {
   const MemorizationWidget({super.key});
@@ -49,12 +50,12 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(context.spaceLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMemorizationStats(memorizationProvider),
-              const SizedBox(height: 24),
+              SizedBox(height: context.spaceXl + context.spaceSm),
               _buildMemorizationList(memorizationProvider, quranProvider),
             ],
           ),
@@ -68,18 +69,15 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
     
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(context.spaceLg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Statistikat e Memorizimit',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: context.spaceMd),
             Row(
               children: [
                 Expanded(
@@ -87,16 +85,16 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                     'Ajete të memorizuara',
                     '${stats['memorized']}',
                     Icons.bookmark,
-                    Colors.green,
+                    Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: context.spaceMd),
                 Expanded(
                   child: _buildStatCard(
                     'Sure me memorizim',
                     '${stats['total']}',
                     Icons.book,
-                    Colors.blue,
+                    Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               ],
@@ -109,16 +107,16 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(context.spaceMd),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: color.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(context.radiusSmall.x),
+        border: Border.all(color: color.withOpacity(0.25)),
       ),
       child: Column(
         children: [
           Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
+          SizedBox(height: context.spaceSm),
           Text(
             value,
             style: TextStyle(
@@ -129,7 +127,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
           ),
           Text(
             title,
-            style: const TextStyle(fontSize: 12),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ],
@@ -139,22 +137,22 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
 
   Widget _buildMemorizationList(MemorizationProvider memorizationProvider, QuranProvider quranProvider) {
     if (memorizationProvider.memorizationList.isEmpty) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(context.spaceXl),
           child: Center(
             child: Column(
               children: [
-                Icon(Icons.school, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
+                Icon(Icons.school, size: 64, color: Theme.of(context).colorScheme.primary.withOpacity(0.4)),
+                SizedBox(height: context.spaceLg),
                 Text(
                   'Nuk keni ajete të memorizuara',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.75)),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: context.spaceSm),
                 Text(
                   'Shtoni ajete në memorizim duke klikuar ikonën e memorizimit në çdo ajet.',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -180,20 +178,17 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Ajetet e Memorizuara',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: context.spaceMd),
         ...versesBySurah.entries.map((entry) {
           final surahNumber = entry.key;
           final verses = entry.value;
           
           return Card(
-            margin: const EdgeInsets.only(bottom: 8),
+            margin: EdgeInsets.only(bottom: context.spaceSm),
             child: ExpansionTile(
               title: Text('Sure $surahNumber'),
               subtitle: Text('${verses.length} ajete të memorizuara'),
@@ -201,20 +196,20 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                 final parts = verseKey.split(':');
                 final verseNumber = parts.length == 2 ? parts[1] : '';
                 
-                return ListTile(
+        return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Colors.green.withOpacity(0.2),
+          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                     child: Text(
                       verseNumber,
                       style: const TextStyle(
-                        color: Colors.green,
+            color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   title: Text('Ajeti $verseNumber'),
                   trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle, color: Colors.red),
+          icon: Icon(Icons.remove_circle, color: Theme.of(context).colorScheme.error),
                     onPressed: () => _showRemoveConfirmation(context, verseKey, memorizationProvider),
                   ),
                   onTap: () {
