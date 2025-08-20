@@ -120,10 +120,10 @@ class KuraniFisnikApp extends StatelessWidget {
   final AudioService audioService;
   final Box quranBox;
   final Box translationBox;
-  final Box thematicIndexBox;
-  final Box transliterationBox;
-  final Box wordByWordBox;
-  final Box timestampBox;
+  final Box? thematicIndexBox;
+  final Box? transliterationBox;
+  final Box? wordByWordBox;
+  final Box? timestampBox;
 
   const KuraniFisnikApp({
     super.key,
@@ -131,10 +131,10 @@ class KuraniFisnikApp extends StatelessWidget {
     required this.audioService,
     required this.quranBox,
     required this.translationBox,
-    required this.thematicIndexBox,
-    required this.transliterationBox,
-    required this.wordByWordBox,
-    required this.timestampBox,
+  required this.thematicIndexBox,
+  required this.transliterationBox,
+  required this.wordByWordBox,
+  required this.timestampBox,
   });
 
   @override
@@ -150,8 +150,8 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => QuranLocalDataSourceImpl(
             quranBox: quranBox,
             translationBox: translationBox,
-            thematicIndexBox: thematicIndexBox, // null -> deferred
-            transliterationBox: transliterationBox, // null -> deferred
+            thematicIndexBox: thematicIndexBox ?? (Hive.isBoxOpen('thematicIndexBox') ? Hive.box('thematicIndexBox') : null),
+            transliterationBox: transliterationBox ?? (Hive.isBoxOpen('transliterationBox') ? Hive.box('transliterationBox') : null),
           ),
         ),
         Provider<StorageDataSource>(
@@ -162,9 +162,8 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         Provider<WordByWordLocalDataSource>(
           create: (_) => WordByWordLocalDataSourceImpl(
-            // Provide dummy unopened boxes via Hive.box if already open else open lazily inside datasource.
-            wordByWordBox: (wordByWordBox ?? (Hive.isBoxOpen('wordByWordBox') ? Hive.box('wordByWordBox') : Hive.box<dynamic>('wordByWordBox',))) ,
-            timestampBox: (timestampBox ?? (Hive.isBoxOpen('timestampBox') ? Hive.box('timestampBox') : Hive.box<dynamic>('timestampBox',))) ,
+            wordByWordBox: wordByWordBox ?? (Hive.isBoxOpen('wordByWordBox') ? Hive.box('wordByWordBox') : await Hive.openBox('wordByWordBox')),
+            timestampBox: timestampBox ?? (Hive.isBoxOpen('timestampBox') ? Hive.box('timestampBox') : await Hive.openBox('timestampBox')),
           ),
         ),
 

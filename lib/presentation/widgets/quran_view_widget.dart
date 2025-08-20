@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../providers/quran_provider.dart';
+import '../../domain/repositories/quran_repository.dart';
 import '../theme/theme.dart';
 import '../providers/note_provider.dart';
 import '../providers/app_state_provider.dart';
