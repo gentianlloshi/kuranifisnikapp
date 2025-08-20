@@ -718,6 +718,24 @@ class VerseWidget extends StatelessWidget {
     );
   }
 
+  // Local add note helper (mirrors QuranViewWidget implementation) to allow bottom sheet action inside VerseWidget
+  void _openAddNote(BuildContext context, Verse verse) {
+    showDialog(
+      context: context,
+      builder: (ctx) => NoteEditorDialog(
+        verseKey: verse.verseKey,
+        onSave: (note) {
+          final provider = context.read<NoteProvider>();
+          if (note.id.isEmpty) {
+            provider.addNote(note.verseKey, note.content, tags: note.tags);
+          } else {
+            provider.updateNote(note);
+          }
+        },
+      ),
+    );
+  }
+
   void _playVerse(BuildContext context, Verse verse) {
     context.read<AudioProvider>().playVerse(verse);
   }

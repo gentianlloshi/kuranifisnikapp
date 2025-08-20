@@ -7,6 +7,7 @@ import '../providers/note_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/texhvid_provider.dart';
 import '../providers/memorization_provider.dart';
+import '../providers/bookmark_provider.dart';
 
 // Widgets
 import '../widgets/quran_view_widget.dart';
