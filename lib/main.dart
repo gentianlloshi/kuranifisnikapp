@@ -162,8 +162,8 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         Provider<WordByWordLocalDataSource>(
           create: (_) => WordByWordLocalDataSourceImpl(
-            wordByWordBox: wordByWordBox ?? (Hive.isBoxOpen('wordByWordBox') ? Hive.box('wordByWordBox') : await Hive.openBox('wordByWordBox')),
-            timestampBox: timestampBox ?? (Hive.isBoxOpen('timestampBox') ? Hive.box('timestampBox') : await Hive.openBox('timestampBox')),
+            wordByWordBox: wordByWordBox,
+            timestampBox: timestampBox,
           ),
         ),
 

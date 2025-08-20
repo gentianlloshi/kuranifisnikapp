@@ -13,26 +13,26 @@ abstract class WordByWordLocalDataSource {
 }
 
 class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
-  Box<dynamic> _wordByWordBox;
-  Box<dynamic> _timestampBox;
+  Box<dynamic>? _wordByWordBox;
+  Box<dynamic>? _timestampBox;
 
   // Increment this when changing parsing / storage format so cached Hive data is invalidated.
   static const int _cacheVersion = 2;
 
   WordByWordLocalDataSourceImpl({
-    required Box<dynamic> wordByWordBox,
-    required Box<dynamic> timestampBox,
+    Box<dynamic>? wordByWordBox,
+    Box<dynamic>? timestampBox,
   })  : _wordByWordBox = wordByWordBox,
         _timestampBox = timestampBox;
 
   @override
   Future<List<WordByWordVerse>> getWordByWordData(int surahNumber) async {
   final String boxKey = 'word_by_word_surah_${surahNumber}_v$_cacheVersion';
-    if (!_wordByWordBox.isOpen) {
+    if (_wordByWordBox == null || !_wordByWordBox!.isOpen) {
       _wordByWordBox = await Hive.openBox('wordByWordBox');
     }
-    if (_wordByWordBox.containsKey(boxKey)) {
-      final List<dynamic> cachedData = _wordByWordBox.get(boxKey);
+    if (_wordByWordBox!.containsKey(boxKey)) {
+      final List<dynamic> cachedData = _wordByWordBox!.get(boxKey);
   // ignore: avoid_print
   // ignore: use_build_context_synchronously
   Logger.d('cache hit words surah=$surahNumber count=${cachedData.length}', tag: 'WBW');
@@ -54,11 +54,11 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
   @override
   Future<List<TimestampData>> getTimestampData(int surahNumber) async {
   final String boxKey = 'timestamp_surah_${surahNumber}_v$_cacheVersion';
-    if (!_timestampBox.isOpen) {
+    if (_timestampBox == null || !_timestampBox!.isOpen) {
       _timestampBox = await Hive.openBox('timestampBox');
     }
-    if (_timestampBox.containsKey(boxKey)) {
-      final List<dynamic> cachedData = _timestampBox.get(boxKey);
+    if (_timestampBox!.containsKey(boxKey)) {
+      final List<dynamic> cachedData = _timestampBox!.get(boxKey);
   // ignore: avoid_print
   Logger.d('cache hit ts surah=$surahNumber count=${cachedData.length}', tag: 'WBW');
       return cachedData.map((json) => TimestampData.fromJson(json)).toList();
