@@ -50,27 +50,41 @@ import 'package:kurani_fisnik_app/core/services/notification_service.dart';
 import 'package:kurani_fisnik_app/core/services/audio_service.dart';
 import 'presentation/theme/design_tokens.dart';
 import 'presentation/theme/theme.dart';
+import 'presentation/startup/startup_scheduler.dart';
+import 'presentation/startup/performance_monitor.dart';
+import 'core/utils/logger.dart';
+import 'core/utils/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final _startupSw = Stopwatch()..start();
+  Logger.configure();
+  Logger.i('Startup: begin', tag: 'Startup');
 
   // Initialize Hive
   await Hive.initFlutter();
 
-  // Initialize Hive boxes
-  final quranBox = await Hive.openBox("quranBox");
-  final translationBox = await Hive.openBox("translationBox");
-  final thematicIndexBox = await Hive.openBox("thematicIndexBox");
-  final transliterationBox = await Hive.openBox("transliterationBox");
-  final wordByWordBox = await Hive.openBox("wordByWordBox");
-  final timestampBox = await Hive.openBox("timestampBox");
+  Future<Box> _openTimed(String name) async {
+    final sw = Stopwatch()..start();
+    final box = await Hive.openBox(name);
+    Logger.d('Hive box $name opened in ${sw.elapsedMilliseconds}ms', tag: 'HiveInit');
+    return box;
+  }
+  // Critical boxes only (keep cold start minimal).
+  final quranBox = await _openTimed("quranBox");
+  final translationBox = await _openTimed("translationBox");
+  Logger.i('Startup: critical boxes opened elapsed=${_startupSw.elapsedMilliseconds}ms', tag: 'Startup');
 
-  // Initialize services
+  // Non-critical boxes: open lazily (first use) or scheduled later.
+  // We pass null to providers; they will open on demand.
+  final Box? thematicIndexBox = null;
+  final Box? transliterationBox = null;
+  final Box? wordByWordBox = null;
+  final Box? timestampBox = null;
+
+  // Defer heavy service initialization until after first frame to avoid jank.
   final notificationService = NotificationService();
   final audioService = AudioService();
-
-  await notificationService.initialize();
-  await audioService.initialize();
 
   runApp(KuraniFisnikApp(
     notificationService: notificationService,
@@ -82,6 +96,18 @@ void main() async {
     wordByWordBox: wordByWordBox,
     timestampBox: timestampBox,
   ));
+  // Schedule service init post-frame (slight delay) to yield UI.
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final sw = Stopwatch()..start();
+    await notificationService.initialize();
+    await audioService.initialize();
+    Logger.i('Deferred services initialized in ${sw.elapsedMilliseconds}ms', tag: 'Startup');
+  });
+  // First frame callback instrumentation
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    Logger.i('Startup: first frame in ${_startupSw.elapsedMilliseconds}ms', tag: 'Startup');
+  });
 }
 
 class KuraniFisnikApp extends StatelessWidget {
@@ -119,8 +145,8 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => QuranLocalDataSourceImpl(
             quranBox: quranBox,
             translationBox: translationBox,
-            thematicIndexBox: thematicIndexBox,
-            transliterationBox: transliterationBox,
+            thematicIndexBox: thematicIndexBox, // null -> deferred
+            transliterationBox: transliterationBox, // null -> deferred
           ),
         ),
         Provider<StorageDataSource>(
@@ -131,8 +157,9 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         Provider<WordByWordLocalDataSource>(
           create: (_) => WordByWordLocalDataSourceImpl(
-            wordByWordBox: wordByWordBox,
-            timestampBox: timestampBox,
+            // Provide dummy unopened boxes via Hive.box if already open else open lazily inside datasource.
+            wordByWordBox: (wordByWordBox ?? (Hive.isBoxOpen('wordByWordBox') ? Hive.box('wordByWordBox') : Hive.box<dynamic>('wordByWordBox',))) ,
+            timestampBox: (timestampBox ?? (Hive.isBoxOpen('timestampBox') ? Hive.box('timestampBox') : Hive.box<dynamic>('timestampBox',))) ,
           ),
         ),
 
@@ -251,6 +278,10 @@ class KuraniFisnikApp extends StatelessWidget {
       ],
       child: Consumer<AppStateProvider>(
         builder: (context, appState, child) {
+          // Update logger suppression dynamically (cheap)
+          Logger.configure(
+            suppressTags: appState.verboseWbwLogging ? {} : {'WBW'},
+          );
           return LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
@@ -266,23 +297,33 @@ class KuraniFisnikApp extends StatelessWidget {
                 scaleFactor = 1.2;
               }
               final theme = _resolveTheme(appState.currentTheme, scaleFactor: scaleFactor);
-              return MaterialApp(
+              // Register post-frame startup scheduler once.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+                // Use a dedicated element context to start scheduler (once).
+                if (context.findAncestorWidgetOfExactType<_StartupSchedulerMarker>() == null) {
+                  // Insert marker by rebuilding below (simpler: just start scheduler directly)
+                  final scheduler = StartupScheduler(context);
+                  scheduler.start();
+          PerformanceMonitor.ensureStarted();
+                }
+              });
+              return _StartupSchedulerMarker(child: MaterialApp(
                 title: 'Kurani Fisnik',
                 debugShowCheckedModeBanner: false,
                 theme: theme,
-                home: const EnhancedHomePage(),
+                home: EnhancedHomePage(),
                 routes: {
-                  '/home': (context) => const EnhancedHomePage(),
-                  '/quran': (context) => const HomePage(),
-                  '/search': (context) => const HomePage(),
-                  '/bookmarks': (context) => const HomePage(),
-                  '/notes': (context) => const HomePage(),
-                  '/memorization': (context) => const HomePage(),
-                  '/texhvid': (context) => const HomePage(),
-                  '/thematic': (context) => const HomePage(),
-                  '/settings': (context) => const HomePage(),
+                  '/home': (context) => EnhancedHomePage(),
+                  '/quran': (context) => HomePage(),
+                  '/search': (context) => HomePage(),
+                  '/bookmarks': (context) => HomePage(),
+                  '/notes': (context) => HomePage(),
+                  '/memorization': (context) => HomePage(),
+                  '/texhvid': (context) => HomePage(),
+                  '/thematic': (context) => HomePage(),
+                  '/settings': (context) => HomePage(),
                 },
-              );
+              ));
             },
           );
         },
@@ -302,4 +343,11 @@ class KuraniFisnikApp extends StatelessWidget {
         return buildAppTheme(buildDeepBlueScheme(Brightness.light), scaleFactor: scaleFactor);
     }
   }
+}
+
+// Marker widget to ensure we only start scheduler once; carries child tree.
+class _StartupSchedulerMarker extends InheritedWidget {
+  const _StartupSchedulerMarker({required super.child});
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
 }

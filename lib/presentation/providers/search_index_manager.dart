@@ -21,6 +21,7 @@ class SearchIndexManager {
   // Incremental state
   int _nextSurahToIndex = 1; // 1..114
   bool _incrementalMode = false; // true if using incremental background build
+  int _buildSessionId = 0; // monotonically increasing build session
   // Progress stream
   final StreamController<SearchIndexProgress> _progressController = StreamController<SearchIndexProgress>.broadcast();
   Stream<SearchIndexProgress> get progressStream => _progressController.stream;
@@ -98,51 +99,68 @@ class SearchIndexManager {
   /// Starts an incremental background build if not yet complete. Returns immediately.
   /// Search calls can begin early; they will return partial results based on indexed surahs.
   void ensureIncrementalBuild({void Function(double progress)? onProgress}) {
-    if (_invertedIndex != null && !_incrementalMode) return; // already fully built
+    // Already fully built & not in incremental mode
+    if (_invertedIndex != null && !_incrementalMode) return;
+    // If a build already in progress, just return (callers can await existing completer if exposed later)
     if (_building) return;
     _incrementalMode = true;
     _building = true;
+    _buildSessionId++;
+    final int session = _buildSessionId;
     _buildCompleter = Completer<void>();
     _invertedIndex ??= <String, List<String>>{}; // start empty index
     () async {
       try {
-        // Attempt load (may be partial)
+        // Attempt fast snapshot load once at session start.
         if (_nextSurahToIndex == 1 && await _tryLoadSnapshot()) {
-          // If snapshot marks complete we can stop.
+          if (session != _buildSessionId) return; // stale session guard
           if (_nextSurahToIndex > 114) {
-            _building = false;
+            // Snapshot already complete; mark done (let finally handle completion flags)
             _incrementalMode = false;
-            _buildCompleter?.complete();
             _emitProgress(1.0);
             if (onProgress != null) onProgress(1.0);
             return;
           }
         }
         for (int s = _nextSurahToIndex; s <= 114; s++) {
+          if (session != _buildSessionId) return; // aborted by newer session
           _nextSurahToIndex = s; // record current for snapshot resume
+          final batchSw = Stopwatch()..start();
           try {
             final verses = await getSurahVersesUseCase.call(s);
             for (final v in verses) {
-              final key = '${v.surahNumber}:${v.number}';
-              _verseCache[key] = v;
+              _verseCache['${v.surahNumber}:${v.number}'] = v;
               _indexVerse(v);
             }
-          } catch (_) {/* skip */}
+          } catch (_) {/* skip surah errors silently */}
           final p = s / 114.0;
-          _emitProgress(p);
-          if (onProgress != null) onProgress(p);
+            _emitProgress(p);
+            if (onProgress != null) onProgress(p);
+          final elapsed = batchSw.elapsedMilliseconds;
+          if (elapsed > 30) {
+            // Avoid importing logger here to keep manager lean; using debugPrint.
+            // ignore: avoid_print
+            print('[IndexBatch] surah=$s ms=$elapsed progress=${(p*100).toStringAsFixed(1)}');
+          }
           if (s % 5 == 0 || s == 114) {
             unawaited(_saveSnapshot(partial: s != 114));
           }
-          // Yield to UI
-          await _applyAdaptiveThrottle();
+          await _applyAdaptiveThrottle(); // cooperative yield
         }
-        _incrementalMode = false;
-        _emitProgress(1.0);
-        if (onProgress != null) onProgress(1.0);
+        if (session == _buildSessionId) {
+          _incrementalMode = false;
+          _emitProgress(1.0);
+          if (onProgress != null) onProgress(1.0);
+        }
+      } catch (_) {
+        // On error keep state allowing retry later; do not mark complete progress
       } finally {
-        _building = false;
-        _buildCompleter?.complete();
+        if (session == _buildSessionId) {
+          _building = false;
+          if (!(_buildCompleter?.isCompleted ?? true)) {
+            _buildCompleter!.complete();
+          }
+        }
       }
     }();
   }

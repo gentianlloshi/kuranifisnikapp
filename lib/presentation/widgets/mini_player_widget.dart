@@ -16,9 +16,10 @@ class MiniPlayerWidget extends StatelessWidget {
         if (verse == null) return const SizedBox.shrink();
         if (audio.isPlayerExpanded) return const SizedBox.shrink();
         final quran = context.read<QuranProvider>();
-        final surah = quran.surahs.firstWhere(
+        if (quran.surahs.isEmpty) return const SizedBox.shrink();
+        final surahMeta = quran.surahs.firstWhere(
           (s) => s.number == verse.surahNumber,
-          orElse: () => quran.currentSurah ?? (quran.surahs.isNotEmpty ? quran.surahs.first : null)!,
+          orElse: () => quran.surahs.first,
         );
         final progress = audio.progress.clamp(0.0, 1.0);
         final scheme = Theme.of(context).colorScheme;
@@ -47,7 +48,7 @@ class MiniPlayerWidget extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${surah.nameTranslation.isNotEmpty ? surah.nameTranslation : 'Sure'} • Ajeti ${verse.number}',
+                            '${surahMeta.nameTranslation.isNotEmpty ? surahMeta.nameTranslation : 'Sure'} • Ajeti ${verse.number}',
                             style: Theme.of(context).textTheme.bodyMedium,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

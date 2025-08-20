@@ -175,6 +175,21 @@ class SettingsDrawer extends StatelessWidget {
                 ],
               ),
 
+              // Search / Indexing options
+              ExpansionTile(
+                leading: const Icon(Icons.search),
+                title: const Text('Kërkimi & Indeksimi'),
+                children: [
+                  SwitchListTile(
+                    title: const Text('Indeksim në sfond'),
+                    subtitle: const Text('Ndërton indeksin e kërkimit gradualisht pa pritur përdoruesin.'),
+                    value: settings.backgroundIndexingEnabled,
+                    onChanged: (v) => appState.updateBackgroundIndexing(v),
+                  ),
+                  // Mund të shtohen këtu më vonë filtra të përhershëm ose opsione verbose.
+                ],
+              ),
+
               // Audio settings
               ExpansionTile(
                 leading: const Icon(Icons.audiotrack),

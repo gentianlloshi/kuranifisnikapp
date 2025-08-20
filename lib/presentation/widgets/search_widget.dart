@@ -17,6 +17,7 @@ class SearchWidget extends StatefulWidget {
 
 class _SearchWidgetState extends State<SearchWidget> {
   final TextEditingController _searchController = TextEditingController();
+  bool _indexKickIssued = false; // prevent repeated ensureIndexBuild bursts per non-empty session
   String _selectedTranslation = 'sq_ahmeti';
   int? _selectedJuz; // 1..30
   bool _filterTranslation = true;
@@ -113,8 +114,19 @@ class _SearchWidgetState extends State<SearchWidget> {
                     ),
                     onChanged: (query) {
                       setState(() {}); // Update clear icon state
+                      if (query.isNotEmpty) {
+                        final app = context.read<AppStateProvider>();
+                        if (app.backgroundIndexingEnabled && !_indexKickIssued) {
+                          final qp = context.read<QuranProvider>();
+                          if (qp.indexProgress < 1.0) {
+                            _indexKickIssued = true;
+                            qp.ensureIndexBuild();
+                          }
+                        }
+                      }
                       if (query.trim().isEmpty) {
                         quranProvider.clearSearch();
+                        _indexKickIssued = false; // reset when cleared
                       } else {
                         quranProvider.searchVersesDebounced(query.trim());
                       }

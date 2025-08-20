@@ -834,59 +834,96 @@ class _WordByWordLine extends StatelessWidget {
           final appState = context.read<AppStateProvider>();
           final glow = appState.wordHighlightGlow && !appState.reduceMotion;
           final baseStyle = theme.textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.6);
-          final List<InlineSpan> spans = [];
-          final animDuration = appState.reduceMotion ? Duration.zero : const Duration(milliseconds: 220);
-          // Render words once in logical (original) order; RichText with RTL will place first word on the right.
-          for (int i = 0; i < words.length; i++) {
-            final w = words[i];
-            final highlighted = activeIndex == i;
-      final bool dark = theme.colorScheme.brightness == Brightness.dark;
-      final highlightBg = dark
-        ? theme.colorScheme.primary.withOpacity(0.28)
-        : theme.colorScheme.primary.withOpacity(0.15);
-            spans.add(
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: AnimatedContainer(
-                  duration: animDuration,
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  decoration: highlighted
-                      ? BoxDecoration(
-              color: highlightBg,
-                          borderRadius: BorderRadius.circular(6),
-                          boxShadow: glow
-                              ? [
-                                  BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(dark ? 0.55 : 0.45),
-                                    blurRadius: 12,
-                                    spreadRadius: 2,
-                                  ),
-                                ]
-                              : null,
-                        )
+          final useSpan = appState.useSpanWordRendering;
+          if (useSpan) {
+            final bool dark = theme.colorScheme.brightness == Brightness.dark;
+            final Color baseHighlightBg = dark
+                ? theme.colorScheme.primary.withOpacity(0.28)
+                : theme.colorScheme.primary.withOpacity(0.15);
+            // Build pure TextSpan list with minimal objects; reuse recognizers if desired (omitted now for simplicity).
+            final List<TextSpan> wordSpans = List.generate(words.length, (i) {
+              final w = words[i];
+              final highlighted = activeIndex == i;
+              TextStyle style = baseStyle;
+              if (highlighted) {
+                style = style.copyWith(
+                  fontWeight: FontWeight.w600,
+                  background: Paint()..color = baseHighlightBg,
+                  shadows: glow
+                      ? [
+                          Shadow(
+                            color: theme.colorScheme.primary.withOpacity(dark ? 0.55 : 0.45),
+                            blurRadius: 12,
+                          )
+                        ]
                       : null,
-                  child: Text(
-                    w.arabic,
-                    style: highlighted
-                        ? baseStyle.copyWith(fontWeight: FontWeight.w600, color: baseStyle.color)
-                        : baseStyle,
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ),
-            );
-            if (i != words.length - 1) {
-              spans.add(const WidgetSpan(child: SizedBox(width: 4)));
-            }
-          }
-          return Directionality(
+                );
+              }
+              return TextSpan(text: w.arabic + (i == words.length - 1 ? '' : ' '), style: style);
+            });
+            return Directionality(
               textDirection: TextDirection.rtl,
               child: RichText(
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
-                text: TextSpan(children: spans),
-              ));
+                text: TextSpan(children: wordSpans),
+              ),
+            );
+          } else {
+            // Fallback to legacy widget-per-word path (kept for safety / feature flag rollback)
+            final List<InlineSpan> spans = [];
+            final animDuration = appState.reduceMotion ? Duration.zero : const Duration(milliseconds: 220);
+            for (int i = 0; i < words.length; i++) {
+              final w = words[i];
+              final highlighted = activeIndex == i;
+              final bool dark = theme.colorScheme.brightness == Brightness.dark;
+              final highlightBg = dark
+                  ? theme.colorScheme.primary.withOpacity(0.28)
+                  : theme.colorScheme.primary.withOpacity(0.15);
+              spans.add(
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: AnimatedContainer(
+                    duration: animDuration,
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: highlighted
+                        ? BoxDecoration(
+                            color: highlightBg,
+                            borderRadius: BorderRadius.circular(6),
+                            boxShadow: glow
+                                ? [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary.withOpacity(dark ? 0.55 : 0.45),
+                                      blurRadius: 12,
+                                      spreadRadius: 2,
+                                    ),
+                                  ]
+                                : null,
+                          )
+                        : null,
+                    child: Text(
+                      w.arabic,
+                      style: highlighted
+                          ? baseStyle.copyWith(fontWeight: FontWeight.w600, color: baseStyle.color)
+                          : baseStyle,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ),
+              );
+              if (i != words.length - 1) {
+                spans.add(const WidgetSpan(child: SizedBox(width: 4)));
+              }
+            }
+            return Directionality(
+                textDirection: TextDirection.rtl,
+                child: RichText(
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  text: TextSpan(children: spans),
+                ));
+          }
         });
   }
 }

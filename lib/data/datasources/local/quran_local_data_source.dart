@@ -14,18 +14,17 @@ abstract class QuranLocalDataSource {
 }
 
 class QuranLocalDataSourceImpl implements QuranLocalDataSource {
-  final Box<dynamic> _quranBox;
-  final Box<dynamic> _translationBox;
-  final Box<dynamic> _thematicIndexBox;
-  final Box<dynamic> _transliterationBox;
+  final Box<dynamic> _quranBox; // critical – opened at startup
+  Box<dynamic> _translationBox; // opened early (active translation cache)
+  Box<dynamic>? _thematicIndexBox; // deferred
+  Box<dynamic>? _transliterationBox; // deferred
 
   QuranLocalDataSourceImpl({
     required Box<dynamic> quranBox,
     required Box<dynamic> translationBox,
-    required Box<dynamic> thematicIndexBox,
-    required Box<dynamic> transliterationBox,
-  })
-      : _quranBox = quranBox,
+    Box<dynamic>? thematicIndexBox,
+    Box<dynamic>? transliterationBox,
+  })  : _quranBox = quranBox,
         _translationBox = translationBox,
         _thematicIndexBox = thematicIndexBox,
         _transliterationBox = transliterationBox;
@@ -62,8 +61,12 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
   @override
   Future<Map<String, dynamic>> getTranslationData(String translationKey) async {
+    // Translation box always available (opened early) but keep defensive lazy-open in case of future deferral.
+    if (!_translationBox.isOpen) {
+      _translationBox = await Hive.openBox('translationBox');
+    }
     if (_translationBox.containsKey(translationKey)) {
-      return _translationBox.get(translationKey);
+      return _translationBox.get(translationKey) as Map<String, dynamic>;
     }
 
     try {
@@ -82,14 +85,20 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
   @override
   Future<Map<String, dynamic>> getThematicIndex() async {
-    if (_thematicIndexBox.containsKey('thematic_index')) {
-      return _thematicIndexBox.get('thematic_index');
+    final box = _thematicIndexBox ??= await Hive.openBox('thematicIndexBox');
+    if (box.containsKey('thematic_index')) {
+      return box.get('thematic_index') as Map<String, dynamic>;
     }
 
     try {
       final String jsonString = await rootBundle.loadString('assets/data/temat.json');
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-      await _thematicIndexBox.put('thematic_index', jsonData);
+      // Offload heavy decode to isolate (mirrors translation/transliteration parsing).
+      final sw = Stopwatch()..start();
+      final Map<String, dynamic> jsonData = await compute(_decodeJsonMap, jsonString);
+      if (sw.elapsedMilliseconds > 40) {
+        debugPrint('Decoded thematic index in ${sw.elapsedMilliseconds}ms (isolate)');
+      }
+      await box.put('thematic_index', jsonData);
       return jsonData;
     } catch (e) {
       throw Exception('Failed to load thematic index: $e');
@@ -98,8 +107,9 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
   @override
   Future<Map<String, dynamic>> getTransliterations() async {
-    if (_transliterationBox.containsKey('transliterations')) {
-      return _transliterationBox.get('transliterations');
+    final box = _transliterationBox ??= await Hive.openBox('transliterationBox');
+    if (box.containsKey('transliterations')) {
+      return box.get('transliterations') as Map<String, dynamic>;
     }
 
     try {
@@ -109,7 +119,7 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
       if (sw.elapsedMilliseconds > 50) {
         debugPrint('Decoded transliterations in ${sw.elapsedMilliseconds}ms (isolate)');
       }
-      await _transliterationBox.put('transliterations', jsonData);
+  await box.put('transliterations', jsonData);
       return jsonData;
     } catch (e) {
       throw Exception('Failed to load transliterations: $e');

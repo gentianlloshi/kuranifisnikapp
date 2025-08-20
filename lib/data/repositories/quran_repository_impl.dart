@@ -14,39 +14,40 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<List<Surah>> getAllSurahs() async {
-  final sw = Stopwatch()..start();
-    // Try to get from cache first
+    // Full load (Arabic + default translation + transliteration) – invoked by legacy callers.
+    final sw = Stopwatch()..start();
+    List<Surah> surahs = await _storageDataSource.getCachedQuranData();
+    if (surahs.isEmpty) {
+      Logger.i('Loading Quran data (full) from assets...', tag: 'QuranRepo');
+      surahs = await _localDataSource.getQuranData();
+    }
+    // Merge if missing (lazy augmentation) – keep cost deferred until requested.
+    final needsTranslation = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTranslation == null);
+    final needsTransliteration = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTransliteration == null);
+    if (needsTranslation) {
+      await _loadAndMergeTranslation('sq_ahmeti', surahs);
+    }
+    if (needsTransliteration) {
+      await _loadAndMergeTransliteration(surahs);
+    }
+    await _storageDataSource.cacheQuranData(surahs);
+    Logger.d('getAllSurahs full ${sw.elapsedMilliseconds}ms', tag: 'Perf');
+    return surahs;
+  }
+
+  // Lightweight meta fetch (no translation / transliteration merging). Used by lazy UI list / indexing pre-stage.
+  Future<List<Surah>> getArabicOnly() async {
+    final sw = Stopwatch()..start();
     List<Surah> surahs = await _storageDataSource.getCachedQuranData();
     if (surahs.isNotEmpty) {
-  Logger.i('Loaded Quran data from cache', tag: 'QuranRepo');
-      // Kontrollo nëse mungojnë përkthimet / transliterimet (kjo ndodhi para se të shtonim logjikën e bashkimit)
-      final needsTranslation = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTranslation == null);
-      final needsTransliteration = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTransliteration == null);
-      if (needsTranslation || needsTransliteration) {
-  Logger.i('Merging missing translation / transliteration into cached data...', tag: 'QuranRepo');
-        if (needsTranslation) {
-          await _loadAndMergeTranslation('sq_ahmeti', surahs);
-        }
-        if (needsTransliteration) {
-          await _loadAndMergeTransliteration(surahs);
-        }
-        // Ruaj përsëri cache me të dhënat e pasuruara
-        await _storageDataSource.cacheQuranData(surahs);
-      }
-  Logger.d('getAllSurahs (cache) ${sw.elapsedMilliseconds}ms', tag: 'Perf');
-  return surahs;
+      Logger.d('getArabicOnly cache ${sw.elapsedMilliseconds}ms', tag: 'Perf');
+      return surahs;
     }
-
-    // If not in cache, load from local assets and then cache it
-  Logger.i('Loading Quran data from assets and caching...', tag: 'QuranRepo');
-  surahs = await _localDataSource.getQuranData();
+    Logger.i('Loading Arabic-only Quran data (no merges) from assets...', tag: 'QuranRepo');
+    surahs = await _localDataSource.getQuranData();
+    // Intentionally NOT merging translation/transliteration here.
     await _storageDataSource.cacheQuranData(surahs);
-    
-  // Load default translation and transliteration and merge with Arabic text
-  await _loadAndMergeTranslation('sq_ahmeti', surahs);
-  await _loadAndMergeTransliteration(surahs);
-  await _storageDataSource.cacheQuranData(surahs); // cache pas bashkimit
-    Logger.d('getAllSurahs (fresh) ${sw.elapsedMilliseconds}ms', tag: 'Perf');
+    Logger.d('getArabicOnly fresh ${sw.elapsedMilliseconds}ms', tag: 'Perf');
     return surahs;
   }
 

@@ -4,7 +4,7 @@ import '../theme/theme.dart';
 import '../providers/quran_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/word_by_word_provider.dart';
-import '../../domain/entities/surah.dart';
+import '../../domain/entities/surah_meta.dart';
 import '../providers/surah_selection_provider.dart';
 
 class SurahListWidget extends StatelessWidget {
@@ -49,7 +49,7 @@ class SurahListWidget extends StatelessWidget {
           );
         }
 
-        final surahs = quranProvider.surahs;
+  final surahs = quranProvider.surahs; // List<SurahMeta>
         if (surahs.isEmpty) {
           return const Center(
             child: Text('Nuk u gjetën sure'),
@@ -134,25 +134,29 @@ class SurahListWidget extends StatelessWidget {
     );
   }
 
-  void _onSurahTap(BuildContext context, Surah surah) {
+  void _onSurahTap(BuildContext context, SurahMeta surah) {
     _loadSurah(context, surah);
   }
 
-  void _loadSurah(BuildContext context, Surah surah) {
-    context.read<QuranProvider>().loadSurah(surah.number);
+  void _loadSurah(BuildContext context, SurahMeta surah) {
+    context.read<QuranProvider>().ensureSurahLoaded(surah.number);
   }
 
-  void _playSingleSurah(BuildContext context, Surah surah) {
+  Future<void> _playSingleSurah(BuildContext context, SurahMeta surah) async {
+    final provider = context.read<QuranProvider>();
+    await provider.ensureSurahLoaded(surah.number);
     final wbw = context.read<WordByWordProvider>();
-    context.read<AudioProvider>().playSurah(surah.verses, wbwProvider: wbw);
+    final verses = provider.fullCurrentSurahVerses; // full surah verses
+    if (verses.isEmpty) return;
+    context.read<AudioProvider>().playSurah(verses, wbwProvider: wbw);
   }
 
-  void _playSelected(BuildContext context, List<int> selected) {
+  Future<void> _playSelected(BuildContext context, List<int> selected) async {
     if (selected.isEmpty) return;
     final q = context.read<QuranProvider>();
     final first = selected.first;
     final surah = q.surahs.firstWhere((s) => s.number == first, orElse: () => q.surahs.first);
-    _playSingleSurah(context, surah);
+    await _playSingleSurah(context, surah);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Luajti ${selected.length} sure (multi playlist TODO)')));
     context.read<SurahSelectionProvider>().clear();
   }
@@ -163,7 +167,7 @@ class SurahListWidget extends StatelessWidget {
 }
 
 class SurahListItem extends StatelessWidget {
-  final Surah surah;
+  final SurahMeta surah;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onPlay;

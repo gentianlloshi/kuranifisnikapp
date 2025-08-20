@@ -2,12 +2,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/surah.dart';
+import '../../domain/entities/surah_meta.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
 import 'package:kurani_fisnik_app/core/utils/result.dart';
 import '../../domain/usecases/search_verses_usecase.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import 'search_index_manager.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
@@ -35,10 +37,6 @@ class QuranProvider extends ChangeNotifier {
       _indexProgress = evt.progress;
       notifyListeners();
     });
-    // Defer starting the incremental build slightly to allow first frame to render.
-    Future.delayed(const Duration(milliseconds: 400), () {
-      _indexManager?.ensureIncrementalBuild();
-    });
   }
 
   // Simplified constructor for basic functionality without use cases
@@ -49,12 +47,16 @@ class QuranProvider extends ChangeNotifier {
         _indexManager = null;
   
   Future<void> _init() async {
-    if (_surahs.isEmpty && _getSurahsUseCase != null) {
-      await loadSurahs();
+  if (_surahsMeta.isEmpty && _getSurahsUseCase != null) {
+      // Defer to next event loop so first frame can paint.
+      Future.delayed(const Duration(milliseconds: 10), () async {
+        await loadSurahs();
+      });
     }
   }
 
-  List<Surah> _surahs = [];
+  // Metadata-only list (no verse bodies) to reduce startup memory.
+  List<SurahMeta> _surahsMeta = [];
   List<Verse> _allCurrentSurahVerses = []; // full list for current surah
   List<Verse> _pagedVerses = []; // verses exposed with pagination
   List<Verse> _searchResults = [];
@@ -74,9 +76,11 @@ class QuranProvider extends ChangeNotifier {
   double get indexProgress => _indexProgress;
   Timer? _debounceTimer;
   static const _debounceDuration = Duration(milliseconds: 350);
+  bool _userTriggeredIndexOnce = false; // suppress duplicate logs
 
-  List<Surah> get surahs => _surahs;
+  List<SurahMeta> get surahs => _surahsMeta;
   List<Verse> get currentVerses => _pagedVerses;
+  List<Verse> get fullCurrentSurahVerses => _allCurrentSurahVerses;
   List<Verse> get searchResults => _searchResults;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -89,7 +93,21 @@ class QuranProvider extends ChangeNotifier {
     try {
       final res = await _getSurahsUseCase!.call();
       if (res is Success<List<Surah>>) {
-        _surahs = res.value;
+        final sw = Stopwatch()..start();
+        final all = res.value.map((s) => SurahMeta.fromSurah(s)).toList();
+        // Incremental publication in small batches for earlier first paint.
+        _surahsMeta = [];
+        final batchSize = 25;
+        for (int i = 0; i < all.length; i += batchSize) {
+          final end = (i + batchSize) > all.length ? all.length : (i + batchSize);
+          _surahsMeta.addAll(all.sublist(i, end));
+          notifyListeners();
+          // Yield control between batches (except last) to allow frames.
+          if (end < all.length) {
+            await Future.delayed(Duration(milliseconds: 1));
+          }
+        }
+        Logger.d('Loaded surah metadata count=${_surahsMeta.length} in ${sw.elapsedMilliseconds}ms', tag: 'StartupPhase');
         _error = null;
       } else {
         _error = res.error?.message ?? 'Unknown error';
@@ -130,8 +148,13 @@ class QuranProvider extends ChangeNotifier {
       return;
     }
     if (_indexManager != null) {
-      // Kick incremental build if not started yet (returns immediately)
+      // Kick incremental build if not started yet (returns immediately) – user-driven start.
+      final wasIdle = !_indexManager!.isBuilding && indexProgress <= 0.0;
       _indexManager!.ensureIncrementalBuild();
+      if (wasIdle && !_userTriggeredIndexOnce) {
+        _userTriggeredIndexOnce = true;
+        Logger.i('Index build triggered by user search input', tag: 'SearchIndex');
+      }
       // Perform search over currently indexed subset (results will improve as index grows)
       _searchResults = _indexManager!.search(
         query,
@@ -169,10 +192,11 @@ class QuranProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       _allCurrentSurahVerses = await _getSurahVersesUseCase!.call(surahId);
+  Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
       _currentSurahId = surahId;
-      _currentSurah = _surahs.firstWhere(
-        (s) => s.id == surahId || s.number == surahId,
-        orElse: () => Surah(
+      // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
+      if (_currentSurah == null || _currentSurah!.number != surahId) {
+        _currentSurah = Surah(
           id: surahId,
           number: surahId,
           nameArabic: '',
@@ -180,9 +204,9 @@ class QuranProvider extends ChangeNotifier {
           nameTransliteration: '',
           revelation: '',
           versesCount: _allCurrentSurahVerses.length,
-          verses: _allCurrentSurahVerses,
-        ),
-      );
+          verses: const [],
+        );
+      }
       _loadedVerseCount = 0;
       _pagedVerses = [];
       _appendMoreVerses();
@@ -200,25 +224,32 @@ class QuranProvider extends ChangeNotifier {
   }
 
   Future<void> navigateToSurah(int surahNumber) async {
-    if (_surahs.isEmpty) {
+    if (_surahsMeta.isEmpty) {
       await loadSurahs();
     }
-    final surah = _surahs.firstWhere(
-      (s) => s.number == surahNumber || s.id == surahNumber,
-      orElse: () => Surah(
-        id: surahNumber,
+    final meta = _surahsMeta.firstWhere(
+      (s) => s.number == surahNumber,
+      orElse: () => SurahMeta(
         number: surahNumber,
         nameArabic: '—',
-        nameTranslation: '—',
         nameTransliteration: '—',
-        revelation: '',
+        nameTranslation: '—',
         versesCount: 0,
-        verses: const [],
+        revelation: '',
       ),
     );
-    _currentSurah = surah;
+    _currentSurah = Surah(
+      id: surahNumber,
+      number: meta.number,
+      nameArabic: meta.nameArabic,
+      nameTransliteration: meta.nameTransliteration,
+      nameTranslation: meta.nameTranslation,
+      versesCount: meta.versesCount,
+      revelation: meta.revelation,
+      verses: const [],
+    );
     notifyListeners();
-    await loadSurahVerses(surah.number);
+    await loadSurahVerses(meta.number);
     // After verses loaded, trigger listeners to allow scroll
     if (_pendingScrollVerseNumber != null) {
       // keep value; UI will consume and then clear via consumePendingScrollTarget
@@ -287,6 +318,19 @@ class QuranProvider extends ChangeNotifier {
   // UI can call this when user actively scrolls verses; forwards to index manager for adaptive throttling
   void notifyUserScrollActivity() {
     _indexManager?.notifyUserScrollEvent();
+  }
+
+  // Public explicit trigger for incremental index build (phase scheduler & early user actions)
+  void ensureIndexBuild() {
+  _indexManager?.ensureIncrementalBuild();
+  }
+
+  // Ensure verses for a surah are loaded; if different surah from current, switches context.
+  Future<void> ensureSurahLoaded(int surahNumber) async {
+    if (_currentSurahId == surahNumber && _allCurrentSurahVerses.isNotEmpty) return;
+    final sw = Stopwatch()..start();
+    await navigateToSurah(surahNumber); // this calls loadSurahVerses internally
+    Logger.d('ensureSurahLoaded surah=$surahNumber took=${sw.elapsedMilliseconds}ms', tag: 'LazySurah');
   }
 
 }

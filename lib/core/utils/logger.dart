@@ -8,10 +8,12 @@ class Logger {
   Logger._();
   static LogLevel _minLevel = LogLevel.debug;
   static bool _useDeveloperLog = true;
+  static Set<String>? _suppressTags; // if set, skip logs for these tags
 
-  static void configure({LogLevel? minLevel, bool? useDeveloperLog}) {
+  static void configure({LogLevel? minLevel, bool? useDeveloperLog, Set<String>? suppressTags}) {
     if (minLevel != null) _minLevel = minLevel;
     if (useDeveloperLog != null) _useDeveloperLog = useDeveloperLog;
+    if (suppressTags != null) _suppressTags = suppressTags.isEmpty ? null : suppressTags;
   }
 
   static void d(String message, {String tag = 'APP'}) {
@@ -29,6 +31,7 @@ class Logger {
 
   static void _log(LogLevel level, String tag, String line) {
     if (level.index < _minLevel.index) return;
+    if (_suppressTags != null && _suppressTags!.contains(tag)) return;
     final ts = DateTime.now().toIso8601String();
     final levelStr = level.name.toUpperCase().padRight(5);
     final msg = '[$ts][$levelStr][$tag] $line';

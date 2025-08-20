@@ -32,6 +32,12 @@ class AppSettings {
   final bool adaptiveAutoScroll;
   // Visual enhancement: glow effect on active word highlight
   final bool wordHighlightGlow;
+  // Feature flag: new RichText/TextSpan based WBW rendering (vs legacy per-word widgets)
+  final bool useSpanWordRendering;
+  // Feature flag: allow background incremental search indexing (can disable to isolate jank)
+  final bool backgroundIndexingEnabled;
+  // Diagnostic flag: enable verbose word-by-word loading logs
+  final bool verboseWbwLogging;
 
   const AppSettings({
     this.theme = 'light',
@@ -59,6 +65,9 @@ class AppSettings {
   this.reduceMotion = false,
   this.adaptiveAutoScroll = true,
   this.wordHighlightGlow = true,
+  this.useSpanWordRendering = true,
+  this.backgroundIndexingEnabled = true,
+  this.verboseWbwLogging = false,
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -88,6 +97,9 @@ class AppSettings {
   reduceMotion: json['reduceMotion'] ?? false,
   adaptiveAutoScroll: json['adaptiveAutoScroll'] ?? true,
   wordHighlightGlow: json['wordHighlightGlow'] ?? true,
+  useSpanWordRendering: json['useSpanWordRendering'] ?? true,
+  backgroundIndexingEnabled: json['backgroundIndexingEnabled'] ?? true,
+  verboseWbwLogging: json['verboseWbwLogging'] ?? false,
     );
   }
 
@@ -118,6 +130,9 @@ class AppSettings {
   'reduceMotion': reduceMotion,
   'adaptiveAutoScroll': adaptiveAutoScroll,
   'wordHighlightGlow': wordHighlightGlow,
+  'useSpanWordRendering': useSpanWordRendering,
+  'backgroundIndexingEnabled': backgroundIndexingEnabled,
+  'verboseWbwLogging': verboseWbwLogging,
     };
   }
 
@@ -147,6 +162,9 @@ class AppSettings {
   bool? reduceMotion,
   bool? adaptiveAutoScroll,
   bool? wordHighlightGlow,
+  bool? useSpanWordRendering,
+  bool? backgroundIndexingEnabled,
+  bool? verboseWbwLogging,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -174,6 +192,9 @@ class AppSettings {
   reduceMotion: reduceMotion ?? this.reduceMotion,
   adaptiveAutoScroll: adaptiveAutoScroll ?? this.adaptiveAutoScroll,
   wordHighlightGlow: wordHighlightGlow ?? this.wordHighlightGlow,
+  useSpanWordRendering: useSpanWordRendering ?? this.useSpanWordRendering,
+  backgroundIndexingEnabled: backgroundIndexingEnabled ?? this.backgroundIndexingEnabled,
+  verboseWbwLogging: verboseWbwLogging ?? this.verboseWbwLogging,
     );
   }
 

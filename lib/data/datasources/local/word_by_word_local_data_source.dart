@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../../domain/entities/word_by_word.dart';
+import 'package:kurani_fisnik_app/core/utils/logger.dart';
+import 'package:provider/provider.dart';
+import '../../../presentation/providers/app_state_provider.dart';
 
 abstract class WordByWordLocalDataSource {
   Future<List<WordByWordVerse>> getWordByWordData(int surahNumber);
@@ -10,8 +13,8 @@ abstract class WordByWordLocalDataSource {
 }
 
 class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
-  final Box<dynamic> _wordByWordBox;
-  final Box<dynamic> _timestampBox;
+  Box<dynamic> _wordByWordBox;
+  Box<dynamic> _timestampBox;
 
   // Increment this when changing parsing / storage format so cached Hive data is invalidated.
   static const int _cacheVersion = 2;
@@ -25,10 +28,14 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
   @override
   Future<List<WordByWordVerse>> getWordByWordData(int surahNumber) async {
   final String boxKey = 'word_by_word_surah_${surahNumber}_v$_cacheVersion';
+    if (!_wordByWordBox.isOpen) {
+      _wordByWordBox = await Hive.openBox('wordByWordBox');
+    }
     if (_wordByWordBox.containsKey(boxKey)) {
       final List<dynamic> cachedData = _wordByWordBox.get(boxKey);
   // ignore: avoid_print
-  print('[WordByWordLocal] cache hit words surah=$surahNumber count=${cachedData.length}');
+  // ignore: use_build_context_synchronously
+  Logger.d('cache hit words surah=$surahNumber count=${cachedData.length}', tag: 'WBW');
       return cachedData.map((json) => WordByWordVerse.fromJson(json)).toList();
     }
 
@@ -37,7 +44,7 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
       final verses = await compute(_parseWordByWordJson, jsonString);
       await _wordByWordBox.put(boxKey, verses.map((v) => v.toJson()).toList());
   // ignore: avoid_print
-  print('[WordByWordLocal] loaded asset words surah=$surahNumber count=${verses.length}');
+  Logger.d('loaded asset words surah=$surahNumber count=${verses.length}', tag: 'WBW');
       return verses;
     } catch (e) {
       throw Exception('Failed to load word by word data for surah $surahNumber: $e');
@@ -47,10 +54,13 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
   @override
   Future<List<TimestampData>> getTimestampData(int surahNumber) async {
   final String boxKey = 'timestamp_surah_${surahNumber}_v$_cacheVersion';
+    if (!_timestampBox.isOpen) {
+      _timestampBox = await Hive.openBox('timestampBox');
+    }
     if (_timestampBox.containsKey(boxKey)) {
       final List<dynamic> cachedData = _timestampBox.get(boxKey);
   // ignore: avoid_print
-  print('[WordByWordLocal] cache hit ts surah=$surahNumber count=${cachedData.length}');
+  Logger.d('cache hit ts surah=$surahNumber count=${cachedData.length}', tag: 'WBW');
       return cachedData.map((json) => TimestampData.fromJson(json)).toList();
     }
 
@@ -59,7 +69,7 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
       final timestamps = await compute(_parseTimestampJson, jsonString);
       await _timestampBox.put(boxKey, timestamps.map((t) => t.toJson()).toList());
   // ignore: avoid_print
-  print('[WordByWordLocal] loaded asset ts surah=$surahNumber count=${timestamps.length}');
+  Logger.d('loaded asset ts surah=$surahNumber count=${timestamps.length}', tag: 'WBW');
       return timestamps;
     } catch (e) {
       throw Exception('Failed to load timestamp data for surah $surahNumber: $e');
@@ -146,9 +156,9 @@ List<TimestampData> _parseTimestampJson(String jsonString) {
           if (words.isNotEmpty) {
             final expected = maxNextWord;
             if (words.length != expected) {
-              print('[WordByWordLocal] expand warn verse=$ayah words=${words.length} expected=$expected');
+              Logger.w('expand warn verse=$ayah words=${words.length} expected=$expected', tag: 'WBW');
             } else {
-              print('[WordByWordLocal] expanded verse=$ayah words=${words.length}');
+              Logger.d('expanded verse=$ayah words=${words.length}', tag: 'WBW');
             }
           }
           out.add(TimestampData.fromJson({'verse': ayah, 'words': words}));

@@ -42,6 +42,9 @@ class AppStateProvider extends ChangeNotifier {
   bool get reduceMotion => _settings.reduceMotion;
   bool get adaptiveAutoScroll => _settings.adaptiveAutoScroll;
   bool get wordHighlightGlow => _settings.wordHighlightGlow;
+  bool get useSpanWordRendering => _settings.useSpanWordRendering;
+  bool get backgroundIndexingEnabled => _settings.backgroundIndexingEnabled;
+  bool get verboseWbwLogging => _settings.verboseWbwLogging;
 
   Future<void> _loadSettings() async {
     if (_getSettingsUseCase == null) return; // Skip loading if no use case
@@ -123,6 +126,21 @@ class AppStateProvider extends ChangeNotifier {
 
   Future<void> updateWordHighlightGlow(bool enabled) async {
     final newSettings = _settings.copyWith(wordHighlightGlow: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateUseSpanWordRendering(bool enabled) async {
+    final newSettings = _settings.copyWith(useSpanWordRendering: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateBackgroundIndexing(bool enabled) async {
+    final newSettings = _settings.copyWith(backgroundIndexingEnabled: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateVerboseWbwLogging(bool enabled) async {
+    final newSettings = _settings.copyWith(verboseWbwLogging: enabled);
     await _updateSettings(newSettings);
   }
 

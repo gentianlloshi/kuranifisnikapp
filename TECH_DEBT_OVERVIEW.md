@@ -2,7 +2,7 @@
 
 This document captures intentional shortcuts and their implications, plus remediation plan (Sprint oriented) for the Kurani Fisnik Flutter App.
 
-_Last updated: 2025-08-12 (post search refactor phase 1, auto-scroll refinement)_
+_Last updated: 2025-08-20 (post incremental index + WBW RTL fix pass)_
 
 ## 1. Removed Providers (Bookmark / Memorization) – Placeholder UI
 - Shortcut: Removed provider usages; left FAB actions with SnackBars.
@@ -74,12 +74,16 @@ _Last updated: 2025-08-12 (post search refactor phase 1, auto-scroll refinement)
 - Risk: Drift of code quality.
 - Remediation: Script to count & categorize warnings per commit.
 
-## 15. Heavy JSON Parsing on Main Isolate (Startup Frame Skips)
-- Status: PARTIALLY MITIGATED
-- Shortcut: Large translation / transliteration JSON decode + merge executed synchronously during initial UI build (initial state).
-- Current: Core large JSON parsing moved to isolates; frame skips reduced but still present during search index build surah collection.
-- Risk: Residual skipped frames (40–230) during initial index activities; battery/cpu spikes.
-- Remediation (Next): Combine verse collection + index build fully off-main; throttle progress notifications; instrumentation of frame timings.
+## 15. Heavy Startup Work Still Clustered (Residual Frame Skips / ANR Risk)
+- Status: PARTIALLY MITIGATED / REGRESSED (post new features)
+- Improvement So Far: Major JSON (translations, transliterations, WBW, thematic index) offloaded to isolates.
+- Current Problem: Surah full object materialization + provider inits + early incremental index start + Hive box opens overlap in first 1–1.5s → large frame bursts (>1000 skipped frames in traces on low-end devices).
+- Risk: Perceived freeze; potential OS ANR dialog on very low spec devices; battery spike.
+- Remediation (Next):
+	1. Phased StartupScheduler (Frame 1 shell → +200ms surah metadata only → +700ms index resume/build → +1200ms translation prewarm).
+	2. Lazy verse loading (metadata list first; hydrate verses on demand).
+	3. Stagger Hive openings (microtask gaps) & instrument each phase.
+	4. Dynamic batch pacing for index using frame timing callbacks.
 
 ## 16. Missing Auto-Scroll for Currently Playing Verse (Critical UX Gap)
 - Status: ADDRESSED (PHASE 1) / REFINEMENTS PENDING
@@ -102,15 +106,17 @@ _Last updated: 2025-08-12 (post search refactor phase 1, auto-scroll refinement)
 - Risk: Minor duration estimation drift; negligible UX impact.
 - Remediation: (Optional) Offline integrity validation + ignore at runtime.
 
-## 20. Search Index Persistence Missing
-- Shortcut: Index rebuilt every launch; no disk snapshot.
-- Risk: Repeated cold cost; battery & startup jank on slower devices.
-- Remediation: Serialize index + metadata (version hash) to app documents; load fast path.
+## 20. Search Index Persistence
+- Status: IMPLEMENTED (Snapshot v2: terms map + postings + progress pointer)
+- Remaining Debt: No compaction/size guard; legacy snapshot versions not purged; checksum/version mismatch detection minimal.
+- Risk: Silent bloat over time; rebuild on subtle schema mismatch.
+- Remediation (Next): Add size threshold, legacy file cleanup, strong hash on source asset manifest.
 
-## 21. Search Index Partial Off-Main Collection
-- Shortcut: Verse collection loop (1..114) still sequential on main before isolate build (pre-refactor plan). Phase 1 introduced manager & debounce but not consolidated build.
-- Risk: Frame skips during collection; user perceives sluggishness.
-- Remediation: Single compute for collection+build; stream/estimate progress; avoid main isolate awaits.
+## 21. Search Index Incremental Build CPU Scheduling
+- Status: PARTIAL (incremental build + progress stream + adaptive throttle implemented)
+- Shortcut: Adaptive throttle uses coarse sleep; frame budget awareness absent; indexing may coincide with other heavy tasks.
+- Risk: Jank during simultaneous scroll + build; wasted potential idle frame exploitation.
+- Remediation: Frame-time aware pacing (SchedulerBinding timings); pause during sustained fast scroll; merge small batches when idle budget high.
 
 ## 22. Insufficient Performance Instrumentation
 - Shortcut: Limited coarse Stopwatch logs only for JSON parsing.
@@ -149,11 +155,96 @@ _Last updated: 2025-08-12 (post search refactor phase 1, auto-scroll refinement)
 - Risk: Potential low readability for users with contrast sensitivity.
 - Remediation: Add contrast check utility & optional outline focus ring; provide user setting to switch highlight style (underline only / background).
 
----
+## 29. Word-by-Word Rendering Architecture (WidgetSpan Per Word)
+- Status: NEW / HIGH PRIORITY
+- Issue: `WidgetSpan` + container per word increases render objects & broke Arabic ordering edge cases; impacts shaping & layout cost.
+- Remediation: Single `RichText` with `TextSpan` children + per-word recognizers; highlight via style (non-layout) change.
+
+## 30. Highlight State Artifact Accumulation
+- Status: NEW
+- Issue: Prior layering risked stale highlight widgets remaining.
+- Remediation: Centralize active word index; assert exactly one highlight style applied; diff-only rebuild.
+
+## 31. Lazy Surah Metadata Mode Missing
+- Status: NEW / HIGH PRIORITY
+- Issue: All verse objects instantiated at startup.
+- Remediation: Introduce lightweight `SurahMeta` list (id, arabicName, translationName, versesCount); hydrate verses lazily.
+
+## 32. Startup Task Orchestration Absent
+- Status: NEW / HIGH PRIORITY
+- Issue: No scheduler; tasks fire concurrently causing contention.
+- Remediation: Implement `StartupScheduler` phases + cancellation + metrics.
+
+## 33. Frame Timing & Instrumentation Gap
+- Status: NEW / HIGH PRIORITY
+- Issue: No automated capture of frame durations, first paint, index batch timing.
+- Remediation: Add debug-only `PerformanceMonitor` (TTFP, >32ms frames, max contiguous skips, batch duration histogram).
+
+## 34. Verse Paging Aggressiveness
+- Status: NEW
+- Issue: Static page size may exceed frame budget on large fonts / slower devices.
+- Remediation: Adaptive page size targeting <12ms build time.
+
+## 35. Audio & WBW Concurrency Policy
+- Status: NEW
+- Issue: Heavy background isolate tasks contend with real-time audio UI updates.
+- Remediation: Cooperative token / priority escalation (audio over indexing) + yield hooks.
+
+## 36. Translation Prewarm Strategy
+- Status: NEW
+- Issue: Potential to decode multiple translations up front.
+- Remediation: Prewarm only active; lazy others; track usage for idle prefetch.
+
+## 37. Memory Footprint Awareness
+- Status: NEW
+- Issue: No tracking of verse object counts or cache size.
+- Remediation: Counters + debug panel + future LRU if threshold exceeded.
+
+## 38. Gesture Recognizer Allocation Per Word
+- Status: NEW
+- Issue: One recognizer per word may be heavy for long verses.
+- Remediation: Recognizer pool or manual hit-test mapping on pointer up.
+
+## 39. Adaptive Highlight Frequency
+- Status: NEW
+- Issue: Rebuild for every rapid word transition even < frame budget.
+- Remediation: Coalesce rapid transitions; skip intermediate frames.
+
+## 40. Legacy Documentation Drift
+- Status: NEW
+- Issue: WordByWordImpl doc out-of-sync with planned TextSpan architecture.
+- Remediation: Update doc + add ADR after migration.
+
+---flutter run --debug
 ## Risk Levels
-High: 1,7,8,13,15,20,21
-Medium: 3,9,11,12,14,16,22,24
-Low: 2,4,5,6,10,17,18,19,23,25,26
+High: 1,7,8,13,15,20,21,29,31,32,33
+Medium: 3,9,11,12,14,16,22,24,34,35,37,39,40
+Low: 2,4,5,6,10,17,18,19,23,25,26,28,30,36,38
+
+Note: 20 (Persistence) mostly complete; residual items kept High until compaction & checksum added.
+
+### Newly Added High Priority (Aug 20)
+1. (29) WBW TextSpan rendering migration
+2. (31) Surah metadata lazy loading
+3. (32) Startup scheduler
+4. (33) Frame timing instrumentation
+5. (21) Dynamic index pacing refinement
+
+### Proposed Sprint Focus (Next)
+Area | Tasks
+-----|------
+Startup Smoothness | 15,31,32,21 (pacing),34
+WBW Reliability & Performance | 29,30,38,39
+Search Efficiency | 20 (remaining),21
+Instrumentation | 22,28 (metrics),33
+Memory | 37 (counters),31 (lazy load)
+
+Definition of Done (Sprint):
+- TTFP < 700ms (mid-tier, warm start profile).
+- No frame >120ms in first 2s (excluding first paint) during profile run.
+- WBW migration: zero RTL ordering defects & highlight rebuild <1 per frame.
+- Index resume: batches <8ms main isolate time average.
+- Surah open (cached) median build <40ms across sample.
 
 ---
 ## Appendix A: Help Page Feature Coverage Audit (2025-08-12)
