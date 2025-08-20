@@ -17,6 +17,9 @@ class BookmarkProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  // Fast synchronous lookup used by list item widgets (avoids awaiting future each rebuild)
+  bool isBookmarkedSync(String verseKey) => _bookmarks.any((b) => b.verseKey == verseKey);
+
   Future<void> loadBookmarks() async {
     _setLoading(true);
     try {

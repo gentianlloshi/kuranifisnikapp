@@ -302,10 +302,21 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
   void _addCurrentVerseToBookmarks() {
     final quranProvider = context.read<QuranProvider>();
     if (quranProvider.currentSurah != null) {
-      // TODO integrate real bookmark logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('U shtua në favoritet (placeholder)')),
-      );
+      final verses = quranProvider.currentVerses;
+      if (verses.isNotEmpty) {
+        final currentVerse = verses.first; // Improvement: track currently viewed/selected verse
+        final key = '${currentVerse.surahNumber}:${currentVerse.number}';
+        final bookmarkProvider = context.read<BookmarkProvider>();
+        bookmarkProvider.toggleBookmark(key);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(bookmarkProvider.isBookmarkedSync(key)
+                ? 'Ajeti u shtua në favoritë'
+                : 'Ajeti u hoq nga favoritët'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 

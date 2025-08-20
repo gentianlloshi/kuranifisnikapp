@@ -402,10 +402,25 @@ class SearchResultItem extends StatelessWidget {
                 children: [
                   _RefChip('${verse.surahNumber}:${verse.number}'),
                   const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.bookmark_border),
-                    onPressed: () {
-                      // TODO: Implement bookmark functionality
+                  Consumer<BookmarkProvider>(
+                    builder: (context, bookmarkProvider, _) {
+                      final key = '${verse.surahNumber}:${verse.number}';
+                      final isMarked = bookmarkProvider.isBookmarkedSync(key);
+                      return IconButton(
+                        icon: Icon(isMarked ? Icons.bookmark : Icons.bookmark_border),
+                        color: isMarked ? theme.colorScheme.primary : theme.iconTheme.color,
+                        tooltip: isMarked ? 'Hiq nga favoritët' : 'Shto në favoritë',
+                        onPressed: () async {
+                          await bookmarkProvider.toggleBookmark(key);
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(isMarked ? 'U hoq nga favoritët' : 'U shtua në favoritë'),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                 ],

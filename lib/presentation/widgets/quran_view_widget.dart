@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../providers/quran_provider.dart';
 import '../theme/theme.dart';
-import '../theme/theme.dart';
+import '../providers/note_provider.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/audio_provider.dart';
@@ -16,6 +16,8 @@ import '../widgets/surah_list_widget.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart';
 import 'sheet_header.dart';
+import 'package:flutter/services.dart';
+import '../widgets/note_editor_dialog.dart';
 
 class QuranViewWidget extends StatefulWidget {
   const QuranViewWidget({super.key});
@@ -70,6 +72,23 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                 offset: const Offset(0, 3),
               ),
             ],
+    );
+  }
+
+  void _openAddNote(BuildContext context, Verse verse) {
+    showDialog(
+      context: context,
+      builder: (ctx) => NoteEditorDialog(
+        verseKey: verse.verseKey,
+        onSave: (note) {
+          final provider = context.read<NoteProvider>();
+          if (note.id.isEmpty) {
+            provider.addNote(note.verseKey, note.content, tags: note.tags);
+          } else {
+            provider.updateNote(note);
+          }
+        },
+      ),
     );
   }
 
@@ -714,9 +733,11 @@ class VerseWidget extends StatelessWidget {
   }
 
   void _shareVerse(BuildContext context, Verse verse) {
-    // TODO: Implement share functionality
+    final text = '${verse.textArabic}\n\n${verse.textTranslation ?? ''}\n\n(${verse.surahNumber}:${verse.number})';
+    // Placeholder: integrate share_plus later. For now copy to clipboard & notify.
+    Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funksioni i ndarjes do të implementohet së shpejti')),
+      const SnackBar(content: Text('Teksti u kopjua – ndarja e avancuar së shpejti')),
     );
   }
 
@@ -749,7 +770,9 @@ class VerseWidget extends StatelessWidget {
               title: const Text('Kopjo'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement copy functionality
+                final t = '${verse.textArabic}\n${verse.textTranslation ?? ''}\n(${verse.surahNumber}:${verse.number})';
+                Clipboard.setData(ClipboardData(text: t));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ajeti u kopjua')));
               },
             ),
             ListTile(
@@ -757,7 +780,7 @@ class VerseWidget extends StatelessWidget {
               title: const Text('Shto shënim'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement add note functionality
+                _openAddNote(context, verse);
               },
             ),
             ListTile(
@@ -765,7 +788,8 @@ class VerseWidget extends StatelessWidget {
               title: const Text('Shto në memorim'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement add to memorization functionality
+                context.read<MemorizationProvider>().toggleVerseMemorization(verse.verseKey);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('U përditësua statusi i memorizimit')));
               },
             ),
           ],
