@@ -217,8 +217,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                     final vn = int.tryParse(verseNumber);
                     if (sn != null && vn != null) {
                       quranProvider.openSurahAtVerse(sn, vn);
-                      // switch to Quran tab by popping until home uses tab index? Simpler: show snackbar
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('U hap Sure $sn, Ajeti $vn')));
+                      context.read<AppStateProvider>().enqueueSnack('U hap Sure $sn, Ajeti $vn');
                     }
                   },
                 );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
+import 'package:provider/provider.dart';
 import '../providers/reading_progress_provider.dart';
 import '../theme/theme.dart';
 import '../providers/quran_provider.dart';
@@ -86,14 +88,18 @@ class SurahListWidget extends StatelessWidget {
                               child: _ContinueCard(
                                 surah: meta,
                                 verse: rp.verse,
-                                onTap: () => context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse),
+                                onTap: () async {
+                                  context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse);
+                                  if (context.mounted) {
+                                    context.read<AppStateProvider>().enqueueSnack('Vazhduat te ${meta.nameTranslation} • Ajeti ${rp.verse}');
+                                  }
+                                },
                               ),
                             );
                           },
                         );
                       }
                       final surah = surahs[index - 1];
-                      final surah = surahs[index];
                       final selected = selection.isSelected(surah.number);
                       return SurahListItem(
                         surah: surah,
@@ -179,12 +185,12 @@ class SurahListWidget extends StatelessWidget {
     final first = selected.first;
     final surah = q.surahs.firstWhere((s) => s.number == first, orElse: () => q.surahs.first);
     await _playSingleSurah(context, surah);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Luajti ${selected.length} sure (multi playlist TODO)')));
+  context.read<AppStateProvider>().enqueueSnack('Luajti ${selected.length} sure (multi playlist TODO)');
     context.read<SurahSelectionProvider>().clear();
   }
 
   void _downloadSelected(BuildContext context, List<int> selected) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Shkarkimi i ${selected.length} sureve (skeleton)')));
+  context.read<AppStateProvider>().enqueueSnack('Shkarkimi i ${selected.length} sureve (skeleton)');
   }
 }
 

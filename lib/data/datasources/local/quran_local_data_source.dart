@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 
@@ -86,6 +87,10 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
   @override
   Future<Map<String, dynamic>> getThematicIndex() async {
     final box = _thematicIndexBox ??= await Hive.openBox('thematicIndexBox');
+    if (!box.containsKey('thematic_index')) {
+      // First time access triggers an actual asset decode (instrument lazy open)
+      PerfMetrics.instance.incLazyBoxOpen();
+    }
     if (box.containsKey('thematic_index')) {
       return box.get('thematic_index') as Map<String, dynamic>;
     }
@@ -108,6 +113,10 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
   @override
   Future<Map<String, dynamic>> getTransliterations() async {
     final box = _transliterationBox ??= await Hive.openBox('transliterationBox');
+    if (!box.containsKey('transliterations')) {
+  PerfMetrics.instance.incTransliterationCacheHit();
+      PerfMetrics.instance.incLazyBoxOpen();
+    }
     if (box.containsKey('transliterations')) {
       return box.get('transliterations') as Map<String, dynamic>;
     }

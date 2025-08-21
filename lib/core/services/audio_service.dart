@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart'; // Import WordByWord entities
+import '../metrics/perf_metrics.dart';
 
 enum AudioState {
   stopped,
@@ -34,6 +35,7 @@ class AudioService {
   List<Verse> _currentPlaylist = [];
   int _currentIndex = 0; // mirrors player.currentIndex; kept for legacy callers
   bool _isRepeatMode = false;
+  bool _singleVerseLoop = false; // single verse loop (non-playlist)
   bool _isAutoPlayNext = true; // with ConcatenatingAudioSource this is always true unless disabled
   List<WordTimestamp> _currentWordTimestamps = []; // Store current word timestamps
   Map<int, List<WordTimestamp>> _allSurahTimestamps = {}; // verseNumber -> timestamps for playlist mode
@@ -65,8 +67,10 @@ class AudioService {
   AudioState get currentState => _currentState;
   Verse? get currentVerse => _currentVerse;
   bool get isRepeatMode => _isRepeatMode;
+  bool get isSingleVerseLoop => _singleVerseLoop;
   bool get isAutoPlayNext => _isAutoPlayNext;
   AudioPlayer get player => _audioPlayer; // Expose player for external access if needed
+  int get currentPlaylistLength => _currentPlaylist.length; // 0 or >0 if playlist mode
 
   Future<void> initialize() async {
     try {
@@ -145,6 +149,7 @@ class AudioService {
   Future<void> playVerse(Verse verse, {List<WordTimestamp>? wordTimestamps}) async {
     try {
       _setState(AudioState.loading);
+  _singleVerseLoop = false; // reset per new verse
       _currentVerse = verse;
       _currentVerseController.add(verse);
       _currentWordTimestamps = wordTimestamps ?? [];
@@ -166,6 +171,7 @@ class AudioService {
       }
       // Fallback to streaming if prefetch disabled or failed
       final isLocal = playPath != null;
+  if (isLocal) { PerfMetrics.instance.incAudioCacheHit(); }
 
       bool success = false;
       for (int attempt = 0; attempt < _maxRetries && !success; attempt++) {
@@ -210,6 +216,7 @@ class AudioService {
         path = await _ensureLocalFile(url);
       }
       final effective = path != null ? Uri.file(path) : Uri.parse(url);
+  if (path != null) { PerfMetrics.instance.incAudioCacheHit(); }
       children.add(AudioSource.uri(effective));
     }
     final source = ConcatenatingAudioSource(children: children);
@@ -267,6 +274,7 @@ class AudioService {
       _currentWordTimestamps = []; // Clear timestamps on stop
   _allSurahTimestamps = {};
       _currentWordIndexController.add(null); // Clear word index on stop
+  _singleVerseLoop = false;
       _setState(AudioState.stopped);
     } catch (e) {
       _log('Error stopping audio: $e');
@@ -297,6 +305,12 @@ class AudioService {
   void toggleRepeatMode() {
     _isRepeatMode = !_isRepeatMode;
     _audioPlayer.setLoopMode(_isRepeatMode ? LoopMode.all : LoopMode.off);
+  }
+
+  Future<void> setSingleVerseLoop(bool enable) async {
+    _singleVerseLoop = enable;
+    if (_playlistSource != null) return; // only for single verse mode
+    await _audioPlayer.setLoopMode(enable ? LoopMode.one : LoopMode.off);
   }
 
   void toggleAutoPlayNext() {

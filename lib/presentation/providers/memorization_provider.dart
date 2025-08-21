@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:hive/hive.dart';
 import '../../data/datasources/local/hive_boxes.dart';
 import '../../domain/entities/memorization_verse.dart';
@@ -309,7 +310,6 @@ class MemorizationProvider extends ChangeNotifier {
     }
   }
 
-  bool isVerseMemorized(String verseKey) => _verses.containsKey(verseKey);
   bool isVerseMemorizedSync(String verseKey) => isVerseMemorized(verseKey);
 
   // Legacy widget compatibility (stats & list) --------------------------------

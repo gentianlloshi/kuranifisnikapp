@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../providers/bookmark_provider.dart';
@@ -509,13 +510,12 @@ class _SearchResultItemState extends State<SearchResultItem> {
                         tooltip: isMarked ? 'Hiq nga favoritët' : 'Shto në favoritë',
                         onPressed: () async {
                           await bookmarkProvider.toggleBookmark(key);
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           final locale = Localizations.localeOf(context);
                           final strings = Strings(Strings.resolve(locale));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(isMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added')),
+                          context.read<AppStateProvider>().enqueueSnack(
+                            isMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added'),
                             duration: const Duration(seconds: 2),
-                          ));
+                          );
                         },
                       );
                     },
@@ -611,7 +611,7 @@ class _SearchResultItemState extends State<SearchResultItem> {
       return TextSpan(
         text: text,
         style: theme.textTheme.bodyLarge?.copyWith(
-          fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+          fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
           height: 1.4,
         ),
       );
@@ -630,7 +630,7 @@ class _SearchResultItemState extends State<SearchResultItem> {
         spans.add(TextSpan(
           text: text.substring(start, index),
           style: theme.textTheme.bodyLarge?.copyWith(
-            fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+            fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
             height: 1.4,
           ),
         ));
@@ -658,7 +658,7 @@ class _SearchResultItemState extends State<SearchResultItem> {
           child: Text(
             matchText,
             style: theme.textTheme.bodyLarge?.copyWith(
-              fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+              fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
               height: 1.25,
               fontWeight: FontWeight.w700,
               color: highlightColor,
@@ -676,7 +676,7 @@ class _SearchResultItemState extends State<SearchResultItem> {
       spans.add(TextSpan(
         text: text.substring(start),
         style: theme.textTheme.bodyLarge?.copyWith(
-          fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+          fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
           height: 1.4,
         ),
       ));

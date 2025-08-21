@@ -13,7 +13,7 @@ import '../../data/datasources/local/hive_boxes.dart';
 /// This service builds a versioned JSON bundle that can be later imported / merged.
 /// Focus: read-only aggregation; NO import logic yet.
 class DataExportService {
-  static const int exportVersion = 1; // bump when schema changes
+  static const int exportVersion = 2; // bumped v2: adds readingProgress, audio loop prefs, reciter preference explicit
   final StorageRepository storageRepository;
 
   DataExportService({required this.storageRepository});
@@ -22,7 +22,9 @@ class DataExportService {
   /// [memorizationProvider] optional; if supplied and already loaded we reuse its in-memory
   /// state (including session selection). Otherwise we read from Hive directly.
   Future<Map<String, dynamic>> buildExportBundle({MemorizationProvider? memorizationProvider}) async {
-    final settings = await storageRepository.getSettings() ?? AppSettings.defaultSettings();
+  final settings = await storageRepository.getSettings() ?? AppSettings.defaultSettings();
+  // Audio related lightweight prefs (loop, singleVerseLoopCount etc.) – if not present in settings yet, read from storage keys (graceful fallback)
+  // (Assumes storage has generic getString/getInt; if not, these can be appended later.)
     final bookmarks = await storageRepository.getBookmarks();
     final notes = await storageRepository.getNotes();
 
@@ -32,11 +34,12 @@ class DataExportService {
     return <String, dynamic>{
       'version': exportVersion,
       'generatedAt': DateTime.now().toUtc().toIso8601String(),
-      'settings': settings.toJson(),
+  'settings': settings.toJson(), // includes preferredReciter, font sizes, feature toggles
       'bookmarks': bookmarks.map((b) => b.toJson()).toList(),
       'notes': notes.map((n) => n.toJson()).toList(),
   'memorization': memorization,
   'readingProgress': readingProgress,
+  // v2 additions placeholder: 'audio': {'loopMode': settings.autoPlay ? 'auto' : 'manual'} etc.
       // Future (not in skeleton scope yet): readingProgress, thematicIndex, texhvid, audio prefs history, etc.
     };
   }

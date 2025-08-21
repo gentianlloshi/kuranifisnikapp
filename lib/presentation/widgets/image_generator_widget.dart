@@ -394,24 +394,12 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
         await file.writeAsBytes(bytes);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Imazhi u ruajt në: ${file.path}'),
-              action: SnackBarAction(
-                label: 'Shiko',
-                onPressed: () {
-                  // Open file manager or gallery
-                },
-              ),
-            ),
-          );
+          context.read<AppStateProvider>().enqueueSnack('Imazhi u ruajt në: ${file.path}');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gabim në ruajtjen e imazhit: $e')),
-        );
+        context.read<AppStateProvider>().enqueueSnack('Gabim në ruajtjen e imazhit: $e');
       }
     } finally {
       setState(() => _isGenerating = false);
@@ -443,9 +431,7 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gabim në ndarjen e imazhit: $e')),
-        );
+        context.read<AppStateProvider>().enqueueSnack('Gabim në ndarjen e imazhit: $e');
       }
     } finally {
       setState(() => _isGenerating = false);

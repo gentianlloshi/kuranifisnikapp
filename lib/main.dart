@@ -14,7 +14,9 @@ import 'package:kurani_fisnik_app/presentation/providers/texhvid_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/word_by_word_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/surah_selection_provider.dart';
-import 'package:kurani_fisnik_app/presentation/widgets/quran_view_widget.dart' show VerseActionRegistry, VerseAction;
+// Verse action registry + selection service
+import 'package:kurani_fisnik_app/presentation/widgets/verse_action_registry.dart';
+import 'package:kurani_fisnik_app/presentation/providers/selection_service.dart';
 import 'package:kurani_fisnik_app/presentation/providers/reading_progress_provider.dart';
 
 // Pages and Widgets
@@ -51,6 +53,7 @@ import 'package:kurani_fisnik_app/domain/usecases/thematic_index_usecases.dart' 
 // Services
 import 'package:kurani_fisnik_app/core/services/notification_service.dart';
 import 'package:kurani_fisnik_app/core/services/audio_service.dart';
+import 'package:kurani_fisnik_app/core/services/service_locator.dart';
 import 'presentation/theme/design_tokens.dart';
 import 'presentation/theme/theme.dart';
 import 'presentation/startup/startup_scheduler.dart';
@@ -171,8 +174,12 @@ class KuraniFisnikApp extends StatelessWidget {
 
         // Repositories
         ProxyProvider2<QuranLocalDataSource, StorageDataSource, QuranRepositoryImpl>(
-          update: (_, localDataSource, storageDataSource, __) =>
-              QuranRepositoryImpl(localDataSource, storageDataSource),
+          update: (_, localDataSource, storageDataSource, __) {
+            final repo = QuranRepositoryImpl(localDataSource, storageDataSource);
+            // Register for global diagnostics access
+            ServiceLocator.instance.registerQuranRepository(repo);
+            return repo;
+          },
         ),
         ProxyProvider<StorageDataSource, StorageRepositoryImpl>(
           update: (_, storageDataSource, __) => StorageRepositoryImpl(storageDataSource),
@@ -327,6 +334,10 @@ class KuraniFisnikApp extends StatelessWidget {
                 },
               ),
             ]),
+        ),
+        // Global selection service (multi-domain selection future)
+        ChangeNotifierProvider<SelectionService>(
+          create: (_) => SelectionService(),
         ),
       ],
       child: Consumer<AppStateProvider>(

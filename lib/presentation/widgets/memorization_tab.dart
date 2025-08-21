@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/memorization_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/quran_provider.dart';
+import '../providers/selection_service.dart';
 import '../../domain/entities/verse.dart';
 import '../theme/theme.dart';
 import '../../domain/entities/memorization_verse.dart';
@@ -37,8 +38,8 @@ class _MemorizationTabState extends State<MemorizationTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MemorizationProvider>(
-      builder: (context, mem, _) {
+    return Consumer2<MemorizationProvider, SelectionService>(
+      builder: (context, mem, selection, _) {
         if (mem.isLoading && mem.groupedSurahs.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -63,9 +64,31 @@ class _MemorizationTabState extends State<MemorizationTab> {
   // Observe current playing verse for auto-scroll
   final audio = context.watch<AudioProvider>();
   _maybeAutoScroll(mem, audio.currentVerse);
+  final selecting = selection.mode == SelectionMode.memorization;
   return CustomScrollView(
           controller: _scrollController,
           slivers: [
+            if (selecting)
+              SliverToBoxAdapter(
+                child: _MemSelectionBar(
+                  count: selection.selected.length,
+                  onCancel: selection.clear,
+                  onRemove: () async {
+                    for (final key in selection.selected.toList()) {
+                      final parts = key.split(':');
+                      if (parts.length==2) {
+                        final s = int.tryParse(parts[0]);
+                        final v = int.tryParse(parts[1]);
+                        if (s!=null && v!=null) { await mem.removeVerse(s,v); }
+                      }
+                    }
+                    selection.clear();
+                    if (context.mounted) {
+                      context.read<AppStateProvider>().enqueueSnack('U hoqën ajetet e përzgjedhura');
+                    }
+                  },
+                ),
+              ),
             SliverPersistentHeader(
               pinned: true,
               delegate: _StickyHeaderDelegate(child: _buildHeader(context, mem), minExtent: 140, maxExtent: 180),
@@ -235,13 +258,20 @@ class _MemorizationTabState extends State<MemorizationTab> {
         }
       });
     }
+    final sel = context.read<SelectionService>();
+    final selecting = sel.mode == SelectionMode.memorization;
+    final keyStr = '${mv.surah}:${mv.verse}';
+    final isSelected = selecting && sel.contains(keyStr);
     return _MemorizationVerseTile(
       key: ValueKey(mv.key),
       verse: mv,
       selected: selected,
       hideText: mem.hideText,
       arabicText: arabicText,
-      onSelect: () => mem.toggleSelection(mv.surah, mv.verse),
+      onSelect: () {
+        if (!selecting) sel.start(SelectionMode.memorization);
+        sel.toggle(keyStr);
+      },
       onCycle: () => mem.cycleStatus(mv),
       onRemove: () => mem.removeVerse(mv.surah, mv.verse),
     );
@@ -449,7 +479,7 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
   Widget build(BuildContext context) {
     final mv = widget.verse;
     final colorScheme = Theme.of(context).colorScheme;
-    final tileColor = widget.selected ? colorScheme.primary.withOpacity(0.08) : Colors.transparent;
+  final tileColor = widget.selected ? colorScheme.primary.withOpacity(0.12) : Colors.transparent;
     final statusColor = _statusColor(mv.status);
     return InkWell(
       onTap: widget.onSelect,
@@ -540,6 +570,33 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MemSelectionBar extends StatelessWidget {
+  final int count; final VoidCallback onCancel; final Future<void> Function() onRemove; 
+  const _MemSelectionBar({required this.count, required this.onCancel, required this.onRemove});
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      elevation: 2,
+      color: scheme.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            children: [
+              IconButton(icon: const Icon(Icons.close), tooltip: 'Anulo', onPressed: onCancel),
+              Text('$count të zgjedhura', style: Theme.of(context).textTheme.titleMedium),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.delete_outline), tooltip: 'Hiq', onPressed: onRemove),
+            ],
+          ),
+        ),
       ),
     );
   }

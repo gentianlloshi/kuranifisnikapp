@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../../domain/entities/app_settings.dart';
@@ -6,6 +7,9 @@ import '../../domain/usecases/settings_usecases.dart';
 class AppStateProvider extends ChangeNotifier {
   final GetSettingsUseCase? _getSettingsUseCase;
   final SaveSettingsUseCase? _saveSettingsUseCase;
+  // Snackbar queue (ERR-1)
+  final Queue<_SnackMessage> _snackQueue = Queue<_SnackMessage>();
+  bool _snackShowing = false;
 
   AppStateProvider({
     required GetSettingsUseCase getSettingsUseCase,
@@ -161,6 +165,38 @@ class AppStateProvider extends ChangeNotifier {
     await _updateSettings(newSettings);
   }
 
+  // --- Snackbar Queue API ---
+  void enqueueSnack(String text, {Duration duration = const Duration(seconds: 3)}) {
+    _snackQueue.add(_SnackMessage(text, duration));
+    if (!_snackShowing) _drainSnackQueue();
+  }
+
+  _SnackMessage? get currentSnack => _snackQueue.isEmpty ? null : _snackQueue.first;
+  bool get hasSnack => _snackQueue.isNotEmpty;
+
+  void markSnackDisplayed() {
+    // Called by UI host right after showing SnackBar to prevent multiple show attempts
+    _snackShowing = true;
+  }
+
+  void onSnackCompleted() {
+    if (_snackQueue.isNotEmpty) {
+      _snackQueue.removeFirst();
+    }
+    _snackShowing = false;
+    if (_snackQueue.isNotEmpty) {
+      _drainSnackQueue();
+    } else {
+      notifyListeners();
+    }
+  }
+
+  void _drainSnackQueue() {
+    if (_snackQueue.isEmpty) return;
+    // Trigger listener to present first item.
+    notifyListeners();
+  }
+
   Future<void> _updateSettings(AppSettings newSettings) async {
     try {
       await _saveSettingsUseCase!.call(newSettings);
@@ -170,4 +206,10 @@ class AppStateProvider extends ChangeNotifier {
       Logger.e('Error saving settings', e, st, tag: 'AppState');
     }
   }
+}
+
+class _SnackMessage {
+  final String text;
+  final Duration duration;
+  _SnackMessage(this.text, this.duration);
 }

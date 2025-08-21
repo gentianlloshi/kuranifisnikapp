@@ -42,6 +42,15 @@ class MiniPlayerWidget extends StatelessWidget {
                       ),
                       onPressed: () => audio.togglePlayPause(),
                     ),
+                    if (!audio.isPlaylistMode)
+                      IconButton(
+                        icon: Icon(
+                          Icons.repeat_one,
+                          color: audio.isSingleVerseLoop ? scheme.primary : scheme.onSurfaceVariant,
+                        ),
+                        tooltip: audio.isSingleVerseLoop ? 'Hiq loop' : 'Loop ajetin',
+                        onPressed: () => audio.setSingleVerseLoop(!audio.isSingleVerseLoop),
+                      ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,6 +181,26 @@ class _FullPlayerCore extends StatelessWidget {
                 color: audio.isRepeatMode ? scheme.primary : null,
                 onPressed: audio.toggleRepeatMode,
               ),
+              if (!audio.isPlaylistMode)
+                IconButton(
+                  icon: Icon(audio.isSingleVerseLoop ? Icons.repeat_one_on : Icons.repeat_one),
+                  color: audio.isSingleVerseLoop ? scheme.primary : null,
+                  tooltip: 'Loop ajetin',
+                  onPressed: () => audio.setSingleVerseLoop(!audio.isSingleVerseLoop),
+                ),
+              if (!audio.isPlaylistMode)
+                PopupMenuButton<int>(
+                  tooltip: 'Numër përsëritjesh',
+                  icon: const Icon(Icons.filter_1),
+                  onSelected: (v) => audio.setSingleVerseLoopCount(v),
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 2, child: Text('2x')), 
+                    PopupMenuItem(value: 3, child: Text('3x')),
+                    PopupMenuItem(value: 5, child: Text('5x')),
+                    PopupMenuItem(value: 10, child: Text('10x')),
+                    PopupMenuItem(value: 0, child: Text('Paq (hiq)')),
+                  ],
+                ),
             ],
           ),
         ],

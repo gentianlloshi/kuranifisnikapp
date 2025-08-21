@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/services/data_export_service.dart';
@@ -28,10 +32,12 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
 
   bool _loading = false;
   String? _exportJson;
+  String? _exportHash;
   String? _error;
   String _importRaw = '';
   ImportDiff? _diff;
   DataImportResult? _applyResult;
+  final Map<String, NoteConflictResolution> _conflictResolutions = {}; // noteId -> choice
 
   // Domain toggles
   bool _settings = true;
@@ -39,6 +45,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
   bool _notes = true;
   bool _memorization = true;
   bool _readingProgress = true;
+  bool _settingsMerge = true; // if partial & user chooses merge instead of full overwrite
 
   @override
   void initState() {
@@ -86,8 +93,10 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
                   if (_exportJson != null)
                     TextButton.icon(
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: _exportJson));
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('JSON u kopjua')));
+                        final data = _exportJson;
+                        if (data == null) return; // safety
+                        Clipboard.setData(ClipboardData(text: data));
+                        context.read<AppStateProvider>().enqueueSnack('JSON u kopjua');
                       },
                       icon: const Icon(Icons.copy),
                       label: const Text('Kopjo'),
@@ -97,6 +106,10 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
               if (_exportJson != null) ...[
                 const SizedBox(height: 8),
                 _collapsibleJsonPreview('Rezultati', _exportJson!),
+                if (_exportHash != null) Padding(
+                  padding: const EdgeInsets.only(top:4),
+                  child: Text('SHA256: ${_exportHash!.substring(0,16)}…', style: theme.textTheme.bodySmall),
+                ),
               ],
               const Divider(height: 32),
               _sectionHeader('Importo'),
@@ -122,7 +135,8 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
                 ],
               ),
               const SizedBox(height: 8),
-              Row(
+              if (_settings) _settingsStrategyRow(),
+        Row(
                 children: [
                   ElevatedButton.icon(
                     onPressed: _loading || _importRaw.trim().isEmpty ? null : _onAnalyze,
@@ -135,6 +149,13 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
                     icon: const Icon(Icons.upload),
                     label: const Text('Apliko'),
                   ),
+                  const SizedBox(width: 12),
+                  if (_diff != null && _diff!.noteConflicts.isNotEmpty)
+                    OutlinedButton.icon(
+                      onPressed: () => _showConflictResolver(),
+                      icon: const Icon(Icons.rule_folder),
+          label: Text('Konfliktet (${_resolvedConflictSummary()})'),
+                    ),
                 ],
               ),
               if (_error != null) ...[
@@ -237,7 +258,8 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
     setState(() { _loading = true; _error = null; _exportJson = null; });
     try {
       final jsonStr = await _exportService.exportAsJsonString(pretty: true);
-      setState(() { _exportJson = jsonStr; });
+      final hash = sha256.convert(utf8.encode(jsonStr)).toString();
+      setState(() { _exportJson = jsonStr; _exportHash = hash; });
     } catch (e) {
       setState(() { _error = 'Eksporti dështoi: $e'; });
     } finally {
@@ -249,6 +271,10 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
     setState(() { _loading = true; _error = null; _diff = null; _applyResult = null; });
     try {
       final bundle = await _importService.parse(_importRaw);
+      if (!_checkVersionCompatibility(bundle.version)) {
+        final cont = await _showVersionDialog(bundle.version);
+        if (!cont) { setState(()=>_loading=false); return; }
+      }
       final diff = await _importService.dryRunDiff(bundle);
       setState(() { _diff = diff; });
     } catch (e) {
@@ -258,22 +284,225 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
 
   Future<void> _onApply() async {
     if (_diff == null) return;
+    final proceed = await _confirmApply();
+    if (!proceed) return;
     setState(() { _loading = true; _error = null; _applyResult = null; });
     try {
       final bundle = await _importService.parse(_importRaw);
       final options = DataImportOptions(
-        overwriteSettings: _settings,
+  overwriteSettings: _settings && !_settingsMerge,
         importBookmarks: _bookmarks,
         importNotes: _notes,
         importMemorization: _memorization,
         importReadingProgress: _readingProgress,
+        noteConflictResolutions: Map.of(_conflictResolutions),
       );
       final res = await _importService.applyImport(bundle: bundle, options: options, precomputedDiff: _diff);
       setState(() { _applyResult = res; });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importi u aplikua')));
+  context.read<AppStateProvider>().enqueueSnack('Importi u aplikua');
     } catch (e) {
       setState(() { _error = 'Aplikimi dështoi: $e'; });
     } finally { setState(() { _loading = false; }); }
+  }
+
+  Future<bool> _confirmApply() async {
+    final d = _diff!;
+    return await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Konfirmo Importin'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Do të aplikohen:'),
+            const SizedBox(height: 8),
+            _confirmLine('Cilësimet', _settings && d.settingsChange!=SettingsChange.none),
+            _confirmLine('Favoritet', _bookmarks && (d.bookmarkAdds.isNotEmpty || d.bookmarkUpdates.isNotEmpty)),
+            _confirmLine('Shënimet', _notes && (d.noteAdds.isNotEmpty || d.noteUpdates.isNotEmpty || d.noteConflicts.isNotEmpty)),
+            _confirmLine('Memorizimi', _memorization && (d.memorizationAdds.isNotEmpty || d.memorizationStatusUpgrades.isNotEmpty)),
+            _confirmLine('Progresi Leximit', _readingProgress && d.readingProgressImprovements.isNotEmpty),
+            if (d.noteConflicts.isNotEmpty) Padding(
+              padding: const EdgeInsets.only(top:8),
+              child: Text('Konflikte shënimesh: ${d.noteConflicts.length}', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ),
+            if (d.settingsChange == SettingsChange.partial) Padding(
+              padding: const EdgeInsets.only(top:8),
+              child: Text(_settingsMerge ? 'Cilësimet: MERGE (ruhen vlerat lokale mungese).' : 'Cilësimet: OVERWRITE tërësisht.', style: theme.textTheme.bodySmall),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: ()=>Navigator.pop(ctx,false), child: const Text('Anulo')),
+          ElevatedButton(onPressed: ()=>Navigator.pop(ctx,true), child: const Text('Apliko')),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  bool _checkVersionCompatibility(int bundleVersion) {
+    const current = DataExportService.exportVersion; // requires import at top
+    // Simple rule: if bundleVersion > current => incompatible (need upgrade); if older show warning dialog handled separately.
+    return bundleVersion <= current;
+  }
+
+  Future<bool> _showVersionDialog(int bundleVersion) async {
+    const current = DataExportService.exportVersion;
+    final newer = bundleVersion > current;
+    final older = bundleVersion < current;
+    return await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Versioni i Pakos'),
+        content: Text(newer
+            ? 'Paketa është version $bundleVersion ndërsa aplikacioni mbështet $current. Përditëso aplikacionin për të importuar.'
+            : older
+              ? 'Paketa është version më i vjetër ($bundleVersion < $current). Mund të ketë humbje fushash të reja. Vazhdo?'
+              : 'Version i përputhshëm ($bundleVersion).'),
+        actions: [
+          TextButton(onPressed: ()=>Navigator.pop(ctx,false), child: Text(newer? 'Mbyll':'Jo')),
+          if (!newer) ElevatedButton(onPressed: ()=>Navigator.pop(ctx,true), child: const Text('Po')),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  Widget _confirmLine(String label, bool active) => Row(
+    children: [
+      Icon(active ? Icons.check_circle : Icons.remove_circle, size: 16, color: active ? Colors.green : Colors.grey),
+      const SizedBox(width: 6),
+      Expanded(child: Text(label)),
+    ],
+  );
+
+  void _showConflictResolver() {
+    if (_diff == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (c, controller) {
+            return Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children:[const Icon(Icons.rule), const SizedBox(width:8), const Text('Zgjidh Konfliktet')]),
+                  const SizedBox(height:8),
+                  if (_diff!.noteConflicts.isNotEmpty) _bulkConflictBar(),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: controller,
+                      itemCount: _diff!.noteConflicts.length,
+                      itemBuilder: (c,i){
+                        final nc = _diff!.noteConflicts[i];
+                        final id = nc.id;
+                        final selected = _conflictResolutions[id] ?? NoteConflictResolution.import;
+                        return Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Note ID: $id', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height:4),
+                                Text('Lokale: '+ (nc.local['content']??'').toString(), maxLines:3, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height:4),
+                                Text('Import: '+ (nc.imported['content']??'').toString(), maxLines:3, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height:6),
+                                Row(children:[
+                                  Expanded(child: OutlinedButton(
+                                    onPressed:(){ setState((){ _conflictResolutions[id]=NoteConflictResolution.local; }); },
+                                    style: OutlinedButton.styleFrom(backgroundColor: selected==NoteConflictResolution.local? Colors.green.withOpacity(0.15):null),
+                                    child: Text('Mbaj Lokale', style: TextStyle(color: selected==NoteConflictResolution.local? Colors.green: null)),
+                                  )),
+                                  const SizedBox(width:8),
+                                  Expanded(child: ElevatedButton(
+                                    onPressed:(){ setState((){ _conflictResolutions[id]=NoteConflictResolution.import; }); },
+                                    style: ElevatedButton.styleFrom(backgroundColor: selected==NoteConflictResolution.import? Theme.of(context).colorScheme.primary: null),
+                                    child: const Text('Merr Importin'),
+                                  )),
+                                ])
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height:8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: ()=> Navigator.pop(ctx),
+                      icon: const Icon(Icons.done),
+                      label: const Text('Ruaj'),
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _bulkConflictBar() {
+    final total = _diff!.noteConflicts.length;
+    final imports = _conflictResolutions.values.where((e)=>e==NoteConflictResolution.import).length;
+    final locals = _conflictResolutions.values.where((e)=>e==NoteConflictResolution.local).length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom:8),
+      child: Wrap(spacing:8, runSpacing:4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+        Chip(label: Text('Gjithsej: $total')),
+        Chip(label: Text('Import: $imports')),
+        Chip(label: Text('Lokale: $locals')),
+        TextButton(onPressed:(){ setState((){ for (final c in _diff!.noteConflicts){ _conflictResolutions[c.id]=NoteConflictResolution.import; } }); }, child: const Text('Import all')),
+        TextButton(onPressed:(){ setState((){ for (final c in _diff!.noteConflicts){ _conflictResolutions[c.id]=NoteConflictResolution.local; } }); }, child: const Text('Local all')),
+        TextButton(onPressed:(){ setState((){ _conflictResolutions.clear(); }); }, child: const Text('Reset')),
+      ]),
+    );
+  }
+
+  String _resolvedConflictSummary() {
+    if (_diff==null) return '0';
+    final total = _diff!.noteConflicts.length;
+    final decided = _conflictResolutions.length;
+    if (decided==0) return '$total';
+    return '$decided/$total';
+  }
+
+  Widget _settingsStrategyRow() {
+    final partial = _diff?.settingsChange == SettingsChange.partial;
+    if (!partial) {
+      return Row(
+        children: [
+          const Icon(Icons.tune, size: 18),
+          const SizedBox(width:6),
+          Text('Strategjia: overwrite (nuk ka merge të nevojshëm)', style: Theme.of(context).textTheme.bodySmall),
+        ],
+      );
+    }
+    return Row(
+      children: [
+        const Icon(Icons.tune, size: 18),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Wrap(
+            spacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text('Cilësimet (partial):', style: Theme.of(context).textTheme.bodySmall),
+              ChoiceChip(label: const Text('Merge'), selected: _settingsMerge, onSelected: (v){ setState(()=>_settingsMerge=true); }),
+              ChoiceChip(label: const Text('Overwrite'), selected: !_settingsMerge, onSelected: (v){ setState(()=>_settingsMerge=false); }),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 

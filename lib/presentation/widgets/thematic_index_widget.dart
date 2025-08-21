@@ -139,15 +139,11 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: provider.filteredThemes.length,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      itemCount: provider.rootNodes.length,
                       itemBuilder: (context, index) {
-                        final themeName = provider.filteredThemes[index];
-                        final themeData = provider.thematicIndex[themeName];
-                        if (themeData is Map<String, dynamic>) {
-                          return _buildThemeCard(context, themeName, themeData, provider);
-                        }
-                        return const SizedBox.shrink();
+                        final node = provider.rootNodes[index];
+                        return _ThemeNodeCard(node: node, provider: provider);
                       },
                     ),
             ),
@@ -157,63 +153,17 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
     );
   }
 
-  Widget _buildThemeCard(BuildContext context, String themeName, Map<String, dynamic> themeData, ThematicIndexProvider provider) {
-  final subthemes = themeData['subthemes'] as Map<String, dynamic>? ?? {};
-  final isExpanded = provider.isThemeExpanded(themeName);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          ListTile(
-            title: Text(
-              themeName,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            subtitle: Text('${subthemes.length} nën-tema'),
-            trailing: Icon(
-              isExpanded ? Icons.expand_less : Icons.expand_more,
-            ),
-            onTap: () => provider.toggleThemeExpansion(themeName),
-          ),
-          if (isExpanded) ...[
-            const Divider(height: 1),
-            ...subthemes.entries.map((entry) => _buildSubthemeItem(
-              context,
-              entry.key,
-              entry.value as List<dynamic>,
-              provider,
-            )),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubthemeItem(
-    BuildContext context,
-    String subthemeName,
-    List<dynamic> verses,
-    ThematicIndexProvider provider,
-  ) {
+  Widget _buildSubthemeItem(BuildContext context, ThematicNode subNode) {
+    final verses = subNode.verseRefs;
     return ListTile(
-      contentPadding: const EdgeInsets.only(left: 32, right: 16),
-      title: Text(
-        subthemeName,
-        style: const TextStyle(fontSize: 14),
-      ),
+      contentPadding: const EdgeInsets.only(left: 32, right: 12),
+      title: Text(subNode.label, style: const TextStyle(fontSize: 14)),
       subtitle: Text(
         '${verses.length} ajete: ${verses.take(3).join(", ")}${verses.length > 3 ? "..." : ""}',
-        style: TextStyle(
-          fontSize: 12,
-          color: Colors.grey[600],
-        ),
+        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
       ),
       trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-      onTap: () => _showVersesList(context, subthemeName, verses),
+      onTap: () => _showVersesList(context, subNode.label, verses),
     );
   }
 
@@ -309,5 +259,96 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
         );
       }
     }
+  }
+}
+
+class _ThemeNodeCard extends StatelessWidget {
+  final ThematicNode node;
+  final ThematicIndexProvider provider;
+  const _ThemeNodeCard({required this.node, required this.provider});
+  @override
+  Widget build(BuildContext context) {
+    final expanded = provider.isThemeExpanded(node.id);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        children: [
+          ListTile(
+            title: Text(node.label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            subtitle: Text('${node.children.isEmpty ? '...' : node.children.length} nën-tema'),
+            trailing: Icon(expanded ? Icons.expand_less : Icons.expand_more),
+            onTap: () async => provider.toggleThemeExpansion(node.id),
+          ),
+          if (expanded) ...[
+            const Divider(height: 1),
+            if (node.children.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(12),
+                child: Align(alignment: Alignment.centerLeft, child: SizedBox(height:16,width:16, child: CircularProgressIndicator(strokeWidth:2))),
+              )
+            else SizedBox(
+              // Constrain height to avoid unbounded expansion; approximate item height ~72
+              height: (node.children.length * 72).clamp(0, 400).toDouble(),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: node.children.length,
+                itemBuilder: (ctx, i) => _ThemeSubthemeTile(subNode: node.children[i]),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeSubthemeTile extends StatelessWidget {
+  final ThematicNode subNode;
+  const _ThemeSubthemeTile({required this.subNode});
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.only(left: 32, right: 12),
+      title: Text(subNode.label, style: const TextStyle(fontSize: 14)),
+      subtitle: Text(
+        '${subNode.verseRefs.length} ajete: ${subNode.verseRefs.take(3).join(", ")}${subNode.verseRefs.length > 3 ? "..." : ""}',
+        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      onTap: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (ctx) => BottomSheetWrapper(
+          padding: EdgeInsets.only(
+            left: context.spaceLg,
+            right: context.spaceLg,
+            top: context.spaceSm,
+            bottom: MediaQuery.of(context).viewInsets.bottom + context.spaceLg,
+          ),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: Column(
+              children: [
+                SheetHeader(
+                  title: subNode.label,
+                  subtitle: '${subNode.verseRefs.length} ajete',
+                  leadingIcon: Icons.topic,
+                  onClose: () => Navigator.of(context).maybePop(),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: subNode.verseRefs.length,
+                    itemBuilder: (c, i) => ListTile(
+                      title: Text(subNode.verseRefs[i]),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

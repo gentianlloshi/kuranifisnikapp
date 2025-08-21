@@ -98,6 +98,14 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           },
           icon: const Icon(Icons.expand_less),
         ),
+        IconButton(
+          tooltip: audioProvider.isSingleVerseLoop ? 'Hiq loop' : 'Loop ajetin',
+          onPressed: audioProvider.isPlaylistMode ? null : () => audioProvider.setSingleVerseLoop(!audioProvider.isSingleVerseLoop),
+          icon: Icon(
+            Icons.repeat_one,
+            color: audioProvider.isSingleVerseLoop ? Theme.of(context).colorScheme.primary : Theme.of(context).iconTheme.color,
+          ),
+        ),
       ],
     );
   }
@@ -219,6 +227,15 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     : null,
               ),
             ),
+            // Single verse loop (only in single verse mode)
+            IconButton(
+              tooltip: 'Loop ajetin aktual',
+              onPressed: audioProvider.isPlaylistMode ? null : () => audioProvider.setSingleVerseLoop(!audioProvider.isSingleVerseLoop),
+              icon: Icon(
+                Icons.repeat_one,
+                color: audioProvider.isSingleVerseLoop ? Theme.of(context).primaryColor : null,
+              ),
+            ),
             
             // More options button
             IconButton(
@@ -269,13 +286,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     _downloadProgress = progress;
                   });
                 });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Audio u shkarkua me sukses!')),
-                );
+                context.read<AppStateProvider>().enqueueSnack('Audio u shkarkua me sukses!');
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Gabim gjatë shkarkimit: $e')),
-                );
+                context.read<AppStateProvider>().enqueueSnack('Gabim gjatë shkarkimit: $e');
               } finally {
                 setState(() {
                   _isDownloading = false;

@@ -24,6 +24,11 @@ class DataImportService {
 
   Future<ImportBundle> parse(String jsonString) async {
     final map = json.decode(jsonString) as Map<String, dynamic>;
+    final version = (map['version'] as num?)?.toInt() ?? 1;
+    const supported = 2; // keep in sync with DataExportService.exportVersion
+    if (version > supported) {
+      throw UnsupportedError('Unsupported export bundle version=$version (max supported=$supported)');
+    }
     return ImportBundle(root: map);
   }
 
@@ -81,6 +86,8 @@ class DataImportService {
     // Notes diff
     final noteAdds = <Map<String, dynamic>>[];
     final noteUpdates = <Map<String, dynamic>>[];
+    final noteConflicts = <NoteConflict>[]; // near-simultaneous edits
+    const conflictThreshold = Duration(seconds: 5);
     final existingNoteMap = { for (final n in currentNotes) n.id : n };
     for (final raw in exportedNotes) {
       final id = raw['id'] as String?; if (id == null) continue;
@@ -91,7 +98,16 @@ class DataImportService {
         try {
           final impTs = DateTime.parse(raw['updatedAt']);
           if (impTs.isAfter(existing.updatedAt)) {
-            noteUpdates.add(raw.cast<String,dynamic>());
+            final delta = impTs.difference(existing.updatedAt).abs();
+            if (delta <= conflictThreshold) {
+              noteConflicts.add(NoteConflict(
+                id: id,
+                local: existing.toJson(),
+                imported: raw.cast<String,dynamic>(),
+              ));
+            } else {
+              noteUpdates.add(raw.cast<String,dynamic>());
+            }
           }
         } catch (_) {}
       }
@@ -133,8 +149,18 @@ class DataImportService {
       }
     });
 
+    SettingsChange settingsChange = SettingsChange.none;
+    if (exportedSettings != null) {
+      // Detect partial vs full based on expected keys present
+      const expectedKeys = {
+        'theme','fontSize','fontSizeArabic','fontSizeTranslation','selectedTranslation','showArabic','showTranslation','showTransliteration','showWordByWord','showVerseNumbers','enableNotifications','notificationTime','enableAudio','audioVolume','playbackSpeed','autoPlay','preferredReciter','searchInArabic','searchInTranslation','searchInTransliteration','searchJuz','autoScrollEnabled','reduceMotion','adaptiveAutoScroll','wordHighlightGlow','useSpanWordRendering','backgroundIndexingEnabled','verboseWbwLogging'
+      };
+      final missing = expectedKeys.difference(exportedSettings.keys.toSet());
+      settingsChange = missing.isEmpty ? SettingsChange.overwrite : SettingsChange.partial;
+    }
+
     return ImportDiff(
-      settingsChange: exportedSettings == null ? SettingsChange.none : SettingsChange.overwrite,
+      settingsChange: settingsChange,
       bookmarkAdds: bookmarkAdds,
       bookmarkUpdates: bookmarkUpdates,
       noteAdds: noteAdds,
@@ -142,6 +168,7 @@ class DataImportService {
       memorizationAdds: memorizationAdds,
       memorizationStatusUpgrades: memorizationStatusUpgrades,
       readingProgressImprovements: readingProgressImproved,
+      noteConflicts: noteConflicts,
     );
   }
 
@@ -157,8 +184,37 @@ class DataImportService {
     // SETTINGS
     if (options.overwriteSettings && bundle.root['settings'] is Map<String,dynamic>) {
       try {
-        final settings = AppSettings.fromJson(bundle.root['settings']);
-        await storageRepository.saveSettings(settings);
+        final raw = (bundle.root['settings'] as Map<String,dynamic>);
+        final incoming = AppSettings.fromJson(raw);
+        if (precomputedDiff?.settingsChange == SettingsChange.partial) {
+          final existing = await storageRepository.getSettings() ?? AppSettings.defaultSettings();
+          // Preserve local audio + font fields if absent in bundle map
+          AppSettings merged = incoming;
+          if (!raw.containsKey('preferredReciter')) {
+            merged = merged.copyWith(preferredReciter: existing.preferredReciter);
+          }
+            if (!raw.containsKey('audioVolume')) {
+              merged = merged.copyWith(audioVolume: existing.audioVolume);
+            }
+            if (!raw.containsKey('playbackSpeed')) {
+              merged = merged.copyWith(playbackSpeed: existing.playbackSpeed);
+            }
+            if (!raw.containsKey('autoPlay')) {
+              merged = merged.copyWith(autoPlay: existing.autoPlay);
+            }
+            if (!raw.containsKey('fontSizeArabic')) {
+              merged = merged.copyWith(fontSizeArabic: existing.fontSizeArabic);
+            }
+            if (!raw.containsKey('fontSizeTranslation')) {
+              merged = merged.copyWith(fontSizeTranslation: existing.fontSizeTranslation);
+            }
+            if (!raw.containsKey('fontSize')) { // legacy single size
+              merged = merged.copyWith(fontSize: existing.fontSize);
+            }
+          await storageRepository.saveSettings(merged);
+        } else {
+          await storageRepository.saveSettings(incoming);
+        }
         result.settingsOverwritten = true;
       } catch (e) {
         result.errors.add('Settings import failed: $e');
@@ -206,6 +262,19 @@ class DataImportService {
               map[n.id] = n; result.notesUpdated++;
             }
           } catch (e) { result.errors.add('Note parse failed: $e'); }
+        }
+        // Resolve conflicts
+        for (final conflict in diff.noteConflicts) {
+          final resolution = options.noteConflictResolutions[conflict.id] ?? NoteConflictResolution.import;
+            if (resolution == NoteConflictResolution.import) {
+              try {
+                final n = Note.fromJson(conflict.imported);
+                map[n.id] = n; result.noteConflictsImported++;
+              } catch (e) { result.errors.add('Conflict import parse failed: $e'); }
+            } else {
+              // Keep local
+              result.noteConflictsKeptLocal++;
+            }
         }
         // Persist each via repository API (no bulk API exposed)
         for (final n in map.values) { await storageRepository.saveNote(n); }
@@ -278,6 +347,7 @@ class ImportDiff {
   final List<Map<String,dynamic>> memorizationAdds; // {s,v,st}
   final List<Map<String,dynamic>> memorizationStatusUpgrades; // {s,v,from,to}
   final Map<String, Map<String,int>> readingProgressImprovements; // surah->{oldVerse,newVerse,oldTs,newTs}
+  final List<NoteConflict> noteConflicts;
   ImportDiff({
     required this.settingsChange,
     required this.bookmarkAdds,
@@ -287,6 +357,7 @@ class ImportDiff {
     required this.memorizationAdds,
     required this.memorizationStatusUpgrades,
     required this.readingProgressImprovements,
+    required this.noteConflicts,
   });
 
   Map<String, dynamic> toJson() => {
@@ -298,6 +369,7 @@ class ImportDiff {
     'memorizationAdds': memorizationAdds,
     'memorizationStatusUpgrades': memorizationStatusUpgrades,
     'readingProgressImprovements': readingProgressImprovements,
+  'noteConflicts': noteConflicts.map((c)=>c.toJson()).toList(),
   };
 }
 
@@ -308,6 +380,7 @@ class DataImportOptions {
   final bool importNotes;
   final bool importMemorization;
   final bool importReadingProgress;
+  final Map<String, NoteConflictResolution> noteConflictResolutions; // noteId -> resolution
 
   const DataImportOptions({
     this.overwriteSettings = true,
@@ -315,6 +388,7 @@ class DataImportOptions {
     this.importNotes = true,
     this.importMemorization = true,
     this.importReadingProgress = true,
+  this.noteConflictResolutions = const {},
   });
 }
 
@@ -328,6 +402,8 @@ class DataImportResult {
   int memorizationAdded = 0;
   int memorizationUpgraded = 0;
   int readingProgressUpdated = 0;
+  int noteConflictsImported = 0;
+  int noteConflictsKeptLocal = 0;
   final List<String> errors = [];
 
   Map<String, dynamic> toJson() => {
@@ -339,6 +415,22 @@ class DataImportResult {
     'memorizationAdded': memorizationAdded,
     'memorizationUpgraded': memorizationUpgraded,
     'readingProgressUpdated': readingProgressUpdated,
+    'noteConflictsImported': noteConflictsImported,
+    'noteConflictsKeptLocal': noteConflictsKeptLocal,
     'errors': errors,
   };
 }
+
+class NoteConflict {
+  final String id;
+  final Map<String,dynamic> local;
+  final Map<String,dynamic> imported;
+  NoteConflict({required this.id, required this.local, required this.imported});
+  Map<String,dynamic> toJson() => {
+    'id': id,
+    'local': local,
+    'imported': imported,
+  };
+}
+
+enum NoteConflictResolution { local, import }

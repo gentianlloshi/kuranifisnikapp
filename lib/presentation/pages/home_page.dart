@@ -97,16 +97,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       case 1: // Quran View
         return FloatingActionButton(
           onPressed: () {
-            // Broadcast an intent that QuranViewWidget can listen for via Inherited or direct static messenger (simpler: use global key or event)
-            // For now reuse Navigator to find QuranViewWidget state via context.
-            final qvwState = context.findAncestorStateOfType<_QuranViewWidgetState>();
-            if (qvwState != null) {
-              // ignore: invalid_use_of_protected_member
-              // call quick jump
-              // qvwState._showQuickJumpDialog(); (private) - fallback: show local simplified dialog
-              // Simpler: replicate call through a message.
-            }
-            // Temporary: maintain old dialog until wiring done
             _showJumpToVerseDialog();
           },
           child: const Icon(Icons.navigation),
@@ -124,6 +114,53 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void _showJumpToVerseDialog() { /* deprecated placeholder kept for now */ }
+  void _showJumpToVerseDialog() {
+    final surahController = TextEditingController();
+    final verseController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Shko te ajeti'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: surahController,
+              decoration: const InputDecoration(labelText: 'Nr. i Sures (1-114)'),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: verseController,
+              decoration: const InputDecoration(labelText: 'Nr. i Ajetit (opsional)'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Anulo')),
+          TextButton(
+            onPressed: () {
+              final surah = int.tryParse(surahController.text.trim());
+              final verse = int.tryParse(verseController.text.trim());
+              if (surah == null || surah < 1 || surah > 114) {
+                context.read<AppStateProvider>().enqueueSnack('Numër sureje i pavlefshëm');
+                return;
+              }
+              Navigator.pop(ctx);
+              final qp = context.read<QuranProvider>();
+              if (verse != null && verse > 0) {
+                qp.openSurahAtVerse(surah, verse);
+              } else {
+                qp.navigateToSurah(surah);
+              }
+              _tabController.animateTo(1);
+            },
+            child: const Text('Shko'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 

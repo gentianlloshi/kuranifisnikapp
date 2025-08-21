@@ -7,6 +7,7 @@ import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
 import 'inverted_index_builder.dart' as idx;
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 
 /// Encapsulates building and querying the inverted search index.
 /// Responsible only for in-memory structures; persistence & advanced ranking can layer on top later.
@@ -134,8 +135,9 @@ class SearchIndexManager {
             }
           } catch (_) {/* skip surah errors silently */}
           final p = s / 114.0;
-            _emitProgress(p);
-            if (onProgress != null) onProgress(p);
+          _emitProgress(p);
+          PerfMetrics.instance.setIndexCoverage(p);
+          if (onProgress != null) onProgress(p);
           final elapsed = batchSw.elapsedMilliseconds;
           if (elapsed > 30) {
             // Avoid importing logger here to keep manager lean; using debugPrint.
@@ -150,6 +152,7 @@ class SearchIndexManager {
         if (session == _buildSessionId) {
           _incrementalMode = false;
           _emitProgress(1.0);
+          PerfMetrics.instance.setIndexCoverage(1.0);
           if (onProgress != null) onProgress(1.0);
         }
       } catch (_) {

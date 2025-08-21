@@ -12,6 +12,7 @@ import '../../domain/usecases/get_surah_verses_usecase.dart';
 import 'search_index_manager.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../../domain/repositories/quran_repository.dart';
+import '../../core/metrics/perf_metrics.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
@@ -43,6 +44,8 @@ class QuranProvider extends ChangeNotifier {
     _indexProgressSub = _indexManager?.progressStream.listen((evt) {
       _isBuildingIndex = !evt.complete;
       _indexProgress = evt.progress;
+  // Update perf metrics coverage (index fraction). Enrichment coverage handled in repo merges.
+  PerfMetrics.instance.setIndexCoverage(evt.progress);
       notifyListeners();
     });
   }
@@ -97,6 +100,8 @@ class QuranProvider extends ChangeNotifier {
   int? get currentSurahId => _currentSurahId;
   Surah? get currentSurah => _currentSurah;
   bool get hasMoreVerses => _hasMoreVerses;
+  // Expose underlying repository for debug / metrics panels (read-only usage)
+  QuranRepository? get repository => _quranRepository;
 
   Future<void> loadSurahs() async {
     _setLoading(true);
@@ -422,6 +427,15 @@ class QuranProvider extends ChangeNotifier {
   }
 
   bool hasPrefetched(int surahNumber) => _prefetchCache.containsKey(surahNumber);
+
+  // Resolve a verse instance for given surah & verse number. If not loaded yet, returns null (caller can load then retry).
+  Verse? findVerse(int surahNumber, int verseNumber) {
+    if (_currentSurahId == surahNumber) {
+      try { return _allCurrentSurahVerses.firstWhere((v) => v.verseNumber == verseNumber); } catch (_) {}
+      try { return _pagedVerses.firstWhere((v) => v.verseNumber == verseNumber); } catch (_) {}
+    }
+    return null;
+  }
 
 }
 

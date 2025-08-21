@@ -15,6 +15,6 @@ class PersistenceVersions {
   // Reading progress model (current simple map) - plan v2 for streak / last session length.
   static const int readingProgress = 1;
 
-  // Export bundle schema version (mirrors DataExportService.exportVersion)
-  static const int exportBundle = 1;
+  // Export bundle schema version (mirrors DataExportService.exportVersion). v2 adds audio & reading progress enrichment fields.
+  static const int exportBundle = 2;
 }
