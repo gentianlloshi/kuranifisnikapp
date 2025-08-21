@@ -331,19 +331,41 @@ class _StatusCycleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final (label, color) = switch (mv.status) {
-      MemorizationStatus.newVerse => ('I Ri', Colors.blueGrey),
-      MemorizationStatus.inProgress => ('Në Progres', Colors.orange),
-      MemorizationStatus.mastered => ('I Mësuar', Colors.green),
-    };
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color.withOpacity(0.6)),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+    Color statusColor;
+    String label;
+    switch (mv.status) {
+      case MemorizationStatus.newVerse:
+        label = 'I Ri';
+        statusColor = Colors.blueGrey;
+        break;
+      case MemorizationStatus.inProgress:
+        label = 'Në Progres';
+        statusColor = Colors.orange;
+        break;
+      case MemorizationStatus.mastered:
+        label = 'I Mësuar';
+        statusColor = Colors.green;
+        break;
+    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, anim) {
+        return ScaleTransition(scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack), child: child);
+      },
+      child: OutlinedButton(
+        key: ValueKey(mv.status),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: statusColor,
+          side: BorderSide(color: statusColor.withOpacity(0.6)),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        ),
+        onPressed: onCycle,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 250),
+          style: TextStyle(color: colorScheme.onSurface, fontSize: 12, fontWeight: mv.status == MemorizationStatus.mastered ? FontWeight.bold : FontWeight.w500),
+          child: Text(label),
+        ),
       ),
-      onPressed: onCycle,
-      child: Text(label, style: TextStyle(color: colorScheme.onSurface, fontSize: 12)),
     );
   }
 }
@@ -454,7 +476,12 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
                     ],
                   ),
                   const SizedBox(height: 4),
-                  _buildArabicMasked(context),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeIn,
+                    switchOutCurve: Curves.easeOut,
+                    child: _buildArabicMasked(context),
+                  ),
                 ],
               ),
             ),

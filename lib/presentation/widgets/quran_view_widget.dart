@@ -12,6 +12,7 @@ import '../providers/bookmark_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/word_by_word_provider.dart';
 import '../providers/memorization_provider.dart';
+import '../providers/reading_progress_provider.dart';
 import '../widgets/verse_notes_indicator.dart';
 import '../widgets/surah_list_widget.dart';
 import '../../domain/entities/verse.dart';
@@ -39,7 +40,12 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   static const Duration _autoScrollThrottle = Duration(milliseconds: 350);
   DateTime _lastUserScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _manualScrollSuppressionWindow = Duration(seconds: 5); // pause auto-scroll 5s after user interacts (spec)
+  // Accurate progress tracking cadence
+  DateTime _lastAccurateProgressCalc = DateTime.fromMillisecondsSinceEpoch(0);
+  static const Duration _progressCalcThrottle = Duration(milliseconds: 120);
   static const bool kUseNewVerseHighlight = true; // feature flag for new highlight spec
+  final TextEditingController _jumpSurahCtrl = TextEditingController();
+  final TextEditingController _jumpVerseCtrl = TextEditingController();
   // Selection mode state
   bool _selectionMode = false;
   final Set<String> _selectedVerseKeys = <String>{};
@@ -100,25 +106,9 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
       context: context,
       showDragHandle: true,
       builder: (context) => BottomSheetWrapper(
-        child: _VerseOptionsSheet(
-          verse: verse,
-          onPlay: () => context.read<AudioProvider>().playVerse(verse),
-          onPlayFromHere: () {
-            final q = context.read<QuranProvider>();
-            final verses = q.currentVerses;
-            final startIndex = verses.indexWhere((v) => v.number == verse.number);
-            if (startIndex != -1) {
-              final wbwProv = context.read<WordByWordProvider>();
-              context.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
-            }
-          },
-          onToggleMemorization: () {
-            final mem = context.read<MemorizationProvider>();
-            final key = '${verse.surahNumber}:${verse.number}';
-            mem.toggleVerseMemorization(key);
-            Navigator.pop(context);
-          },
-        ),
+              child: VerseActionsSheet(
+                verse: verse,
+              ),
       ),
     );
   }
@@ -196,6 +186,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+  _jumpSurahCtrl.dispose();
+  _jumpVerseCtrl.dispose();
     super.dispose();
   }
 
@@ -208,6 +200,49 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     final dir = _scrollController.position.userScrollDirection;
     if (dir != ScrollDirection.idle) {
       _lastUserScroll = DateTime.now();
+      _updateAccurateProgress();
+    }
+  }
+
+  void _updateAccurateProgress() {
+    final now = DateTime.now();
+    if (now.difference(_lastAccurateProgressCalc) < _progressCalcThrottle) return; // throttle
+    _lastAccurateProgressCalc = now;
+    if (!_scrollController.hasClients) return;
+    final q = Provider.of<QuranProvider>(context, listen: false);
+    if (q.currentSurahId == null || q.currentVerses.isEmpty) return;
+    final verses = q.currentVerses;
+    final viewportTop = _scrollController.offset;
+    final viewportBottom = viewportTop + _scrollController.position.viewportDimension;
+    double bestVisible = 0;
+    Verse? bestVerse;
+    // Evaluate visible fraction using RenderBox geometry of each verse card if available.
+    for (final v in verses) {
+      final key = _verseKeys[v.verseKey];
+      final ctx = key?.currentContext;
+      if (ctx == null) continue;
+      final box = ctx.findRenderObject();
+      if (box is! RenderBox) continue;
+      final position = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
+      // position.dy is global relative to screen; convert to scroll space by adding scroll offset baseline (approx by using scroll metrics pixels relative to first paint).
+      final topGlobal = position.dy + _scrollController.offset; // approximate mapping back into scroll coordinates
+      final height = box.size.height;
+      final bottomGlobal = topGlobal + height;
+      final overlapTop = math.max(viewportTop, topGlobal);
+      final overlapBottom = math.min(viewportBottom, bottomGlobal);
+      final visible = math.max(0, overlapBottom - overlapTop);
+      if (visible <= 0) continue;
+      final fraction = visible / height;
+      if (fraction > bestVisible) {
+        bestVisible = fraction;
+        bestVerse = v;
+      }
+    }
+    if (bestVerse != null) {
+      try {
+        Provider.of<ReadingProgressProvider>(context, listen: false)
+            .updateProgress(bestVerse.surahNumber, bestVerse.number);
+      } catch (_) {}
     }
   }
 
@@ -376,44 +411,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                 onShare: _shareSelected,
               ),
             // Surah header
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(context.spaceSm, context.spaceSm, context.spaceSm, context.spaceSm),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceElevated(1),
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withOpacity(0.4),
-                  ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Kthehu',
-                    onPressed: () => context.read<QuranProvider>().exitCurrentSurah(),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  surah.nameArabic,
-                                  textAlign: TextAlign.right,
-                                  style: Theme.of(context).textTheme.bodyArabic.copyWith(
-                                        fontSize: 26,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Builder(
+                      // The new implementation will handle actions dynamically
+                      // based on the registered actions in the VerseActionRegistry.
                                   builder: (ctx) {
                                     final repo = Provider.of<QuranRepository?>(ctx, listen: false);
                                     final enriched = repo?.isSurahFullyEnriched(surah.number) ?? true;
@@ -467,14 +466,71 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                 },
                 child: ListView.builder(
                   controller: _scrollController,
-                  padding: EdgeInsets.all(context.spaceLg),
-                  itemCount: verses.length + (quranProvider.hasMoreVerses ? 1 : 0), // Add 1 for loading indicator
+                  padding: EdgeInsets.only(
+                    left: context.spaceLg,
+                    right: context.spaceLg,
+                    top: context.spaceLg,
+                    bottom: context.spaceLg + 80, // space for chaining banner
+                  ),
+                  itemCount: verses.length + 1, // extra sentinel row for loader / next surah card
                   itemBuilder: (context, index) {
                     if (index == verses.length) {
-                      // Last item, show loading indicator if more verses are available
-                      return quranProvider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : const SizedBox.shrink();
+                      // Sentinel row
+                      if (quranProvider.hasMoreVerses) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(
+                            child: quranProvider.isLoading
+                                ? const CircularProgressIndicator()
+                                : ElevatedButton.icon(
+                                    onPressed: () => quranProvider.loadMoreVerses(),
+                                    icon: const Icon(Icons.unfold_more),
+                                    label: const Text('Ngarko më shumë'),
+                                  ),
+                          ),
+                        );
+                      } else {
+                        // End of surah; offer next surah chaining if not last.
+                        final current = quranProvider.currentSurah;
+                        if (current != null && current.number < 114) {
+                          final nextNum = current.number + 1;
+                          final prefetched = quranProvider.hasPrefetched(nextNum);
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 12.0),
+                            child: Card(
+                              color: Theme.of(context).colorScheme.surfaceElevated(1),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.play_circle_outline, color: Theme.of(context).colorScheme.primary),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        prefetched
+                                            ? 'Sura $nextNum gati. Vazhdo leximin?'
+                                            : 'Fundi i sures. Vazhdo me Sura $nextNum',
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        await quranProvider.navigateToSurah(nextNum);
+                                        if (mounted) {
+                                          _scrollController.jumpTo(0);
+                                        }
+                                      },
+                                      child: const Text('Vazhdo'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox(height: 24);
+                      }
                     }
                   final verse = verses[index];
                   final key = _verseKeys.putIfAbsent(verse.verseKey, () => GlobalKey());
@@ -839,6 +895,55 @@ class VerseWidget extends StatelessWidget {
       ),
     );
   }
+
+  void _showQuickJumpDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Shko te ajeti'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _jumpSurahCtrl,
+              decoration: const InputDecoration(labelText: 'Nr. i Sures (1-114)'),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _jumpVerseCtrl,
+              decoration: const InputDecoration(labelText: 'Nr. i Ajetit'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Anulo')),
+          TextButton(
+            onPressed: () async {
+              final surah = int.tryParse(_jumpSurahCtrl.text.trim());
+              final verse = int.tryParse(_jumpVerseCtrl.text.trim());
+              if (surah == null || surah < 1 || surah > 114) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Numër sureje i pavlefshëm')));
+                return;
+              }
+              if (verse == null || verse < 1) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Numër ajeti i pavlefshëm')));
+                return;
+              }
+              Navigator.pop(ctx);
+              final q = context.read<QuranProvider>();
+              q.openSurahAtVerse(surah, verse);
+              // Clear for next time
+              _jumpSurahCtrl.clear();
+              _jumpVerseCtrl.clear();
+            },
+            child: const Text('Shko'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _WordByWordLine extends StatelessWidget {
@@ -1010,14 +1115,40 @@ class _SelectionBar extends StatelessWidget {
   }
 }
 
-class _VerseOptionsSheet extends StatelessWidget {
+// Verse action registry appended below (old _VerseOptionsSheet removed)
+
+
+// ----- Verse Action Registry (VERSE-ACTIONS-1) -----
+typedef VerseActionHandler = Future<void> Function(BuildContext context, Verse verse);
+
+class VerseAction {
+  final String id;
+  final String label;
+  final IconData icon;
+  final VerseActionHandler handler;
+  final bool Function(Verse verse)? visibleIf;
+  VerseAction({required this.id, required this.label, required this.icon, required this.handler, this.visibleIf});
+}
+
+class VerseActionRegistry extends ChangeNotifier {
+  final List<VerseAction> _actions = [];
+  List<VerseAction> actionsFor(Verse v) => _actions.where((a) => a.visibleIf?.call(v) ?? true).toList(growable: false);
+  void register(VerseAction action) {
+    if (_actions.any((a) => a.id == action.id)) return;
+    _actions.add(action);
+    notifyListeners();
+  }
+  void registerAll(Iterable<VerseAction> acts) { for (final a in acts) register(a); }
+  void clear() { _actions.clear(); notifyListeners(); }
+}
+
+class VerseActionsSheet extends StatelessWidget {
   final Verse verse;
-  final VoidCallback onPlay;
-  final VoidCallback onPlayFromHere;
-  final VoidCallback onToggleMemorization;
-  const _VerseOptionsSheet({required this.verse, required this.onPlay, required this.onPlayFromHere, required this.onToggleMemorization});
+  const VerseActionsSheet({super.key, required this.verse});
   @override
   Widget build(BuildContext context) {
+    final registry = Provider.of<VerseActionRegistry>(context, listen: false);
+    final items = registry.actionsFor(verse);
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1028,27 +1159,15 @@ class _VerseOptionsSheet extends StatelessWidget {
             leadingIcon: Icons.menu_book,
             onClose: () => Navigator.of(context).maybePop(),
           ),
-          ListTile(
-            leading: const Icon(Icons.play_arrow),
-            title: const Text('Luaj këtë ajet'),
-            onTap: () {
-              Navigator.pop(context);
-              onPlay();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.playlist_play),
-            title: const Text('Luaj nga ky ajet'),
-            onTap: () {
-              Navigator.pop(context);
-              onPlayFromHere();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.psychology),
-            title: const Text('Ndrysho Status Memorizimi'),
-            onTap: onToggleMemorization,
-          ),
+          ...items.map((a) => ListTile(
+                leading: Icon(a.icon),
+                title: Text(a.label),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await a.handler(context, verse);
+                },
+              )),
+          const SizedBox(height: 4),
         ],
       ),
     );

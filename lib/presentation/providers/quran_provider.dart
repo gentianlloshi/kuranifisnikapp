@@ -67,6 +67,7 @@ class QuranProvider extends ChangeNotifier {
   // Metadata-only list (no verse bodies) to reduce startup memory.
   List<SurahMeta> _surahsMeta = [];
   List<Verse> _allCurrentSurahVerses = []; // full list for current surah
+  final Map<int, List<Verse>> _prefetchCache = {}; // surahNumber -> verses (prefetched)
   List<Verse> _pagedVerses = []; // verses exposed with pagination
   List<Verse> _searchResults = [];
   bool _isLoading = false;
@@ -225,7 +226,11 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahVerses(int surahId) async {
     _setLoading(true);
     try {
-      _allCurrentSurahVerses = await _getSurahVersesUseCase!.call(surahId);
+      if (_prefetchCache.containsKey(surahId)) {
+        _allCurrentSurahVerses = _prefetchCache.remove(surahId)!;
+      } else {
+        _allCurrentSurahVerses = await _getSurahVersesUseCase!.call(surahId);
+      }
   Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
       // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
       // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
@@ -262,6 +267,8 @@ class QuranProvider extends ChangeNotifier {
       _pagedVerses = [];
       _appendMoreVerses();
       _error = null;
+  // Opportunistic prefetch of next surah early (after first page) for chaining smoothness
+  _maybePrefetchNextSurah(surahId);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -330,12 +337,20 @@ class QuranProvider extends ChangeNotifier {
     final remaining = _allCurrentSurahVerses.length - _loadedVerseCount;
     if (remaining <= 0) {
       _hasMoreVerses = false;
+      // At end of current surah pages; if chaining desired prefetch next if not already
+      if (_currentSurahId != null) _maybePrefetchNextSurah(_currentSurahId!);
       return;
     }
     final take = remaining >= _pageSize ? _pageSize : remaining;
     _pagedVerses.addAll(_allCurrentSurahVerses.sublist(_loadedVerseCount, _loadedVerseCount + take));
     _loadedVerseCount += take;
     _hasMoreVerses = _loadedVerseCount < _allCurrentSurahVerses.length;
+    // Trigger prefetch when within one page from end
+    if (_hasMoreVerses == false && _currentSurahId != null) {
+      _maybePrefetchNextSurah(_currentSurahId!);
+    } else if (_hasMoreVerses && (_allCurrentSurahVerses.length - _loadedVerseCount) <= _pageSize && _currentSurahId != null) {
+      _maybePrefetchNextSurah(_currentSurahId!);
+    }
   }
 
   void _loadMoreVerses() {
@@ -387,6 +402,26 @@ class QuranProvider extends ChangeNotifier {
     await navigateToSurah(surahNumber); // this calls loadSurahVerses internally
     Logger.d('ensureSurahLoaded surah=$surahNumber took=${sw.elapsedMilliseconds}ms', tag: 'LazySurah');
   }
+
+  // Prefetch next surah's verses (store in cache) if not last surah.
+  void _maybePrefetchNextSurah(int current) {
+    if (current >= 114) return; // last surah
+    final next = current + 1;
+    if (_prefetchCache.containsKey(next)) return; // already prefetched
+    // Fire and forget prefetch
+    // ignore: unawaited_futures
+    Future(() async {
+      try {
+        final verses = await _getSurahVersesUseCase!.call(next);
+        _prefetchCache[next] = verses;
+        Logger.d('Prefetched surah=$next verses=${verses.length}', tag: 'Prefetch');
+      } catch (e) {
+        // ignore errors silently
+      }
+    });
+  }
+
+  bool hasPrefetched(int surahNumber) => _prefetchCache.containsKey(surahNumber);
 
 }
 

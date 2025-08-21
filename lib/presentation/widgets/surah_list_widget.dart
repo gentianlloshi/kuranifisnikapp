@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/reading_progress_provider.dart';
 import '../theme/theme.dart';
 import '../providers/quran_provider.dart';
 import '../providers/audio_provider.dart';
@@ -12,8 +13,8 @@ class SurahListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<QuranProvider, SurahSelectionProvider>(
-      builder: (context, quranProvider, selectionProvider, child) {
+    return Consumer3<QuranProvider, SurahSelectionProvider, ReadingProgressProvider>(
+      builder: (context, quranProvider, selectionProvider, progressProvider, child) {
         if (quranProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -70,9 +71,28 @@ class SurahListWidget extends StatelessWidget {
                 if (width < 600) columns = 1;
                 if (columns == 1) {
                   return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 96),
-                    itemCount: surahs.length,
+                    padding: const EdgeInsets.only(bottom: 96, top: 8),
+                    itemCount: surahs.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return FutureBuilder<ReadingResumePoint?>(
+                          future: progressProvider.getMostRecent(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.data == null) return const SizedBox.shrink();
+                            final rp = snapshot.data!;
+                            final meta = surahs.firstWhere((s) => s.number == rp.surah, orElse: () => surahs.first);
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              child: _ContinueCard(
+                                surah: meta,
+                                verse: rp.verse,
+                                onTap: () => context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                      final surah = surahs[index - 1];
                       final surah = surahs[index];
                       final selected = selection.isSelected(surah.number);
                       return SurahListItem(
@@ -82,6 +102,7 @@ class SurahListWidget extends StatelessWidget {
                         onTap: () => selectionMode ? selection.toggle(surah.number) : _onSurahTap(context, surah),
                         onLongPress: () => selection.toggle(surah.number),
                         onPlay: () => _playSingleSurah(context, surah),
+                        progressProvider: progressProvider,
                       );
                     },
                   );
@@ -110,6 +131,7 @@ class SurahListWidget extends StatelessWidget {
             onTap: () => selectionMode ? selection.toggle(surah.number) : _onSurahTap(context, surah),
             onLongPress: () => selection.toggle(surah.number),
                         onPlay: () => _playSingleSurah(context, surah),
+                        progressProvider: progressProvider,
                       ),
                     );
                   },
@@ -173,6 +195,7 @@ class SurahListItem extends StatelessWidget {
   final VoidCallback? onPlay;
   final bool selectionMode;
   final bool selected;
+  final ReadingProgressProvider? progressProvider;
 
   const SurahListItem({
     super.key,
@@ -182,6 +205,7 @@ class SurahListItem extends StatelessWidget {
     this.onPlay,
     this.selectionMode = false,
     this.selected = false,
+  this.progressProvider,
   });
 
   @override
@@ -191,7 +215,7 @@ class SurahListItem extends StatelessWidget {
     final muted = theme.textTheme.bodySmall?.color?.withOpacity(0.7);
     final borderColor = selected ? theme.colorScheme.primary : theme.dividerColor.withOpacity(0.15);
     final bgOverlay = selected ? theme.colorScheme.primary.withOpacity(0.10) : Colors.transparent;
-    return AnimatedContainer(
+  return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -204,7 +228,7 @@ class SurahListItem extends StatelessWidget {
         onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Column(
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -257,6 +281,61 @@ class SurahListItem extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 6),
+              if (progressProvider != null)
+                FutureBuilder<double>(
+                  future: progressProvider!.getProgressPercent(surah.number, totalVerses: surah.versesCount),
+                  builder: (context, snapshot) {
+                    final p = snapshot.data ?? 0;
+                    if (p <= 0) return const SizedBox.shrink();
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        minHeight: 6,
+                        value: p,
+                        backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.35),
+                        valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContinueCard extends StatelessWidget {
+  final SurahMeta surah; final int verse; final VoidCallback onTap;
+  const _ContinueCard({required this.surah, required this.verse, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.25))),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Icon(Icons.play_circle_fill, color: theme.colorScheme.primary, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Vazhdo leximin', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height:4),
+                    Text('Sure ${surah.nameTranslation} • Ajeti $verse', style: theme.textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: theme.iconTheme.color),
             ],
           ),
         ),

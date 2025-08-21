@@ -14,6 +14,8 @@ import 'package:kurani_fisnik_app/presentation/providers/texhvid_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/word_by_word_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/surah_selection_provider.dart';
+import 'package:kurani_fisnik_app/presentation/widgets/quran_view_widget.dart' show VerseActionRegistry, VerseAction;
+import 'package:kurani_fisnik_app/presentation/providers/reading_progress_provider.dart';
 
 // Pages and Widgets
 import 'package:kurani_fisnik_app/presentation/pages/home_page.dart';
@@ -285,6 +287,46 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<SurahSelectionProvider>(
           create: (_) => SurahSelectionProvider(),
+        ),
+        ChangeNotifierProxyProvider<StorageRepositoryImpl, ReadingProgressProvider>(
+          create: (_) => ReadingProgressProvider(storage: Provider.of<StorageRepositoryImpl>(_, listen:false)),
+          update: (_, storageRepo, previous) => ReadingProgressProvider(storage: storageRepo),
+        ),
+        ChangeNotifierProvider<VerseActionRegistry>(
+          create: (_) => VerseActionRegistry()
+            ..registerAll([
+              VerseAction(
+                id: 'play',
+                label: 'Luaj këtë ajet',
+                icon: Icons.play_arrow,
+                handler: (ctx, verse) async {
+                  ctx.read<AudioProvider>().playVerse(verse);
+                },
+              ),
+              VerseAction(
+                id: 'play_from_here',
+                label: 'Luaj nga ky ajet',
+                icon: Icons.playlist_play,
+                handler: (ctx, verse) async {
+                  final q = ctx.read<QuranProvider>();
+                  final verses = q.currentVerses;
+                  final startIndex = verses.indexWhere((v) => v.number == verse.number);
+                  if (startIndex != -1) {
+                    final wbwProv = ctx.read<WordByWordProvider>();
+                    ctx.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
+                  }
+                },
+              ),
+              VerseAction(
+                id: 'memorization_toggle',
+                label: 'Ndrysho Status Memorizimi',
+                icon: Icons.psychology,
+                handler: (ctx, verse) async {
+                  final mem = ctx.read<MemorizationProvider>();
+                  mem.toggleVerseMemorization('${verse.surahNumber}:${verse.number}');
+                },
+              ),
+            ]),
         ),
       ],
       child: Consumer<AppStateProvider>(

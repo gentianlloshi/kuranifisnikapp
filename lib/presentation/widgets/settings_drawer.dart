@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import '../../core/utils/constants.dart';
 import '../pages/help_page.dart'; // Import the HelpPage
+import 'data_management_sheet.dart';
 
 class SettingsDrawer extends StatelessWidget {
   const SettingsDrawer({super.key});
@@ -185,6 +186,23 @@ class SettingsDrawer extends StatelessWidget {
                     subtitle: const Text('Ndërton indeksin e kërkimit gradualisht pa pritur përdoruesin.'),
                     value: settings.backgroundIndexingEnabled,
                     onChanged: (v) => appState.updateBackgroundIndexing(v),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.backup_table_outlined),
+                    title: const Text('Import / Export'),
+                    subtitle: const Text('Backup ose rikthim i të dhënave personale'),
+                    onTap: () {
+                      Navigator.pop(context); // mbyll drawer
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        useSafeArea: true,
+                        builder: (_) => const FractionallySizedBox(
+                          heightFactor: 0.9,
+                          child: DataManagementSheet(),
+                        ),
+                      );
+                    },
                   ),
                   // Mund të shtohen këtu më vonë filtra të përhershëm ose opsione verbose.
                 ],

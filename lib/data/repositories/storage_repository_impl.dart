@@ -1,4 +1,6 @@
 import '../../domain/entities/app_settings.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/bookmark.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/storage_repository.dart';
@@ -98,15 +100,47 @@ class StorageRepositoryImpl implements StorageRepository {
 
   @override
   Future<void> saveLastReadPosition(int surahNumber, int verseNumber) async {
-    // TODO: Implement last read position functionality
-    // For now, this is a placeholder
+    // Persist last read positions as map of surah->verse and timestamps surah->epochSeconds
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final positionsRaw = prefs.getString('last_read_positions_v1');
+      Map<String, dynamic> map = positionsRaw != null ? json.decode(positionsRaw) : {};
+      map['$surahNumber'] = verseNumber;
+      await prefs.setString('last_read_positions_v1', json.encode(map));
+
+      final timestampsRaw = prefs.getString('last_read_timestamps_v1');
+      Map<String, dynamic> tmap = timestampsRaw != null ? json.decode(timestampsRaw) : {};
+      tmap['$surahNumber'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await prefs.setString('last_read_timestamps_v1', json.encode(tmap));
+    } catch (_) {
+      // swallow errors (best-effort persistence)
+    }
   }
 
   @override
   Future<Map<String, int>> getLastReadPosition() async {
-    // TODO: Implement last read position functionality
-    // For now, return empty map
-    return {};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('last_read_positions_v1');
+      if (raw == null) return {};
+      final decoded = json.decode(raw) as Map<String, dynamic>;
+      return decoded.map((k, v) => MapEntry(k, (v as num).toInt()));
+    } catch (_) {
+      return {};
+    }
+  }
+
+  @override
+  Future<Map<String, int>> getLastReadTimestamps() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('last_read_timestamps_v1');
+      if (raw == null) return {};
+      final decoded = json.decode(raw) as Map<String, dynamic>;
+      return decoded.map((k, v) => MapEntry(k, (v as num).toInt()));
+    } catch (_) {
+      return {};
+    }
   }
 
   @override

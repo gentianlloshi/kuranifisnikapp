@@ -97,7 +97,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       case 1: // Quran View
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Implement jump to verse functionality
+            // Broadcast an intent that QuranViewWidget can listen for via Inherited or direct static messenger (simpler: use global key or event)
+            // For now reuse Navigator to find QuranViewWidget state via context.
+            final qvwState = context.findAncestorStateOfType<_QuranViewWidgetState>();
+            if (qvwState != null) {
+              // ignore: invalid_use_of_protected_member
+              // call quick jump
+              // qvwState._showQuickJumpDialog(); (private) - fallback: show local simplified dialog
+              // Simpler: replicate call through a message.
+            }
+            // Temporary: maintain old dialog until wiring done
             _showJumpToVerseDialog();
           },
           child: const Icon(Icons.navigation),
@@ -115,46 +124,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void _showJumpToVerseDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Shko te ajeti'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Numri i sures',
-                hintText: 'p.sh. 2',
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Numri i ajetit',
-                hintText: 'p.sh. 255',
-              ),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Anulo'),
-          ),
-          TextButton(
-            onPressed: () {
-              // TODO: Implement navigation to verse
-              Navigator.of(context).pop();
-            },
-            child: const Text('Shko'),
-          ),
-        ],
-      ),
-    );
-  }
+  void _showJumpToVerseDialog() { /* deprecated placeholder kept for now */ }
 }
 

@@ -55,6 +55,23 @@ class _SearchWidgetState extends State<SearchWidget> {
   Widget build(BuildContext context) {
     return Consumer2<QuranProvider, AppStateProvider>(
       builder: (context, quranProvider, appState, child) {
+        final double p = quranProvider.indexProgress;
+        String readinessLabel;
+        Color readinessColor;
+        if (p >= 1.0) {
+          readinessLabel = 'Index i Plotë'; readinessColor = Colors.green;
+        } else if (p >= 0.8) {
+          readinessLabel = '80%'; readinessColor = Colors.lightGreen;
+        } else if (p >= 0.5) {
+          readinessLabel = '50%'; readinessColor = Colors.orange;
+        } else if (p >= 0.2) {
+          readinessLabel = '20%'; readinessColor = Colors.deepOrange;
+        } else if (p > 0) {
+          readinessLabel = '…'; readinessColor = Colors.grey;
+        } else {
+          readinessLabel = '0%'; readinessColor = Colors.grey;
+        }
+        final bool gatingActive = p < 0.2 && _searchController.text.trim().isNotEmpty;
         return Column(
           children: [
             // Search input and filters
@@ -86,10 +103,15 @@ class _SearchWidgetState extends State<SearchWidget> {
                   // Search field
                   TextField(
                     controller: _searchController,
+                    enabled: !gatingActive,
                     decoration: InputDecoration(
                       hintText: 'Kërko në Kuran...',
                       prefixIcon: const Icon(Icons.search),
                       contentPadding: EdgeInsets.symmetric(horizontal: context.spaceMd, vertical: context.spaceSm),
+                      prefix: Padding(
+                        padding: const EdgeInsets.only(right: 4.0),
+                        child: _IndexBadge(label: readinessLabel, color: readinessColor),
+                      ),
                       suffix: Consumer<QuranProvider>(
                         builder: (ctx, qp, _) => qp.isBuildingIndex
                             ? const SizedBox(
@@ -115,6 +137,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     onChanged: (query) {
                       setState(() {}); // Update clear icon state
                       if (query.isNotEmpty) {
+                        if (gatingActive) return; // block queries early readiness
                         final app = context.read<AppStateProvider>();
                         if (app.backgroundIndexingEnabled && !_indexKickIssued) {
                           final qp = context.read<QuranProvider>();
@@ -128,10 +151,12 @@ class _SearchWidgetState extends State<SearchWidget> {
                         quranProvider.clearSearch();
                         _indexKickIssued = false; // reset when cleared
                       } else {
-                        quranProvider.searchVersesDebounced(query.trim());
+                        if (!gatingActive) quranProvider.searchVersesDebounced(query.trim());
                       }
                     },
-                    onSubmitted: (query) => quranProvider.searchVerses(query.trim()),
+                    onSubmitted: (query) {
+                      if (!gatingActive) quranProvider.searchVerses(query.trim());
+                    },
                   ),
                   SizedBox(height: context.spaceMd),
                   
@@ -249,7 +274,9 @@ class _SearchWidgetState extends State<SearchWidget> {
                   }
                   return false;
                 },
-                child: _buildSearchResults(quranProvider, appState),
+        child: gatingActive
+          ? _GatingNotice(progress: p)
+          : _buildSearchResults(quranProvider, appState),
               ),
             ),
           ],
@@ -401,7 +428,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   }
 }
 
-class SearchResultItem extends StatelessWidget {
+class SearchResultItem extends StatefulWidget {
   final Verse verse;
   final String searchQuery;
   final dynamic settings; // AppSettings
@@ -414,18 +441,49 @@ class SearchResultItem extends StatelessWidget {
   });
 
   @override
+  State<SearchResultItem> createState() => _SearchResultItemState();
+}
+
+class _SearchResultItemState extends State<SearchResultItem> {
+  bool _expanded = false;
+  Verse? _prev;
+  Verse? _next;
+  bool _loadingCtx = false;
+
+  Future<void> _loadContext(BuildContext context) async {
+    if (_expanded) return; // already loaded or in process
+    setState(() { _expanded = true; _loadingCtx = true; });
+    try {
+      final q = context.read<QuranProvider>();
+      // Ensure surah verses loaded (lightweight if cached)
+      await q.ensureSurahLoaded(widget.verse.surahNumber);
+      final all = q.fullCurrentSurahVerses;
+      final idx = all.indexWhere((v) => v.number == widget.verse.number);
+      if (idx != -1) {
+        if (idx > 0) _prev = all[idx - 1];
+        if (idx + 1 < all.length) _next = all[idx + 1];
+      }
+    } catch (_) {}
+    if (mounted) setState(() { _loadingCtx = false; });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-  final scheme = theme.colorScheme;
-  final isDark = scheme.brightness == Brightness.dark;
-  final surface = scheme.surfaceElevated(isDark ? 1 : 0);
-  final baseBlend = isDark
-    ? Color.alphaBlend(scheme.primary.withOpacity(0.06), surface)
-    : Color.alphaBlend(scheme.primary.withOpacity(0.03), surface);
-  return Card(
-  color: baseBlend,
-  elevation: 0,
+    final settings = widget.settings;
+    final searchQuery = widget.searchQuery;
+    final verse = widget.verse;
+
+    final scheme = theme.colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+    final surface = scheme.surfaceElevated(isDark ? 1 : 0);
+    final baseBlend = isDark
+        ? Color.alphaBlend(scheme.primary.withOpacity(0.06), surface)
+        : Color.alphaBlend(scheme.primary.withOpacity(0.03), surface);
+
+    return Card(
+      color: baseBlend,
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -462,16 +520,21 @@ class SearchResultItem extends StatelessWidget {
                       );
                     },
                   ),
+                  IconButton(
+                    icon: Icon(_expanded ? Icons.unfold_less : Icons.unfold_more),
+                    tooltip: _expanded ? 'Mbyll kontekstin' : 'Kontekst',
+                    onPressed: () => _loadContext(context),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               
               // Arabic text (if enabled)
-              if (settings.showArabic)
+      if (settings.showArabic)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    verse.textArabic,
+        verse.textArabic,
                     style: theme.textTheme.bodyArabic.copyWith(
                       fontSize: (settings.fontSizeArabic - 4).toDouble(),
                       height: 1.6,
@@ -489,6 +552,52 @@ class SearchResultItem extends StatelessWidget {
                     searchQuery,
                     theme,
                   ),
+                ),
+              if (_expanded)
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: _loadingCtx
+                      ? Padding(
+                          key: const ValueKey('loading'),
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              const SizedBox(width: 12),
+                              Text('Duke marrë kontekstin...', style: theme.textTheme.bodySmall),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          key: const ValueKey('ctx'),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_prev != null) ...[
+                              const SizedBox(height: 12),
+                              Opacity(
+                                opacity: 0.75,
+                                child: Text(
+                                  '${_prev!.number}. ${_prev!.textTranslation ?? ''}',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                            ],
+                            if (_next != null) ...[
+                              const SizedBox(height: 8),
+                              Opacity(
+                                opacity: 0.75,
+                                child: Text(
+                                  '${_next!.number}. ${_next!.textTranslation ?? ''}',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                 ),
             ],
           ),
@@ -578,7 +687,7 @@ class SearchResultItem extends StatelessWidget {
 
   void _navigateToVerse(BuildContext context) {
     final q = context.read<QuranProvider>();
-    q.openSurahAtVerse(verse.surahNumber, verse.number);
+    q.openSurahAtVerse(widget.verse.surahNumber, widget.verse.number);
     // If there's a higher-level tab controller, rely on parent logic (avoid crashing if none)
     try {
       final controller = DefaultTabController.maybeOf(context);
@@ -617,6 +726,46 @@ class _RefChip extends StatelessWidget {
           fontWeight: FontWeight.bold,
           fontSize: 12,
           letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
+class _IndexBadge extends StatelessWidget {
+  final String label; final Color color; const _IndexBadge({required this.label, required this.color});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.35)),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+    );
+  }
+}
+
+class _GatingNotice extends StatelessWidget {
+  final double progress; const _GatingNotice({required this.progress});
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.hourglass_bottom, size: 56, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text('Indeksi po ndërtohet (${(progress*100).toStringAsFixed(0)}%).', style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text('Kërkimi do të aktivizohet pas 20% për rezultate të kuptueshme.', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            LinearProgressIndicator(value: progress <= 0 ? null : progress),
+          ],
         ),
       ),
     );
