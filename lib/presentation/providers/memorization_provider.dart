@@ -9,6 +9,9 @@ class MemorizationProvider extends ChangeNotifier {
   static const String _activeSurahKey = 'active_surah';
   static const String _repeatTargetKey = 'repeat_target';
   static const String _hiddenModeKey = 'hidden_mode';
+  // Legacy keys (pre-structured model) for MEMO-6 migration
+  static const String _legacyVersesBoolMapKey = 'verses'; // Map<String,bool>
+  static const String _legacyListKey = 'list'; // List<String>
 
   Box? _box;
   final Map<String, MemorizationVerse> _verses = {};
@@ -49,6 +52,8 @@ class MemorizationProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       await _ensureBox();
+  // MEMO-6: one-time migration from legacy simple formats to structured list
+  await _maybeMigrateLegacy();
       final raw = _box!.get(_versesKey) as List?;
       if (raw != null) {
         for (final item in raw) {
@@ -76,6 +81,40 @@ class MemorizationProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> _maybeMigrateLegacy() async {
+    if (_box == null) return;
+    // If new key already populated, skip
+    if (_box!.get(_versesKey) != null) return;
+    final legacyMap = _box!.get(_legacyVersesBoolMapKey) as Map?; // map of verseKey->bool
+    final legacyList = _box!.get(_legacyListKey) as List?; // list of verseKey strings
+    if (legacyMap == null && legacyList == null) return; // nothing to migrate
+    final mergedKeys = <String>{};
+    if (legacyMap != null) {
+      legacyMap.forEach((k, v) {
+        if (v == true) mergedKeys.add(k.toString());
+      });
+    }
+    if (legacyList != null) {
+      for (final k in legacyList) {
+        mergedKeys.add(k.toString());
+      }
+    }
+    if (mergedKeys.isEmpty) return;
+    final migrated = <Map<String, dynamic>>[];
+    for (final key in mergedKeys) {
+      final parts = key.split(':');
+      if (parts.length != 2) continue;
+      final s = int.tryParse(parts[0]);
+      final v = int.tryParse(parts[1]);
+      if (s == null || v == null) continue;
+      migrated.add({'s': s, 'v': v, 'st': MemorizationStatus.newVerse.index});
+    }
+    await _box!.put(_versesKey, migrated);
+    // Optionally clear legacy to avoid re-migration
+    await _box!.delete(_legacyVersesBoolMapKey);
+    await _box!.delete(_legacyListKey);
   }
 
   Future<void> addVerse(int surah, int verse) async {
@@ -246,6 +285,30 @@ class MemorizationProvider extends ChangeNotifier {
 
   bool isVerseMemorized(String verseKey) => _verses.containsKey(verseKey);
   bool isVerseMemorizedSync(String verseKey) => isVerseMemorized(verseKey);
+
+  // Legacy widget compatibility (stats & list) --------------------------------
+  List<String> get memorizationList => _verses.values.map((v) => v.key).toList(growable: false);
+  Future<void> loadMemorizationList() async { if (_verses.isEmpty && !_isLoading) await load(); }
+  Map<String, dynamic> getMemorizationStats() {
+    final totalVerses = _verses.length;
+    // In old logic 'memorized' likely counted all; we align to mastered count now
+    final mastered = _verses.values.where((v) => v.status == MemorizationStatus.mastered).length;
+    return { 'total': totalVerses, 'memorized': mastered };
+  }
+  int getMemorizationProgressForSurah(int surahNumber) => _verses.values.where((v) => v.surah == surahNumber).length;
+  double getMemorizationPercentageForSurah(int surahNumber) {
+    final count = getMemorizationProgressForSurah(surahNumber);
+    // We do not have verse count here; returning count as percentage stand-in if unknown.
+    return count.toDouble();
+  }
+  void removeVerseFromMemorization(String verseKey) async {
+    final parts = verseKey.split(':');
+    if (parts.length != 2) return;
+    final s = int.tryParse(parts[0]);
+    final v = int.tryParse(parts[1]);
+    if (s == null || v == null) return;
+    await removeVerse(s, v);
+  }
 
   Future<void> _persist() async {
     await _ensureBox();

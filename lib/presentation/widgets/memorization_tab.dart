@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../providers/memorization_provider.dart';
 import '../providers/audio_provider.dart';
@@ -20,6 +21,7 @@ class MemorizationTab extends StatefulWidget {
 class _MemorizationTabState extends State<MemorizationTab> {
   bool _initialized = false;
   final ScrollController _scrollController = ScrollController();
+  int? _requestedArabicSurah; // MEMO-3: avoid redundant surah loads for Arabic text
 
   // reserved for future audio binding (auto-scroll listener)
 
@@ -217,21 +219,31 @@ class _MemorizationTabState extends State<MemorizationTab> {
 
   Widget _buildVerseTile(BuildContext context, MemorizationProvider mem, MemorizationVerse mv) {
     final selected = mem.isSelected(mv.surah, mv.verse);
-    return ListTile(
+    String? arabicText;
+    final quran = context.watch<QuranProvider>();
+    if (quran.currentSurah?.number == mv.surah) {
+      for (final v in quran.fullCurrentSurahVerses.isNotEmpty ? quran.fullCurrentSurahVerses : quran.currentVerses) {
+        if (v.number == mv.verse) { arabicText = v.textArabic; break; }
+      }
+    } else if (mem.hideText && _requestedArabicSurah != mv.surah) {
+      // Lazy load surah Arabic if entering hide mode
+      _requestedArabicSurah = mv.surah;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final qp = context.read<QuranProvider>();
+        if (qp.currentSurah?.number != mv.surah) {
+          qp.navigateToSurah(mv.surah);
+        }
+      });
+    }
+    return _MemorizationVerseTile(
       key: ValueKey(mv.key),
-      leading: CircleAvatar(radius: 18, child: Text('${mv.verse}')),
-      title: Text('Ajeti ${mv.verse}'),
-      subtitle: Text(_statusLabel(mv.status)),
+      verse: mv,
       selected: selected,
-      onTap: () => mem.toggleSelection(mv.surah, mv.verse),
-      trailing: Wrap(spacing: 4, children: [
-        _StatusCycleButton(mv: mv, onCycle: () => mem.cycleStatus(mv)),
-        IconButton(
-          tooltip: 'Hiq',
-          icon: const Icon(Icons.close),
-          onPressed: () => mem.removeVerse(mv.surah, mv.verse),
-        ),
-      ]),
+      hideText: mem.hideText,
+      arabicText: arabicText,
+      onSelect: () => mem.toggleSelection(mv.surah, mv.verse),
+      onCycle: () => mem.cycleStatus(mv),
+      onRemove: () => mem.removeVerse(mv.surah, mv.verse),
     );
   }
 
@@ -346,4 +358,162 @@ class _NavButton extends StatelessWidget {
         onPressed: enabled ? onTap : null,
         icon: Icon(icon),
       );
+}
+
+// MEMO-3: Verse tile with hide-text blur + tap-to-peek reveal.
+class _MemorizationVerseTile extends StatefulWidget {
+  final MemorizationVerse verse;
+  final bool selected;
+  final bool hideText;
+  final String? arabicText;
+  final VoidCallback onSelect;
+  final VoidCallback onCycle;
+  final VoidCallback onRemove;
+  const _MemorizationVerseTile({
+    super.key,
+    required this.verse,
+    required this.selected,
+    required this.hideText,
+    this.arabicText,
+    required this.onSelect,
+    required this.onCycle,
+    required this.onRemove,
+  });
+
+  @override
+  State<_MemorizationVerseTile> createState() => _MemorizationVerseTileState();
+}
+
+class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with SingleTickerProviderStateMixin {
+  bool _peek = false;
+  Timer? _reHideTimer;
+  static const _peekDuration = Duration(seconds: 5);
+
+  @override
+  void didUpdateWidget(covariant _MemorizationVerseTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.hideText) {
+      _cancelTimer();
+      if (_peek) setState(() => _peek = false);
+    }
+  }
+
+  void _cancelTimer() { _reHideTimer?.cancel(); _reHideTimer = null; }
+
+  void _togglePeek() {
+    if (!widget.hideText) return; // not in hide mode
+    setState(() => _peek = !_peek);
+    _cancelTimer();
+    if (_peek) {
+      _reHideTimer = Timer(_peekDuration, () {
+        if (mounted) setState(() => _peek = false);
+      });
+    }
+  }
+
+  Color _statusColor(MemorizationStatus status) => switch (status) {
+        MemorizationStatus.newVerse => Colors.blueGrey,
+        MemorizationStatus.inProgress => Colors.orange,
+        MemorizationStatus.mastered => Colors.green,
+      };
+
+  @override
+  void dispose() {
+    _cancelTimer();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mv = widget.verse;
+    final colorScheme = Theme.of(context).colorScheme;
+    final tileColor = widget.selected ? colorScheme.primary.withOpacity(0.08) : Colors.transparent;
+    final statusColor = _statusColor(mv.status);
+    return InkWell(
+      onTap: widget.onSelect,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: tileColor,
+          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(radius: 18, child: Text('${mv.verse}')),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text('Ajeti ${mv.verse}', style: Theme.of(context).textTheme.titleSmall),
+                      const SizedBox(width: 8),
+                      _StatusCycleButton(mv: mv, onCycle: widget.onCycle),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  _buildArabicMasked(context),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: 'Hiq',
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: widget.onRemove,
+                ),
+                if (widget.hideText)
+                  IconButton(
+                    tooltip: _peek ? 'Fsheh' : 'Shfaq',
+                    icon: Icon(_peek ? Icons.visibility : Icons.visibility_off, size: 20),
+                    onPressed: _togglePeek,
+                  ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArabicMasked(BuildContext context) {
+    final hide = widget.hideText && !_peek;
+  final arabic = widget.arabicText ?? '…';
+    final baseStyle = Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 20, height: 1.4);
+    if (!hide) {
+      return AnimatedOpacity(
+        duration: const Duration(milliseconds: 250),
+        opacity: 1,
+        child: Text(arabic, textDirection: TextDirection.rtl, style: baseStyle),
+      );
+    }
+    return GestureDetector(
+      onTap: _togglePeek,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Obscured text silhouette (for height stability)
+          Opacity(
+            opacity: 0,
+            child: Text(arabic, textDirection: TextDirection.rtl, style: baseStyle),
+          ),
+          Container(
+            height: 36,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text('Prek për të parë', style: Theme.of(context).textTheme.bodySmall),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
