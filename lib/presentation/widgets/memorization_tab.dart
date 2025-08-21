@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/memorization_provider.dart';
+import '../providers/audio_provider.dart';
+import '../providers/quran_provider.dart';
+import '../../domain/entities/verse.dart';
 import '../theme/theme.dart';
 import '../../domain/entities/memorization_verse.dart';
 
@@ -16,6 +19,9 @@ class MemorizationTab extends StatefulWidget {
 
 class _MemorizationTabState extends State<MemorizationTab> {
   bool _initialized = false;
+  final ScrollController _scrollController = ScrollController();
+
+  // reserved for future audio binding (auto-scroll listener)
 
   @override
   void didChangeDependencies() {
@@ -52,7 +58,11 @@ class _MemorizationTabState extends State<MemorizationTab> {
         if (mem.groupedSurahs.isEmpty) {
           return _buildEmptyState(context);
         }
-        return CustomScrollView(
+  // Observe current playing verse for auto-scroll
+  final audio = context.watch<AudioProvider>();
+  _maybeAutoScroll(mem, audio.currentVerse);
+  return CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverPersistentHeader(
               pinned: true,
@@ -119,6 +129,11 @@ class _MemorizationTabState extends State<MemorizationTab> {
                 ),
                 _NavButton(icon: Icons.chevron_left, onTap: mem.goToPrevGroup, enabled: _hasPrev(mem)),
                 _NavButton(icon: Icons.chevron_right, onTap: mem.goToNextGroup, enabled: _hasNext(mem)),
+                IconButton(
+                  tooltip: 'Luaj Seancën',
+                  icon: const Icon(Icons.play_circle_fill),
+                  onPressed: () => _playSession(context, mem),
+                ),
               ],
             ),
             if (activeSurah != null)
@@ -154,6 +169,36 @@ class _MemorizationTabState extends State<MemorizationTab> {
         ),
       ),
     );
+  }
+
+  Future<void> _playSession(BuildContext context, MemorizationProvider mem) async {
+    final session = mem.session;
+    if (session == null || session.selectedVerseKeys.isEmpty) return;
+    final audio = context.read<AudioProvider>();
+    final quran = context.read<QuranProvider>();
+    final surah = session.surah;
+    // Ensure surah loaded
+    if (quran.currentSurah == null || quran.currentSurah!.number != surah) {
+      await quran.navigateToSurah(surah);
+    }
+    final verseNumbers = mem.sessionVerseNumbersOrdered();
+    if (verseNumbers.isEmpty) return;
+    // Filter verses from provider (paged list may not include all yet); naive approach: ensure all pages loaded until last needed verse present
+    int safety = 20;
+    while (safety-- > 0) {
+      final currentMax = quran.currentVerses.isEmpty ? 0 : quran.currentVerses.map((v) => v.number).reduce((a,b)=>a>b?a:b);
+      if (currentMax >= verseNumbers.last) break;
+      quran.loadMoreVerses();
+      await Future.delayed(const Duration(milliseconds: 30));
+    }
+    final verses = quran.currentVerses.where((v) => verseNumbers.contains(v.number)).toList()
+      ..sort((a,b)=>a.number.compareTo(b.number));
+    if (verses.isEmpty) return;
+    // Build repeated playlist
+    final repeat = (session.repeatTarget <= 1) ? 1 : session.repeatTarget;
+  final List<Verse> playlist = [];
+  for (int i=0;i<repeat;i++) { playlist.addAll(verses); }
+  await audio.playSurah(playlist);
   }
 
   bool _hasPrev(MemorizationProvider mem) {
@@ -195,6 +240,31 @@ class _MemorizationTabState extends State<MemorizationTab> {
         MemorizationStatus.inProgress => 'Në Progres',
         MemorizationStatus.mastered => 'I Mësuar',
       };
+
+  DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
+  static const _autoScrollCooldown = Duration(milliseconds: 500);
+
+  void _maybeAutoScroll(MemorizationProvider mem, Verse? playing) {
+    if (playing == null) return;
+    if (mem.activeSurah == null || playing.surahNumber != mem.activeSurah) return;
+    if (mem.session == null || !mem.session!.selectedVerseKeys.contains('${playing.surahNumber}:${playing.number}')) return;
+    final now = DateTime.now();
+    if (now.difference(_lastAutoScroll) < _autoScrollCooldown) return;
+    _lastAutoScroll = now;
+    // Find index
+    final verses = mem.versesForActiveSurah();
+    final idx = verses.indexWhere((v) => v.verse == playing.number);
+    if (idx == -1) return;
+    // Compute scroll offset approximation (ListTile height ~72?) use position in sliver list by jumping to index * 72; smooth animate
+    final targetOffset = (idx * 72).toDouble();
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
 }
 
 class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {

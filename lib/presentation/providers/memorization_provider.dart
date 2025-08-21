@@ -214,6 +214,21 @@ class MemorizationProvider extends ChangeNotifier {
   bool isSelected(int surah, int verse) => _session?.selectedVerseKeys.contains('$surah:$verse') ?? false;
   bool containsVerse(int surah, int verse) => _verses.containsKey('$surah:$verse');
 
+  List<int> sessionVerseNumbersOrdered() {
+    if (_session == null) return const [];
+    final keys = _session!.selectedVerseKeys;
+    final nums = <int>[];
+    for (final k in keys) {
+      final parts = k.split(':');
+      if (parts.length == 2 && int.tryParse(parts[0]) == _session!.surah) {
+        final v = int.tryParse(parts[1]);
+        if (v != null) nums.add(v);
+      }
+    }
+    nums.sort();
+    return nums;
+  }
+
   // Legacy API compatibility -------------------------------------------------
   Future<void> toggleVerseMemorization(String verseKey) async {
     // verseKey format surah:verse
