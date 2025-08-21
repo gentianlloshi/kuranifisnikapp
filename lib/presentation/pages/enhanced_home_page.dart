@@ -14,7 +14,8 @@ import '../widgets/quran_view_widget.dart';
 import '../widgets/search_widget.dart';
 import '../widgets/bookmarks_widget.dart';
 import '../widgets/notes_widget.dart';
-import '../widgets/memorization_widget.dart';
+import '../widgets/memorization_widget.dart'; // legacy (temporarily kept)
+import '../widgets/memorization_tab.dart'; // new MEMO-1 implementation
 import '../widgets/audio_player_widget.dart';
 import '../widgets/mini_player_widget.dart';
 import '../widgets/texhvid_widget.dart';
@@ -60,7 +61,7 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
     TabInfo(
       title: 'Memorizo',
       icon: Icons.psychology,
-      widget: const MemorizationWidget(),
+      widget: const MemorizationTab(),
     ),
     TabInfo(
       title: 'Texhvid',

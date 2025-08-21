@@ -1,0 +1,279 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/memorization_provider.dart';
+import '../theme/theme.dart';
+import '../../domain/entities/memorization_verse.dart';
+
+/// New Memorization Tab (MEMO-1):
+/// - Sticky controls header (stats + actions)
+/// - Group navigation (prev/next surah groups)
+/// - Verses list for active surah with status chips & selection support placeholder
+class MemorizationTab extends StatefulWidget {
+  const MemorizationTab({super.key});
+  @override
+  State<MemorizationTab> createState() => _MemorizationTabState();
+}
+
+class _MemorizationTabState extends State<MemorizationTab> {
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      // Load data (new provider API)
+      WidgetsBinding.instance.addPostFrameCallback((_) => context.read<MemorizationProvider>().load());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MemorizationProvider>(
+      builder: (context, mem, _) {
+        if (mem.isLoading && mem.groupedSurahs.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (mem.error != null) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Gabim: ${mem.error}', style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => mem.load(),
+                  child: const Text('Ringarko'),
+                ),
+              ],
+            ),
+          );
+        }
+        if (mem.groupedSurahs.isEmpty) {
+          return _buildEmptyState(context);
+        }
+        return CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _StickyHeaderDelegate(child: _buildHeader(context, mem), minExtent: 140, maxExtent: 180),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (ctx, index) {
+                  final verses = mem.versesForActiveSurah();
+                  if (index >= verses.length) return null;
+                  final mv = verses[index];
+                  return _buildVerseTile(context, mem, mv);
+                },
+                childCount: mem.versesForActiveSurah().length,
+              ),
+            ),
+            if (mem.versesForActiveSurah().isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(context.spaceXl),
+                  child: const Text('Nuk ka ajete të zgjedhura për këtë sure.'),
+                ),
+              ),
+            const SliverToBoxAdapter(child: SizedBox(height: 64)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(context.spaceXl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.school_outlined, size: 72, color: Theme.of(context).colorScheme.primary.withOpacity(0.35)),
+            SizedBox(height: context.spaceLg),
+            Text('Shtoni ajete nga pamja e leximit për të nisur memorizimin.',
+                textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, MemorizationProvider mem) {
+    final global = mem.globalStatusCounts();
+    final active = mem.statusCountsForActive();
+    final activeSurah = mem.activeSurah;
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      elevation: 2,
+      child: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: context.spaceMd, right: context.spaceMd, bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text('Memorizim', style: Theme.of(context).textTheme.titleLarge),
+                ),
+                _NavButton(icon: Icons.chevron_left, onTap: mem.goToPrevGroup, enabled: _hasPrev(mem)),
+                _NavButton(icon: Icons.chevron_right, onTap: mem.goToNextGroup, enabled: _hasNext(mem)),
+              ],
+            ),
+            if (activeSurah != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text('Sure $activeSurah  •  ${active['new']} të reja  •  ${active['inProgress']} në progres  •  ${active['mastered']} të mësuara',
+                    style: Theme.of(context).textTheme.bodySmall),
+              ),
+            SizedBox(height: context.spaceSm),
+            Row(
+              children: [
+                _StatChip(label: 'Totale', value: global.values.fold<int>(0, (a, b) => a + b)),
+                SizedBox(width: context.spaceSm),
+                _StatChip(label: 'Të mësuara', value: global['mastered'] ?? 0, color: Colors.green),
+                SizedBox(width: context.spaceSm),
+                _StatChip(label: 'Në progres', value: global['inProgress'] ?? 0, color: Colors.orange),
+                SizedBox(width: context.spaceSm),
+                _StatChip(label: 'Të reja', value: global['new'] ?? 0, color: Colors.blueGrey),
+                const Spacer(),
+                IconButton(
+                  tooltip: mem.hideText ? 'Shfaq tekstin' : 'Fsheh tekstin',
+                  onPressed: mem.toggleHideText,
+                  icon: Icon(mem.hideText ? Icons.visibility_off : Icons.visibility),
+                ),
+                IconButton(
+                  tooltip: 'Zgjidh të gjitha',
+                  onPressed: mem.selectAllForActive,
+                  icon: const Icon(Icons.select_all),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _hasPrev(MemorizationProvider mem) {
+    if (mem.activeSurah == null) return false;
+    final list = mem.groupedSurahs;
+    final idx = list.indexOf(mem.activeSurah!);
+    return idx > 0;
+  }
+
+  bool _hasNext(MemorizationProvider mem) {
+    if (mem.activeSurah == null) return false;
+    final list = mem.groupedSurahs;
+    final idx = list.indexOf(mem.activeSurah!);
+    return idx >= 0 && idx < list.length - 1;
+  }
+
+  Widget _buildVerseTile(BuildContext context, MemorizationProvider mem, MemorizationVerse mv) {
+    final selected = mem.isSelected(mv.surah, mv.verse);
+    return ListTile(
+      key: ValueKey(mv.key),
+      leading: CircleAvatar(radius: 18, child: Text('${mv.verse}')),
+      title: Text('Ajeti ${mv.verse}'),
+      subtitle: Text(_statusLabel(mv.status)),
+      selected: selected,
+      onTap: () => mem.toggleSelection(mv.surah, mv.verse),
+      trailing: Wrap(spacing: 4, children: [
+        _StatusCycleButton(mv: mv, onCycle: () => mem.cycleStatus(mv)),
+        IconButton(
+          tooltip: 'Hiq',
+          icon: const Icon(Icons.close),
+          onPressed: () => mem.removeVerse(mv.surah, mv.verse),
+        ),
+      ]),
+    );
+  }
+
+  String _statusLabel(MemorizationStatus status) => switch (status) {
+        MemorizationStatus.newVerse => 'I Ri',
+        MemorizationStatus.inProgress => 'Në Progres',
+        MemorizationStatus.mastered => 'I Mësuar',
+      };
+}
+
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double _minH;
+  final double _maxH;
+  _StickyHeaderDelegate({required this.child, required double minExtent, required double maxExtent})
+      : _minH = minExtent,
+        _maxH = maxExtent;
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
+  @override
+  bool shouldRebuild(covariant _StickyHeaderDelegate oldDelegate) =>
+      oldDelegate.child != child || oldDelegate._minH != _minH || oldDelegate._maxH != _maxH;
+  @override
+  double get maxExtent => _maxH;
+  @override
+  double get minExtent => _minH;
+}
+
+class _StatChip extends StatelessWidget {
+  final String label;
+  final int value;
+  final Color? color;
+  const _StatChip({required this.label, required this.value, this.color});
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? Theme.of(context).colorScheme.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: c.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: c.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$value', style: TextStyle(fontWeight: FontWeight.bold, color: c)),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(color: c.withOpacity(0.9))),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusCycleButton extends StatelessWidget {
+  final MemorizationVerse mv;
+  final VoidCallback onCycle;
+  const _StatusCycleButton({required this.mv, required this.onCycle});
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (label, color) = switch (mv.status) {
+      MemorizationStatus.newVerse => ('I Ri', Colors.blueGrey),
+      MemorizationStatus.inProgress => ('Në Progres', Colors.orange),
+      MemorizationStatus.mastered => ('I Mësuar', Colors.green),
+    };
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: color,
+        side: BorderSide(color: color.withOpacity(0.6)),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      ),
+      onPressed: onCycle,
+      child: Text(label, style: TextStyle(color: colorScheme.onSurface, fontSize: 12)),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final IconData icon;
+  final Future<void> Function()? onTap;
+  final bool enabled;
+  const _NavButton({required this.icon, required this.onTap, required this.enabled});
+  @override
+  Widget build(BuildContext context) => IconButton(
+        onPressed: enabled ? onTap : null,
+        icon: Icon(icon),
+      );
+}
