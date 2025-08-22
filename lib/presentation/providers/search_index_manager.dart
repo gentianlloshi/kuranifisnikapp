@@ -38,6 +38,14 @@ class SearchIndexManager {
   // Persistence constants
   static const int _snapshotVersion = 2; // bumped for incremental structure
   static const String _snapshotFile = 'search_index_v$_snapshotVersion.json';
+  // Manual corpus data version: bump when asset corpus changes to invalidate old snapshots.
+  static const String _dataVersion = '2025-08-22';
+
+  // Scoring weights (tunable)
+  static const int _baseHitWeight = 10;
+  static const int _wTranslation = 25;
+  static const int _wArabic = 15;
+  static const int _wTransliteration = 10;
 
   SearchIndexManager({
     required this.getSurahsUseCase,
@@ -209,7 +217,7 @@ class SearchIndexManager {
   if (_invertedIndex == null) return [];
     final tokens = _expandQueryTokens(query);
     if (tokens.isEmpty) return [];
-    final candidateScores = <String, int>{};
+  final candidateScores = <String, int>{};
     for (final t in tokens) {
       final list = _invertedIndex![t];
       if (list == null) continue;
@@ -224,23 +232,23 @@ class SearchIndexManager {
       final verse = _verseCache[key];
       if (verse == null) return;
       if (juzFilter != null && verse.juz != juzFilter) return;
-      int score = base * 10;
+      int score = base * _baseHitWeight;
       if (includeTranslation) {
         final translation = (verse.textTranslation ?? '').toLowerCase();
         for (final ft in fullTokens) {
-          if (translation.contains(ft)) score += 25;
+          if (translation.contains(ft)) score += _wTranslation;
         }
       }
       if (includeArabic) {
         final ar = (verse.textArabic ?? '').toLowerCase();
         for (final ft in fullTokens) {
-          if (ar.contains(ft)) score += 15; // lower weight
+          if (ar.contains(ft)) score += _wArabic; // lower weight
         }
       }
       if (includeTransliteration) {
         final tr = (verse.textTransliteration ?? '').toLowerCase();
         for (final ft in fullTokens) {
-          if (tr.contains(ft)) score += 10; // lowest weight
+          if (tr.contains(ft)) score += _wTransliteration; // lowest weight
         }
       }
       scored.add(_ScoredVerse(verse, score));
@@ -412,6 +420,8 @@ extension on SearchIndexManager {
       final jsonMap = json.decode(content) as Map<String, dynamic>;
       final version = jsonMap['version'] as int?;
       if (version != SearchIndexManager._snapshotVersion) return false; // mismatch version
+  final dataVersion = jsonMap['dataVersion'] as String?;
+  if (dataVersion != SearchIndexManager._dataVersion) return false; // corpus changed
       final inv = (jsonMap['index'] as Map<String, dynamic>).map((k, v) => MapEntry(k, (v as List).cast<String>()));
       final versesJson = (jsonMap['verses'] as Map<String, dynamic>);
       versesJson.forEach((k, v) {
@@ -461,6 +471,7 @@ extension on SearchIndexManager {
       });
       final payload = json.encode({
         'version': SearchIndexManager._snapshotVersion,
+        'dataVersion': SearchIndexManager._dataVersion,
         'index': _invertedIndex,
         'verses': versesMap,
         'createdAt': DateTime.now().toIso8601String(),

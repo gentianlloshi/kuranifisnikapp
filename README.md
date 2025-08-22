@@ -17,6 +17,7 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 - Android: aktivizuar predictive back; përditësuar Pop/Back në fletë të plota.
 - UI: rregulluar overflow në header të Memorizimit (chips horizontale të scrollueshme).
  - Kërkim: shtuar debounce në input dhe normalizim morfologjik i lehtë (shqip) për indeksim dhe kërkim.
+ - Kërkim: peshëzim i fushave (bonus më i lartë për përkthim), dhe verifikim i snapshot-it me dataVersion për invalidim të saktë.
 
 ## Karakteristikat Kryesore
 
