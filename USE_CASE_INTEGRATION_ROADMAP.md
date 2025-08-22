@@ -112,7 +112,7 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 |------|-----------|
 | Multi-reciter LRU cache | Reduce storage & memory for audio assets. |
 | Offline first translation diff sync | Future content update mechanism. |
-| Advanced search ranking (BM25-lite) | Better relevance ordering when multiple terms. |
+| Advanced search ranking (BM25-lite) | Better relevance ordering when multiple terms (flagged). |
 | Animated list diffing for memorization changes | Smoother UX when cycling statuses. |
 
 > Roadmap auto-updated after resolving initial compilation errors & integrating Perf + Memorization features (commit batch Aug 2025). Adjust IDs if new domains added.

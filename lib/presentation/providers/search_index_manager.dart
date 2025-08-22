@@ -251,7 +251,7 @@ class SearchIndexManager {
     }
     if (candidateScores.isEmpty) return [];
   final fullTokens = tq.tokenizeLatin(query).map((e) => e.toLowerCase()).toSet();
-    final scored = <_ScoredVerse>[];
+  final scored = <_ScoredVerse>[];
     candidateScores.forEach((key, base) {
       final verse = _verseCache[key];
       if (verse == null) return;
@@ -277,6 +277,7 @@ class SearchIndexManager {
       }
       scored.add(_ScoredVerse(verse, score));
     });
+    // Default ranking by score, stable tie-breakers
     scored.sort((a, b) {
       final c = b.score.compareTo(a.score);
       if (c != 0) return c;

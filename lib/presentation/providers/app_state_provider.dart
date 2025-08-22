@@ -49,6 +49,7 @@ class AppStateProvider extends ChangeNotifier {
   bool get useSpanWordRendering => _settings.useSpanWordRendering;
   bool get backgroundIndexingEnabled => _settings.backgroundIndexingEnabled;
   bool get verboseWbwLogging => _settings.verboseWbwLogging;
+  bool get searchRankingBm25Lite => _settings.searchRankingBm25Lite;
 
   Future<void> _loadSettings() async {
     if (_getSettingsUseCase == null) return; // Skip loading if no use case
@@ -145,6 +146,11 @@ class AppStateProvider extends ChangeNotifier {
 
   Future<void> updateVerboseWbwLogging(bool enabled) async {
     final newSettings = _settings.copyWith(verboseWbwLogging: enabled);
+    await _updateSettings(newSettings);
+  }
+
+  Future<void> updateSearchRankingBm25Lite(bool enabled) async {
+    final newSettings = _settings.copyWith(searchRankingBm25Lite: enabled);
     await _updateSettings(newSettings);
   }
 

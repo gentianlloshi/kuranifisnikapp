@@ -38,6 +38,8 @@ class AppSettings {
   final bool backgroundIndexingEnabled;
   // Diagnostic flag: enable verbose word-by-word loading logs
   final bool verboseWbwLogging;
+  // Feature flag: experimental BM25-lite ranking for search results
+  final bool searchRankingBm25Lite;
 
   const AppSettings({
     this.theme = 'light',
@@ -68,6 +70,7 @@ class AppSettings {
   this.useSpanWordRendering = true,
   this.backgroundIndexingEnabled = true,
   this.verboseWbwLogging = false,
+  this.searchRankingBm25Lite = false,
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -100,6 +103,7 @@ class AppSettings {
   useSpanWordRendering: json['useSpanWordRendering'] ?? true,
   backgroundIndexingEnabled: json['backgroundIndexingEnabled'] ?? true,
   verboseWbwLogging: json['verboseWbwLogging'] ?? false,
+  searchRankingBm25Lite: json['searchRankingBm25Lite'] ?? false,
     );
   }
 
@@ -133,6 +137,7 @@ class AppSettings {
   'useSpanWordRendering': useSpanWordRendering,
   'backgroundIndexingEnabled': backgroundIndexingEnabled,
   'verboseWbwLogging': verboseWbwLogging,
+  'searchRankingBm25Lite': searchRankingBm25Lite,
     };
   }
 
@@ -165,6 +170,7 @@ class AppSettings {
   bool? useSpanWordRendering,
   bool? backgroundIndexingEnabled,
   bool? verboseWbwLogging,
+  bool? searchRankingBm25Lite,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -195,6 +201,7 @@ class AppSettings {
   useSpanWordRendering: useSpanWordRendering ?? this.useSpanWordRendering,
   backgroundIndexingEnabled: backgroundIndexingEnabled ?? this.backgroundIndexingEnabled,
   verboseWbwLogging: verboseWbwLogging ?? this.verboseWbwLogging,
+  searchRankingBm25Lite: searchRankingBm25Lite ?? this.searchRankingBm25Lite,
     );
   }
 
