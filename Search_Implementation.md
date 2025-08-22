@@ -1,6 +1,6 @@
 # Qur'an Search Implementation
 
-_Last updated: 2025-08-12_
+_Last updated: 2025-08-22_
 
 This document provides a deep dive into the current search architecture in the Kurani Fisnik Flutter app: data flow, indexing strategy, tokenization & normalization, ranking, fallback paths, performance characteristics, limitations, and recommended enhancements.
 
@@ -26,9 +26,9 @@ A verse is uniquely identified by a composite key `surahNumber:verseNumber` (e.g
 ---
 ## 3. Control Flow Overview
 1. UI calls `QuranProvider.searchVerses(query)`.
-2. Provider ensures the inverted index exists (`_ensureSearchIndex`).
-   - If not built, loads all surah verses sequentially using `GetSurahVersesUseCase` (1..114) and accumulates raw verse maps.
-   - Spawns an isolate via `compute(buildInvertedIndex, raw)` to build the inverted index.
+2. Provider ensures the inverted index exists.
+   - Attempts to load a persisted snapshot (v2) from app documents for a fast path.
+   - If not built or partial, starts incremental background build: for each surah, collects raw rows, offloads per‑surah tokenization with `compute(buildInvertedIndex, raw)`, then merges the partial index.
 3. When index ready: `_searchIndexQuery(query)` executes.
 4. Results (ranked `List<Verse>`) assigned to `_searchResults` and `notifyListeners()` triggers UI update.
 5. If index build failed: falls back to `_searchVersesUseCase` (legacy direct search).
@@ -63,15 +63,15 @@ Mapping reduces e.g. `ç→c`, `ë→e`, plus broad vowel/accent normalization (
 
 ### 5.4 Prefix Indexing
 For each normalized Latin token (length ≥3):
-- Generate prefixes of length 2..min(len-1, 10)
+- Generate prefixes of length 3..min(len-1, 10)
 - Enables incremental suggestions while user types.
 - Arabic tokens are effectively normalized then tokenized; prefixes generated the same way because after normalization they are plain letters.
 
 ### 5.5 Query Expansion
 `_expandQueryTokens(query)` adds:
 - Original tokens
-- Diacritic-stripped variants (ç, ë replacements)
-- (Potential future) Arabic folded forms
+- Diacritic‑stripped variants (ç, ë → c, e)
+- Light Albanian stems (e.g., -ave, -eve, -uar, -shme, -isht, -it, -in, -ve)
 Result deduplicated via `toSet()`.
 
 ---
@@ -92,7 +92,7 @@ Limitations:
 ## 7. Performance Characteristics
 | Phase | Complexity | Notes |
 |-------|------------|-------|
-| Index Build | O(N * T) where N=verses, T=tokens per verse | Done once per app session in isolate; may take a few 100 ms. |
+| Index Build | O(N * T) where N=verses, T=tokens per verse | Incremental; per‑surah tokenization offloaded to isolate; merged on main. |
 | Query | O(sum(len(postingList(token)))) + sort(candidates) | Candidate set small vs full corpus due to prefix pruning. |
 | Memory | ~ (tokens * avgKeyRefs * pointer) | Controlled by prefix cap & normalization. |
 
@@ -100,7 +100,7 @@ Warm Index Expected Query Latency: ~1–10 ms typical (device-dependent).
 
 ---
 ## 8. Fallback Path
-If index build fails (exception or isolate error): `_invertedIndex` remains null → provider uses `_searchVersesUseCase` which likely performs linear scan / repository filtering (slower, but functional).
+If index build fails (exception or isolate error): `_invertedIndex` may remain partial → provider searches the available subset or falls back to `_searchVersesUseCase`.
 
 ---
 ## 9. Threading & Concurrency
@@ -117,9 +117,9 @@ Edge Case: Multiple simultaneous search calls while build in progress: first cal
 - Improvements suggested: capture exception details to a diagnostic log buffer.
 
 ---
-## 11. Caching Strategy
+## 11. Caching & Persistence Strategy
 - Verse objects cached in `_verseCache` keyed by verseKey for quick retrieval after ranking.
-- Index built once; no persistence yet (lost on app restart). Potential enhancement: serialize to local file with version stamp (hash of underlying data assets).
+- Index snapshot persistence implemented (v2): JSON `{version, index, verses, createdAt, nextSurah}` stored in app documents; fast‑path load and partial resume.
 
 ---
 ## 12. Pagination Interaction

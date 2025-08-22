@@ -129,9 +129,22 @@ class SearchIndexManager {
           final batchSw = Stopwatch()..start();
           try {
             final verses = await getSurahVersesUseCase.call(s);
+            // Keep verse cache for result hydration
+            final raw = <Map<String, dynamic>>[];
             for (final v in verses) {
-              _verseCache['${v.surahNumber}:${v.number}'] = v;
-              _indexVerse(v);
+              final key = '${v.surahNumber}:${v.number}';
+              _verseCache[key] = v;
+              raw.add({
+                'key': key,
+                't': (v.textTranslation ?? '').toString(),
+                'tr': (v.textTransliteration ?? '').toString(),
+                'ar': (v.textArabic ?? '').toString(),
+              });
+            }
+            if (raw.isNotEmpty) {
+              // Build partial inverted index off the main isolate and merge
+              final partial = await compute(idx.buildInvertedIndex, raw);
+              _mergePartialIndex(partial);
             }
           } catch (_) {/* skip surah errors silently */}
           final p = s / 114.0;
@@ -166,6 +179,24 @@ class SearchIndexManager {
         }
       }
     }();
+  }
+
+  void _mergePartialIndex(Map<String, List<String>> partial) {
+    final dst = _invertedIndex!;
+    partial.forEach((token, keys) {
+      final list = dst.putIfAbsent(token, () => <String>[]);
+      // Append while avoiding duplicates at the very end of the list (rare)
+      if (list.isEmpty) {
+        list.addAll(keys);
+      } else {
+        for (final k in keys) {
+          if (list.isEmpty || list.last != k) {
+            // Weak de-duplication; safe since each verse appears once per partial
+            list.add(k);
+          }
+        }
+      }
+    });
   }
 
   List<Verse> search(

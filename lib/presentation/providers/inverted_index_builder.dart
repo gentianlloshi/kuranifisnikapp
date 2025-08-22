@@ -3,6 +3,8 @@
 // 't' (translation), 'tr' (transliteration), 'ar' (arabic)
 // Output: Map<String, List<String>> inverted index token -> list of verseKeys
 
+const int _kMinPrefixLen = 3;
+
 Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
   final Map<String, List<String>> index = {};
   for (final row in raw) {
@@ -30,11 +32,11 @@ Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
       addToken(tok);
       if (norm != tok) addToken(norm);
       if (stem != norm && stem.length >= 3) addToken(stem);
-      // Prefix indexing (for incremental / partial search) from length 2..min(6,len-1)
+      // Prefix indexing (for incremental / partial search) from length _kMinPrefixLen..min(10,len-1)
       final baseForPrefix = stem.length >= 3 ? stem : norm;
-      if (baseForPrefix.length >= 3) {
+      if (baseForPrefix.length >= _kMinPrefixLen) {
         final maxPref = baseForPrefix.length - 1 < 10 ? baseForPrefix.length - 1 : 10; // cap at 10 chars
-        for (int l = 2; l <= maxPref; l++) {
+        for (int l = _kMinPrefixLen; l <= maxPref; l++) {
           addToken(baseForPrefix.substring(0, l));
         }
       }
