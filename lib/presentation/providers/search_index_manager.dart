@@ -275,9 +275,9 @@ class SearchIndexManager {
     if (_invertedIndex == null) return;
     final key = '${v.surahNumber}:${v.number}';
     final tokens = <String>{}
-      ..addAll(_tokenize((v.textTranslation ?? '')))
-      ..addAll(_tokenize((v.textTransliteration ?? '')))
-      ..addAll(_tokenize(_normalizeArabic((v.textArabic))));
+  ..addAll(tq.tokenizeLatin((v.textTranslation ?? '')))
+  ..addAll(tq.tokenizeLatin((v.textTransliteration ?? '')))
+  ..addAll(tq.tokenizeLatin(_normalizeArabic((v.textArabic))));
     final seenVerseTokens = <String>{};
     for (final tok in tokens) {
       if (tok.isEmpty) continue;
@@ -448,54 +448,48 @@ extension on SearchIndexManager {
       // ignore persistence failure silently
     }
   }
-}
-      // Compute a lightweight corpus hash using file sizes and modified timestamps of key assets.
-      Future<String> _computeCorpusHash() async {
-        if (_cachedCorpusHash != null) return _cachedCorpusHash!;
+
+  // Compute a lightweight corpus hash using asset bytes to invalidate snapshots when data changes.
+  Future<String> _computeCorpusHash() async {
+    if (_cachedCorpusHash != null) return _cachedCorpusHash!;
+    try {
+      const files = <String>[
+        'assets/data/suret.json',
+        'assets/data/sq_ahmeti.json',
+        'assets/data/sq_mehdiu.json',
+        'assets/data/sq_nahi.json',
+        'assets/data/arabic_quran.json',
+        'assets/data/transliterations.json',
+      ];
+      final sig = StringBuffer('v2:');
+      for (final f in files) {
         try {
-          // Note: In Flutter, assets are bundled; we approximate with a fixed list of logical asset paths
-          // and combine their known lengths via the repository APIs by loading a few identifying datasets.
-          // As a pragmatic approach, hash the surah names file and translation datasets via repository use cases if available.
-          // Since we are inside the manager, we’ll base this on a stable list of expected asset filenames under assets/data/.
-          const files = <String>[
-            'assets/data/suret.json',
-            'assets/data/sq_ahmeti.json',
-            'assets/data/sq_mehdiu.json',
-            'assets/data/sq_nahi.json',
-            'assets/data/arabic_quran.json',
-            'assets/data/transliterations.json',
-          ];
-          // Try to read asset bytes and compute a simple checksum based on lengths + first/last bytes
-          final sig = StringBuffer('v2:');
-          for (final f in files) {
-            try {
-              final data = await rootBundle.load(f);
-              final bytes = data.buffer.asUint8List();
-              final len = bytes.length;
-              final first = len > 0 ? bytes[0] : 0;
-              final last = len > 0 ? bytes[len - 1] : 0;
-              sig
-                ..write(f)
-                ..write('#')
-                ..write(len)
-                ..write(':')
-                ..write(first)
-                ..write('-')
-                ..write(last)
-                ..write('|');
-            } catch (_) {
-              // If any asset missing, include marker to vary hash
-              sig..write(f)..write('#missing|');
-            }
-          }
-          final hash = sig.toString();
-          _cachedCorpusHash = hash;
-          return hash;
+          final data = await rootBundle.load(f);
+          final bytes = data.buffer.asUint8List();
+          final len = bytes.length;
+          final first = len > 0 ? bytes[0] : 0;
+          final last = len > 0 ? bytes[len - 1] : 0;
+          sig
+            ..write(f)
+            ..write('#')
+            ..write(len)
+            ..write(':')
+            ..write(first)
+            ..write('-')
+            ..write(last)
+            ..write('|');
         } catch (_) {
-          // On error, return a static marker to avoid crashes; will force rebuilds on next runs.
-          return 'v2:fallback';
+          sig..write(f)..write('#missing|');
         }
       }
+      final hash = sig.toString();
+      _cachedCorpusHash = hash;
+      return hash;
+    } catch (_) {
+      return 'v2:fallback';
+    }
+  }
+}
 
 class _ScoredVerse {
   final Verse verse;
