@@ -58,6 +58,7 @@ dependencies:
   
   # Utilities
   uuid: ^4.4.0
+  crypto: ^3.0.3
 
   # Permissions
   permission_handler: ^11.3.1

@@ -328,7 +328,12 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
             ),
             if (d.settingsChange == SettingsChange.partial) Padding(
               padding: const EdgeInsets.only(top:8),
-              child: Text(_settingsMerge ? 'Cilësimet: MERGE (ruhen vlerat lokale mungese).' : 'Cilësimet: OVERWRITE tërësisht.', style: theme.textTheme.bodySmall),
+              child: Text(
+                _settingsMerge
+                    ? 'Cilësimet: MERGE (ruhen vlerat lokale mungese).'
+                    : 'Cilësimet: OVERWRITE tërësisht.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ],
         ),

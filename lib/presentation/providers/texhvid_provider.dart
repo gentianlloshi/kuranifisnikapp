@@ -14,6 +14,8 @@ class TexhvidProvider extends ChangeNotifier {
   String? _error;
   bool _isQuizMode = false;
   int _currentQuestionIndex = 0;
+  // Flattened quiz pool across rules when in quiz mode
+  List<QuizQuestion> _quizPool = const [];
   int _score = 0;
   String? _selectedAnswer;
   bool _hasAnswered = false;
@@ -26,12 +28,14 @@ class TexhvidProvider extends ChangeNotifier {
   int get score => _score;
   String? get selectedAnswer => _selectedAnswer;
   bool get hasAnswered => _hasAnswered;
-  bool get isLastQuestion => _currentQuestionIndex >= _rules.length - 1;
-  int get totalQuestions => _rules.length;
+  bool get isLastQuestion => _isQuizMode
+    ? _currentQuestionIndex >= (_quizPool.length - 1)
+    : _currentQuestionIndex >= (_rules.length - 1);
+  int get totalQuestions => _isQuizMode ? _quizPool.length : _rules.length;
   QuizQuestion? get currentQuestion =>
-    (_currentQuestionIndex >= 0 && _currentQuestionIndex < _rules.length)
-      ? (_rules[_currentQuestionIndex].quiz.isNotEmpty
-        ? _rules[_currentQuestionIndex].quiz[_currentQuestionIndex % _rules[_currentQuestionIndex].quiz.length]
+    _isQuizMode
+      ? (_currentQuestionIndex >= 0 && _currentQuestionIndex < _quizPool.length
+        ? _quizPool[_currentQuestionIndex]
         : null)
       : null;
   List<String> get categories => _rules.map((r) => r.category).where((c) => c.isNotEmpty).toSet().toList();
@@ -52,12 +56,29 @@ class TexhvidProvider extends ChangeNotifier {
     return _rules.where((rule) => rule.category == category).toList();
   }
 
-  void startQuiz() {
+  void startQuiz({String? category, int? limit, bool shuffle = true}) {
+    // Build pool
+    Iterable<TexhvidRule> source = _rules;
+    if (category != null && category.isNotEmpty) {
+      source = source.where((r) => r.category == category);
+    }
+    final pool = <QuizQuestion>[];
+    for (final r in source) {
+      pool.addAll(r.quiz);
+    }
+    if (shuffle) {
+      pool.shuffle();
+    }
+    if (limit != null && limit > 0 && limit < pool.length) {
+      _quizPool = List.of(pool.take(limit));
+    } else {
+      _quizPool = List.of(pool);
+    }
     _isQuizMode = true;
     _currentQuestionIndex = 0;
     _score = 0;
-  _selectedAnswer = null;
-  _hasAnswered = false;
+    _selectedAnswer = null;
+    _hasAnswered = false;
     notifyListeners();
   }
 
@@ -67,15 +88,20 @@ class TexhvidProvider extends ChangeNotifier {
     _score = 0;
   _selectedAnswer = null;
   _hasAnswered = false;
+  _quizPool = const [];
     notifyListeners();
   }
 
   void nextQuestion() {
-    if (_currentQuestionIndex < _rules.length - 1) {
+    if (!_isQuizMode) return;
+    if (_currentQuestionIndex < totalQuestions - 1) {
       _currentQuestionIndex++;
-  _selectedAnswer = null;
-  _hasAnswered = false;
+      _selectedAnswer = null;
+      _hasAnswered = false;
       notifyListeners();
+    } else {
+      // End of quiz
+      exitQuiz();
     }
   }
 
@@ -94,11 +120,11 @@ class TexhvidProvider extends ChangeNotifier {
 
   void submitAnswer() {
     if (_selectedAnswer == null || currentQuestion == null) return;
-  final question = currentQuestion;
-  if (question == null) return;
-  final selectedIndex = question.options.indexOf(_selectedAnswer!);
-  final isCorrect = selectedIndex == question.correctAnswer;
-  answerQuestion(isCorrect);
+    final question = currentQuestion;
+    if (question == null) return;
+    final selectedIndex = question.options.indexOf(_selectedAnswer!);
+    final isCorrect = selectedIndex == question.correctAnswer;
+    answerQuestion(isCorrect);
   }
 
   void _setLoading(bool loading) {

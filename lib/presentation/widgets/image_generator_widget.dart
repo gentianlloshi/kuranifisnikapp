@@ -6,6 +6,8 @@ import '../theme/theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
 import 'dart:io';
 
 class ImageGeneratorWidget extends StatefulWidget {

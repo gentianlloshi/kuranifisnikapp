@@ -6,6 +6,17 @@ Aplikacion Flutter për leximin dhe studimin e Kuranit Fisnik në gjuhën shqipe
 
 Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërkimin në Kuranin Fisnik, i fokusuar te përdoruesit shqipfolës. Aplikacioni përmban përkthime të shumta në shqip, krahas tekstit origjinal arab dhe transliterimit latin.
 
+## Çfarë ka të re (22 Gusht 2025)
+
+- A‑B loop i audios: kërkim me indeks në playlist, riciklim i saktë i vargut dhe indikator në UI (chip statusi).
+- Qendërzim i njoftimeve: migrim në një radhë të unifikuar të SnackBar‑ëve (ERR‑1).
+- Panel performancash reaktiv: mbulim i përkthimeve/enrichment me streams live (PERF‑2).
+- Texhvid: modal “Fillo Kuizin” me kategori/limit, kuiz bazik funksional; pastrim HTML për përmbajtjen (heq tag‑et si <span>).
+- Stabilitet WBW: riparim i crash nga cast i Hive Map<dynamic,dynamic> në Map<String,dynamic>.
+- Siguri lifecycle: shtuar mounted checks rreth post‑frame/async në pamjen e Kuranit.
+- Android: aktivizuar predictive back; përditësuar Pop/Back në fletë të plota.
+- UI: rregulluar overflow në header të Memorizimit (chips horizontale të scrollueshme).
+
 ## Karakteristikat Kryesore
 
 ### ✅ Të Implementuara Plotësisht

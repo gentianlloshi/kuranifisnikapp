@@ -100,7 +100,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: provider.isQuizMode ? null : () => provider.startQuiz(),
+                      onPressed: provider.isQuizMode ? null : () => _openStartQuizDialog(context, provider),
                       icon: const Icon(Icons.quiz),
                       label: const Text('Fillo Kuizin'),
                       style: ElevatedButton.styleFrom(
@@ -352,6 +352,65 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  void _openStartQuizDialog(BuildContext context, TexhvidProvider provider) {
+    String? selectedCategory;
+    int? limit;
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Fillo Kuizin'),
+          content: StatefulBuilder(
+            builder: (ctx, setState) {
+              final categories = ['Të gjitha', ...provider.categories];
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: selectedCategory,
+                    items: categories
+                        .map((c) => DropdownMenuItem<String>(
+                              value: c == 'Të gjitha' ? null : c,
+                              child: Text(c),
+                            ))
+                        .toList(),
+                    decoration: const InputDecoration(labelText: 'Kategoria'),
+                    onChanged: (val) => setState(() => selectedCategory = val),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    value: limit,
+                    items: const [
+                      DropdownMenuItem(value: 5, child: Text('5 pyetje')),
+                      DropdownMenuItem(value: 10, child: Text('10 pyetje')),
+                      DropdownMenuItem(value: 20, child: Text('20 pyetje')),
+                    ],
+                    decoration: const InputDecoration(labelText: 'Numri i pyetjeve (opsionale)'),
+                    onChanged: (val) => setState(() => limit = val),
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Anulo'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                provider.startQuiz(category: selectedCategory, limit: limit, shuffle: true);
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Fillo'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

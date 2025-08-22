@@ -99,8 +99,11 @@ class MiniPlayerWidget extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (ctx) => WillPopScope(
-        onWillPop: () async { audio.isPlayerExpanded = false; return true; },
+      builder: (ctx) => PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
+          audio.isPlayerExpanded = false;
+        },
         child: BottomSheetWrapper(
           padding: EdgeInsets.all(context.spaceLg),
           child: SingleChildScrollView(
@@ -146,6 +149,22 @@ class _FullPlayerCore extends StatelessWidget {
         children: [
           Text('Sure ${verse.surahNumber} • Ajeti ${verse.number}', style: Theme.of(context).textTheme.bodyLarge),
           SizedBox(height: context.spaceMd),
+          if (audio.isPlaylistMode && audio.isABLoopEnabled && audio.loopStartVerse != null && audio.loopEndVerse != null)
+            Padding(
+              padding: EdgeInsets.only(bottom: context.spaceSm),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: InputChip(
+                  label: Text(
+                    'A-B: ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} → ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}' +
+                    (audio.remainingABLoops != null ? ' ×${audio.remainingABLoops}' : ''),
+                  ),
+                  avatar: const Icon(Icons.loop, size: 18),
+                  onDeleted: audio.disableABLoop,
+                  deleteIcon: const Icon(Icons.close),
+                ),
+              ),
+            ),
           Slider(
             value: audio.progress.clamp(0.0, 1.0),
             onChanged: (v) => audio.seekToProgress(v),
@@ -201,6 +220,67 @@ class _FullPlayerCore extends StatelessWidget {
                     PopupMenuItem(value: 0, child: Text('Paq (hiq)')),
                   ],
                 ),
+              // A-B loop controls for playlist mode (MEMO-2b)
+              if (audio.isPlaylistMode) ...[
+                const SizedBox(width: 8),
+                Tooltip(
+                  message: 'Cakto pika A (fillimi) te ajeti aktual',
+                  child: IconButton(
+                    icon: const Icon(Icons.flag),
+                    onPressed: () {
+                      final v = audio.currentVerse;
+                      if (v != null) {
+                        audio.setABLoop(start: v, end: audio.loopEndVerse ?? v, repeatCount: audio.remainingABLoops);
+                      }
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: 'Cakto pika B (fundi) te ajeti aktual',
+                  child: IconButton(
+                    icon: const Icon(Icons.flag_circle),
+                    onPressed: () {
+                      final v = audio.currentVerse;
+                      if (v != null) {
+                        audio.setABLoop(start: audio.loopStartVerse ?? v, end: v, repeatCount: audio.remainingABLoops);
+                      }
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: audio.isABLoopEnabled ? 'Çaktivizo A-B loop' : 'Aktivizo A-B loop',
+                  child: IconButton(
+                    icon: Icon(audio.isABLoopEnabled ? Icons.repeat_on : Icons.repeat),
+                    color: audio.isABLoopEnabled ? scheme.primary : null,
+                    onPressed: () {
+                      final v = audio.currentVerse;
+                      if (audio.isABLoopEnabled) {
+                        audio.disableABLoop();
+                      } else if (v != null) {
+                        audio.setABLoop(start: audio.loopStartVerse ?? v, end: audio.loopEndVerse ?? v, repeatCount: audio.remainingABLoops);
+                      }
+                    },
+                  ),
+                ),
+                PopupMenuButton<int>(
+                  tooltip: 'Numër përsëritjesh A-B',
+                  icon: const Icon(Icons.filter_2),
+                  onSelected: (v) {
+                    final cnt = v == 0 ? null : v;
+                    final cur = audio.currentVerse;
+                    if (cur != null) {
+                      audio.setABLoop(start: audio.loopStartVerse ?? cur, end: audio.loopEndVerse ?? cur, repeatCount: cnt);
+                    }
+                  },
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 2, child: Text('2x A-B')), 
+                    PopupMenuItem(value: 3, child: Text('3x A-B')),
+                    PopupMenuItem(value: 5, child: Text('5x A-B')),
+                    PopupMenuItem(value: 10, child: Text('10x A-B')),
+                    PopupMenuItem(value: 0, child: Text('Paq (hiq)')),
+                  ],
+                ),
+              ],
             ],
           ),
         ],

@@ -173,6 +173,7 @@ class AppStateProvider extends ChangeNotifier {
 
   _SnackMessage? get currentSnack => _snackQueue.isEmpty ? null : _snackQueue.first;
   bool get hasSnack => _snackQueue.isNotEmpty;
+  bool get isSnackDisplaying => _snackShowing;
 
   void markSnackDisplayed() {
     // Called by UI host right after showing SnackBar to prevent multiple show attempts

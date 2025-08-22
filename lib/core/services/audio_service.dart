@@ -246,6 +246,38 @@ class AudioService {
     _isAdvancing = false;
   }
 
+  // Seek to a verse inside the current playlist by matching verse identity.
+  // Returns true if the verse was found and seek performed. If [autoPlay] is true, resumes playback after seek.
+  Future<bool> seekToVerseInPlaylist(Verse target, {bool autoPlay = true}) async {
+    if (_playlistSource == null || _currentPlaylist.isEmpty) return false;
+    // Prefer matching by verseKey when present; fallback to surahId+verseNumber
+    final String? key = target.verseKey;
+    final int surah = target.surahId ?? target.surahNumber;
+    final int ayah = target.verseNumber ?? target.number;
+    int found = -1;
+    for (int i = 0; i < _currentPlaylist.length; i++) {
+      final v = _currentPlaylist[i];
+      if (key != null && key.isNotEmpty) {
+        if (v.verseKey == key) { found = i; break; }
+      } else {
+        final s = v.surahId ?? v.surahNumber;
+        final a = v.verseNumber ?? v.number;
+        if (s == surah && a == ayah) { found = i; break; }
+      }
+    }
+    if (found < 0) return false;
+    try {
+      await _audioPlayer.seek(Duration.zero, index: found);
+      if (autoPlay) {
+        await _audioPlayer.play();
+      }
+      return true;
+    } catch (e) {
+      _log('seekToVerseInPlaylist failed: $e');
+      return false;
+    }
+  }
+
   void _prefetchNextInPlaylist() {/* obsolete with ConcatenatingAudioSource - retained for compatibility */}
 
   Future<void> play() async {

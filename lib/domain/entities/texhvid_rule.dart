@@ -1,3 +1,5 @@
+import 'package:kurani_fisnik_app/core/utils/text_sanitizer.dart';
+
 class TexhvidRule {
   final String id;
   final String title;
@@ -20,15 +22,15 @@ class TexhvidRule {
     Map<String, dynamic> json, {
     String? fallbackCategory,
   }) {
-    final rawExamples = (json['examples'] as List<dynamic>? ?? []);
+  final rawExamples = (json['examples'] as List<dynamic>? ?? []);
     final flattened = <String>[];
     for (final item in rawExamples) {
       if (item is String) {
-        flattened.add(item);
+    flattened.add(sanitizeHtmlLike(item));
       } else if (item is Map<String, dynamic>) {
         // Prefer 'meaning', else build from arabic/pronunciation
         if (item['meaning'] is String) {
-          flattened.add(item['meaning'] as String);
+      flattened.add(sanitizeHtmlLike(item['meaning'] as String));
         } else if (item['arabic'] is String) {
           final arabic = item['arabic'];
             final pron = item['pronunciation'];
@@ -42,8 +44,8 @@ class TexhvidRule {
     }
     return TexhvidRule(
       id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String? ?? '',
+    title: sanitizeHtmlLike(json['title'] as String?),
+    description: sanitizeHtmlLike(json['description'] as String? ?? ''),
       examples: flattened,
       quiz: (json['quiz'] as List<dynamic>?)
               ?.map((e) => QuizQuestion.fromJson(e as Map<String, dynamic>))
@@ -78,7 +80,7 @@ class QuizQuestion {
   });
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
-    final questionText = json['question'] ?? json['text'] ?? '';
+  final questionText = sanitizeHtmlLike((json['question'] ?? json['text'] ?? '') as String);
     final options = <String>[];
     int correctIndex = 0;
 
@@ -87,12 +89,12 @@ class QuizQuestion {
       for (int i = 0; i < optionsList.length; i++) {
         final option = optionsList[i];
         if (option is Map<String, dynamic>) {
-          options.add(option['text'] as String);
+      options.add(sanitizeHtmlLike(option['text'] as String));
           if (option['isCorrect'] == true) {
             correctIndex = i;
           }
         } else if (option is String) {
-          options.add(option);
+      options.add(sanitizeHtmlLike(option));
         }
       }
     }
@@ -101,7 +103,7 @@ class QuizQuestion {
       question: questionText,
       options: options,
       correctAnswer: json['correctAnswer'] ?? correctIndex,
-      explanation: json['explanation'] as String?,
+    explanation: sanitizeHtmlLike(json['explanation'] as String?),
     );
   }
 

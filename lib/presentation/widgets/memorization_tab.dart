@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
+import 'dart:async';
+
 import '../providers/memorization_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/quran_provider.dart';
@@ -170,14 +172,22 @@ class _MemorizationTabState extends State<MemorizationTab> {
             SizedBox(height: context.spaceSm),
             Row(
               children: [
-                _StatChip(label: 'Totale', value: global.values.fold<int>(0, (a, b) => a + b)),
-                SizedBox(width: context.spaceSm),
-                _StatChip(label: 'Të mësuara', value: global['mastered'] ?? 0, color: Colors.green),
-                SizedBox(width: context.spaceSm),
-                _StatChip(label: 'Në progres', value: global['inProgress'] ?? 0, color: Colors.orange),
-                SizedBox(width: context.spaceSm),
-                _StatChip(label: 'Të reja', value: global['new'] ?? 0, color: Colors.blueGrey),
-                const Spacer(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _StatChip(label: 'Totale', value: global.values.fold<int>(0, (a, b) => a + b)),
+                        SizedBox(width: context.spaceSm),
+                        _StatChip(label: 'Të mësuara', value: global['mastered'] ?? 0, color: Colors.green),
+                        SizedBox(width: context.spaceSm),
+                        _StatChip(label: 'Në progres', value: global['inProgress'] ?? 0, color: Colors.orange),
+                        SizedBox(width: context.spaceSm),
+                        _StatChip(label: 'Të reja', value: global['new'] ?? 0, color: Colors.blueGrey),
+                      ],
+                    ),
+                  ),
+                ),
                 IconButton(
                   tooltip: mem.hideText ? 'Shfaq tekstin' : 'Fsheh tekstin',
                   onPressed: mem.toggleHideText,

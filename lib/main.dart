@@ -59,7 +59,6 @@ import 'presentation/theme/theme.dart';
 import 'presentation/startup/startup_scheduler.dart';
 import 'presentation/startup/performance_monitor.dart';
 import 'core/utils/logger.dart';
-import 'core/utils/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -233,9 +232,9 @@ class KuraniFisnikApp extends StatelessWidget {
 
         // Providers
   // App state provider depends on settings use cases
-  ChangeNotifierProxyProvider2<GetSettingsUseCase, SaveSettingsUseCase, AppStateProvider>(
-          create: (_) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(_, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(_, listen: false)),
-          update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
+        ChangeNotifierProxyProvider2<GetSettingsUseCase, SaveSettingsUseCase, AppStateProvider>(
+          create: (ctx) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(ctx, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(ctx, listen: false)),
+          update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => previous ?? AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
         ),
         ChangeNotifierProxyProvider5<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, QuranProvider>(
           create: (_) => QuranProvider(

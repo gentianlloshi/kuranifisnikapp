@@ -2,7 +2,7 @@
 
 This document captures intentional shortcuts and their implications, plus remediation plan (Sprint oriented) for the Kurani Fisnik Flutter App.
 
-_Last updated: 2025-08-20 (post incremental index + WBW RTL fix pass)_
+_Last updated: 2025-08-22 (A‑B loop index seek, Texhvid HTML sanitization, predictive back, WBW cache cast fix)_
 
 ## 1. Removed Providers (Bookmark / Memorization) – Placeholder UI
 - Shortcut: Removed provider usages; left FAB actions with SnackBars.
@@ -86,7 +86,7 @@ _Last updated: 2025-08-20 (post incremental index + WBW RTL fix pass)_
 	4. Dynamic batch pacing for index using frame timing callbacks.
 
 ## 16. Missing Auto-Scroll for Currently Playing Verse (Critical UX Gap)
-- Status: ADDRESSED (PHASE 1) / REFINEMENTS PENDING
+ - Status: ADDRESSED (PHASE 1) / REFINEMENTS PENDING
 - Implemented: GlobalKey measurement + ensureVisible alignment=0.1 + throttle + suppression after recent manual scroll (3s window) + animated highlight of current verse.
 - Remaining Gaps: User preference toggle, improved precision for large dynamic font changes, accessibility (reduce motion) mode, scroll easing adaptation when distance large.
 - Follow-up: Expose toggle in settings; pre-measure heuristic average line height to reduce fallback offset variance.
@@ -107,7 +107,7 @@ _Last updated: 2025-08-20 (post incremental index + WBW RTL fix pass)_
 - Remediation: (Optional) Offline integrity validation + ignore at runtime.
 
 ## 20. Search Index Persistence
-- Status: IMPLEMENTED (Snapshot v2: terms map + postings + progress pointer)
+ - Status: IMPLEMENTED (Snapshot v2: terms map + postings + progress pointer)
 - Remaining Debt: No compaction/size guard; legacy snapshot versions not purged; checksum/version mismatch detection minimal.
 - Risk: Silent bloat over time; rebuild on subtle schema mismatch.
 - Remediation (Next): Add size threshold, legacy file cleanup, strong hash on source asset manifest.
@@ -223,7 +223,15 @@ Low: 2,4,5,6,10,17,18,19,23,25,26,28,30,36,38
 
 Note: 20 (Persistence) mostly complete; residual items kept High until compaction & checksum added.
 
-### Newly Added High Priority (Aug 20)
+### Newly Added/Addressed (Aug 22)
+Addressed:
+- ERR‑1 Centralized SnackBar queue adopted by major surfaces.
+- PERF‑2 Reactive coverage streams wired to perf panel.
+- TEXHVID: Sanitized HTML‑like tags from rule content & quiz text at model layer.
+- ANDROID: Predictive back enabled; Pop/Back handling modernized in full‑player.
+- WBW: Cache cast fix for Hive Map<dynamic,dynamic> to Map<String,dynamic> on read.
+
+New High Priority:
 1. (29) WBW TextSpan rendering migration
 2. (31) Surah metadata lazy loading
 3. (32) Startup scheduler

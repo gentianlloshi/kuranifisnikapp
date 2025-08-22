@@ -210,12 +210,18 @@ class AudioProvider extends ChangeNotifier {
 
   Future<void> _jumpToLoopStart() async {
     if (!_abLoopEnabled || _loopStartVerse == null) return;
-    // Find index in current playlist
-    if (!isPlaylistMode || _audioService.player.sequence == null) return;
-    final startKey = _loopStartVerse!.verseKey;
-    // We rely on _currentPlaylist stored in AudioService not directly accessible; workaround: trigger stop & replay strategy.
-    // Simpler approach: request playVerse which disrupts playlist ordering (acceptable first iteration) – future: expose playlist mapping from service.
-    await playVerse(_loopStartVerse!);
+    if (!isPlaylistMode) return;
+    // Perform index-based seek within current playlist using service helper
+    try {
+      final ok = await _audioService.seekToVerseInPlaylist(_loopStartVerse!);
+      if (!ok) {
+        // Fallback to direct play if not found (should be rare)
+        await _audioService.playVerse(_loopStartVerse!);
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> togglePlayPause() async {

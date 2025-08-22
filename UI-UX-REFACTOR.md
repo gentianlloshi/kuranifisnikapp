@@ -354,3 +354,7 @@ Summary: Foundation (tokens, palettes, theme, verse styling, filter persistence)
 - Refactored Help page into structured model using tokens.
 
 Next Focus (Sprint Continuation): Typography scaler, search result chip grouping & highlight radius, responsive Surah grid, selection mode scaffolding.
+
+Recent Polishing (Aug 22):
+- Texhvid content sanitization at model layer removes stray HTML tags in descriptions/examples/quiz, ensuring clean typography rendering without external renderers.
+- Predictive back enabled on Android; full-player sheet uses modern back handling for smoother UX.

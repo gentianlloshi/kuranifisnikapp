@@ -77,18 +77,19 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 | DATA-2 | Import dry-run diff + merge strategy | Done | Diff + conflict resolver + settings merge/overwrite. |
 | THEMATIC-1 | Hierarchical thematic index scaffold | Done | Lazy node tree + persisted expansion. |
 | THEMATIC-2 | Virtualized subtheme rendering | Done | Height clamp + builder list. |
-| TEXHVID-1 | Texhvid rules basic viewer | Partial | Base widget exists; quiz mode pending. |
+| TEXHVID-1 | Texhvid rules basic viewer | Done | Viewer stable; content sanitized to strip HTML-like tags. |
+| TEXHVID-2 | Texhvid quiz mode | Partial | Start dialog (category/limit) + session flow implemented; stats persistence pending. |
 | SEARCH-2 | Context preview lines | Done | Prev/next verse context expansion. |
 | PERF-1 | Perf panel metrics (index/enrichment/cache) | Done | Panel with coverage bars & translation dialog. |
-| PERF-2 | Reactive translation coverage | Pending | Manual refresh only; needs event-driven update. |
+| PERF-2 | Reactive translation & enrichment coverage | Done | Repository streams drive the perf panel live; no manual refresh. |
 | A11Y-1 | Larger tap targets (key icons) | Partial | Many icons sized 20; audit pass needed. |
-| ERR-1 | Centralized snackbar queue | Pending | Currently ad-hoc SnackBars. |
+| ERR-1 | Centralized snackbar queue | Done | AppStateProvider queue + overlay host; major widgets migrated to enqueueSnack. |
 
 ## Updated Next Immediate Actions
 
-1. PERF-2: Make translation coverage & enrichment coverage reactive (stream or ChangeNotifier from repository) + mini summary in panel.
-2. TEXHVID-2: Implement quiz mode logic (random rule, answer choices, scoring, persistence of history).
-3. MEMO-2b: Add per-verse repeat count / loop controls (A-B range) & integrate with AudioProvider without blocking UI.
+1. PERF-2: Make translation coverage & enrichment coverage reactive (stream or ChangeNotifier from repository) + mini summary in panel. (Completed)
+2. TEXHVID-2: Extend quiz mode with scoring summary and persist history (accuracy, streak) in Hive.
+3. MEMO-2b: Persist A‑B range across session and show repeat counters; smooth index-based seeks already in place.
 4. SEARCH-3: Add fuzzy / partial matching optimization & highlight performance profiling (avoid widget span inflation on long results).
 5. ERR-1: Introduce AppStateProvider snackbar queue + unified error dispatch API; refactor existing SnackBars.
 6. TEST-1: Add widget tests (thematic index expansion, memorization hide/peek, verse action registry dynamic filtering).
@@ -96,6 +97,14 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 8. DATA-3: Add incremental import preview for large JSON (streamed parsing) & progress updates.
 9. TEXHVID-3: Persist quiz performance stats (streak, accuracy) in Hive with version key.
 10. PERF-3: Add frame build timing sampler + optional overlay (dev mode toggle) for hotspots.
+
+### Recently Completed (Aug 22)
+- PERF‑2: Reactive coverage streams wired to performance panel (live updates).
+- ERR‑1: Centralized snackbar queue; migrated key surfaces.
+- AUDIO: A‑B loop index‑based seek within playlist + status chip in full player.
+- TEXHVID: Start Quiz dialog (category/limit), HTML sanitization at model layer.
+- ANDROID UX: Predictive back enabled; updated back handling in player sheet.
+- STABILITY: WBW cache map cast fix; mounted checks added in Quran view async flows.
 
 ## Deferred / Nice-To-Have Backlog
 | Idea | Rationale |

@@ -357,6 +357,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
         final pendingTarget = quranProvider.consumePendingScrollTarget();
         if (pendingTarget != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             final verses = quranProvider.currentVerses;
             final index = verses.indexWhere((v) => v.number == pendingTarget);
             if (index >= 0 && _scrollController.hasClients) {
@@ -374,6 +375,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
         if (currentPlayingKey != null && currentPlayingKey != _lastPlayingVerseKey) {
           _lastPlayingVerseKey = currentPlayingKey;
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             _autoScrollToVerse(currentPlayingKey, quranProvider.currentVerses);
           });
         }
@@ -387,7 +389,11 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
         // Load real word-by-word + timestamps if feature enabled
         if (context.read<AppStateProvider>().showWordByWord) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<WordByWordProvider>().ensureLoaded(surah.number);
+            if (!mounted) return;
+            final wbw = context.read<WordByWordProvider>();
+            // Fire-and-forget; provider vetë publikon state
+            // ignore: discarded_futures
+            wbw.ensureLoaded(surah.number);
           });
         }
 
@@ -656,6 +662,7 @@ class VerseWidget extends StatelessWidget {
                                 tooltip: 'Luaj ajetin me highlight',
                                 onPressed: () async {
                                   await wbwProv.ensureLoaded(verse.surahNumber);
+                                  if (!context.mounted) return;
                                   final data = wbwProv.getVerseWordData(verse.number);
                                   final ts = wbwProv.getVerseTimestamps(verse.number);
                                   context.read<AudioProvider>().playVerseWithWordData(verse, data, timestamps: ts);

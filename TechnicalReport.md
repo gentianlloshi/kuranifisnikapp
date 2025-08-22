@@ -82,3 +82,12 @@ Projekti "Kurani Fisnik" paraqet një aplikacion të përpiktë dhe të planifik
 - Mbulim më i mirë i testeve
 - Optimizime shtesë të performancës
 - Zgjerim i veçorive të personalizimit
+
+---
+## Përditësime të Fundit (22 Gusht 2025)
+- Audio A‑B loop: kërkim me indeks në playlist, rikthim i saktë dhe indikator UI.
+- Qendërzim i njoftimeve: radhë e unifikuar e SnackBar‑ëve, reduktim i duplikimeve dhe qasjeve ad‑hoc.
+- Panel performancash: përditësim reaktiv i mbulimit të përkthimeve dhe enrichment.
+- Texhvid: modal për nisjen e kuizit (kategori/limit), sanitizim i tekstit (heqje e tag‑eve HTML‑like) për renditje të pastër.
+- Android UX: predictive back i aktivizuar; përmirësim i back handling në pamjet në fletë.
+- Stabilitet: rregulluar crash nga tipizimi i hartave në Hive gjatë leximit WBW; shtuar kontrolle `mounted` për flukse asinkrone në pamjen e Kuranit.

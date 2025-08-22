@@ -15,7 +15,6 @@ import '../widgets/quran_view_widget.dart';
 import '../widgets/search_widget.dart';
 import '../widgets/bookmarks_widget.dart';
 import '../widgets/notes_widget.dart';
-import '../widgets/memorization_widget.dart'; // legacy (temporarily kept)
 import '../widgets/memorization_tab.dart'; // new MEMO-1 implementation
 import '../widgets/audio_player_widget.dart';
 import '../widgets/mini_player_widget.dart';
@@ -481,16 +480,54 @@ class _QuranOverflowMenu extends StatelessWidget {
   }
 }
 
-class _PerfPanel extends StatelessWidget {
+class _PerfPanel extends StatefulWidget {
   const _PerfPanel();
+  @override
+  State<_PerfPanel> createState() => _PerfPanelState();
+}
+
+class _PerfPanelState extends State<_PerfPanel> {
+  StreamSubscription<double>? _enrSub;
+  StreamSubscription<Map<String,double>>? _trSub;
+  Map<String,double>? _latestTrCov;
+  double? _latestEnr;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _attachStreams();
+  }
+
+  void _attachStreams() {
+    final repo = _findQuranRepository(context);
+    if (repo == null) return;
+    _enrSub ??= repo.enrichmentCoverageStream.listen((v) {
+      _latestEnr = v;
+      setState(() {});
+    });
+    _trSub ??= repo.translationCoverageStream.listen((m) {
+      _latestTrCov = m;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _enrSub?.cancel();
+    _trSub?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final metrics = PerfMetrics.instance;
+    final snap = metrics.currentSnapshot();
+    final enrichment = _latestEnr ?? snap.enrichmentCoverage;
     return AnimatedBuilder(
       animation: metrics,
       builder: (_, __) {
-        final snap = metrics.currentSnapshot();
+        final updatedSnap = metrics.currentSnapshot();
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -505,13 +542,13 @@ class _PerfPanel extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const Text('Perf:'),
-                Text('audioCacheHits=${snap.audioCacheHits}'),
-                Text('trCache=${snap.translationCacheHits}'),
-                Text('trlitCache=${snap.transliterationCacheHits}'),
-                Text('lazyBoxOpens=${snap.lazyBoxOpens}'),
-                _CoverageBar(label: 'Idx', value: snap.indexCoverage),
-                _CoverageBar(label: 'Enr', value: snap.enrichmentCoverage),
-                _TranslationCoverageButton(),
+                Text('audioCacheHits=${updatedSnap.audioCacheHits}'),
+                Text('trCache=${updatedSnap.translationCacheHits}'),
+                Text('trlitCache=${updatedSnap.transliterationCacheHits}'),
+                Text('lazyBoxOpens=${updatedSnap.lazyBoxOpens}'),
+                _CoverageBar(label: 'Idx', value: updatedSnap.indexCoverage),
+                _CoverageBar(label: 'Enr', value: enrichment),
+                _TranslationCoverageButton(liveCoverage: _latestTrCov),
               ],
             ),
           ),
@@ -521,36 +558,22 @@ class _PerfPanel extends StatelessWidget {
   }
 }
 
-class _TranslationCoverageButton extends StatefulWidget {
-  @override
-  State<_TranslationCoverageButton> createState() => _TranslationCoverageButtonState();
-}
-
-class _TranslationCoverageButtonState extends State<_TranslationCoverageButton> {
-  Map<String,double>? _coverage;
-  bool _loading = false;
+class _TranslationCoverageButton extends StatelessWidget {
+  final Map<String,double>? liveCoverage;
+  const _TranslationCoverageButton({this.liveCoverage});
   @override
   Widget build(BuildContext context) {
     return IconButton(
       tooltip: 'Translation coverage',
-      icon: _loading ? const SizedBox(width:16,height:16,child:CircularProgressIndicator(strokeWidth:2)) : const Icon(Icons.language, size: 18),
-      onPressed: () async {
-        if (_coverage == null && !_loading) {
-          setState(()=> _loading = true);
-          final repo = _findQuranRepository(context);
-          if (repo != null) {
-            _coverage = repo.translationCoverageByKey();
-          }
-          setState(()=> _loading = false);
-        }
-        _showDialog(context);
-      },
+      icon: const Icon(Icons.language, size: 18),
+      onPressed: () => _showDialog(context),
     );
   }
 
   void _showDialog(BuildContext context) {
     showDialog(context: context, builder: (c) {
-      final data = _coverage ?? const {};
+      final repo = _findQuranRepository(context);
+      final data = liveCoverage ?? repo?.translationCoverageByKey() ?? const {};
       return AlertDialog(
         title: const Text('Translation Coverage'),
         content: data.isEmpty ? const Text('No data yet') : SizedBox(
@@ -582,21 +605,7 @@ class _TranslationCoverageButtonState extends State<_TranslationCoverageButton> 
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      final repo = _findQuranRepository(context);
-                      if (repo != null) {
-                        setState(()=> _coverage = repo.translationCoverageByKey());
-                      }
-                    },
-                    icon: const Icon(Icons.refresh, size: 16),
-                    label: const Text('Refresh'),
-                  ),
-                ],
-              ),
+              Align(alignment: Alignment.centerRight, child: Text('${data.length} translations', style: Theme.of(context).textTheme.labelSmall)),
             ],
           ),
         ),
@@ -606,10 +615,10 @@ class _TranslationCoverageButtonState extends State<_TranslationCoverageButton> 
       );
     });
   }
+}
 
-  QuranRepository? _findQuranRepository(BuildContext context) {
-    try { return Provider.of<QuranProvider>(context, listen:false).repository; } catch(_) { return null; }
-  }
+QuranRepository? _findQuranRepository(BuildContext context) {
+  try { return Provider.of<QuranProvider>(context, listen:false).repository; } catch(_) { return null; }
 }
 
 class _CoverageBar extends StatelessWidget {
@@ -684,10 +693,10 @@ class _SnackHostState extends State<_SnackHost> {
     if (!mounted) return;
     final current = app.currentSnack;
     if (current == null) return;
+  // If a snack is already being displayed (provider flag), don't show again.
+  if (app.isSnackDisplaying) return;
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
-    // Avoid stacking: if a SnackBar is currently visible, do nothing (will show after completion)
-    if (messenger.mounted && messenger.currentSnackBar != null) return;
     app.markSnackDisplayed();
     messenger.showSnackBar(
       SnackBar(
