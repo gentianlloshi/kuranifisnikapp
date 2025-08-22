@@ -8,16 +8,9 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 
 ## Çfarë ka të re (22 Gusht 2025)
 
-- A‑B loop i audios: kërkim me indeks në playlist, riciklim i saktë i vargut dhe indikator në UI (chip statusi).
-- Qendërzim i njoftimeve: migrim në një radhë të unifikuar të SnackBar‑ëve (ERR‑1).
-- Panel performancash reaktiv: mbulim i përkthimeve/enrichment me streams live (PERF‑2).
-- Texhvid: modal “Fillo Kuizin” me kategori/limit, kuiz bazik funksional; pastrim HTML për përmbajtjen (heq tag‑et si <span>).
-- Stabilitet WBW: riparim i crash nga cast i Hive Map<dynamic,dynamic> në Map<String,dynamic>.
-- Siguri lifecycle: shtuar mounted checks rreth post‑frame/async në pamjen e Kuranit.
-- Android: aktivizuar predictive back; përditësuar Pop/Back në fletë të plota.
-- UI: rregulluar overflow në header të Memorizimit (chips horizontale të scrollueshme).
  - Kërkim: shtuar debounce në input dhe normalizim morfologjik i lehtë (shqip) për indeksim dhe kërkim.
  - Kërkim: peshëzim i fushave (bonus më i lartë për përkthim), dhe verifikim i snapshot-it me dataVersion për invalidim të saktë.
+ - Texhvid: quiz mode now persists session results and lifetime stats (accuracy, total quizzes) using a lightweight Hive box opened lazily.
 
 ## Karakteristikat Kryesore
 

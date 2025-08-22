@@ -280,7 +280,13 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
               ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: provider.nextQuestion,
+              onPressed: provider.isLastQuestion
+                  ? () async {
+                      final result = await provider.finishQuiz();
+                      if (!mounted) return;
+                      _showQuizSummary(context, provider, result);
+                    }
+                  : provider.nextQuestion,
               child: Text(
                 provider.isLastQuestion ? 'Përfundo Kuizin' : 'Pyetja Tjetër',
               ),
@@ -413,4 +419,34 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
       },
     );
   }
+}
+
+void _showQuizSummary(BuildContext context, TexhvidProvider provider, QuizResult result) {
+  showDialog(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        title: const Text('Përmbledhje e Kuizit'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Rezultati: ${result.correct}/${result.total} (${(result.accuracy * 100).toStringAsFixed(0)}%)'),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text('Totali i kuizeve: ${provider.totalQuizzes}'),
+            Text('Saktësia gjithsej: ${(provider.lifetimeAccuracy * 100).toStringAsFixed(0)}%'),
+            if (provider.lastQuizAt != null) Text('Kuizi i fundit: ${provider.lastQuizAt}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Mbyll'),
+          ),
+        ],
+      );
+    },
+  );
 }

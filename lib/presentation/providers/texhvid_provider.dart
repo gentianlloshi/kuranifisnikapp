@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../domain/entities/texhvid_rule.dart';
 import '../../domain/usecases/texhvid_usecases.dart';
 
@@ -19,6 +20,15 @@ class TexhvidProvider extends ChangeNotifier {
   int _score = 0;
   String? _selectedAnswer;
   bool _hasAnswered = false;
+  // Stats persistence (lazy Hive box)
+  static const String _kStatsBox = 'texhvidStatsBox';
+  static const String _kSessionsKey = 'sessions_v1';
+  static const String _kTotalsKey = 'totals_v1';
+  // Cached summaries
+  int _lifetimeAnswered = 0;
+  int _lifetimeCorrect = 0;
+  int _totalQuizzes = 0;
+  DateTime? _lastQuizAt;
 
   List<TexhvidRule> get rules => _rules;
   bool get isLoading => _isLoading;
@@ -39,12 +49,20 @@ class TexhvidProvider extends ChangeNotifier {
         : null)
       : null;
   List<String> get categories => _rules.map((r) => r.category).where((c) => c.isNotEmpty).toSet().toList();
+  // Public stats getters
+  int get lifetimeAnswered => _lifetimeAnswered;
+  int get lifetimeCorrect => _lifetimeCorrect;
+  int get totalQuizzes => _totalQuizzes;
+  double get lifetimeAccuracy => _lifetimeAnswered == 0 ? 0.0 : _lifetimeCorrect / _lifetimeAnswered;
+  DateTime? get lastQuizAt => _lastQuizAt;
 
   Future<void> loadTexhvidRules() async {
     _setLoading(true);
     try {
       _rules = await _texhvidUseCases.getTexhvidRules();
       _error = null;
+      // Load stats lazily once rules are available
+      await _loadStatsSummary();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -101,7 +119,8 @@ class TexhvidProvider extends ChangeNotifier {
       notifyListeners();
     } else {
       // End of quiz
-      exitQuiz();
+  // Prefer finishQuiz() from UI to persist results
+  exitQuiz();
     }
   }
 
@@ -127,8 +146,77 @@ class TexhvidProvider extends ChangeNotifier {
     answerQuestion(isCorrect);
   }
 
+  Future<void> _ensureStatsBoxOpen() async {
+    if (!Hive.isBoxOpen(_kStatsBox)) {
+      await Hive.openBox(_kStatsBox);
+    }
+  }
+
+  Future<void> _loadStatsSummary() async {
+    try {
+      await _ensureStatsBoxOpen();
+      final box = Hive.box(_kStatsBox);
+      final totals = box.get(_kTotalsKey);
+      if (totals is Map) {
+        _lifetimeAnswered = (totals['answered'] as num?)?.toInt() ?? 0;
+        _lifetimeCorrect = (totals['correct'] as num?)?.toInt() ?? 0;
+        _totalQuizzes = (totals['quizzes'] as num?)?.toInt() ?? 0;
+        final lastTs = (totals['lastTs'] as num?);
+        _lastQuizAt = lastTs != null ? DateTime.fromMillisecondsSinceEpoch(lastTs.toInt()) : null;
+      }
+    } catch (_) {
+      // best-effort
+    }
+  }
+
+  Future<void> _appendSession({required int correct, required int total, String? category}) async {
+    try {
+      await _ensureStatsBoxOpen();
+      final box = Hive.box(_kStatsBox);
+      final now = DateTime.now();
+      final sessions = (box.get(_kSessionsKey) as List?)?.cast<Map>() ?? <Map>[];
+      sessions.add({
+        'ts': now.millisecondsSinceEpoch,
+        'correct': correct,
+        'total': total,
+        if (category != null) 'category': category,
+      });
+      // Keep last 50 sessions
+      final trimmed = sessions.length > 50 ? sessions.sublist(sessions.length - 50) : sessions;
+      await box.put(_kSessionsKey, trimmed);
+      // Update totals
+      _lifetimeAnswered += total;
+      _lifetimeCorrect += correct;
+      _totalQuizzes += 1;
+      _lastQuizAt = now;
+      await box.put(_kTotalsKey, {
+        'answered': _lifetimeAnswered,
+        'correct': _lifetimeCorrect,
+        'quizzes': _totalQuizzes,
+        'lastTs': _lastQuizAt!.millisecondsSinceEpoch,
+      });
+    } catch (_) {
+      // swallow persistence errors
+    }
+  }
+
+  Future<QuizResult> finishQuiz({String? category}) async {
+    final result = QuizResult(correct: _score, total: totalQuestions);
+    await _appendSession(correct: result.correct, total: result.total, category: category);
+    exitQuiz();
+    notifyListeners();
+    return result;
+  }
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
   }
+}
+
+class QuizResult {
+  final int correct;
+  final int total;
+  const QuizResult({required this.correct, required this.total});
+  double get accuracy => total == 0 ? 0.0 : correct / total;
 }
