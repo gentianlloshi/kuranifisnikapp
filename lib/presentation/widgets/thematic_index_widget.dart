@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
+import 'package:kurani_fisnik_app/presentation/providers/quran_provider.dart';
 import '../theme/theme.dart';
+import '../widgets/quran_view_widget.dart';
 import 'sheet_header.dart';
 
 class ThematicIndexWidget extends StatefulWidget {
@@ -225,40 +227,64 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
   }
 
   String _getVerseDescription(String verseRef) {
-    // Parse verse reference like "2:255" to get surah and verse
-    final parts = verseRef.split(':');
+    // Supports formats: "2:255" or "37:168-170" (hyphen or en dash)
+  final parts = verseRef.trim().split(':');
     if (parts.length == 2) {
       final surahNumber = int.tryParse(parts[0]);
-      final verseNumber = int.tryParse(parts[1]);
-      
-      if (surahNumber != null && verseNumber != null) {
-        // You could load surah names from your data
-        return 'Surja $surahNumber, Ajeti $verseNumber';
+      final versePart = parts[1];
+      final rangeSep = versePart.contains('–') ? '–' : '-';
+      if (versePart.contains(rangeSep)) {
+        final range = versePart.split(rangeSep);
+        final start = int.tryParse(range[0]);
+        final end = int.tryParse(range[1]);
+        if (surahNumber != null && start != null && end != null) {
+          return 'Surja $surahNumber, Ajetet $start–$end';
+        }
+      } else {
+        final verseNumber = int.tryParse(versePart);
+        if (surahNumber != null && verseNumber != null) {
+          return 'Surja $surahNumber, Ajeti $verseNumber';
+        }
       }
     }
     return verseRef;
   }
 
   void _navigateToVerse(BuildContext context, String verseRef) {
-    // Parse verse reference and navigate to the specific verse
-    final parts = verseRef.split(':');
-    if (parts.length == 2) {
-      final surahNumber = int.tryParse(parts[0]);
-      final verseNumber = int.tryParse(parts[1]);
-      
-      if (surahNumber != null && verseNumber != null) {
-        // Navigate to QuranView with specific surah and verse
-        // This would depend on your navigation setup
-        Navigator.pushNamed(
-          context,
-          '/quran',
-          arguments: {
-            'surahNumber': surahNumber,
-            'verseNumber': verseNumber,
-          },
-        );
-      }
+    // Parse verse reference and navigate to the specific verse or range start
+  final parts = verseRef.trim().split(':');
+    if (parts.length != 2) return;
+    final surahNumber = int.tryParse(parts[0]);
+    if (surahNumber == null) return;
+    final versePart = parts[1];
+    final rangeSep = versePart.contains('–') ? '–' : '-';
+    int? startVerse;
+    if (versePart.contains(rangeSep)) {
+      final range = versePart.split(rangeSep);
+      startVerse = int.tryParse(range[0]);
+    } else {
+      startVerse = int.tryParse(versePart);
     }
+    if (startVerse == null) return;
+    // Use QuranProvider to open surah at verse
+    final q = context.read<QuranProvider>();
+    q.openSurahAtVerse(surahNumber, startVerse);
+    _openQuranStandalone(context);
+  }
+
+  void _openQuranStandalone(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Kurani')),
+          body: const Padding(
+            padding: EdgeInsets.only(bottom: 0),
+            child: QuranViewWrapper(),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -337,11 +363,28 @@ class _ThemeSubthemeTile extends StatelessWidget {
                   onClose: () => Navigator.of(context).maybePop(),
                 ),
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView.separated(
                     itemCount: subNode.verseRefs.length,
-                    itemBuilder: (c, i) => ListTile(
-                      title: Text(subNode.verseRefs[i]),
-                    ),
+                    separatorBuilder: (_, __) => SizedBox(height: context.spaceXs),
+                    itemBuilder: (c, i) {
+                      final ref = subNode.verseRefs[i];
+                      return Card(
+                        child: ListTile(
+                          title: Text(ref, style: Theme.of(context).textTheme.titleMedium),
+                          subtitle: Text(
+                            _describeRef(ref),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                                ),
+                          ),
+                          trailing: const Icon(Icons.open_in_new, size: 16),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _openRef(context, ref);
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -350,5 +393,65 @@ class _ThemeSubthemeTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _describeRef(String verseRef) {
+  final parts = verseRef.trim().split(':');
+    if (parts.length == 2) {
+      final surahNumber = int.tryParse(parts[0]);
+      final versePart = parts[1];
+      final rangeSep = versePart.contains('–') ? '–' : '-';
+      if (versePart.contains(rangeSep)) {
+        final range = versePart.split(rangeSep);
+        final start = int.tryParse(range[0]);
+        final end = int.tryParse(range[1]);
+        if (surahNumber != null && start != null && end != null) {
+          return 'Surja $surahNumber, Ajetet $start–$end';
+        }
+      } else {
+        final verseNumber = int.tryParse(versePart);
+        if (surahNumber != null && verseNumber != null) {
+          return 'Surja $surahNumber, Ajeti $verseNumber';
+        }
+      }
+    }
+    return verseRef;
+  }
+
+  void _openRef(BuildContext context, String verseRef) {
+    final parts = verseRef.split(':');
+    if (parts.length != 2) return;
+    final surahNumber = int.tryParse(parts[0]);
+    if (surahNumber == null) return;
+    final versePart = parts[1];
+    final rangeSep = versePart.contains('–') ? '–' : '-';
+    int? startVerse;
+    if (versePart.contains(rangeSep)) {
+      final range = versePart.split(rangeSep);
+      startVerse = int.tryParse(range[0]);
+    } else {
+      startVerse = int.tryParse(versePart);
+    }
+    if (startVerse == null) return;
+    final q = context.read<QuranProvider>();
+    q.openSurahAtVerse(surahNumber, startVerse);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Kurani')),
+          body: const QuranViewWrapper(),
+        ),
+      ),
+    );
+  }
+}
+
+// A thin wrapper to embed QuranViewWidget on a standalone page.
+class QuranViewWrapper extends StatelessWidget {
+  const QuranViewWrapper({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const QuranViewWidget();
   }
 }

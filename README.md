@@ -11,6 +11,8 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
  - Kërkim: shtuar debounce në input dhe normalizim morfologjik i lehtë (shqip) për indeksim dhe kërkim.
  - Kërkim: peshëzim i fushave (bonus më i lartë për përkthim), dhe verifikim i snapshot-it me dataVersion për invalidim të saktë.
  - Texhvid: quiz mode now persists session results and lifetime stats (accuracy, total quizzes) using a lightweight Hive box opened lazily.
+ - Indeksi Tematik: referencat e ajeteve tani janë të klikueshme dhe hapin pamjen e Kuranit te ajeti/rangu (mbështet 2:255 dhe 2:255–257).
+ - Audio/MEMO‑2b: Persistim i A‑B loop (SharedPreferences) dhe etiketa Semantics për mini‑player; A11Y i plotë për kuizin e Texhvidit.
 
 ## Karakteristikat Kryesore
 

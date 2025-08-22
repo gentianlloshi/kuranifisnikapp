@@ -77,6 +77,7 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 | DATA-2 | Import dry-run diff + merge strategy | Done | Diff + conflict resolver + settings merge/overwrite. |
 | THEMATIC-1 | Hierarchical thematic index scaffold | Done | Lazy node tree + persisted expansion. |
 | THEMATIC-2 | Virtualized subtheme rendering | Done | Height clamp + builder list. |
+| THEMATIC-3 | Deep‑link references to Quran view | Done | Tap on refs opens Quran at ajeti/range start via QuranProvider. |
 | TEXHVID-1 | Texhvid rules basic viewer | Done | Viewer stable; content sanitized to strip HTML-like tags. |
 | TEXHVID-2 | Texhvid quiz mode | Partial | Start dialog (category/limit) + session flow implemented; stats persistence pending. |
 | SEARCH-2 | Context preview lines | Done | Prev/next verse context expansion. |
@@ -89,11 +90,11 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 
 1. PERF-2: Make translation coverage & enrichment coverage reactive (stream or ChangeNotifier from repository) + mini summary in panel. (Completed)
 2. TEXHVID-2: Extend quiz mode with scoring summary and persist history (accuracy, streak) in Hive.
-3. MEMO-2b: Persist A‑B range across session and show repeat counters; smooth index-based seeks already in place.
+3. MEMO-2b: Persist A‑B range across session and show repeat counters; smooth index-based seeks already in place. (Completed; persistence via SharedPreferences, counters visible in player chips.)
 4. SEARCH-3: Add fuzzy / partial matching optimization & highlight performance profiling (avoid widget span inflation on long results).
 5. ERR-1: Introduce AppStateProvider snackbar queue + unified error dispatch API; refactor existing SnackBars.
 6. TEST-1: Add widget tests (thematic index expansion, memorization hide/peek, verse action registry dynamic filtering).
-7. A11Y-1b: Accessibility audit (semantics labels on action icons, minimum 48dp interactive areas) & doc checklist.
+7. A11Y-1b: Accessibility audit (semantics labels on action icons, minimum 48dp interactive areas) & doc checklist. (Partial; added Semantics to mini player and Texhvid quiz.)
 8. DATA-3: Add incremental import preview for large JSON (streamed parsing) & progress updates.
 9. TEXHVID-3: Persist quiz performance stats (streak, accuracy) in Hive with version key.
 10. PERF-3: Add frame build timing sampler + optional overlay (dev mode toggle) for hotspots.

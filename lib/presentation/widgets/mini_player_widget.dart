@@ -181,7 +181,6 @@ class _FullPlayerCore extends StatelessWidget {
                   deleteIcon: const Icon(Icons.close),
                   ),
                 ),
-                ),
               ),
             ),
           Semantics(
