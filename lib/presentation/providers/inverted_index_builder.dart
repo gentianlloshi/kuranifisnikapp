@@ -1,4 +1,5 @@
 // Isolate helper to build inverted index for verses
+import 'package:kurani_fisnik_app/core/search/stemmer.dart';
 // Input: List<Map<String,dynamic>> where each map has keys: 'key' (verseKey),
 // 't' (translation), 'tr' (transliteration), 'ar' (arabic)
 // Output: Map<String, List<String>> inverted index token -> list of verseKeys
@@ -21,7 +22,7 @@ Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
     for (final tok in tokens) {
       if (tok.isEmpty) continue;
       final norm = _normalizeLatin(tok);
-      final stem = _lightStem(norm);
+  final stem = lightStem(norm);
       // Base token
       void addToken(String t){
         if (seen.add(t)) {
@@ -80,28 +81,7 @@ String _normalizeLatin(String input) {
   final sb = StringBuffer();
   for (final ch in s.split('')) {
 
-// Very light Albanian-oriented stemmer: trims a small set of frequent noun/adjective suffixes.
-// Intentionally conservative to avoid over-stemming. Ensures minimum length of 3.
-String _lightStem(String token) {
-  var s = token;
-  if (s.length <= 3) return s;
-  // Order matters: try longer suffixes first.
-  const suffixes = <String>[
-    'ave', 'eve', 'ive', 'ove', // plural+dative variants
-    'ëve', 'ët', 'ën',
-    'uar', 'ues', 'uesi', // common verbal/agentive endings
-    'shme', 'shëm', 'shm', // adjectives like dobishëm/dobishme
-    'isht', // adverb ending
-    'it', 'in', 've', 'ra', 'ri', 're', 't', 'i', 'e', 'a', 'u',
-  ];
-  for (final suf in suffixes) {
-    if (s.endsWith(suf) && s.length - suf.length >= 3) {
-      s = s.substring(0, s.length - suf.length);
-      break;
-    }
-  }
-  return s;
-}
+// stemmer now provided by core/search/stemmer.dart
     sb.write(mapping[ch] ?? ch);
   }
   return sb.toString();
