@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
 import 'inverted_index_builder.dart' as idx;
 import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import 'package:kurani_fisnik_app/core/search/stemmer.dart';
+import 'package:kurani_fisnik_app/core/search/token_utils.dart' as tq;
 
 /// Encapsulates building and querying the inverted search index.
 /// Responsible only for in-memory structures; persistence & advanced ranking can layer on top later.
@@ -227,7 +229,7 @@ class SearchIndexManager {
       }
     }
     if (candidateScores.isEmpty) return [];
-    final fullTokens = _tokenize(query).map((e) => e.toLowerCase()).toSet();
+  final fullTokens = tq.tokenizeLatin(query).map((e) => e.toLowerCase()).toSet();
     final scored = <_ScoredVerse>[];
     candidateScores.forEach((key, base) {
       final verse = _verseCache[key];
@@ -264,27 +266,8 @@ class SearchIndexManager {
     return scored.map((e) => e.verse).toList();
   }
 
-  List<String> _tokenize(String text) {
-    final lower = text.toLowerCase();
-    final parts = lower.split(RegExp(r'[^a-zçëšžáéíóúâêîôûäöü0-9]+'));
-    return parts.where((p) => p.isNotEmpty).toList();
-  }
-
   List<String> _expandQueryTokens(String query) {
-    final raw = _tokenize(query);
-    final result = <String>[];
-    for (final r in raw) {
-      if (r.length <= 2) {
-        result.add(r);
-        continue;
-      }
-  result.add(r);
-  final norm = r.replaceAll('ç', 'c').replaceAll('ë', 'e');
-  if (norm != r) result.add(norm);
-  final stem = lightStem(_normalizeLatin(r));
-  if (stem.length >= 3) result.add(stem);
-    }
-    return result.toSet().toList();
+  return tq.expandQueryTokens(query, lightStem);
   }
 
   // Tokenize & insert a single verse into the existing in-memory inverted index (incremental mode)
@@ -482,15 +465,30 @@ extension on SearchIndexManager {
             'assets/data/arabic_quran.json',
             'assets/data/transliterations.json',
           ];
-          // We can’t access AssetBundle here directly; instead, derive a version from lengths embedded in repository snapshots.
-          // Fallback: combine file name strings to a pseudo-hash to ensure stability across runs when assets unchanged.
-          // In a full app context, this should read asset bytes and hash them.
-          final sb = StringBuffer('v2:');
+          // Try to read asset bytes and compute a simple checksum based on lengths + first/last bytes
+          final sig = StringBuffer('v2:');
           for (final f in files) {
-            sb.write(f);
-            sb.write('|');
+            try {
+              final data = await rootBundle.load(f);
+              final bytes = data.buffer.asUint8List();
+              final len = bytes.length;
+              final first = len > 0 ? bytes[0] : 0;
+              final last = len > 0 ? bytes[len - 1] : 0;
+              sig
+                ..write(f)
+                ..write('#')
+                ..write(len)
+                ..write(':')
+                ..write(first)
+                ..write('-')
+                ..write(last)
+                ..write('|');
+            } catch (_) {
+              // If any asset missing, include marker to vary hash
+              sig..write(f)..write('#missing|');
+            }
           }
-          final hash = sb.toString();
+          final hash = sig.toString();
           _cachedCorpusHash = hash;
           return hash;
         } catch (_) {
