@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,18 @@ import '../../domain/repositories/storage_repository.dart';
 class DataImportService {
   final StorageRepository storageRepository;
   DataImportService({required this.storageRepository});
+
+  // DATA-3: Progress stream + cancelation support
+  final StreamController<ImportProgress> _progressController = StreamController<ImportProgress>.broadcast();
+  bool _cancelRequested = false;
+
+  Stream<ImportProgress> get progressStream => _progressController.stream;
+  void cancelImport() { _cancelRequested = true; }
+  void _emit(ImportProgress p) {
+    if (_progressController.hasListener && !_progressController.isClosed) {
+      _progressController.add(p);
+    }
+  }
 
   Future<ImportBundle> parse(String jsonString) async {
     final map = json.decode(jsonString) as Map<String, dynamic>;
@@ -178,21 +191,34 @@ class DataImportService {
     required DataImportOptions options,
     ImportDiff? precomputedDiff,
   }) async {
+    _cancelRequested = false;
     final diff = precomputedDiff ?? await dryRunDiff(bundle);
     final result = DataImportResult();
+    void checkCancel(String phase) {
+      if (_cancelRequested) {
+        result.canceled = true;
+        result.errors.add('Import canceled by user during $phase');
+        throw _Canceled();
+      }
+    }
 
-    // SETTINGS
-    if (options.overwriteSettings && bundle.root['settings'] is Map<String,dynamic>) {
-      try {
-        final raw = (bundle.root['settings'] as Map<String,dynamic>);
-        final incoming = AppSettings.fromJson(raw);
-        if (precomputedDiff?.settingsChange == SettingsChange.partial) {
-          final existing = await storageRepository.getSettings() ?? AppSettings.defaultSettings();
-          // Preserve local audio + font fields if absent in bundle map
-          AppSettings merged = incoming;
-          if (!raw.containsKey('preferredReciter')) {
-            merged = merged.copyWith(preferredReciter: existing.preferredReciter);
-          }
+    try {
+      _emit(ImportProgress.phase('init', message: 'Përgatitja e importit'));
+
+      // SETTINGS
+      if (options.overwriteSettings && bundle.root['settings'] is Map<String,dynamic>) {
+        try {
+          checkCancel('settings');
+          _emit(ImportProgress.phase('settings', message: 'Po aplikohen cilësimet'));
+          final raw = (bundle.root['settings'] as Map<String,dynamic>);
+          final incoming = AppSettings.fromJson(raw);
+          if (precomputedDiff?.settingsChange == SettingsChange.partial) {
+            final existing = await storageRepository.getSettings() ?? AppSettings.defaultSettings();
+            // Preserve local audio + font fields if absent in bundle map
+            AppSettings merged = incoming;
+            if (!raw.containsKey('preferredReciter')) {
+              merged = merged.copyWith(preferredReciter: existing.preferredReciter);
+            }
             if (!raw.containsKey('audioVolume')) {
               merged = merged.copyWith(audioVolume: existing.audioVolume);
             }
@@ -211,116 +237,151 @@ class DataImportService {
             if (!raw.containsKey('fontSize')) { // legacy single size
               merged = merged.copyWith(fontSize: existing.fontSize);
             }
-          await storageRepository.saveSettings(merged);
-        } else {
-          await storageRepository.saveSettings(incoming);
-        }
-        result.settingsOverwritten = true;
-      } catch (e) {
-        result.errors.add('Settings import failed: $e');
-      }
-    }
-
-    // BOOKMARKS
-    if (options.importBookmarks) {
-      try {
-        final existing = await storageRepository.getBookmarks();
-        final map = { for (final b in existing) b.verseKey : b };
-        for (final raw in [...diff.bookmarkAdds, ...diff.bookmarkUpdates]) {
-          try {
-            final b = Bookmark.fromJson(raw);
-            final current = map[b.verseKey];
-            if (current == null) {
-              map[b.verseKey] = b;
-              result.bookmarksAdded++;
-            } else if (b.createdAt.isAfter(current.createdAt)) {
-              map[b.verseKey] = b;
-              result.bookmarksUpdated++;
-            }
-          } catch (e) {
-            result.errors.add('Bookmark parse failed: $e');
+            await storageRepository.saveSettings(merged);
+          } else {
+            await storageRepository.saveSettings(incoming);
+          }
+          result.settingsOverwritten = true;
+        } catch (e) {
+          if (e is! _Canceled) {
+            result.errors.add('Settings import failed: $e');
+          } else {
+            rethrow;
           }
         }
-        await storageRepository.saveBookmarks(map.values.toList());
-      } catch (e) {
-        result.errors.add('Bookmark import failed: $e');
+      }
+
+      // BOOKMARKS
+      if (options.importBookmarks) {
+        try {
+          checkCancel('bookmarks');
+          final total = diff.bookmarkAdds.length + diff.bookmarkUpdates.length;
+          int processed = 0;
+          _emit(ImportProgress('bookmarks', processed, total, 'Favoritet'));
+          final existing = await storageRepository.getBookmarks();
+          final map = { for (final b in existing) b.verseKey : b };
+          for (final raw in [...diff.bookmarkAdds, ...diff.bookmarkUpdates]) {
+            checkCancel('bookmarks');
+            try {
+              final b = Bookmark.fromJson(raw);
+              final current = map[b.verseKey];
+              if (current == null) {
+                map[b.verseKey] = b;
+                result.bookmarksAdded++;
+              } else if (b.createdAt.isAfter(current.createdAt)) {
+                map[b.verseKey] = b;
+                result.bookmarksUpdated++;
+              }
+            } catch (e) {
+              result.errors.add('Bookmark parse failed: $e');
+            } finally {
+              processed++; _emit(ImportProgress('bookmarks', processed, total, 'Favoritet'));
+            }
+          }
+          checkCancel('bookmarks');
+          await storageRepository.saveBookmarks(map.values.toList());
+        } catch (e) {
+          if (e is! _Canceled) {
+            result.errors.add('Bookmark import failed: $e');
+          } else { rethrow; }
+        }
+      }
+
+      // NOTES
+      if (options.importNotes) {
+        try {
+          checkCancel('notes');
+          final existing = await storageRepository.getNotes();
+          final map = { for (final n in existing) n.id : n };
+          final toProcess = [...diff.noteAdds, ...diff.noteUpdates];
+          int processed = 0; final total = toProcess.length + diff.noteConflicts.length;
+          _emit(ImportProgress('notes', processed, total, 'Shënimet'));
+          for (final raw in toProcess) {
+            checkCancel('notes');
+            try {
+              final n = Note.fromJson(raw);
+              final current = map[n.id];
+              if (current == null) { map[n.id] = n; result.notesAdded++; }
+              else if (n.updatedAt.isAfter(current.updatedAt)) { map[n.id] = n; result.notesUpdated++; }
+            } catch (e) { result.errors.add('Note parse failed: $e'); }
+            finally { processed++; _emit(ImportProgress('notes', processed, total, 'Shënimet')); }
+          }
+          // Resolve conflicts
+          for (final conflict in diff.noteConflicts) {
+            checkCancel('notes');
+            final resolution = options.noteConflictResolutions[conflict.id] ?? NoteConflictResolution.import;
+            if (resolution == NoteConflictResolution.import) {
+              try { final n = Note.fromJson(conflict.imported); map[n.id] = n; result.noteConflictsImported++; }
+              catch (e) { result.errors.add('Conflict import parse failed: $e'); }
+            } else { result.noteConflictsKeptLocal++; }
+            processed++; _emit(ImportProgress('notes', processed, total, 'Shënimet'));
+          }
+          checkCancel('notes');
+          // Persist each via repository API (no bulk API exposed)
+          for (final n in map.values) {
+            checkCancel('notes');
+            await storageRepository.saveNote(n);
+          }
+        } catch (e) { if (e is! _Canceled) { result.errors.add('Notes import failed: $e'); } else { rethrow; } }
+      }
+
+      // MEMORIZATION
+      if (options.importMemorization && bundle.root['memorization'] != null) {
+        try {
+          checkCancel('memorization');
+          _emit(ImportProgress.phase('memorization', message: 'Po përditësohet memorisja'));
+          final box = Hive.isBoxOpen(HiveBoxes.memorization)
+              ? Hive.box(HiveBoxes.memorization)
+              : await Hive.openBox(HiveBoxes.memorization);
+          final existingList = (box.get('verses_v1') as List?)?.cast<Map>() ?? [];
+          final map = <String, int>{};
+          for (final m in existingList) {
+            final s = m['s']; final v = m['v']; final st = (m['st'] ?? 0) as int; if (s is int && v is int) map['$s:$v']=st; }
+          // Apply adds / status upgrades
+          for (final add in diff.memorizationAdds) {
+            checkCancel('memorization');
+            final s = add['s'] as int; final v = add['v'] as int; final st = add['st'] as int; map['$s:$v']=st; result.memorizationAdded++; }
+          for (final up in diff.memorizationStatusUpgrades) {
+            checkCancel('memorization');
+            final s = up['s'] as int; final v = up['v'] as int; final to = up['to'] as int; map['$s:$v']=to; result.memorizationUpgraded++; }
+          // Persist
+          checkCancel('memorization');
+          final outList = map.entries.map((e){ final parts = e.key.split(':'); return {'s': int.parse(parts[0]), 'v': int.parse(parts[1]), 'st': e.value}; }).toList();
+          await box.put('verses_v1', outList);
+        } catch (e) { if (e is! _Canceled) { result.errors.add('Memorization import failed: $e'); } else { rethrow; } }
+      }
+
+      // READING PROGRESS
+      if (options.importReadingProgress && bundle.root['readingProgress'] != null) {
+        try {
+          checkCancel('readingProgress');
+          final total = diff.readingProgressImprovements.length; int processed = 0;
+          _emit(ImportProgress('readingProgress', processed, total, 'Progresi i leximit'));
+          final prefs = await SharedPreferences.getInstance();
+          // Load current
+          Map<String,int> positions = await storageRepository.getLastReadPosition();
+          Map<String,int> timestamps = await storageRepository.getLastReadTimestamps();
+          diff.readingProgressImprovements.forEach((surah, info) {
+            positions[surah] = info['newVerse']!;
+            timestamps[surah] = info['newTs']!;
+          processed++; _emit(ImportProgress('readingProgress', processed, total, 'Progresi i leximit'));
+          });
+          checkCancel('readingProgress');
+          await prefs.setString('last_read_positions_v1', json.encode(positions));
+          await prefs.setString('last_read_timestamps_v1', json.encode(timestamps));
+        } catch (e) { if (e is! _Canceled) { result.errors.add('Reading progress import failed: $e'); } else { rethrow; } }
+      }
+
+      _emit(ImportProgress.phase('done', message: result.canceled ? 'U anulua' : 'Importi përfundoi'));
+      return result;
+    } on _Canceled {
+      _emit(ImportProgress.phase('canceled', message: 'U anulua'));
+      return result;
+    } finally {
+      if (!_progressController.isClosed) {
+        // Do not close controller; it’s tied to service lifecycle. Just emit done phase above.
       }
     }
-
-    // NOTES
-    if (options.importNotes) {
-      try {
-        final existing = await storageRepository.getNotes();
-        final map = { for (final n in existing) n.id : n };
-        for (final raw in [...diff.noteAdds, ...diff.noteUpdates]) {
-          try {
-            final n = Note.fromJson(raw);
-            final current = map[n.id];
-            if (current == null) {
-              map[n.id] = n; result.notesAdded++;
-            } else if (n.updatedAt.isAfter(current.updatedAt)) {
-              map[n.id] = n; result.notesUpdated++;
-            }
-          } catch (e) { result.errors.add('Note parse failed: $e'); }
-        }
-        // Resolve conflicts
-        for (final conflict in diff.noteConflicts) {
-          final resolution = options.noteConflictResolutions[conflict.id] ?? NoteConflictResolution.import;
-            if (resolution == NoteConflictResolution.import) {
-              try {
-                final n = Note.fromJson(conflict.imported);
-                map[n.id] = n; result.noteConflictsImported++;
-              } catch (e) { result.errors.add('Conflict import parse failed: $e'); }
-            } else {
-              // Keep local
-              result.noteConflictsKeptLocal++;
-            }
-        }
-        // Persist each via repository API (no bulk API exposed)
-        for (final n in map.values) { await storageRepository.saveNote(n); }
-      } catch (e) { result.errors.add('Notes import failed: $e'); }
-    }
-
-    // MEMORIZATION
-    if (options.importMemorization && bundle.root['memorization'] != null) {
-      try {
-        final box = Hive.isBoxOpen(HiveBoxes.memorization)
-            ? Hive.box(HiveBoxes.memorization)
-            : await Hive.openBox(HiveBoxes.memorization);
-        final existingList = (box.get('verses_v1') as List?)?.cast<Map>() ?? [];
-        final map = <String, int>{};
-        for (final m in existingList) {
-          final s = m['s']; final v = m['v']; final st = (m['st'] ?? 0) as int; if (s is int && v is int) map['$s:$v']=st; }
-        // Apply adds / status upgrades
-        for (final add in diff.memorizationAdds) {
-          final s = add['s'] as int; final v = add['v'] as int; final st = add['st'] as int; map['$s:$v']=st; result.memorizationAdded++; }
-        for (final up in diff.memorizationStatusUpgrades) {
-          final s = up['s'] as int; final v = up['v'] as int; final to = up['to'] as int; map['$s:$v']=to; result.memorizationUpgraded++; }
-        // Persist
-        final outList = map.entries.map((e){ final parts = e.key.split(':'); return {'s': int.parse(parts[0]), 'v': int.parse(parts[1]), 'st': e.value}; }).toList();
-        await box.put('verses_v1', outList);
-      } catch (e) { result.errors.add('Memorization import failed: $e'); }
-    }
-
-    // READING PROGRESS
-    if (options.importReadingProgress && bundle.root['readingProgress'] != null) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        // Load current
-        Map<String,int> positions = await storageRepository.getLastReadPosition();
-        Map<String,int> timestamps = await storageRepository.getLastReadTimestamps();
-        diff.readingProgressImprovements.forEach((surah, info) {
-          final newVerse = info['newVerse']!; final newTs = info['newTs']!; // ints
-          positions[surah] = newVerse;
-          timestamps[surah] = newTs;
-          result.readingProgressUpdated++;
-        });
-        await prefs.setString('last_read_positions_v1', json.encode(positions));
-        await prefs.setString('last_read_timestamps_v1', json.encode(timestamps));
-      } catch (e) { result.errors.add('Reading progress import failed: $e'); }
-    }
-
-    return result;
   }
 
   int _statusIndexFromName(String? name) {
@@ -404,6 +465,7 @@ class DataImportResult {
   int readingProgressUpdated = 0;
   int noteConflictsImported = 0;
   int noteConflictsKeptLocal = 0;
+  bool canceled = false;
   final List<String> errors = [];
 
   Map<String, dynamic> toJson() => {
@@ -417,6 +479,7 @@ class DataImportResult {
     'readingProgressUpdated': readingProgressUpdated,
     'noteConflictsImported': noteConflictsImported,
     'noteConflictsKeptLocal': noteConflictsKeptLocal,
+  'canceled': canceled,
     'errors': errors,
   };
 }
@@ -434,3 +497,16 @@ class NoteConflict {
 }
 
 enum NoteConflictResolution { local, import }
+
+/// Progress model for DATA-3 streamed import
+class ImportProgress {
+  final String phase; // e.g., init, settings, bookmarks, notes, memorization, readingProgress, done, canceled
+  final int current; // 0..total
+  final int total; // may be 0 if not applicable
+  final String? message;
+  ImportProgress(this.phase, this.current, this.total, [this.message]);
+  ImportProgress.phase(this.phase, {this.message}) : current = 0, total = 0;
+  double? get ratio => total > 0 ? current / total : null;
+}
+
+class _Canceled implements Exception {}

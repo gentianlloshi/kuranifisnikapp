@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
@@ -29,6 +30,8 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
   late final StorageRepository _storageRepository;
   late final DataExportService _exportService;
   late final DataImportService _importService;
+  StreamSubscription? _progressSub;
+  ImportProgress? _progress;
 
   bool _loading = false;
   String? _exportJson;
@@ -53,6 +56,16 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
     _storageRepository = StorageRepositoryImpl(StorageDataSourceImpl());
     _exportService = DataExportService(storageRepository: _storageRepository);
     _importService = DataImportService(storageRepository: _storageRepository);
+    _progressSub = _importService.progressStream.listen((p) {
+      if (!mounted) return;
+      setState(() { _progress = p; });
+    });
+  }
+
+  @override
+  void dispose() {
+    _progressSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -172,7 +185,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
               ],
               if (_loading) ...[
                 const SizedBox(height: 24),
-                const Center(child: CircularProgressIndicator()),
+                _buildProgressUI(),
               ],
               const SizedBox(height: 24),
             ],
@@ -302,8 +315,46 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
   context.read<AppStateProvider>().enqueueSnack('Importi u aplikua');
     } catch (e) {
       setState(() { _error = 'Aplikimi dështoi: $e'; });
-    } finally { setState(() { _loading = false; }); }
+    } finally { setState(() { _loading = false; _progress = null; }); }
   }
+
+  Widget _buildProgressUI() {
+    final p = _progress;
+    final theme = Theme.of(context);
+    final label = (){
+      if (p == null) return 'Duke punuar…';
+      switch (p.phase) {
+        case 'init': return p.message ?? 'Përgatitje…';
+        case 'settings': return p.message ?? 'Po aplikohen cilësimet…';
+        case 'bookmarks': return 'Favoritet (${p.current}/${p.total})';
+        case 'notes': return 'Shënimet (${p.current}/${p.total})';
+        case 'memorization': return p.message ?? 'Memorizimi…';
+        case 'readingProgress': return 'Progresi Leximit (${p.current}/${p.total})';
+        case 'done': return p.message ?? 'Përfundoi';
+        case 'canceled': return 'U anulua';
+        default: return p.message ?? p.phase;
+      }
+    }();
+    final value = p?.ratio;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(children:[
+          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+          if (p != null && p.phase != 'done' && p.phase != 'canceled')
+            TextButton.icon(
+              onPressed: _onCancel,
+              icon: const Icon(Icons.cancel),
+              label: const Text('Anulo'),
+            ),
+        ]),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(value: value),
+      ],
+    );
+  }
+
+  void _onCancel() { _importService.cancelImport(); }
 
   Future<bool> _confirmApply() async {
     final d = _diff!;
