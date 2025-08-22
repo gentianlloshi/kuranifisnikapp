@@ -259,16 +259,22 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
     final versePart = parts[1];
     final rangeSep = versePart.contains('–') ? '–' : '-';
     int? startVerse;
+    int? endVerse;
     if (versePart.contains(rangeSep)) {
       final range = versePart.split(rangeSep);
       startVerse = int.tryParse(range[0]);
+      endVerse = int.tryParse(range[1]);
     } else {
       startVerse = int.tryParse(versePart);
     }
     if (startVerse == null) return;
     // Use QuranProvider to open surah at verse
     final q = context.read<QuranProvider>();
-    q.openSurahAtVerse(surahNumber, startVerse);
+    if (endVerse != null && endVerse! >= startVerse) {
+      q.openSurahAtRange(surahNumber, startVerse, endVerse!);
+    } else {
+      q.openSurahAtVerse(surahNumber, startVerse);
+    }
     _openQuranStandalone(context);
   }
 
@@ -426,15 +432,21 @@ class _ThemeSubthemeTile extends StatelessWidget {
     final versePart = parts[1];
     final rangeSep = versePart.contains('–') ? '–' : '-';
     int? startVerse;
+    int? endVerse;
     if (versePart.contains(rangeSep)) {
       final range = versePart.split(rangeSep);
       startVerse = int.tryParse(range[0]);
+      endVerse = int.tryParse(range[1]);
     } else {
       startVerse = int.tryParse(versePart);
     }
     if (startVerse == null) return;
     final q = context.read<QuranProvider>();
-    q.openSurahAtVerse(surahNumber, startVerse);
+    if (endVerse != null && endVerse! >= startVerse) {
+      q.openSurahAtRange(surahNumber, startVerse, endVerse!);
+    } else {
+      q.openSurahAtVerse(surahNumber, startVerse);
+    }
     Navigator.push(
       context,
       MaterialPageRoute(

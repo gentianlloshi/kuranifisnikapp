@@ -82,6 +82,9 @@ class QuranProvider extends ChangeNotifier {
   static const int _pageSize = 20;
   // Pending scroll target (verse number) after loading a surah, used for smooth scroll from search / bookmarks
   int? _pendingScrollVerseNumber;
+  // Pending highlight range on arrival (inclusive), used to softly highlight verses after navigation
+  int? _pendingHighlightStartVerseNumber;
+  int? _pendingHighlightEndVerseNumber;
   // Search indexing (delegated)
   bool _isBuildingIndex = false; // mirrors manager state for UI convenience
   double _indexProgress = 0;
@@ -326,9 +329,21 @@ class QuranProvider extends ChangeNotifier {
 
   Future<void> loadSurah(int surahNumber) async => navigateToSurah(surahNumber);
 
-  // Called by search/bookmark navigation to set a verse to scroll to after load
+  // Called by navigation to open a surah at a specific verse and mark it for highlight.
   void openSurahAtVerse(int surahNumber, int verseNumber) async {
     _pendingScrollVerseNumber = verseNumber;
+    _pendingHighlightStartVerseNumber = verseNumber;
+    _pendingHighlightEndVerseNumber = verseNumber;
+    await navigateToSurah(surahNumber);
+  }
+
+  // Called by navigation to open a surah at a verse range and mark range for highlight.
+  void openSurahAtRange(int surahNumber, int startVerse, int endVerse) async {
+    final s = startVerse <= endVerse ? startVerse : endVerse;
+    final e = endVerse >= startVerse ? endVerse : startVerse;
+    _pendingScrollVerseNumber = s;
+    _pendingHighlightStartVerseNumber = s;
+    _pendingHighlightEndVerseNumber = e;
     await navigateToSurah(surahNumber);
   }
 
@@ -336,6 +351,16 @@ class QuranProvider extends ChangeNotifier {
     final v = _pendingScrollVerseNumber;
     _pendingScrollVerseNumber = null;
     return v;
+  }
+
+  /// Returns [start, end] for a pending arrival highlight range and clears it; or null if none.
+  List<int>? consumePendingHighlightRange() {
+    final s = _pendingHighlightStartVerseNumber;
+    final e = _pendingHighlightEndVerseNumber;
+    _pendingHighlightStartVerseNumber = null;
+    _pendingHighlightEndVerseNumber = null;
+    if (s == null || e == null) return null;
+    return [s, e];
   }
 
   void _appendMoreVerses() {

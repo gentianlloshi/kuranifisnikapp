@@ -85,6 +85,20 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     );
   }
 
+  // Secondary decoration for soft range highlight (lighter than active verse)
+  BoxDecoration _buildRangeHighlightDecoration(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final bool dark = scheme.brightness == Brightness.dark;
+    final baseSurface = scheme.surfaceElevated(1);
+    final tint = dark ? scheme.tertiary.withOpacity(0.14) : scheme.tertiary.withOpacity(0.10);
+    final blended = Color.alphaBlend(tint, baseSurface);
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: blended,
+      border: Border(left: BorderSide(color: scheme.tertiary.withOpacity(dark ? 0.7 : 0.9), width: 2)),
+    );
+  }
+
   void _openAddNote(BuildContext context, Verse verse) {
     showDialog(
       context: context,
@@ -353,8 +367,10 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   Widget build(BuildContext context) {
     return Consumer3<QuranProvider, AppStateProvider, BookmarkProvider>(
       builder: (context, quranProvider, appState, bookmarkProvider, child) {
-        // Handle pending scroll target (e.g., after navigating from search/bookmark)
+  // Handle pending scroll target (e.g., after navigating from search/bookmark)
         final pendingTarget = quranProvider.consumePendingScrollTarget();
+  // Handle pending arrival highlight range
+  final pendingRange = quranProvider.consumePendingHighlightRange();
         if (pendingTarget != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
@@ -386,6 +402,13 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
 
         final surah = quranProvider.currentSurah!;
         final verses = quranProvider.currentVerses;
+        // Build a quick lookup for pending range
+        int? rangeStart;
+        int? rangeEnd;
+        if (pendingRange != null) {
+          rangeStart = pendingRange[0];
+          rangeEnd = pendingRange[1];
+        }
         // Load real word-by-word + timestamps if feature enabled
         if (context.read<AppStateProvider>().showWordByWord) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -524,10 +547,14 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                           final wbwProvider = Provider.of<WordByWordProvider>(context);
                           var wbw = wbwProvider.getVerseWordData(verse.number);
                           wbw ??= wbwProvider.error != null ? wbwProvider.buildNaiveFromVerse(verse) : null;
-                          final isCurrent = currentPlaying == verse.verseKey;
-                          final isSelected = context.watch<SelectionService>().selected.contains(verse.verseKey);
-                          final baseDecoration = _buildVerseHighlightDecoration(context, isActive: isCurrent);
-                          final decoration = _mergeSelectionDecoration(context, base: baseDecoration, isSelected: isSelected);
+              final isCurrent = currentPlaying == verse.verseKey;
+              final isSelected = context.watch<SelectionService>().selected.contains(verse.verseKey);
+              // Arrival range soft highlight (verse number within range)
+              final inArrivalRange = rangeStart != null && rangeEnd != null && verse.number >= rangeStart! && verse.number <= rangeEnd!;
+              final baseDecoration = isCurrent
+                ? _buildVerseHighlightDecoration(context, isActive: true)
+                : (inArrivalRange ? _buildRangeHighlightDecoration(context) : const BoxDecoration());
+              final decoration = _mergeSelectionDecoration(context, base: baseDecoration, isSelected: isSelected);
                           final reduceMotion = appState.reduceMotion;
                           final duration = reduceMotion ? Duration.zero : const Duration(milliseconds: 300);
                           return GestureDetector(
