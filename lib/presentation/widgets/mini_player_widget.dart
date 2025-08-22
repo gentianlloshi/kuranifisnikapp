@@ -34,22 +34,30 @@ class MiniPlayerWidget extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: context.spaceLg, vertical: context.spaceSm),
                 child: Row(
                   children: [
-                    IconButton(
+                    Semantics(
+                      button: true,
+                      label: audio.isPlaying ? 'Pauzo' : 'Luaj',
+                      child: IconButton(
                       icon: Icon(
                         audio.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
                         color: scheme.primary,
                         size: 36,
                       ),
-                      onPressed: () => audio.togglePlayPause(),
+                        onPressed: () => audio.togglePlayPause(),
+                      ),
                     ),
                     if (!audio.isPlaylistMode)
-                      IconButton(
+                      Semantics(
+                        button: true,
+                        label: audio.isSingleVerseLoop ? 'Hiq loop ajet' : 'Loop ajetin',
+                        child: IconButton(
                         icon: Icon(
                           Icons.repeat_one,
                           color: audio.isSingleVerseLoop ? scheme.primary : scheme.onSurfaceVariant,
                         ),
                         tooltip: audio.isSingleVerseLoop ? 'Hiq loop' : 'Loop ajetin',
-                        onPressed: () => audio.setSingleVerseLoop(!audio.isSingleVerseLoop),
+                          onPressed: () => audio.setSingleVerseLoop(!audio.isSingleVerseLoop),
+                        ),
                       ),
                     Expanded(
                       child: Column(
@@ -63,7 +71,9 @@ class MiniPlayerWidget extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(height: context.spaceXs),
-                          ClipRRect(
+                          Semantics(
+                            label: 'Progresi i leximit ${(progress * 100).toStringAsFixed(0)} përqind',
+                            child: ClipRRect(
                             borderRadius: BorderRadius.circular(3),
                             child: LinearProgressIndicator(
                               value: progress > 0 && progress.isFinite ? progress : null,
@@ -71,16 +81,21 @@ class MiniPlayerWidget extends StatelessWidget {
                               backgroundColor: scheme.primary.withOpacity(0.15),
                               valueColor: AlwaysStoppedAnimation(scheme.primary),
                             ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    IconButton(
+                    Semantics(
+                      button: true,
+                      label: 'Mbyll mini playerin',
+                      child: IconButton(
                       icon: const Icon(Icons.close),
                       tooltip: 'Mbyll',
-                      onPressed: () async {
+                        onPressed: () async {
                         await audio.stop();
-                      },
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -154,7 +169,9 @@ class _FullPlayerCore extends StatelessWidget {
               padding: EdgeInsets.only(bottom: context.spaceSm),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: InputChip(
+                child: Semantics(
+                  label: 'A deri B aktiv nga ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} deri ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}' + (audio.remainingABLoops != null ? ', mbetur ${audio.remainingABLoops} herë' : ''),
+                  child: InputChip(
                   label: Text(
                     'A-B: ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} → ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}' +
                     (audio.remainingABLoops != null ? ' ×${audio.remainingABLoops}' : ''),
@@ -162,12 +179,17 @@ class _FullPlayerCore extends StatelessWidget {
                   avatar: const Icon(Icons.loop, size: 18),
                   onDeleted: audio.disableABLoop,
                   deleteIcon: const Icon(Icons.close),
+                  ),
+                ),
                 ),
               ),
             ),
-          Slider(
+          Semantics(
+            label: 'Rrëshqitësi i kohës së leximit',
+            child: Slider(
             value: audio.progress.clamp(0.0, 1.0),
             onChanged: (v) => audio.seekToProgress(v),
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -180,32 +202,52 @@ class _FullPlayerCore extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
+              Semantics(
+                button: true,
+                label: 'Kalo në ajetin e mëparshëm',
+                child: IconButton(
                 icon: const Icon(Icons.skip_previous),
                 onPressed: audio.playPrevious,
+                ),
               ),
               const SizedBox(width: 4),
-              ElevatedButton(
+              Semantics(
+                button: true,
+                label: audio.isPlaying ? 'Pauzo' : 'Luaj',
+                child: ElevatedButton(
                 onPressed: audio.togglePlayPause,
                 child: Icon(audio.isPlaying ? Icons.pause : Icons.play_arrow),
+                ),
               ),
               const SizedBox(width: 4),
-              IconButton(
+              Semantics(
+                button: true,
+                label: 'Kalo në ajetin tjetër',
+                child: IconButton(
                 icon: const Icon(Icons.skip_next),
                 onPressed: audio.playNext,
+                ),
               ),
               const SizedBox(width: 8),
-              IconButton(
+              Semantics(
+                button: true,
+                label: audio.isRepeatMode ? 'Çaktivizo përsëritjen' : 'Aktivizo përsëritjen',
+                child: IconButton(
                 icon: Icon(audio.isRepeatMode ? Icons.repeat_on : Icons.repeat),
                 color: audio.isRepeatMode ? scheme.primary : null,
                 onPressed: audio.toggleRepeatMode,
+                ),
               ),
               if (!audio.isPlaylistMode)
-                IconButton(
+                Semantics(
+                  button: true,
+                  label: audio.isSingleVerseLoop ? 'Hiq loop ajet' : 'Loop ajetin',
+                  child: IconButton(
                   icon: Icon(audio.isSingleVerseLoop ? Icons.repeat_one_on : Icons.repeat_one),
                   color: audio.isSingleVerseLoop ? scheme.primary : null,
                   tooltip: 'Loop ajetin',
                   onPressed: () => audio.setSingleVerseLoop(!audio.isSingleVerseLoop),
+                  ),
                 ),
               if (!audio.isPlaylistMode)
                 PopupMenuButton<int>(

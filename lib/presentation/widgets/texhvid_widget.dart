@@ -188,27 +188,36 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Progress
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          Semantics(
+            label: 'Progres kuizi ${(progress * 100).toStringAsFixed(0)} përqind',
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+            ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Pyetja ${provider.currentQuestionIndex + 1} nga ${provider.totalQuestions}',
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
+          Semantics(
+            label: 'Pyetja ${provider.currentQuestionIndex + 1} nga ${provider.totalQuestions}',
+            child: Text(
+              'Pyetja ${provider.currentQuestionIndex + 1} nga ${provider.totalQuestions}',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: 24),
 
           // Question
-          Card(
+          Semantics(
+            label: 'Pyetje kuizi',
+            child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
                 question.question,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+            ),
             ),
           ),
           const SizedBox(height: 16),
@@ -242,7 +251,10 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                   textColor = Theme.of(context).primaryColor;
                 }
 
-        return Card(
+  return Semantics(
+      button: !showResult,
+      label: 'Opsion ${index + 1}${isSelected ? ', i zgjedhur' : ''}${showResult && isCorrect ? ', i saktë' : ''}',
+      child: Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   color: backgroundColor,
                   child: ListTile(
@@ -250,6 +262,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                     trailing: icon != null ? Icon(icon, color: textColor) : null,
           onTap: showResult ? null : () => provider.selectAnswer(optionText),
                   ),
+      ),
                 );
               },
             ),
@@ -279,7 +292,10 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                 ),
               ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            Semantics(
+              button: true,
+              label: provider.isLastQuestion ? 'Përfundo kuizin' : 'Pyetja tjetër',
+              child: ElevatedButton(
               onPressed: provider.isLastQuestion
                   ? () async {
                       final result = await provider.finishQuiz();
@@ -290,11 +306,16 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
               child: Text(
                 provider.isLastQuestion ? 'Përfundo Kuizin' : 'Pyetja Tjetër',
               ),
+              ),
             ),
           ] else if (provider.selectedAnswer != null) ...[
-            ElevatedButton(
+            Semantics(
+              button: true,
+              label: 'Konfirmo përgjigjen',
+              child: ElevatedButton(
               onPressed: provider.submitAnswer,
               child: const Text('Konfirmo Përgjigjen'),
+              ),
             ),
           ],
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import '../../core/services/audio_service.dart';
 import 'word_by_word_provider.dart';
@@ -64,6 +65,8 @@ class AudioProvider extends ChangeNotifier {
         if (loopPref) {
           await _audioService.setSingleVerseLoop(true);
         }
+  // Load persisted A-B loop state (MEMO-2b)
+  await _loadABLoopState(prefs);
       } catch (_) {}
       _initialized = true;
       notifyListeners();
@@ -197,6 +200,8 @@ class AudioProvider extends ChangeNotifier {
     _loopEndVerse = end;
     _abLoopEnabled = true;
     _remainingABLoops = repeatCount != null && repeatCount > 0 ? repeatCount : null; // null => infinite
+  // Persist
+  unawaited(_persistABLoopState());
     notifyListeners();
   }
 
@@ -205,6 +210,8 @@ class AudioProvider extends ChangeNotifier {
     _loopStartVerse = null;
     _loopEndVerse = null;
     _remainingABLoops = null;
+  // Persist
+  unawaited(_persistABLoopState());
     notifyListeners();
   }
 
@@ -346,6 +353,39 @@ class AudioProvider extends ChangeNotifier {
     final m = d.inMinutes.remainder(60).toString().padLeft(2,'0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2,'0');
     return '$m:$s';
+  }
+
+  // MEMO-2b persistence helpers
+  Future<void> _persistABLoopState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('audio_abloop_enabled', _abLoopEnabled);
+      await prefs.setString('audio_abloop_start_key', _loopStartVerse?.verseKey ?? '');
+      await prefs.setString('audio_abloop_end_key', _loopEndVerse?.verseKey ?? '');
+      await prefs.setInt('audio_abloop_repeat', _remainingABLoops ?? -1); // -1 => infinite/null
+    } catch (_) {}
+  }
+
+  Future<void> _loadABLoopState(SharedPreferences prefs) async {
+    try {
+      final enabled = prefs.getBool('audio_abloop_enabled') ?? false;
+      final startKey = prefs.getString('audio_abloop_start_key');
+      final endKey = prefs.getString('audio_abloop_end_key');
+      final rc = prefs.getInt('audio_abloop_repeat') ?? -1;
+      if (!enabled || startKey == null || startKey.isEmpty || endKey == null || endKey.isEmpty) {
+        return;
+      }
+      Verse parse(String key) {
+        final parts = key.split(':');
+        final s = parts.isNotEmpty ? int.tryParse(parts[0]) ?? 1 : 1;
+        final v = parts.length > 1 ? int.tryParse(parts[1]) ?? 1 : 1;
+        return Verse(surahId: s, verseNumber: v, arabicText: '', translation: null, transliteration: null, verseKey: '$s:$v');
+      }
+      _loopStartVerse = parse(startKey);
+      _loopEndVerse = parse(endKey);
+      _abLoopEnabled = true;
+      _remainingABLoops = rc > 0 ? rc : null;
+    } catch (_) {}
   }
 
   set isPlayerExpanded(bool v) { _isPlayerExpanded = v; notifyListeners(); }
