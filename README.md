@@ -16,6 +16,7 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 - Siguri lifecycle: shtuar mounted checks rreth post‑frame/async në pamjen e Kuranit.
 - Android: aktivizuar predictive back; përditësuar Pop/Back në fletë të plota.
 - UI: rregulluar overflow në header të Memorizimit (chips horizontale të scrollueshme).
+ - Kërkim: shtuar debounce në input dhe normalizim morfologjik i lehtë (shqip) për indeksim dhe kërkim.
 
 ## Karakteristikat Kryesore
 
@@ -213,10 +214,10 @@ Për pyetje ose sugjerime, kontaktoni:
 
 ---
 ### 🔄 Roadmap i Afërt
-- Persistim i indeksit të kërkimit (shmang rebuild çdo hapje)
-- Field-weighted ranking (Arabic > Translation > Transliteration)
+- Persistim i indeksit të kërkimit (snapshot incremental është në vend; zgjerim për invalidim/verzionim)
+- Field-weighted ranking i përmirësuar (aktualisht ka pesha bazike; nevojitet kalibrim dhe BM25-lite)
 - Mini-player i përhershëm në fund gjatë navigimit
 - Opsion për çaktivizim auto-scroll / reduktim animacionesh
-- Light stemming për forma fjalësh (-it, -in, -ve)
+- Normalizim morfologjik: rritje e mbulimit të prapashtesave dhe testim i regression-eve
 
 

@@ -19,6 +19,7 @@ Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
     for (final tok in tokens) {
       if (tok.isEmpty) continue;
       final norm = _normalizeLatin(tok);
+      final stem = _lightStem(norm);
       // Base token
       void addToken(String t){
         if (seen.add(t)) {
@@ -28,11 +29,13 @@ Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
       }
       addToken(tok);
       if (norm != tok) addToken(norm);
+      if (stem != norm && stem.length >= 3) addToken(stem);
       // Prefix indexing (for incremental / partial search) from length 2..min(6,len-1)
-      if (norm.length >= 3) {
-        final maxPref = norm.length - 1 < 10 ? norm.length - 1 : 10; // cap at 10 chars
+      final baseForPrefix = stem.length >= 3 ? stem : norm;
+      if (baseForPrefix.length >= 3) {
+        final maxPref = baseForPrefix.length - 1 < 10 ? baseForPrefix.length - 1 : 10; // cap at 10 chars
         for (int l = 2; l <= maxPref; l++) {
-          addToken(norm.substring(0, l));
+          addToken(baseForPrefix.substring(0, l));
         }
       }
     }
@@ -74,6 +77,29 @@ String _normalizeLatin(String input) {
   };
   final sb = StringBuffer();
   for (final ch in s.split('')) {
+
+// Very light Albanian-oriented stemmer: trims a small set of frequent noun/adjective suffixes.
+// Intentionally conservative to avoid over-stemming. Ensures minimum length of 3.
+String _lightStem(String token) {
+  var s = token;
+  if (s.length <= 3) return s;
+  // Order matters: try longer suffixes first.
+  const suffixes = <String>[
+    'ave', 'eve', 'ive', 'ove', // plural+dative variants
+    'ëve', 'ët', 'ën',
+    'uar', 'ues', 'uesi', // common verbal/agentive endings
+    'shme', 'shëm', 'shm', // adjectives like dobishëm/dobishme
+    'isht', // adverb ending
+    'it', 'in', 've', 'ra', 'ri', 're', 't', 'i', 'e', 'a', 'u',
+  ];
+  for (final suf in suffixes) {
+    if (s.endsWith(suf) && s.length - suf.length >= 3) {
+      s = s.substring(0, s.length - suf.length);
+      break;
+    }
+  }
+  return s;
+}
     sb.write(mapping[ch] ?? ch);
   }
   return sb.toString();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
 import '../providers/memorization_provider.dart';
 import '../providers/quran_provider.dart';
 import '../theme/theme.dart';

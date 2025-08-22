@@ -238,9 +238,11 @@ class SearchIndexManager {
         result.add(r);
         continue;
       }
-      result.add(r);
-      final norm = r.replaceAll('ç', 'c').replaceAll('ë', 'e');
-      if (norm != r) result.add(norm);
+  result.add(r);
+  final norm = r.replaceAll('ç', 'c').replaceAll('ë', 'e');
+  if (norm != r) result.add(norm);
+  final stem = _lightStem(_normalizeLatin(r));
+  if (stem.length >= 3) result.add(stem);
     }
     return result.toSet().toList();
   }
@@ -298,6 +300,27 @@ class SearchIndexManager {
       sb.write(mapping[ch] ?? ch);
     }
     return sb.toString();
+  }
+
+  // Mirror of builder side: very light Albanian-oriented stemmer
+  String _lightStem(String token) {
+    var s = token;
+    if (s.length <= 3) return s;
+    const suffixes = <String>[
+      'ave', 'eve', 'ive', 'ove',
+      'ëve', 'ët', 'ën',
+      'uar', 'ues', 'uesi',
+      'shme', 'shëm', 'shm',
+      'isht',
+      'it', 'in', 've', 'ra', 'ri', 're', 't', 'i', 'e', 'a', 'u',
+    ];
+    for (final suf in suffixes) {
+      if (s.endsWith(suf) && s.length - suf.length >= 3) {
+        s = s.substring(0, s.length - suf.length);
+        break;
+      }
+    }
+    return s;
   }
 
   /// Public API for UI to notify that user scrolled (used for adaptive throttling)

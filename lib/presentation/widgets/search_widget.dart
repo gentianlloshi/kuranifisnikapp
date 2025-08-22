@@ -152,7 +152,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                         quranProvider.clearSearch();
                         _indexKickIssued = false; // reset when cleared
                       } else {
-                        if (!gatingActive) quranProvider.searchVersesDebounced(query.trim());
+                        if (!gatingActive) {
+                          // Debounce at the widget level to minimize rapid provider churn
+                          quranProvider.searchVersesDebounced(query.trim());
+                        }
                       }
                     },
                     onSubmitted: (query) {
