@@ -32,6 +32,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
   late final DataImportService _importService;
   StreamSubscription? _progressSub;
   ImportProgress? _progress;
+  DateTime? _progressStart;
 
   bool _loading = false;
   String? _exportJson;
@@ -58,7 +59,10 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
     _importService = DataImportService(storageRepository: _storageRepository);
     _progressSub = _importService.progressStream.listen((p) {
       if (!mounted) return;
-      setState(() { _progress = p; });
+      setState(() {
+        _progress ??= p;
+        _progress = p;
+      });
     });
   }
 
@@ -315,7 +319,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
   context.read<AppStateProvider>().enqueueSnack('Importi u aplikua');
     } catch (e) {
       setState(() { _error = 'Aplikimi dështoi: $e'; });
-    } finally { setState(() { _loading = false; _progress = null; }); }
+  } finally { setState(() { _loading = false; _progress = null; _progressStart = null; }); }
   }
 
   Widget _buildProgressUI() {
@@ -335,12 +339,16 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
         default: return p.message ?? p.phase;
       }
     }();
-    final value = p?.ratio;
+  // Track start time on first visible progress
+  _progressStart ??= DateTime.now();
+  final elapsed = _progressStart == null ? '' : _formatElapsed(DateTime.now().difference(_progressStart!));
+  final value = p?.ratio;
+  final pct = value != null ? ' ${(value*100).toStringAsFixed(0)}%' : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(children:[
-          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+      Expanded(child: Text('$label$pct · $elapsed', style: theme.textTheme.bodyMedium)),
           if (p != null && p.phase != 'done' && p.phase != 'canceled')
             TextButton.icon(
               onPressed: _onCancel,
@@ -355,6 +363,25 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
   }
 
   void _onCancel() { _importService.cancelImport(); }
+  
+  @override
+  void didUpdateWidget(covariant DataManagementSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When progress switches to canceled, surface a small toast/snackbar once
+    if (_progress?.phase == 'canceled') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<AppStateProvider>().enqueueSnack('Importi u anulua');
+      });
+    }
+  }
+
+  String _formatElapsed(Duration d) {
+    final m = d.inMinutes;
+    final s = d.inSeconds % 60;
+    if (m > 0) return '${m}m ${s}s';
+    return '${s}s';
+  }
 
   Future<bool> _confirmApply() async {
     final d = _diff!;

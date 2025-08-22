@@ -260,7 +260,7 @@ class DataImportService {
           _emit(ImportProgress('bookmarks', processed, total, 'Favoritet'));
           final existing = await storageRepository.getBookmarks();
           final map = { for (final b in existing) b.verseKey : b };
-          for (final raw in [...diff.bookmarkAdds, ...diff.bookmarkUpdates]) {
+      for (final raw in [...diff.bookmarkAdds, ...diff.bookmarkUpdates]) {
             checkCancel('bookmarks');
             try {
               final b = Bookmark.fromJson(raw);
@@ -275,6 +275,8 @@ class DataImportService {
             } catch (e) {
               result.errors.add('Bookmark parse failed: $e');
             } finally {
+        // Yield to event loop to allow cancel handling and UI updates
+        await Future<void>.delayed(Duration.zero);
               processed++; _emit(ImportProgress('bookmarks', processed, total, 'Favoritet'));
             }
           }
@@ -304,7 +306,7 @@ class DataImportService {
               if (current == null) { map[n.id] = n; result.notesAdded++; }
               else if (n.updatedAt.isAfter(current.updatedAt)) { map[n.id] = n; result.notesUpdated++; }
             } catch (e) { result.errors.add('Note parse failed: $e'); }
-            finally { processed++; _emit(ImportProgress('notes', processed, total, 'Shënimet')); }
+            finally { await Future<void>.delayed(Duration.zero); processed++; _emit(ImportProgress('notes', processed, total, 'Shënimet')); }
           }
           // Resolve conflicts
           for (final conflict in diff.noteConflicts) {
@@ -314,6 +316,7 @@ class DataImportService {
               try { final n = Note.fromJson(conflict.imported); map[n.id] = n; result.noteConflictsImported++; }
               catch (e) { result.errors.add('Conflict import parse failed: $e'); }
             } else { result.noteConflictsKeptLocal++; }
+            await Future<void>.delayed(Duration.zero);
             processed++; _emit(ImportProgress('notes', processed, total, 'Shënimet'));
           }
           checkCancel('notes');
@@ -361,11 +364,13 @@ class DataImportService {
           // Load current
           Map<String,int> positions = await storageRepository.getLastReadPosition();
           Map<String,int> timestamps = await storageRepository.getLastReadTimestamps();
-          diff.readingProgressImprovements.forEach((surah, info) {
-            positions[surah] = info['newVerse']!;
-            timestamps[surah] = info['newTs']!;
-          processed++; _emit(ImportProgress('readingProgress', processed, total, 'Progresi i leximit'));
-          });
+          for (final entry in diff.readingProgressImprovements.entries) {
+            checkCancel('readingProgress');
+            positions[entry.key] = entry.value['newVerse']!;
+            timestamps[entry.key] = entry.value['newTs']!;
+            await Future<void>.delayed(Duration.zero);
+            processed++; _emit(ImportProgress('readingProgress', processed, total, 'Progresi i leximit'));
+          }
           checkCancel('readingProgress');
           await prefs.setString('last_read_positions_v1', json.encode(positions));
           await prefs.setString('last_read_timestamps_v1', json.encode(timestamps));
