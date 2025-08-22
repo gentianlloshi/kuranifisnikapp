@@ -221,11 +221,32 @@ class SearchIndexManager {
     final tokens = _expandQueryTokens(query);
     if (tokens.isEmpty) return [];
   final candidateScores = <String, int>{};
+    // Exact/prefix hits
     for (final t in tokens) {
       final list = _invertedIndex![t];
       if (list == null) continue;
       for (final key in list) {
-        candidateScores.update(key, (v) => v + 1, ifAbsent: () => 1);
+        candidateScores.update(key, (v) => v + _baseHitWeight, ifAbsent: () => _baseHitWeight);
+      }
+    }
+    // Fuzzy fallback (Levenshtein distance 1 for short tokens, <=2 for longer)
+    final rawTokens = tq.tokenizeLatin(query).map((e)=>e.toLowerCase()).toList();
+    if (rawTokens.isNotEmpty) {
+      final indexTokens = _invertedIndex!.keys;
+      for (final qTok in rawTokens) {
+        final maxDist = qTok.length <= 4 ? 1 : 2;
+        for (final idxTok in indexTokens) {
+          if ((idxTok.length - qTok.length).abs() > maxDist) continue;
+          final d = _levenshtein(idxTok, qTok, maxDist);
+          if (d >= 0 && d <= maxDist) {
+            final keys = _invertedIndex![idxTok];
+            if (keys == null) continue;
+            final weight = (_baseHitWeight / (d + 2)).round(); // lower weight for fuzzier
+            for (final k in keys) {
+              candidateScores.update(k, (v) => v + weight, ifAbsent: () => weight);
+            }
+          }
+        }
       }
     }
     if (candidateScores.isEmpty) return [];
@@ -369,6 +390,35 @@ class SearchIndexManager {
     // After pause, always yield a tiny delay to keep UI responsive
     await Future<void>.delayed(const Duration(milliseconds: 1));
   }
+}
+
+// Bounded Levenshtein (returns -1 if exceeds maxDist early)
+int _levenshtein(String a, String b, int maxDist) {
+  final m = a.length, n = b.length;
+  if ((m - n).abs() > maxDist) return -1;
+  if (m == 0) return n <= maxDist ? n : -1;
+  if (n == 0) return m <= maxDist ? m : -1;
+  List<int> prev = List<int>.generate(n + 1, (j) => j);
+  List<int> curr = List<int>.filled(n + 1, 0);
+  for (int i = 1; i <= m; i++) {
+    curr[0] = i;
+    int rowMin = curr[0];
+    final ca = a.codeUnitAt(i - 1);
+    for (int j = 1; j <= n; j++) {
+      final cb = b.codeUnitAt(j - 1);
+      final cost = ca == cb ? 0 : 1;
+      final ins = curr[j - 1] + 1;
+      final del = prev[j] + 1;
+      final sub = prev[j - 1] + cost;
+      final v = (ins < del ? ins : del);
+      curr[j] = v < sub ? v : sub;
+      if (curr[j] < rowMin) rowMin = curr[j];
+    }
+    if (rowMin > maxDist) return -1; // early prune
+    final tmp = prev; prev = curr; curr = tmp;
+  }
+  final d = prev[n];
+  return d <= maxDist ? d : -1;
 }
 
 extension on SearchIndexManager {

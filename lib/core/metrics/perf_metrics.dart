@@ -8,6 +8,9 @@ class PerfMetricsSnapshot {
   final int transliterationCacheHits; // (if later cached externally)
   final double indexCoverage; // 0..1 fraction of search index built
   final double enrichmentCoverage; // 0..1 fraction of surahs enriched (translation+transliteration)
+  final int highlightRenderCount;
+  final int highlightRenderMsTotal;
+  final int highlightRenderMsLast;
   const PerfMetricsSnapshot({
     required this.audioCacheHits,
     required this.lazyBoxOpens,
@@ -15,6 +18,9 @@ class PerfMetricsSnapshot {
     required this.transliterationCacheHits,
     required this.indexCoverage,
     required this.enrichmentCoverage,
+    required this.highlightRenderCount,
+    required this.highlightRenderMsTotal,
+    required this.highlightRenderMsLast,
   });
 }
 
@@ -27,6 +33,9 @@ class PerfMetrics extends ChangeNotifier {
   int _transliterationCacheHits = 0;
   double _indexCoverage = 0.0;
   double _enrichmentCoverage = 0.0;
+  int _highlightRenderCount = 0;
+  int _highlightRenderMsTotal = 0;
+  int _highlightRenderMsLast = 0;
 
   void incAudioCacheHit() { _audioCacheHits++; _notify(); }
   void incLazyBoxOpen() { _lazyBoxOpens++; _notify(); }
@@ -49,6 +58,9 @@ class PerfMetrics extends ChangeNotifier {
   transliterationCacheHits: _transliterationCacheHits,
     indexCoverage: _indexCoverage,
     enrichmentCoverage: _enrichmentCoverage,
+  highlightRenderCount: _highlightRenderCount,
+  highlightRenderMsTotal: _highlightRenderMsTotal,
+  highlightRenderMsLast: _highlightRenderMsLast,
   );
 
   // Test support – reset internal counters (not for production runtime use)
@@ -59,6 +71,18 @@ class PerfMetrics extends ChangeNotifier {
     _transliterationCacheHits = 0;
     _indexCoverage = 0.0;
     _enrichmentCoverage = 0.0;
+    _highlightRenderCount = 0;
+    _highlightRenderMsTotal = 0;
+    _highlightRenderMsLast = 0;
+    _notify();
+  }
+
+  // Highlight render profiling (SEARCH-3 profiling)
+  void recordHighlightDuration(Duration d) {
+    final ms = d.inMilliseconds;
+    _highlightRenderCount += 1;
+    _highlightRenderMsTotal += ms;
+    _highlightRenderMsLast = ms;
     _notify();
   }
 

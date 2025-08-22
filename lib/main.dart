@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -59,6 +60,7 @@ import 'presentation/theme/theme.dart';
 import 'presentation/startup/startup_scheduler.dart';
 import 'presentation/startup/performance_monitor.dart';
 import 'core/utils/logger.dart';
+import 'package:kurani_fisnik_app/presentation/widgets/dev_perf_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -370,23 +372,28 @@ class KuraniFisnikApp extends StatelessWidget {
           PerformanceMonitor.ensureStarted();
                 }
               });
-              return _StartupSchedulerMarker(child: MaterialApp(
-                title: 'Kurani Fisnik',
-                debugShowCheckedModeBanner: false,
-                theme: theme,
-                home: EnhancedHomePage(),
-                routes: {
-                  '/home': (context) => EnhancedHomePage(),
-                  '/quran': (context) => HomePage(),
-                  '/search': (context) => HomePage(),
-                  '/bookmarks': (context) => HomePage(),
-                  '/notes': (context) => HomePage(),
-                  '/memorization': (context) => HomePage(),
-                  '/texhvid': (context) => HomePage(),
-                  '/thematic': (context) => HomePage(),
-                  '/settings': (context) => HomePage(),
-                },
-              ));
+              return DevPerfOverlay(
+                enabled: kDebugMode,
+                child: _StartupSchedulerMarker(
+                  child: MaterialApp(
+                    title: 'Kurani Fisnik',
+                    debugShowCheckedModeBanner: false,
+                    theme: theme,
+                    home: EnhancedHomePage(),
+                    routes: {
+                      '/home': (context) => EnhancedHomePage(),
+                      '/quran': (context) => HomePage(),
+                      '/search': (context) => HomePage(),
+                      '/bookmarks': (context) => HomePage(),
+                      '/notes': (context) => HomePage(),
+                      '/memorization': (context) => HomePage(),
+                      '/texhvid': (context) => HomePage(),
+                      '/thematic': (context) => HomePage(),
+                      '/settings': (context) => HomePage(),
+                    },
+                  ),
+                ),
+              );
             },
           );
         },

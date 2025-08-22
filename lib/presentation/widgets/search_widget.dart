@@ -6,6 +6,7 @@ import '../providers/bookmark_provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
 import '../../domain/entities/verse.dart';
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import '../theme/theme.dart';
 import 'sheet_header.dart';
 
@@ -549,8 +550,8 @@ class _SearchResultItemState extends State<SearchResultItem> {
               
               // Translation with highlighting
               if (settings.showTranslation && verse.textTranslation != null)
-                RichText(
-                  text: _buildHighlightedText(
+                _ProfilingRichText(
+                  buildSpan: () => _buildHighlightedText(
                     verse.textTranslation!,
                     searchQuery,
                     theme,
@@ -771,6 +772,22 @@ class _GatingNotice extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProfilingRichText extends StatelessWidget {
+  final TextSpan Function() buildSpan;
+  const _ProfilingRichText({required this.buildSpan});
+  @override
+  Widget build(BuildContext context) {
+    final sw = Stopwatch()..start();
+    final span = buildSpan();
+    sw.stop();
+    PerfMetrics.instance.recordHighlightDuration(sw.elapsed);
+    return Semantics(
+      label: 'Tekst me theksim të rezultateve',
+      child: RichText(text: span),
     );
   }
 }
