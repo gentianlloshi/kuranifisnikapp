@@ -151,7 +151,7 @@ class _NotesWidgetState extends State<NotesWidget> {
             Icon(
               Icons.note_add_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -269,10 +269,10 @@ class NoteListItem extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+      Text(
               'Krijuar: ${_formatDate(note.createdAt)}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+        color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
               ),
             ),
             if (note.tags.isNotEmpty) ...[

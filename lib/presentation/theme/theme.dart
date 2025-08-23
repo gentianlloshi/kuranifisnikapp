@@ -50,19 +50,21 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
   final bool isDark = scheme.brightness == Brightness.dark;
   // Derived elevated surface colors (soft layering) for dark mode contrast improvement
   final Color surface1 = isDark ? scheme.surface : scheme.surface;
-  final Color surface2 = isDark ? Color.alphaBlend(scheme.primary.withOpacity(0.04), scheme.surface) : scheme.surface;
-  final Color surface3 = isDark ? Color.alphaBlend(scheme.primary.withOpacity(0.08), scheme.surface) : scheme.surface;
-  final Color surface4 = isDark ? Color.alphaBlend(scheme.primary.withOpacity(0.12), scheme.surface) : scheme.surface;
-  final Color dividerColor = isDark ? scheme.outline.withOpacity(0.35) : scheme.outline.withOpacity(0.6);
-  final Color outlineVariant = isDark ? scheme.outlineVariant.withOpacity(0.35) : scheme.outlineVariant;
+  final Color surface2 = isDark ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.04), scheme.surface) : scheme.surface;
+  final Color surface3 = isDark ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.08), scheme.surface) : scheme.surface;
+  final Color surface4 = isDark ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.12), scheme.surface) : scheme.surface;
+  final Color dividerColor = isDark ? scheme.outline.withValues(alpha: 0.35) : scheme.outline.withValues(alpha: 0.6);
+  final Color outlineVariant = isDark ? scheme.outlineVariant.withValues(alpha: 0.35) : scheme.outlineVariant;
 
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: isDark ? surface1 : scheme.background,
+    scaffoldBackgroundColor: surface1,
     textTheme: baseTextTheme,
     canvasColor: surface1,
-    dialogBackgroundColor: surface2,
+    dialogTheme: DialogThemeData(
+      backgroundColor: surface2,
+    ),
     cardColor: surface2,
     appBarTheme: AppBarTheme(
       backgroundColor: surface2,
@@ -85,13 +87,13 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
         borderRadius: BorderRadius.all(AppRadii.card),
         side: BorderSide(color: Colors.transparent),
       ),
-      shadowColor: isDark ? Colors.black.withOpacity(0.6) : scheme.shadow.withOpacity(0.08),
+  shadowColor: isDark ? Colors.black.withValues(alpha: 0.6) : scheme.shadow.withValues(alpha: 0.08),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: surface2,
       elevation: AppElevation.level1,
       selectedItemColor: scheme.primary,
-      unselectedItemColor: scheme.onSurface.withOpacity(0.6),
+  unselectedItemColor: scheme.onSurface.withValues(alpha: 0.6),
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
     ),
@@ -102,22 +104,22 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
     ),
     iconTheme: IconThemeData(color: scheme.onSurface),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: isDark ? surface3 : scheme.surfaceVariant,
+  backgroundColor: isDark ? surface3 : scheme.surfaceContainerHighest,
       behavior: SnackBarBehavior.floating,
-      contentTextStyle: baseTextTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant.withOpacity(isDark ? 0.9 : 1)),
+  contentTextStyle: baseTextTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: isDark ? 0.9 : 1)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card.x)),
     ),
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(
         color: isDark ? surface4 : scheme.inverseSurface,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: dividerColor.withOpacity(0.4)),
+        border: Border.all(color: dividerColor.withValues(alpha: 0.4)),
       ),
       textStyle: baseTextTheme.bodySmall?.copyWith(color: isDark ? scheme.onSurface : scheme.onInverseSurface),
     ),
     dividerColor: dividerColor,
-    highlightColor: scheme.primary.withOpacity(0.08),
-    splashColor: scheme.primary.withOpacity(0.12),
+      highlightColor: scheme.primary.withValues(alpha: 0.08),
+      splashColor: scheme.primary.withValues(alpha: 0.12),
   );
 }
 
@@ -155,7 +157,7 @@ class BottomSheetWrapper extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: context.radiusPanel),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.15),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
             blurRadius: 18,
             offset: const Offset(0, -4),
           ),
@@ -171,6 +173,6 @@ extension DarkSurfaces on ColorScheme {
   Color surfaceElevated(int level) {
     if (brightness != Brightness.dark || level <= 0) return surface;
     final double alpha = switch (level) { 1 => 0.04, 2 => 0.08, 3 => 0.12, 4 => 0.16, _ => 0.20 };
-    return Color.alphaBlend(primary.withOpacity(alpha), surface);
+  return Color.alphaBlend(primary.withValues(alpha: alpha), surface);
   }
 }

@@ -89,10 +89,10 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -198,7 +198,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
               
               // Information Card
               Card(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
                 child: Padding(
                   padding: EdgeInsets.all(context.spaceLg),
                   child: Column(

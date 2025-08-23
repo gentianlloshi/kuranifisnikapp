@@ -15,7 +15,7 @@ void main() {
     Color expected(ColorScheme scheme, int level) {
       if (scheme.brightness != Brightness.dark || level <= 0) return scheme.surface;
       final double alpha = switch (level) { 1 => 0.04, 2 => 0.08, 3 => 0.12, 4 => 0.16, _ => 0.20 };
-      return Color.alphaBlend(scheme.primary.withOpacity(alpha), scheme.surface);
+      return Color.alphaBlend(scheme.primary.withValues(alpha: alpha), scheme.surface);
     }
 
     test('returns base surface for light mode all levels', () {
@@ -41,9 +41,12 @@ void main() {
       for (var level = 1; level <= 4; level++) {
         final current = darkScheme.surfaceElevated(level);
         expect(current, isNot(equals(prev)), reason: 'Level $level should differ from previous');
-        // Check channel difference grows or at least not zero (heuristic)
-        final prevDiff = (prev.red - base.red).abs() + (prev.green - base.green).abs() + (prev.blue - base.blue).abs();
-        final currDiff = (current.red - base.red).abs() + (current.green - base.green).abs() + (current.blue - base.blue).abs();
+        // Check channel difference grows or at least not zero (heuristic) using non-deprecated accessors (.r/.g/.b range 0..1).
+        double r(Color c) => c.r;
+        double g(Color c) => c.g;
+        double b(Color c) => c.b;
+        final prevDiff = (r(prev) - r(base)).abs() + (g(prev) - g(base)).abs() + (b(prev) - b(base)).abs();
+        final currDiff = (r(current) - r(base)).abs() + (g(current) - g(base)).abs() + (b(current) - b(base)).abs();
         expect(currDiff >= prevDiff, isTrue, reason: 'Level $level should not reduce distance from base');
         prev = current;
       }

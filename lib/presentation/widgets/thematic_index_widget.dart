@@ -69,7 +69,7 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(16),
                 ),
@@ -206,7 +206,7 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
                         subtitle: Text(
                           _getVerseDescription(verseRef),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                                color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                               ),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -388,7 +388,7 @@ class _ThemeSubthemeTile extends StatelessWidget {
                           subtitle: Text(
                             _describeRef(ref),
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                                 ),
                           ),
                           trailing: const Icon(Icons.open_in_new, size: 16),

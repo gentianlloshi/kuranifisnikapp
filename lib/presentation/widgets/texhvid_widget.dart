@@ -68,7 +68,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(16),
                 ),
@@ -247,7 +247,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                     icon = Icons.cancel;
                   }
                 } else if (isSelected) {
-                  backgroundColor = Theme.of(context).primaryColor.withOpacity(0.1);
+                  backgroundColor = Theme.of(context).colorScheme.primary.withValues(alpha: 0.1);
                   textColor = Theme.of(context).primaryColor;
                 }
 

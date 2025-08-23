@@ -127,7 +127,7 @@ class _MemorizationTabState extends State<MemorizationTab> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.school_outlined, size: 72, color: Theme.of(context).colorScheme.primary.withOpacity(0.35)),
+            Icon(Icons.school_outlined, size: 72, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35)),
             SizedBox(height: context.spaceLg),
             Text('Shtoni ajete nga pamja e leximit për të nisur memorizimin.',
                 textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
@@ -348,16 +348,16 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.10),
+  color: c.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: c.withOpacity(0.25)),
+  border: Border.all(color: c.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('$value', style: TextStyle(fontWeight: FontWeight.bold, color: c)),
           const SizedBox(width: 4),
-          Text(label, style: TextStyle(color: c.withOpacity(0.9))),
+          Text(label, style: TextStyle(color: c.withValues(alpha: 0.9))),
         ],
       ),
     );
@@ -396,7 +396,7 @@ class _StatusCycleButton extends StatelessWidget {
         key: ValueKey(mv.status),
         style: OutlinedButton.styleFrom(
           foregroundColor: statusColor,
-          side: BorderSide(color: statusColor.withOpacity(0.6)),
+          side: BorderSide(color: statusColor.withValues(alpha: 0.6)),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         ),
         onPressed: onCycle,
@@ -489,7 +489,7 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
   Widget build(BuildContext context) {
     final mv = widget.verse;
     final colorScheme = Theme.of(context).colorScheme;
-  final tileColor = widget.selected ? colorScheme.primary.withOpacity(0.12) : Colors.transparent;
+  final tileColor = widget.selected ? colorScheme.primary.withValues(alpha: 0.12) : Colors.transparent;
     final statusColor = _statusColor(mv.status);
     return InkWell(
       onTap: widget.onSelect,
@@ -497,7 +497,7 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: tileColor,
-          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1))),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -572,7 +572,7 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
           Container(
             height: 36,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(

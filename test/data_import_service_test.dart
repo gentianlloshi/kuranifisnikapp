@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:kuranifisnikapp/core/services/data_import_service.dart';
-import 'package:kuranifisnikapp/domain/repositories/storage_repository.dart';
-import 'package:kuranifisnikapp/domain/entities/app_settings.dart';
-import 'package:kuranifisnikapp/domain/entities/bookmark.dart';
-import 'package:kuranifisnikapp/domain/entities/note.dart';
+import 'package:kurani_fisnik_app/core/services/data_import_service.dart';
+import 'package:kurani_fisnik_app/domain/repositories/storage_repository.dart';
+import 'package:kurani_fisnik_app/domain/entities/app_settings.dart';
+import 'package:kurani_fisnik_app/domain/entities/bookmark.dart';
+import 'package:kurani_fisnik_app/domain/entities/note.dart';
 
 class _FakeStorageRepository implements StorageRepository {
   AppSettings? _settings;
@@ -37,7 +37,11 @@ class _FakeStorageRepository implements StorageRepository {
   @override
   Future<List<Note>> getNotes() async => _notes.values.toList();
   @override
-  Future<Note?> getNoteForVerse(String verseKey) async => _notes.values.firstWhere((n)=>n.verseKey==verseKey, orElse: ()=> null as Note); // not used in tests
+  Future<Note?> getNoteForVerse(String verseKey) async {
+    try {
+      return _notes.values.firstWhere((n)=>n.verseKey==verseKey);
+    } catch (_) { return null; }
+  }
   // Reading progress
   @override
   Future<void> saveLastReadPosition(int surahNumber, int verseNumber) async { _lastReadPositions['$surahNumber'] = verseNumber; _lastReadTimestamps['$surahNumber'] = DateTime.now().millisecondsSinceEpoch ~/ 1000; }

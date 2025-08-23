@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -12,6 +11,7 @@ import 'search_index_isolate.dart' as iso;
 import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import 'package:kurani_fisnik_app/core/search/stemmer.dart';
 import 'package:kurani_fisnik_app/core/search/token_utils.dart' as tq;
+import 'search_snapshot_store.dart';
 
 /// Encapsulates building and querying the inverted search index.
 /// Responsible only for in-memory structures; persistence & advanced ranking can layer on top later.
@@ -44,6 +44,7 @@ class SearchIndexManager {
   static const String _snapshotFile = 'search_index_v$_snapshotVersion.json';
   // Computed corpus hash (lazy). Used to invalidate old snapshots when assets change.
   String? _cachedCorpusHash;
+  final SnapshotStore _snapshotStore;
 
   // Scoring weights (tunable)
   static const int _baseHitWeight = 10;
@@ -54,7 +55,8 @@ class SearchIndexManager {
   SearchIndexManager({
     required this.getSurahsUseCase,
     required this.getSurahVersesUseCase,
-  });
+    SnapshotStore? snapshotStore,
+  }) : _snapshotStore = snapshotStore ?? DefaultSnapshotStore(fileName: _snapshotFile);
 
   /// Ensures the index is fully built (blocking until completion) unless already built.
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
@@ -456,10 +458,8 @@ extension on SearchIndexManager {
 
   Future<bool> _tryLoadSnapshot() async {
     try {
-      final file = await _snapshotPath();
-      if (!await file.exists()) return false;
-      final content = await file.readAsString();
-      final jsonMap = json.decode(content) as Map<String, dynamic>;
+  final jsonMap = await _snapshotStore.load();
+  if (jsonMap == null) return false;
       final version = jsonMap['version'] as int?;
       if (version != SearchIndexManager._snapshotVersion) return false; // mismatch version
   final dataVersion = jsonMap['dataVersion'] as String?;
@@ -499,7 +499,6 @@ extension on SearchIndexManager {
   Future<void> _saveSnapshot({bool partial = false}) async {
     if (_invertedIndex == null) return;
     try {
-      final file = await _snapshotPath();
       final versesMap = <String, dynamic>{};
       _verseCache.forEach((k, v) {
         versesMap[k] = {
@@ -512,15 +511,15 @@ extension on SearchIndexManager {
           'juz': v.juz,
         };
       });
-      final payload = json.encode({
+  final payload = {
         'version': SearchIndexManager._snapshotVersion,
         'dataVersion': await _computeCorpusHash(),
         'index': _invertedIndex,
         'verses': versesMap,
         'createdAt': DateTime.now().toIso8601String(),
         'nextSurah': partial ? _nextSurahToIndex : 115, // 115 => complete ( > 114 )
-      });
-      await file.writeAsString(payload, flush: true);
+  };
+  await _snapshotStore.save(payload);
     } catch (_) {
       // ignore persistence failure silently
     }
@@ -530,36 +529,7 @@ extension on SearchIndexManager {
   Future<String> _computeCorpusHash() async {
     if (_cachedCorpusHash != null) return _cachedCorpusHash!;
     try {
-      const files = <String>[
-        'assets/data/suret.json',
-        'assets/data/sq_ahmeti.json',
-        'assets/data/sq_mehdiu.json',
-        'assets/data/sq_nahi.json',
-        'assets/data/arabic_quran.json',
-        'assets/data/transliterations.json',
-      ];
-      final sig = StringBuffer('v2:');
-      for (final f in files) {
-        try {
-          final data = await rootBundle.load(f);
-          final bytes = data.buffer.asUint8List();
-          final len = bytes.length;
-          final first = len > 0 ? bytes[0] : 0;
-          final last = len > 0 ? bytes[len - 1] : 0;
-          sig
-            ..write(f)
-            ..write('#')
-            ..write(len)
-            ..write(':')
-            ..write(first)
-            ..write('-')
-            ..write(last)
-            ..write('|');
-        } catch (_) {
-          sig..write(f)..write('#missing|');
-        }
-      }
-      final hash = sig.toString();
+      final hash = await _snapshotStore.computeCurrentDataVersion();
       _cachedCorpusHash = hash;
       return hash;
     } catch (_) {

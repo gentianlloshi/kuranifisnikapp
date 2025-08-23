@@ -33,6 +33,19 @@ class FakeQuranRepository implements QuranRepository {
   Future<Map<String, dynamic>> getThematicIndex() => throw UnimplementedError();
   @override
   Future<Map<String, dynamic>> getTransliterations() => throw UnimplementedError();
+  // New enrichment API members – not used here
+  @override
+  Future<void> ensureSurahTranslation(int surahNumber, {String translationKey = 'sq_ahmeti'}) async {}
+  @override
+  Future<void> ensureSurahTransliteration(int surahNumber) async {}
+  @override
+  bool isSurahFullyEnriched(int surahNumber) => false;
+  @override
+  Map<String, double> translationCoverageByKey() => const {};
+  @override
+  Stream<double> get enrichmentCoverageStream => const Stream<double>.empty();
+  @override
+  Stream<Map<String, double>> get translationCoverageStream => const Stream<Map<String, double>>.empty();
   // Duplicate signature for searchVerses with Surah return removed
 }
 

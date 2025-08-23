@@ -59,16 +59,16 @@ class BookmarksWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.bookmark_border, size: 64, color: Theme.of(context).colorScheme.outline.withOpacity(0.6)),
+                  Icon(Icons.bookmark_border, size: 64, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6)),
                   SizedBox(height: context.spaceLg),
                   Text(
                     'Nuk keni favorit të ruajtur',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                   SizedBox(height: context.spaceSm),
                   Text(
                     'Shtoni ajete në favorit duke klikuar ikonën e bookmark-ut',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55)),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55)),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -195,7 +195,7 @@ class BookmarkItem extends StatelessWidget {
     final bool dark = scheme.brightness == Brightness.dark;
     return Card(
       margin: EdgeInsets.only(bottom: context.spaceMd),
-      color: selected ? Color.alphaBlend(scheme.primary.withOpacity(0.10), scheme.surfaceElevated(1)) : scheme.surfaceElevated(1),
+  color: selected ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.10), scheme.surfaceElevated(1)) : scheme.surfaceElevated(1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -210,7 +210,7 @@ class BookmarkItem extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: context.spaceSm, vertical: context.spaceXs),
                     decoration: ShapeDecoration(
-                      color: scheme.primary.withOpacity(dark ? 0.20 : 0.10),
+                      color: scheme.primary.withValues(alpha: dark ? 0.20 : 0.10),
                       shape: const StadiumBorder(),
                     ),
                     child: Text(
@@ -236,7 +236,7 @@ class BookmarkItem extends StatelessWidget {
               Text(
                 'Ruajtur më ${_formatDate(bookmark.createdAt)}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                 ),
               ),
               
@@ -252,7 +252,7 @@ class BookmarkItem extends StatelessWidget {
                     color: () {
                       final base = scheme.surfaceElevated(dark ? 2 : 1);
                       final tintOpacity = dark ? 0.08 : 0.05;
-                      return Color.alphaBlend(scheme.primary.withOpacity(tintOpacity), base);
+                      return Color.alphaBlend(scheme.primary.withValues(alpha: tintOpacity), base);
                     }(),
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -261,7 +261,7 @@ class BookmarkItem extends StatelessWidget {
                       Icon(
                         Icons.note,
                         size: 16,
-                        color: scheme.onSurfaceVariant.withOpacity(0.75),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
                       ),
                       SizedBox(width: context.spaceSm),
                       Expanded(

@@ -60,17 +60,17 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     final bool dark = scheme.brightness == Brightness.dark;
     // Layer base elevated surface then blend a primary tint for active verse.
     final baseSurface = scheme.surfaceElevated(2);
-    final tint = dark ? scheme.primary.withOpacity(0.18) : scheme.primary.withOpacity(0.10);
+  final tint = dark ? scheme.primary.withValues(alpha: 0.18) : scheme.primary.withValues(alpha: 0.10);
     final blended = Color.alphaBlend(tint, baseSurface);
     final accent = dark ? scheme.primaryContainer : scheme.primary;
     return BoxDecoration(
       borderRadius: BorderRadius.circular(10),
       color: blended,
-      border: Border(left: BorderSide(color: accent.withOpacity(dark ? 0.9 : 1.0), width: 3)),
+  border: Border(left: BorderSide(color: accent.withValues(alpha: dark ? 0.9 : 1.0), width: 3)),
       boxShadow: dark
           ? [
               BoxShadow(
-                color: scheme.primary.withOpacity(0.25),
+                color: scheme.primary.withValues(alpha: 0.25),
                 blurRadius: 14,
                 spreadRadius: 1,
                 offset: const Offset(0, 2),
@@ -78,7 +78,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
             ]
           : [
               BoxShadow(
-                color: scheme.primary.withOpacity(0.12),
+                color: scheme.primary.withValues(alpha: 0.12),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -91,12 +91,12 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     final scheme = Theme.of(context).colorScheme;
     final bool dark = scheme.brightness == Brightness.dark;
     final baseSurface = scheme.surfaceElevated(1);
-    final tint = dark ? scheme.tertiary.withOpacity(0.14) : scheme.tertiary.withOpacity(0.10);
+  final tint = dark ? scheme.tertiary.withValues(alpha: 0.14) : scheme.tertiary.withValues(alpha: 0.10);
     final blended = Color.alphaBlend(tint, baseSurface);
     return BoxDecoration(
       borderRadius: BorderRadius.circular(10),
       color: blended,
-      border: Border(left: BorderSide(color: scheme.tertiary.withOpacity(dark ? 0.7 : 0.9), width: 2)),
+  border: Border(left: BorderSide(color: scheme.tertiary.withValues(alpha: dark ? 0.7 : 0.9), width: 2)),
     );
   }
 
@@ -135,10 +135,10 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     final scheme = Theme.of(context).colorScheme;
     // Layer selection indication (adaptive overlay)
     final bool dark = scheme.brightness == Brightness.dark;
-    final selectionColor = (dark ? scheme.primary.withOpacity(0.22) : scheme.primaryContainer.withOpacity(0.35));
+  final selectionColor = (dark ? scheme.primary.withValues(alpha: 0.22) : scheme.primaryContainer.withValues(alpha: 0.35));
     return base.copyWith(
       color: base.color == null ? selectionColor : Color.alphaBlend(selectionColor, base.color!),
-      border: base.border ?? Border.all(color: scheme.primary.withOpacity(dark ? 0.5 : 0.6), width: 2),
+  border: base.border ?? Border.all(color: scheme.primary.withValues(alpha: dark ? 0.5 : 0.6), width: 2),
     );
   }
 
@@ -495,7 +495,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                       Text(
                         '${surah.revelation} • ${surah.versesCount} ajete',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                             ),
                       ),
                     ],
@@ -697,14 +697,14 @@ class VerseWidget extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                       decoration: ShapeDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.07),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.07),
                         shape: const StadiumBorder(),
                       ),
                       child: Text(
                         verse.number.toString(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.primary.withOpacity(0.9),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.9),
                           letterSpacing: 0.3,
                         ),
                       ),
@@ -846,7 +846,7 @@ class VerseWidget extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontSize: (settings.fontSizeTranslation.toDouble() - 2).clamp(10, 100),
                           fontStyle: FontStyle.italic,
-                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                           height: 1.4,
                         ),
                   ),
@@ -931,8 +931,8 @@ class _WordByWordLine extends StatelessWidget {
           if (useSpan) {
             final bool dark = theme.colorScheme.brightness == Brightness.dark;
             final Color baseHighlightBg = dark
-                ? theme.colorScheme.primary.withOpacity(0.28)
-                : theme.colorScheme.primary.withOpacity(0.15);
+                ? theme.colorScheme.primary.withValues(alpha: 0.28)
+                : theme.colorScheme.primary.withValues(alpha: 0.15);
             // Build pure TextSpan list with minimal objects; reuse recognizers if desired (omitted now for simplicity).
             final List<TextSpan> wordSpans = List.generate(words.length, (i) {
               final w = words[i];
@@ -945,7 +945,7 @@ class _WordByWordLine extends StatelessWidget {
                   shadows: glow
                       ? [
                           Shadow(
-                            color: theme.colorScheme.primary.withOpacity(dark ? 0.55 : 0.45),
+                            color: theme.colorScheme.primary.withValues(alpha: dark ? 0.55 : 0.45),
                             blurRadius: 12,
                           )
                         ]
@@ -971,8 +971,8 @@ class _WordByWordLine extends StatelessWidget {
               final highlighted = activeIndex == i;
               final bool dark = theme.colorScheme.brightness == Brightness.dark;
               final highlightBg = dark
-                  ? theme.colorScheme.primary.withOpacity(0.28)
-                  : theme.colorScheme.primary.withOpacity(0.15);
+                  ? theme.colorScheme.primary.withValues(alpha: 0.28)
+                  : theme.colorScheme.primary.withValues(alpha: 0.15);
               spans.add(
                 WidgetSpan(
                   alignment: PlaceholderAlignment.middle,
@@ -987,7 +987,7 @@ class _WordByWordLine extends StatelessWidget {
                             boxShadow: glow
                                 ? [
                                     BoxShadow(
-                                      color: theme.colorScheme.primary.withOpacity(dark ? 0.55 : 0.45),
+                                      color: theme.colorScheme.primary.withValues(alpha: dark ? 0.55 : 0.45),
                                       blurRadius: 12,
                                       spreadRadius: 2,
                                     ),

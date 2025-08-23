@@ -6,9 +6,16 @@ import 'package:kurani_fisnik_app/core/services/data_export_service.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dart';
 import 'package:kurani_fisnik_app/data/repositories/storage_repository_impl.dart';
 import 'package:kurani_fisnik_app/domain/repositories/storage_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
+import 'dart:io';
 
 // Minimal harness to validate ImportProgress emissions and cancel behavior.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+  final tempDir = Directory.systemTemp.createTempSync('hive_test');
+  Hive.init(tempDir.path);
   late StorageRepository repo;
   late DataImportService importService;
 
@@ -60,6 +67,9 @@ void main() {
       ),
     );
 
+  // Allow queued stream events (like the final 'done') to deliver to our listener
+  await Future<void>.delayed(const Duration(milliseconds: 5));
+
     expect(res.canceled, isFalse);
     // Must have emitted init and done at least
     expect(phases.first, anyOf('init'));
@@ -99,6 +109,9 @@ void main() {
         importReadingProgress: false,
       ),
     );
+
+  // Allow queued stream events (like the final 'canceled') to deliver to our listener
+  await Future<void>.delayed(const Duration(milliseconds: 5));
 
     expect(res.canceled, isTrue);
     expect(phases.contains('canceled'), isTrue);

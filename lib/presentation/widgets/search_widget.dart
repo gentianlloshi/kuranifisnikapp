@@ -82,7 +82,7 @@ class _SearchWidgetState extends State<SearchWidget> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceElevated(1),
                 borderRadius: BorderRadius.circular(context.radiusCard.x),
-                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4)),
+                border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.4)),
               ),
               child: Column(
                 children: [
@@ -428,7 +428,7 @@ class _SearchWidgetState extends State<SearchWidget> {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.75),
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
                   fontWeight: FontWeight.w600,
                 ),
           ),
@@ -503,8 +503,8 @@ class _SearchResultItemState extends State<SearchResultItem> {
     final isDark = scheme.brightness == Brightness.dark;
     final surface = scheme.surfaceElevated(isDark ? 1 : 0);
     final baseBlend = isDark
-        ? Color.alphaBlend(scheme.primary.withOpacity(0.06), surface)
-        : Color.alphaBlend(scheme.primary.withOpacity(0.03), surface);
+  ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.06), surface)
+  : Color.alphaBlend(scheme.primary.withValues(alpha: 0.03), surface);
 
     return Card(
       color: baseBlend,
@@ -643,7 +643,7 @@ class _SearchResultItemState extends State<SearchResultItem> {
     // Diacritic-insensitive, token-based partial highlighting
     final bool isDark = theme.brightness == Brightness.dark;
     final highlightBg = isDark
-        ? theme.colorScheme.tertiary.withOpacity(0.28)
+  ? theme.colorScheme.tertiary.withValues(alpha: 0.28)
         : theme.colorScheme.tertiaryContainer;
     final highlightColor = theme.colorScheme.onTertiaryContainer;
 
@@ -764,14 +764,14 @@ class _RefChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.6)],
+          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 4,
             offset: const Offset(0,2),
           )
@@ -797,9 +797,9 @@ class _IndexBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+  color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.35)),
+  border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
     );

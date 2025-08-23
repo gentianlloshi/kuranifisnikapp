@@ -533,8 +533,8 @@ class _PerfPanelState extends State<_PerfPanel> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: scheme.surfaceVariant.withOpacity(0.4),
-            border: Border(bottom: BorderSide(color: scheme.outline.withOpacity(0.2))),
+            color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+            border: Border(bottom: BorderSide(color: scheme.outline.withValues(alpha: 0.2))),
           ),
           child: DefaultTextStyle(
             style: Theme.of(context).textTheme.bodySmall!,

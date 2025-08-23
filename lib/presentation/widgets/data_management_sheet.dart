@@ -212,7 +212,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
         Container(
           width: double.infinity,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
           padding: const EdgeInsets.all(8),
@@ -498,7 +498,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
                                 Row(children:[
                                   Expanded(child: OutlinedButton(
                                     onPressed:(){ setState((){ _conflictResolutions[id]=NoteConflictResolution.local; }); },
-                                    style: OutlinedButton.styleFrom(backgroundColor: selected==NoteConflictResolution.local? Colors.green.withOpacity(0.15):null),
+                                    style: OutlinedButton.styleFrom(backgroundColor: selected==NoteConflictResolution.local? Colors.green.withValues(alpha: 0.15):null),
                                     child: Text('Mbaj Lokale', style: TextStyle(color: selected==NoteConflictResolution.local? Colors.green: null)),
                                   )),
                                   const SizedBox(width:8),

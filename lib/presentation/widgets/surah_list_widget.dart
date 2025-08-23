@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/reading_progress_provider.dart';
@@ -218,9 +217,9 @@ class SurahListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    final muted = theme.textTheme.bodySmall?.color?.withOpacity(0.7);
-    final borderColor = selected ? theme.colorScheme.primary : theme.dividerColor.withOpacity(0.15);
-    final bgOverlay = selected ? theme.colorScheme.primary.withOpacity(0.10) : Colors.transparent;
+  final muted = theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7);
+  final borderColor = selected ? theme.colorScheme.primary : theme.dividerColor.withValues(alpha: 0.15);
+  final bgOverlay = selected ? theme.colorScheme.primary.withValues(alpha: 0.10) : Colors.transparent;
   return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
@@ -245,7 +244,7 @@ class SurahListItem extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Icon(
                         selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                        color: selected ? theme.colorScheme.primary : theme.iconTheme.color?.withOpacity(0.5),
+                        color: selected ? theme.colorScheme.primary : theme.iconTheme.color?.withValues(alpha: 0.5),
                         size: 20,
                       ),
                     ),
@@ -299,7 +298,7 @@ class SurahListItem extends StatelessWidget {
                       child: LinearProgressIndicator(
                         minHeight: 6,
                         value: p,
-                        backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.35),
+                        backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
                         valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
                       ),
                     );
@@ -321,7 +320,7 @@ class _ContinueCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.25))),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.25))),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,

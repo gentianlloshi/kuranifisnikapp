@@ -249,7 +249,7 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
       child: Container(
         decoration: _backgroundImagePath != null
             ? BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
               )
             : null,
         padding: const EdgeInsets.all(24),
@@ -272,7 +272,7 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
                 Text(
                   _referenceController.text,
                   style: TextStyle(
-                    color: _textColor.withOpacity(0.8),
+                    color: _textColor.withValues(alpha: 0.8),
                     fontSize: _fontSize * 0.6,
                     fontWeight: FontWeight.w500,
                   ),
@@ -283,13 +283,13 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
               Icon(
                 Icons.text_fields,
                 size: 64,
-                color: _textColor.withOpacity(0.5),
+                color: _textColor.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 'Shkruani tekstin e ajetit për ta parë këtu',
                 style: TextStyle(
-                  color: _textColor.withOpacity(0.7),
+                  color: _textColor.withValues(alpha: 0.7),
                   fontSize: 16,
                 ),
                 textAlign: TextAlign.center,

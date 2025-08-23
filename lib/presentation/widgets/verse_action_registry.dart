@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
-import 'package:provider/provider.dart';
 import '../../domain/entities/verse.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/audio_provider.dart';
@@ -9,7 +8,6 @@ import '../providers/memorization_provider.dart';
 import '../providers/note_provider.dart';
 import 'note_editor_dialog.dart';
 import 'sheet_header.dart';
-import '../theme/theme.dart';
 
 typedef VerseActionHandler = Future<void> Function(BuildContext context, Verse verse);
 

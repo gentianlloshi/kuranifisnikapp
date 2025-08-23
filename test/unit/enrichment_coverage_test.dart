@@ -5,6 +5,9 @@ import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dar
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
+import 'package:kurani_fisnik_app/domain/entities/app_settings.dart';
+import 'package:kurani_fisnik_app/domain/entities/bookmark.dart';
+import 'package:kurani_fisnik_app/domain/entities/note.dart';
 
 // Lightweight fakes
 class _FakeQuranLocal implements QuranLocalDataSource {
