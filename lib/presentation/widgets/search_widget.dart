@@ -418,17 +418,37 @@ class _SearchWidgetState extends State<SearchWidget> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: searchResults.length,
-      itemBuilder: (context, index) {
-        final verse = searchResults[index];
-        return SearchResultItem(
-          verse: verse,
-          searchQuery: _searchController.text,
-          settings: appState.settings,
-        );
-      },
+    final count = searchResults.length;
+    final label = count == 1 ? 'U gjet 1 rezultat' : 'U gjetën $count rezultate';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.75),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: searchResults.length,
+            itemBuilder: (context, index) {
+              final verse = searchResults[index];
+              return SearchResultItem(
+                verse: verse,
+                searchQuery: _searchController.text,
+                settings: appState.settings,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -620,35 +640,81 @@ class _SearchResultItemState extends State<SearchResultItem> {
         ),
       );
     }
+    // Diacritic-insensitive, token-based partial highlighting
+    final bool isDark = theme.brightness == Brightness.dark;
+    final highlightBg = isDark
+        ? theme.colorScheme.tertiary.withOpacity(0.28)
+        : theme.colorScheme.tertiaryContainer;
+    final highlightColor = theme.colorScheme.onTertiaryContainer;
 
-  final List<InlineSpan> spans = [];
-    final String lowerText = text.toLowerCase();
-    final String lowerQuery = query.toLowerCase();
-    
-    int start = 0;
-    int index = lowerText.indexOf(lowerQuery);
-    
-    while (index != -1) {
-      // Add text before the match
-      if (index > start) {
-        spans.add(TextSpan(
-          text: text.substring(start, index),
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
-            height: 1.4,
-          ),
-        ));
+    // Normalization helper for Albanian and common Latin accents
+    String norm(String s) {
+      s = s.toLowerCase();
+      s = s.replaceAll('ç', 'c').replaceAll('ë', 'e');
+      const mapping = {
+        'á':'a','à':'a','ä':'a','â':'a','ã':'a','å':'a','ā':'a','ă':'a','ą':'a',
+        'é':'e','è':'e','ë':'e','ê':'e','ě':'e','ē':'e','ę':'e','ė':'e',
+        'í':'i','ì':'i','ï':'i','î':'i','ī':'i','į':'i','ı':'i',
+        'ó':'o','ò':'o','ö':'o','ô':'o','õ':'o','ø':'o','ō':'o','ő':'o',
+        'ú':'u','ù':'u','ü':'u','û':'u','ū':'u','ů':'u','ű':'u','ť':'t','š':'s','ž':'z','ñ':'n'
+      };
+      final sb = StringBuffer();
+      for (final ch in s.split('')) {
+        sb.write(mapping[ch] ?? ch);
       }
-      
-      // Add highlighted match (Option A refined: soft yellow background, bold dark text)
-      final bool isDark = theme.brightness == Brightness.dark;
-      final highlightBg = isDark
-          ? theme.colorScheme.tertiary.withOpacity(0.28)
-          : theme.colorScheme.tertiaryContainer; // reuse tertiaryContainer as semantic highlight
-      final highlightColor = isDark
-          ? theme.colorScheme.onTertiaryContainer
-          : theme.colorScheme.onTertiaryContainer;
-      final matchText = text.substring(index, index + query.length);
+      return sb.toString();
+    }
+
+    final baseStyle = theme.textTheme.bodyLarge?.copyWith(
+      fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
+      height: 1.4,
+    );
+
+    final textNorm = norm(text);
+    // Split query into tokens, filter short empties
+    final queryTokens = query
+        .split(RegExp(r"[^\p{L}\p{N}]+", unicode: true))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .map(norm)
+        .toSet();
+    if (queryTokens.isEmpty) {
+      return TextSpan(text: text, style: baseStyle);
+    }
+
+    // Build match intervals merging overlaps across tokens
+    final intervals = <List<int>>[]; // [start,end)
+    for (final tok in queryTokens) {
+      int start = 0;
+      while (true) {
+        final idx = textNorm.indexOf(tok, start);
+        if (idx == -1) break;
+        intervals.add([idx, idx + tok.length]);
+        start = idx + tok.length;
+      }
+    }
+    if (intervals.isEmpty) {
+      return TextSpan(text: text, style: baseStyle);
+    }
+    intervals.sort((a, b) => a[0].compareTo(b[0]));
+    // Merge overlaps
+    final merged = <List<int>>[];
+    for (final iv in intervals) {
+      if (merged.isEmpty || iv[0] > merged.last[1]) {
+        merged.add([iv[0], iv[1]]);
+      } else {
+        if (iv[1] > merged.last[1]) merged.last[1] = iv[1];
+      }
+    }
+
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final iv in merged) {
+      final a = iv[0], b = iv[1];
+      if (a > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, a), style: baseStyle));
+      }
+      final original = text.substring(a, b);
       spans.add(WidgetSpan(
         alignment: PlaceholderAlignment.baseline,
         baseline: TextBaseline.alphabetic,
@@ -660,9 +726,8 @@ class _SearchResultItemState extends State<SearchResultItem> {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
-            matchText,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
+            original,
+            style: baseStyle?.copyWith(
               height: 1.25,
               fontWeight: FontWeight.w700,
               color: highlightColor,
@@ -670,23 +735,12 @@ class _SearchResultItemState extends State<SearchResultItem> {
           ),
         ),
       ));
-      
-      start = index + query.length;
-      index = lowerText.indexOf(lowerQuery, start);
+      cursor = b;
     }
-    
-    // Add remaining text
-    if (start < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(start),
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
-          height: 1.4,
-        ),
-      ));
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor), style: baseStyle));
     }
-    
-  return TextSpan(children: spans);
+    return TextSpan(children: spans);
   }
 
   void _navigateToVerse(BuildContext context) {

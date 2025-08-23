@@ -72,13 +72,46 @@ class ThematicIndexProvider extends ChangeNotifier {
 
   void searchThemes(String query) {
     _searchQuery = query;
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       _filteredThemes = _rawIndex.keys.toList();
-    } else {
-      _filteredThemes = _rawIndex.keys
-          .where((theme) => theme.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      notifyListeners();
+      return;
     }
+    String norm(String s) {
+      s = s.toLowerCase();
+      s = s.replaceAll('ç', 'c').replaceAll('ë', 'e');
+      const mapping = {
+        'á':'a','à':'a','ä':'a','â':'a','ã':'a','å':'a','ā':'a','ă':'a','ą':'a',
+        'é':'e','è':'e','ë':'e','ê':'e','ě':'e','ē':'e','ę':'e','ė':'e',
+        'í':'i','ì':'i','ï':'i','î':'i','ī':'i','į':'i','ı':'i',
+        'ó':'o','ò':'o','ö':'o','ô':'o','õ':'o','ø':'o','ō':'o','ő':'o',
+        'ú':'u','ù':'u','ü':'u','û':'u','ū':'u','ů':'u','ű':'u','ť':'t','š':'s','ž':'z','ñ':'n'
+      };
+      final sb = StringBuffer();
+      for (final ch in s.split('')) { sb.write(mapping[ch] ?? ch); }
+      return sb.toString();
+    }
+    final q = norm(query.trim());
+    final matches = <String>{};
+    // Match theme titles
+    for (final theme in _rawIndex.keys) {
+      if (norm(theme).contains(q)) {
+        matches.add(theme);
+        continue;
+      }
+      // Also match subtheme labels
+      final sub = _rawIndex[theme];
+      if (sub is Map<String, dynamic>) {
+        bool hit = false;
+        sub.forEach((subName, _) {
+          if (!hit && norm(subName).contains(q)) {
+            hit = true;
+          }
+        });
+        if (hit) matches.add(theme);
+      }
+    }
+    _filteredThemes = matches.toList()..sort();
     notifyListeners();
   }
 

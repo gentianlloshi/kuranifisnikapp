@@ -153,12 +153,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                           ],
                         ),
                         SizedBox(height: context.spaceMd),
-                        Text(
-                          notificationProvider.currentPrayer!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.6,
-                          ),
-                        ),
+                        _FormattedBlock(text: notificationProvider.currentPrayer!),
                       ],
                     ),
                   ),
@@ -193,12 +188,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                           ],
                         ),
                         SizedBox(height: context.spaceMd),
-                        Text(
-                          notificationProvider.currentHadith!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.6,
-                          ),
-                        ),
+                        _FormattedBlock(text: notificationProvider.currentHadith!),
                       ],
                     ),
                   ),
@@ -246,5 +236,42 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
         );
       },
     );
+  }
+}
+
+class _FormattedBlock extends StatelessWidget {
+  final String text;
+  const _FormattedBlock({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    // Our provider joins parts with \n; try to identify optional header/footer lines.
+    final lines = text.split('\n').where((l) => l.trim().isNotEmpty).toList();
+    TextStyle body = Theme.of(context).textTheme.bodyMedium!.copyWith(height: 1.6);
+    TextStyle title = Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600);
+    TextStyle caption = Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).hintColor);
+
+    final children = <Widget>[];
+    if (lines.isNotEmpty) {
+      // If first line looks like a short title (<= 40 chars), show as title
+      if (lines.first.length <= 40 && RegExp(r'^(Lutje|Hadith|Autori:|Titulli:)', caseSensitive: false).hasMatch(lines.first)) {
+        children.add(Text(lines.first, style: title));
+        lines.removeAt(0);
+        children.add(SizedBox(height: context.spaceSm));
+      }
+      // If last line looks like a source
+      String? sourceLine;
+      if (lines.isNotEmpty && (lines.last.startsWith('Burimi:') || lines.last.length <= 40 && RegExp(r'[,\.]\s*\d').hasMatch(lines.last))) {
+        sourceLine = lines.removeLast();
+      }
+      if (lines.isNotEmpty) {
+        children.add(Text(lines.join('\n'), style: body));
+      }
+      if (sourceLine != null) {
+        children.add(SizedBox(height: context.spaceSm));
+        children.add(Text(sourceLine, style: caption));
+      }
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: children);
   }
 }

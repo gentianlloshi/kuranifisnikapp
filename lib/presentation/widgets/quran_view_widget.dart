@@ -51,6 +51,12 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   final TextEditingController _jumpVerseCtrl = TextEditingController();
   // Selection mode state
   bool get _selectionMode => context.read<SelectionService>().mode == SelectionMode.verses;
+  // Persist arrival highlight range briefly so it survives rebuilds
+  int? _arrivalRangeStart;
+  int? _arrivalRangeEnd;
+  Timer? _arrivalRangeClearTimer;
+  int _pendingScrollRetries = 0;
+  static const int _maxPendingScrollRetries = 8;
 
   // Centralized highlight decoration builder (verse-level)
   BoxDecoration _buildVerseHighlightDecoration(BuildContext context, {required bool isActive}) {
@@ -192,6 +198,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     _scrollController.dispose();
   _jumpSurahCtrl.dispose();
   _jumpVerseCtrl.dispose();
+  _arrivalRangeClearTimer?.cancel();
     super.dispose();
   }
 
@@ -368,21 +375,61 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     return Consumer3<QuranProvider, AppStateProvider, BookmarkProvider>(
       builder: (context, quranProvider, appState, bookmarkProvider, child) {
   // Handle pending scroll target (e.g., after navigating from search/bookmark)
-        final pendingTarget = quranProvider.consumePendingScrollTarget();
+  int? pendingTarget = quranProvider.pendingScrollTarget;
   // Handle pending arrival highlight range
   final pendingRange = quranProvider.consumePendingHighlightRange();
+        if (pendingRange != null) {
+          // Persist in local state and clear after a short delay
+          _arrivalRangeStart = pendingRange[0];
+          _arrivalRangeEnd = pendingRange[1];
+          _arrivalRangeClearTimer?.cancel();
+          _arrivalRangeClearTimer = Timer(const Duration(seconds: 6), () {
+            if (!mounted) return;
+            setState(() {
+              _arrivalRangeStart = null;
+              _arrivalRangeEnd = null;
+            });
+          });
+        }
         if (pendingTarget != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (!mounted) return;
             final verses = quranProvider.currentVerses;
-            final index = verses.indexWhere((v) => v.number == pendingTarget);
-            if (index >= 0 && _scrollController.hasClients) {
-              final position = _computeScrollOffsetForIndex(index, verses);
+            final idx = verses.indexWhere((v) => v.number == pendingTarget);
+            if (idx >= 0 && _scrollController.hasClients) {
+              // Prefer precise ensureVisible using the GlobalKey if available
+              final key = _verseKeys['${quranProvider.currentSurah!.number}:$pendingTarget'];
+              final ctx = key?.currentContext;
+              if (ctx != null) {
+                try {
+                  await Scrollable.ensureVisible(
+                    ctx,
+                    duration: const Duration(milliseconds: 480),
+                    alignment: 0.08,
+                    curve: Curves.easeInOutCubic,
+                  );
+                  quranProvider.consumePendingScrollTarget();
+                  _pendingScrollRetries = 0;
+                  return;
+                } catch (_) {/* fallback below */}
+              }
+              // Fallback to computed offset if key context not ready
+              final position = _computeScrollOffsetForIndex(idx, verses).clamp(0.0, _scrollController.position.maxScrollExtent);
               _scrollController.animateTo(
-                position.clamp(0, _scrollController.position.maxScrollExtent),
+                position as double,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeInOutCubic,
               );
+              quranProvider.consumePendingScrollTarget();
+              _pendingScrollRetries = 0;
+            } else {
+              // Not yet visible in paged list; retry bounded times
+              if (_pendingScrollRetries < _maxPendingScrollRetries) {
+                _pendingScrollRetries++;
+                setState(() {});
+              } else {
+                _pendingScrollRetries = 0;
+              }
             }
           });
         }
@@ -403,12 +450,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
         final surah = quranProvider.currentSurah!;
         final verses = quranProvider.currentVerses;
         // Build a quick lookup for pending range
-        int? rangeStart;
-        int? rangeEnd;
-        if (pendingRange != null) {
-          rangeStart = pendingRange[0];
-          rangeEnd = pendingRange[1];
-        }
+  final int? rangeStart = _arrivalRangeStart;
+  final int? rangeEnd = _arrivalRangeEnd;
         // Load real word-by-word + timestamps if feature enabled
         if (context.read<AppStateProvider>().showWordByWord) {
           WidgetsBinding.instance.addPostFrameCallback((_) {

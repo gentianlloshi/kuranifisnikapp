@@ -41,6 +41,9 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 - UC-10: Live theming & font scaling persistence -> SETTINGS-1..3
 - UC-11: Import/Export JSON domain serializer + merge strategy -> DATA-1..4
 
+### Module: Notifications
+- UC-12: Daily devotional notifications (morning prayer at 04:00, evening hadith at 20:00), local test notification, and refreshable in-app samples.
+
 ### Module: Memorization (Spec Already Added)
 - MEMO-1: Dedicated Tab UI (sticky controls, stats header)
 - MEMO-2: Audio repeat integration & auto-scroll smoothing
@@ -85,6 +88,8 @@ Source Spec Version: 1.0 (Detailed Use Cases Document, 26 Korrik 2024)
 | PERF-2 | Reactive translation & enrichment coverage | Done | Repository streams drive the perf panel live; no manual refresh. |
 | A11Y-1 | Larger tap targets (key icons) | Partial | Many icons sized 20; audit pass needed. |
 | ERR-1 | Centralized snackbar queue | Done | AppStateProvider queue + overlay host; major widgets migrated to enqueueSnack. |
+| NOTIF-1 | Local notifications init + test | Done | NotificationService wired; “Test Njoftimi” works cross‑platform. |
+| NOTIF-2 | Daily samples formatting & refresh | Done | Assets parsed to title/text/source and randomized refresh with no immediate repeats. |
 
 ## Updated Next Immediate Actions
 

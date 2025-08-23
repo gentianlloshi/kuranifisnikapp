@@ -6,16 +6,17 @@
   - [1. Analiza Arkitekturore](#1-analiza-arkitekturore)
   - [2. Analiza Teknike e Implementimit](#2-analiza-teknike-e-implementimit)
   - [3. Analiza e Procesit të Inxhinierisë Softuerike](#3-analiza-e-procesit-të-inxhinierisë-softuerike)
+  - [Roadmap i Integrimit të Use Case-ve](#roadmap-i-integrimit-të-use-case-ve)
   - [Pikat e Forta Kryesore](#pikat-e-forta-kryesore)
   - [Zonat për Përmirësim dhe Rreziqet e Mbetura](#zonat-për-përmirësim-dhe-rreziqet-e-mbetura)
   - [Rekomandime Strategjike](#rekomandime-strategjike)
   - [Vlerësim i Përgjithshëm](#vlerësim-i-përgjithshëm)
-  - [Përditësime të Fundit](#përditësime-të-fundit-22-gusht-2025)
+   - [Përditësime të Fundit](#përditësime-të-fundit-23-gusht-2025)
 - [Arkiv i Analizave të Mëparshme](#arkiv-i-analizave-të-mëparshme)
 
 ---
 
-## Analiza e Unifikuar (22 Gusht 2025)
+## Analiza e Unifikuar (23 Gusht 2025)
 
 ### 1. Analiza Arkitekturore
 
@@ -40,6 +41,32 @@
 - __Menaxhimi i borxhit teknik__: `TECH_DEBT_OVERVIEW.md` detajon 30+ pika me Shortcut/Risk/Remediation (p.sh., pika 8 “Monolithic AudioService” → ndarje në Resolver/Prefetch/Cache/Controller). Kjo tregon maturi procesi.
 - __Roadmap & rreziku i regresionit__: `UI-UX-REFACTOR.md` propozon migrime fazore me kritere matëse (vizuale dhe performancë). Rreziqet menaxhohen me migrim gradual të stileve/komponentëve dhe “diff‑only rebuild” për highlight‑in (shih `TECH_DEBT_OVERVIEW.md`, pika 30).
 - __Strategjia e testimit__: `PROJECT_ANALYSIS.md` tregon bazë për unit tests; mungojnë widget/integration tests. Implikim: rrezik regresioni në UI, flukse audio dhe kërkim.
+
+### Roadmap i Integrimit të Use Case-ve
+
+- __Parimet udhëzuese__ (nga `USE_CASE_INTEGRATION_ROADMAP.md`): vertikale inkrementale për module (Navigation, Reading, Memorization, Audio, Index, Personal Tools, Settings); pa regresion performance (pa >200ms stalls); rikthim i providerëve ekzistues kur është e mundur; ngarkesa të rënda në lazy/deferred.
+- __Përmirësime ndër-prerje__:
+  - State Consistency: konsolidim i logjikës ad‑hoc në modele domain; enum status të tipizuara (memorization kryer).
+  - Persistence Versioning: version keys të reja (favorites v2, notes tags v1, reading progress v2).
+  - Search Index: checkpoints 20/50/80% + surface të readiness në UI.
+  - Performance Instrumentation: perf summary me indexCoverage%, enrichmentCoverage%, audioCacheHits, lazyBoxOpens.
+  - Modularization: ndarje `feature/` për Memorization, Thematic Index, Texhvid.
+  - Error Handling: queue e unifikuar e snackbars përmes `AppStateProvider`.
+  - Accessibility: targete 48dp + semantic labels për ikona kritike.
+- __Statusi (Gusht 2025)__:
+  - Përfunduar: SURAH-LIST‑1/2, SEARCH‑1/2, VERSE‑ACTIONS‑1, MEMO‑1, MEMO‑3..6, DATA‑1/2, THEMATIC‑1..3, PERF‑1/2, ERR‑1.
+  - Në progres: MEMO‑2 (bazë e bërë; 2b persist A‑B e kryer sipas përditësimeve), TEXHVID‑2 (kuiz), A11Y‑1 (audit pjesor).
+  - Planifikuar: SEARCH‑3 (fuzzy/partial + profiling), DATA‑3 (streamed import preview), TEXHVID‑3 (stats), PERF‑3 (frame sampler), TEST‑1 (widget tests kyçe).
+- __Sprints e ardhshme (draft)__: 
+  - Sprint 4: perf & error telemetry të veprueshme, loop audio stabil; TEST‑1 subset.
+  - Sprint 5: Texhvid kuiz + import i qëndrueshëm me streaming; TEST‑1 subset.
+  - Sprint 6: fuzzy search + aksesueshmëri + perf overlay; TEST‑1 subset.
+  - Sprint 7: optimizime strategjike (LRU reciter / ranking) nën feature flag.
+- __Rreziqe & mitime__:
+  - Regresione performance nga widget‑ët e rinj → profilizim, virtualizim liste, shmangie e punëve sync në build.
+  - Migrime të dhënash → version keys + dry‑run diff/merge.
+  - Drift i sinkronizimit audio me repeat → pre‑buffer dhe throttling i animimeve të scroll.
+  - Coupling state (multi‑select vs session) → shërbim i përbashkët selection me mode discriminators.
 
 #### Pikat e Forta Kryesore
 
@@ -69,16 +96,25 @@
    - Implemento “Lazy Surah Metadata Mode” (pika 31) me cache të matur dhe shërbime të ndara.
    - Ekstrakto `AudioService` në Resolver/Prefetch/Cache/Controller (pika 8) me kontrata të testueshme.
 
+4) __Përshtatje me Roadmap‑in (60–90 ditët në vijim)__
+   - TEST‑1: Shtoni widget tests për: zgjerim tematik, MEMO hide/peek, registry i veprimeve të vargut.
+   - SEARCH‑3: Fuzzy/partial matching + profilizim i highlight për rezultate të gjata.
+   - TEXHVID‑2/3: Pikëzim i kuizit + persistencë e statistikave (Hive v1).
+   - DATA‑3: Import preview incremental (stream parsing) me progress UI.
+   - A11Y‑1b: Semantic labels + 48dp minimum për sipërfaqe interaktive.
+   - PERF‑3: Frame timing sampler + dev overlay (toggle); lidhur me perf panel ekzistues.
+
 #### Vlerësim i Përgjithshëm
 
 Projekti është i pjekur dhe i mirë‑dokumentuar; zgjidhjet teknike janë të zgjedhura saktë për kontekstin mobile. Me adresimin e testimit, evolucionit të state management dhe lazy mode‑it, rreziku operacional ulet ndjeshëm.
 
 __Nota e Unifikuar: 8.5/10__
-### Përditësime të Fundit (22 Gusht 2025)
+### Përditësime të Fundit (23 Gusht 2025)
 
-- __TOC i ri__: Shtuar “Tabela e Përmbajtjes” në krye për navigim të shpejtë.
-- __Analizë e Unifikuar__: Konsoliduar pikat kryesore nga analizat ekzistuese në një seksion unik me nota të vetme.
-- __Qartësi e vendimeve__: Sqaruar prioritetet: testim, evoluim i state management, lazy mode, dekompozim i `AudioService`.
+- __Njoftimet__: Provider i njoftimeve tash formëson të dhënat nga JSON në tre pjesë (titull/autor, tekst, burim) për UI të pastër; “Test Njoftimi” përdor `FlutterLocalNotificationsPlugin` dhe inicializohet on‑demand.
+- __Kërkimi__: Fuzzy fallback i kufizuar me filtër të shkronjës së parë dhe “substring gate” mbi fushat kryesore për të shmangur rezultate të palidhura; highlight i pjesshëm diakritik‑insensitiv në UI.
+- __Indeksi Tematik__: Thellë‑linku tani scroll‑on te ajeti/rangu dhe e thekson për një kohë të kufizuar; parandalim i dështimeve me ensureVisible + fallback offset dhe retry.
+- __UI/UX__: Kontrast më i lartë i AppBar në sfona të çelëta; stabilizim i shfaqjes së ë/ç në Ndihmë me font latin.
 
 ---
 ## Arkiv i Analizave të Mëparshme
@@ -160,20 +196,18 @@ Projekti "Kurani Fisnik" paraqet një aplikacion të përpiktë dhe të planifik
 - Arkitekturë e pastër dhe e dokumentuar mirë
 - Veçori të avancuara si Word-by-Word audio
 - Qasje e qëndrueshme ndaj zhvillimit
-
 **Fushat e Përmirësimit:**
 - Mbulim më i mirë i testeve
 - Optimizime shtesë të performancës
 - Zgjerim i veçorive të personalizimit
 
 ---
-### Përditësime të Fundit (Arkiv, 22 Gusht 2025)
+#### Përditësime të Fundit (Arkiv, 22 Gusht 2025)
 - Audio A‑B loop: kërkim me indeks në playlist, rikthim i saktë dhe indikator UI.
 - Panel performancash: përditësim reaktiv i mbulimit të përkthimeve dhe enrichment.
 - Texhvid: modal për nisjen e kuizit (kategori/limit), sanitizim i tekstit (heqje e tag‑eve HTML‑like) për renditje të pastër.
 - Android UX: predictive back i aktivizuar; përmirësim i back handling në pamjet në fletë.
 - Stabilitet: rregulluar crash nga tipizimi i hartave në Hive gjatë leximit WBW; shtuar kontrolle `mounted` për flukse asinkrone në pamjen e Kuranit.
-
 ---
  #### Raport Teknik: Analiza e Aplikacionit "Kurani Fisnik" (Arkiv)
  

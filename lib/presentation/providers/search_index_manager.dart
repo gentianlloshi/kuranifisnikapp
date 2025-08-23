@@ -230,14 +230,24 @@ class SearchIndexManager {
       }
     }
     // Fuzzy fallback (Levenshtein distance 1 for short tokens, <=2 for longer)
-    final rawTokens = tq.tokenizeLatin(query).map((e)=>e.toLowerCase()).toList();
+    // Apply diacritic-insensitive normalization to query tokens for general correctness
+    final rawTokens = tq
+        .tokenizeLatin(query)
+        .map((e) => _normalizeLatin(e))
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList();
     if (rawTokens.isNotEmpty) {
       final indexTokens = _invertedIndex!.keys;
       for (final qTok in rawTokens) {
         final maxDist = qTok.length <= 4 ? 1 : 2;
         for (final idxTok in indexTokens) {
-          if ((idxTok.length - qTok.length).abs() > maxDist) continue;
-          final d = _levenshtein(idxTok, qTok, maxDist);
+          final idxN = _normalizeLatin(idxTok);
+          if (idxN.isEmpty) continue;
+          if ((idxN.length - qTok.length).abs() > maxDist) continue;
+          // Quick first-letter filter to reduce noise and cost
+          if (idxN[0] != qTok[0]) continue;
+          final d = _levenshtein(idxN, qTok, maxDist);
           if (d >= 0 && d <= maxDist) {
             final keys = _invertedIndex![idxTok];
             if (keys == null) continue;
@@ -250,31 +260,36 @@ class SearchIndexManager {
       }
     }
     if (candidateScores.isEmpty) return [];
-  final fullTokens = tq.tokenizeLatin(query).map((e) => e.toLowerCase()).toSet();
+  // Use normalized tokens for consistent matching/highlighting
+  final fullTokens = tq.tokenizeLatin(query)
+      .map((e) => e.toLowerCase())
+      .map(_normalizeLatin)
+      .toSet();
   final scored = <_ScoredVerse>[];
     candidateScores.forEach((key, base) {
       final verse = _verseCache[key];
       if (verse == null) return;
       if (juzFilter != null && verse.juz != juzFilter) return;
       int score = base * _baseHitWeight;
+      // Build normalized field strings for substring checks
+      final tRaw = verse.textTranslation ?? '';
+      final trRaw = verse.textTransliteration ?? '';
+      final arRaw = verse.textArabic;
+      final tNorm = _normalizeLatin(tRaw.toLowerCase());
+      final trNorm = _normalizeLatin(trRaw.toLowerCase());
+      final arNorm = _normalizeArabic(arRaw).toLowerCase();
+      bool hasSubstringHit = false;
       if (includeTranslation) {
-        final translation = (verse.textTranslation ?? '').toLowerCase();
-        for (final ft in fullTokens) {
-          if (translation.contains(ft)) score += _wTranslation;
-        }
+        for (final ft in fullTokens) { if (tNorm.contains(ft)) { score += _wTranslation; hasSubstringHit = true; } }
       }
       if (includeArabic) {
-        final ar = (verse.textArabic ?? '').toLowerCase();
-        for (final ft in fullTokens) {
-          if (ar.contains(ft)) score += _wArabic; // lower weight
-        }
+        for (final ft in fullTokens) { if (arNorm.contains(ft)) { score += _wArabic; hasSubstringHit = true; } }
       }
       if (includeTransliteration) {
-        final tr = (verse.textTransliteration ?? '').toLowerCase();
-        for (final ft in fullTokens) {
-          if (tr.contains(ft)) score += _wTransliteration; // lowest weight
-        }
+        for (final ft in fullTokens) { if (trNorm.contains(ft)) { score += _wTransliteration; hasSubstringHit = true; } }
       }
+      // Prune pure-fuzzy outliers: require at least one substring hit in any included field
+      if (!hasSubstringHit) return;
       scored.add(_ScoredVerse(verse, score));
     });
     // Default ranking by score, stable tie-breakers

@@ -274,6 +274,34 @@ class QuranProvider extends ChangeNotifier {
       _loadedVerseCount = 0;
       _pagedVerses = [];
       _appendMoreVerses();
+      // If a pending scroll/highlight target exists beyond the first page, load enough pages to include it
+      if (_pendingScrollVerseNumber != null) {
+        final targetIdx = _allCurrentSurahVerses.indexWhere((v) => v.verseNumber == _pendingScrollVerseNumber);
+        if (targetIdx != -1 && targetIdx >= _loadedVerseCount) {
+          final needed = ((targetIdx + 1) - _loadedVerseCount);
+          if (needed > 0) {
+            int morePages = (needed / _pageSize).ceil();
+            while (morePages > 0 && _hasMoreVerses) {
+              _appendMoreVerses();
+              morePages--;
+            }
+          }
+        }
+      }
+      // Also ensure pending highlight range end is included to fully highlight the range
+      if (_pendingHighlightEndVerseNumber != null) {
+        final endIdx = _allCurrentSurahVerses.indexWhere((v) => v.verseNumber == _pendingHighlightEndVerseNumber);
+        if (endIdx != -1 && endIdx >= _loadedVerseCount) {
+          final needed = ((endIdx + 1) - _loadedVerseCount);
+          if (needed > 0) {
+            int morePages = (needed / _pageSize).ceil();
+            while (morePages > 0 && _hasMoreVerses) {
+              _appendMoreVerses();
+              morePages--;
+            }
+          }
+        }
+      }
       _error = null;
   // Opportunistic prefetch of next surah early (after first page) for chaining smoothness
   _maybePrefetchNextSurah(surahId);
@@ -352,6 +380,9 @@ class QuranProvider extends ChangeNotifier {
     _pendingScrollVerseNumber = null;
     return v;
   }
+
+  // Peek without consuming (used by UI to wait until verses are available)
+  int? get pendingScrollTarget => _pendingScrollVerseNumber;
 
   /// Returns [start, end] for a pending arrival highlight range and clears it; or null if none.
   List<int>? consumePendingHighlightRange() {

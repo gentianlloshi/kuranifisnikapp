@@ -273,7 +273,7 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => MemorizationProvider(),
         ),
         ChangeNotifierProvider<NotificationProvider>(
-          create: (_) => NotificationProvider(),
+          create: (_) => NotificationProvider(service: notificationService),
         ),
         ChangeNotifierProxyProvider<TexhvidUseCases, TexhvidProvider>(
           create: (_) => TexhvidProvider(texhvidUseCases: Provider.of<TexhvidUseCases>(_, listen:false)),
@@ -372,26 +372,29 @@ class KuraniFisnikApp extends StatelessWidget {
           PerformanceMonitor.ensureStarted();
                 }
               });
-              return DevPerfOverlay(
-                enabled: kDebugMode,
-                child: _StartupSchedulerMarker(
-                  child: MaterialApp(
-                    title: 'Kurani Fisnik',
-                    debugShowCheckedModeBanner: false,
-                    theme: theme,
-                    home: EnhancedHomePage(),
-                    routes: {
-                      '/home': (context) => EnhancedHomePage(),
-                      '/quran': (context) => HomePage(),
-                      '/search': (context) => HomePage(),
-                      '/bookmarks': (context) => HomePage(),
-                      '/notes': (context) => HomePage(),
-                      '/memorization': (context) => HomePage(),
-                      '/texhvid': (context) => HomePage(),
-                      '/thematic': (context) => HomePage(),
-                      '/settings': (context) => HomePage(),
-                    },
+              return _StartupSchedulerMarker(
+                child: MaterialApp(
+                  title: 'Kurani Fisnik',
+                  debugShowCheckedModeBanner: false,
+                  theme: theme,
+                  // Wrap all app pages with the DevPerfOverlay in debug builds, ensuring
+                  // it sits under MaterialApp so Directionality is available.
+                  builder: (context, child) => DevPerfOverlay(
+                    enabled: kDebugMode,
+                    child: child ?? const SizedBox.shrink(),
                   ),
+                  home: EnhancedHomePage(),
+                  routes: {
+                    '/home': (context) => EnhancedHomePage(),
+                    '/quran': (context) => HomePage(),
+                    '/search': (context) => HomePage(),
+                    '/bookmarks': (context) => HomePage(),
+                    '/notes': (context) => HomePage(),
+                    '/memorization': (context) => HomePage(),
+                    '/texhvid': (context) => HomePage(),
+                    '/thematic': (context) => HomePage(),
+                    '/settings': (context) => HomePage(),
+                  },
                 ),
               );
             },

@@ -1,6 +1,6 @@
 # Qur'an Search Implementation
 
-_Last updated: 2025-08-22_
+_Last updated: 2025-08-23_
 
 This document provides a deep dive into the current search architecture in the Kurani Fisnik Flutter app: data flow, indexing strategy, tokenization & normalization, ranking, fallback paths, performance characteristics, limitations, and recommended enhancements.
 
@@ -13,6 +13,7 @@ The search feature must:
 - Tolerate diacritic / orthographic variance (ç→c, ë→e, Arabic diacritics removed)
 - Provide relevant ranking rather than raw occurrence order
 - Degrade gracefully if the index build fails (fallback to domain use case)
+ - UI highlights partial matches (diacritic‑insensitive) and shows total results count
 
 ---
 ## 2. Data Sources & Entities
@@ -83,6 +84,10 @@ Given candidate verse keys (union of posting lists for expanded tokens):
 
 Rationale: Simple, computationally cheap O(k) where k = candidate count. Avoids heavy TF-IDF; acceptable since corpus is small (6236 verses) & largely static.
 
+Filtering & Fuzzy Gate:
+- After candidate generation, we require at least one diacritic‑folded substring hit in selected fields (e.g., translation) to keep a verse. This eliminates spurious fuzzy matches (e.g., far tokens matching by edit distance only).
+- Fuzzy fallback uses bounded Levenshtein with a first‑letter match filter.
+
 Limitations:
 - Does not weight Arabic vs translation differently.
 - No position or proximity scoring.
@@ -141,7 +146,7 @@ Search results currently ignore pagination; entire candidate result set stored i
 ---
 ## 14. Extension Roadmap
 1. Persisted index with versioning (asset hash).
-2. Weighted multi-field scoring + optional BM25-lite variant.
+2. Weighted multi-field scoring + optional BM25-lite variant (flag scaffolded).
 3. Highlight matched tokens in UI (store match spans during scoring pass).
 4. Incremental index updates (if adding notes / annotations in future).
 5. Advanced phonetic matching (soundex-like for transliteration) for mis-typed queries.
@@ -196,7 +201,7 @@ Store ordered token positions per verse (Map<verseKey, List<int>> per token). Du
 
 ---
 ## 20. Summary
-The current search solution balances implementation complexity and performance using a single in-memory inverted index with normalized, prefix-extended tokens. It meets responsiveness goals but leaves room for improved ranking sophistication, persistence, and UX refinements.
+The current search solution balances implementation complexity and performance using a single in-memory inverted index with normalized, prefix-extended tokens. It meets responsiveness goals; a fuzzy-but-gated layer improves relevance. Next steps are persisted index tuning and multi-field ranking sophistication.
 
 ---
 ## 21. Unified Executive Summary & Final Action Plan (From Field Analysis)

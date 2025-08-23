@@ -1,7 +1,7 @@
 ### **Dokumenti i Rasteve të Përdorimit (Use Cases) për Aplikacionin "Kurani Fisnik" në Flutter**
 
-**Versioni:** 1.0
-**Data:** 26 Korrik 2024
+**Versioni:** 1.1
+**Data:** 23 Gusht 2025
 
 #### **1. Aktorët**
 
@@ -33,7 +33,7 @@
 | **Përshkrimi:** | Përdoruesi përdor fushën e kërkimit për të gjetur sure, ajete specifike, ose fjalë kyçe në tekstin shqip dhe arabisht. |
 | **Aktori:** | Përdoruesi |
 | **Parakushtet:** | Ekrani kryesor është i hapur. Indeksi i kërkimit është ndërtuar në prapaskenë. |
-| **Rrjedha Kryesore (Basic Flow):** | 1. Përdoruesi prek fushën e kërkimit. <br> 2. Përdoruesi shkruan një term kërkimi (emër sureje, referencë ajeti si "2:255", ose fjalë si "mëshira"). <br> 3. Ndërsa përdoruesi shkruan, Sistemi shfaq rezultatet në kohë reale. <br> 4. Rezultatet shfaqin ajetin e gjetur, referencën e tij dhe theksojnë termin e kërkimit. <br> 5. Përdoruesi prek një rezultat për të lundruar direkt te ai ajet në pamjen e leximit. |
+| **Rrjedha Kryesore (Basic Flow):** | 1. Përdoruesi prek fushën e kërkimit. <br> 2. Përdoruesi shkruan një term kërkimi (emër sureje, referencë ajeti si "2:255", ose fjalë si "mëshira"). <br> 3. Ndërsa përdoruesi shkruan, Sistemi shfaq rezultatet në kohë reale dhe numrin total të gjetjeve. <br> 4. Rezultatet shfaqin ajetin e gjetur, referencën e tij dhe theksojnë nën‑vargjet e përputhura (highlight i pjesshëm, tolerant ndaj diakritikave). <br> 5. Përdoruesi prek një rezultat për të lundruar direkt te ai ajet në pamjen e leximit. |
 | **Rrjedha Alternative (Alternative Flows):** | **2a. Filtrimi i kërkimit:** Përdoruesi hap filtrat dhe zgjedh të kërkojë vetëm në arabisht/shqip, ose e kufizon kërkimin brenda një xhuzi specifik. Sistemi përditëson rezultatet sipas filtrave. <br> **4a. Shfaqja e kontekstit:** Përdoruesi prek butonin "Shfaq Kontekstin" te një rezultat për të parë ajetin para dhe pas. |
 
 #### **Moduli 2: Leximi dhe Ndërveprimi me Tekstin**
@@ -75,7 +75,7 @@
 | **Përshkrimi:** | Përdoruesi eksploron ajetet e Kuranit të grupuara sipas temave. |
 | **Aktori:** | Përdoruesi |
 | **Parakushtet:** | Përdoruesi ka hapur tabin "Indeksi Tematik". |
-| **Rrjedha Kryesore (Basic Flow):** | 1. Sistemi shfaq një listë të kategorive kryesore. <br> 2. Përdoruesi prek një kategori për ta zgjeruar dhe për të parë nën-temat. <br> 3. Përdoruesi prek një nën-temë për ta zgjeruar dhe për të parë listën e ajeteve përkatëse. <br> 4. Përdoruesi prek një ajet për të lundruar te ai në pamjen e leximit. |
+| **Rrjedha Kryesore (Basic Flow):** | 1. Sistemi shfaq një listë të kategorive kryesore. <br> 2. Përdoruesi prek një kategori për ta zgjeruar dhe për të parë nën-temat. <br> 3. Përdoruesi prek një nën-temë për ta zgjeruar dhe për të parë listën e ajeteve përkatëse. <br> 4. Përdoruesi prek një ajet ose rang (p.sh., 2:255–257) për të lundruar te ai në pamjen e leximit; Sistemi siguron `scroll` të besueshëm dhe e thekson segmentin për rreth 6 sekonda. |
 
 | **UC-08: Mësimi i Texhvidit** | |
 | :--- | :--- |
@@ -109,6 +109,14 @@
 | **Parakushtet:** | Paneli i cilësimeve është i hapur. |
 | **Rrjedha Kryesore (Eksporti):** | 1. Përdoruesi prek butonin "Eksporto". <br> 2. Sistemi gjeneron një skedar JSON që përmban të gjitha të dhënat e përdoruesit (favoritet, shënimet, progresin, cilësimet) dhe ia ofron për shkarkim. |
 | **Rrjedha Kryesore (Importi):** | 1. Përdoruesi prek butonin "Importo" dhe zgjedh një skedar JSON të vlefshëm nga pajisja e tij. <br> 2. Sistemi shfaq një mesazh konfirmimi. <br> 3. Pasi konfirmohet, Sistemi mbishkruan të dhënat aktuale me ato nga skedari dhe e rifreskon aplikacionin. |
+
+| **UC-12: Njoftimet Ditore dhe Testi i Njoftimit** | |
+| :--- | :--- |
+| **Përshkrimi:** | Përdoruesi sheh “Lutja e Ditës” dhe “Hadithi i Ditës” në ekranin e njoftimeve, i rifreskon, dhe teston një njoftim lokal. |
+| **Aktori:** | Përdoruesi |
+| **Parakushtet:** | Aplikacioni ka ngarkuar asetet përkatëse (`lutjet.json`, `thenie-hadithe.json`) dhe ka lejet për njoftime. |
+| **Rrjedha Kryesore (Basic Flow):** | 1. Sistemi shfaq kartat me përmbajtje të formatuar: titull/autor, tekst dhe burim. <br> 2. Përdoruesi prek ikonën e rifreskimit për të marrë një element të ri (rastësor, pa përsëritje të menjëhershme). <br> 3. Përdoruesi prek “Test Njoftimi” dhe merr një njoftim lokal provë. |
+| **Rrjedha Alternative:** | Në mungesë lejesh, Sistemi kërkon leje për njoftime. |
 
 ---
 

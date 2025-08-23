@@ -6,13 +6,13 @@ Aplikacion Flutter për leximin dhe studimin e Kuranit Fisnik në gjuhën shqipe
 
 Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërkimin në Kuranin Fisnik, i fokusuar te përdoruesit shqipfolës. Aplikacioni përmban përkthime të shumta në shqip, krahas tekstit origjinal arab dhe transliterimit latin.
 
-## Çfarë ka të re (22 Gusht 2025)
+## Çfarë ka të re (23 Gusht 2025)
 
- - Kërkim: shtuar debounce në input dhe normalizim morfologjik i lehtë (shqip) për indeksim dhe kërkim.
- - Kërkim: peshëzim i fushave (bonus më i lartë për përkthim), dhe verifikim i snapshot-it me dataVersion për invalidim të saktë.
- - Texhvid: quiz mode now persists session results and lifetime stats (accuracy, total quizzes) using a lightweight Hive box opened lazily.
- - Indeksi Tematik: referencat e ajeteve tani janë të klikueshme dhe hapin pamjen e Kuranit te ajeti/rangu (mbështet 2:255 dhe 2:255–257).
- - Audio/MEMO‑2b: Persistim i A‑B loop (SharedPreferences) dhe etiketa Semantics për mini‑player; A11Y i plotë për kuizin e Texhvidit.
+ - Njoftimet: “Lutja e Ditës” dhe “Hadithi i Ditës” ngarkohen nga asetet dhe shfaqen të formatuara (titull/autor + tekst + burim). Butoni “Test Njoftimi” dërgon një njoftim lokal të punueshëm. “Rifresko” zgjedh rastësisht përmbajtje të re pa përsëritje të menjëhershme.
+ - Indeksi Tematik: thellë‑linku hap pamjen e Kuranit te ajeti ose rangu dhe e thekson për ~6s. Scroll‑i është forcuar me ensureVisible + fallback offset dhe ‘retry’ të kufizuar.
+ - Kërkimi: highlight i pjesshëm i termave me heqje diakritikash; shtuar fuzzy fallback i kufizuar (Levenshtein), filtër i shkronjës së parë dhe kërkesë për të paktën një nën‑varg normalizuar në fushat e përzgjedhura. Shfaqet numri i rezultateve.
+ - UI/UX: titujt në AppBar kanë kontrast më të lartë në sfona të çelëta; tekstet me ë/ç në Ndihmë shfaqen me font të qëndrueshëm latin.
+ - Perf: Dev Perf Overlay vendoset nën MaterialApp.builder; përmbledhësi i metrikeve si widget i veçantë.
 
 ## Karakteristikat Kryesore
 

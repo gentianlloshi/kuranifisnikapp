@@ -28,6 +28,7 @@ import '../../domain/repositories/quran_repository.dart';
 import '../widgets/notifications_widget.dart';
 import 'help_page.dart'; // Import the new HelpPage
 import '../../core/metrics/perf_metrics.dart';
+import '../widgets/perf_summary.dart';
 import '../providers/app_state_provider.dart';
 
 class EnhancedHomePage extends StatefulWidget {
@@ -537,20 +538,14 @@ class _PerfPanelState extends State<_PerfPanel> {
           ),
           child: DefaultTextStyle(
             style: Theme.of(context).textTheme.bodySmall!,
-            child: Wrap(
-              spacing: 16,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                const Text('Perf:'),
-                Text('audioCacheHits=${updatedSnap.audioCacheHits}'),
-                Text('trCache=${updatedSnap.translationCacheHits}'),
-                Text('trlitCache=${updatedSnap.transliterationCacheHits}'),
-                Text('lazyBoxOpens=${updatedSnap.lazyBoxOpens}'),
-                _CoverageBar(label: 'Idx', value: updatedSnap.indexCoverage),
-                _CoverageBar(label: 'Enr', value: enrichment),
-                _TranslationCoverageButton(liveCoverage: _latestTrCov),
-              ],
-            ),
+            child: Row(children: [
+              Expanded(child: PerfSummary(
+                snapshot: updatedSnap,
+                indexCoverage: updatedSnap.indexCoverage,
+                enrichmentCoverage: enrichment,
+              )),
+              _TranslationCoverageButton(liveCoverage: _latestTrCov),
+            ]),
           ),
         );
       },
@@ -621,39 +616,7 @@ QuranRepository? _findQuranRepository(BuildContext context) {
   try { return Provider.of<QuranProvider>(context, listen:false).repository; } catch(_) { return null; }
 }
 
-class _CoverageBar extends StatelessWidget {
-  final String label;
-  final double value; // 0..1
-  const _CoverageBar({required this.label, required this.value});
-  @override
-  Widget build(BuildContext context) {
-    final pct = (value * 100).clamp(0,100).toStringAsFixed(0);
-    final color = value >= 0.99 ? Colors.green : value >= 0.75 ? Colors.lightGreen : value >= 0.5 ? Colors.orange : Colors.redAccent;
-    return Tooltip(
-      message: '$label coverage $pct%',
-      child: SizedBox(
-      width: 60,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('$label $pct%', style: const TextStyle(fontSize: 10)),
-          SizedBox(
-            height: 6,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: value.clamp(0,1),
-                backgroundColor: color.withOpacity(0.15),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-    );
-  }
-}
+// CoverageBar moved to presentation/widgets/perf_summary.dart
 
 class TabInfo {
   final String title;

@@ -37,6 +37,18 @@
 				"$dart-build"
 			],
 			"group": "build"
+		},
+		{
+			"label": "flutter test",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"test"
+			],
+			"problemMatcher": [
+				"$dart-summary"
+			],
+			"group": "build"
 		}
 	]
 }

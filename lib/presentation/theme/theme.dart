@@ -69,8 +69,13 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
-      titleTextStyle: baseTextTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      titleTextStyle: baseTextTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurface,
+      ),
       iconTheme: IconThemeData(color: scheme.onSurface),
+      foregroundColor: scheme.onSurface,
+      surfaceTintColor: Colors.transparent,
     ),
     cardTheme: CardThemeData(
       color: surface2,

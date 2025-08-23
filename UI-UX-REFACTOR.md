@@ -358,3 +358,8 @@ Next Focus (Sprint Continuation): Typography scaler, search result chip grouping
 Recent Polishing (Aug 22):
 - Texhvid content sanitization at model layer removes stray HTML tags in descriptions/examples/quiz, ensuring clean typography rendering without external renderers.
 - Predictive back enabled on Android; full-player sheet uses modern back handling for smoother UX.
+
+Recent Polishing (Aug 23):
+- AppBar title contrast improved on light backgrounds; Help page titles use onPrimaryContainer for readability.
+- Consistent Latin typography ensures ë/ç render correctly in Help and related pages.
+- Thematic Index deep‑link scroll is robust (ensureVisible + offset fallback + retries) and highlights the target range for ~6s.

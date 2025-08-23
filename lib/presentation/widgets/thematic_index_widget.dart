@@ -283,7 +283,15 @@ class _ThematicIndexWidgetState extends State<ThematicIndexWidget> {
       context,
       MaterialPageRoute(
         builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('Kurani')),
+          appBar: AppBar(
+            title: Text(
+              'Kurani',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
           body: const Padding(
             padding: EdgeInsets.only(bottom: 0),
             child: QuranViewWrapper(),
@@ -319,8 +327,8 @@ class _ThemeNodeCard extends StatelessWidget {
                 child: Align(alignment: Alignment.centerLeft, child: SizedBox(height:16,width:16, child: CircularProgressIndicator(strokeWidth:2))),
               )
             else SizedBox(
-              // Constrain height to avoid unbounded expansion; approximate item height ~72
-              height: (node.children.length * 72).clamp(0, 400).toDouble(),
+              // Make height responsive to viewport to prevent overflow on search
+              height: (MediaQuery.of(context).size.height * 0.4).clamp(200, 500),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: node.children.length,
@@ -451,7 +459,15 @@ class _ThemeSubthemeTile extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('Kurani')),
+          appBar: AppBar(
+            title: Text(
+              'Kurani',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
           body: const QuranViewWrapper(),
         ),
       ),
