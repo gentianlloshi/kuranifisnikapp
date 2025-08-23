@@ -41,7 +41,7 @@ class QuranProvider extends ChangeNotifier {
         ) {
     _init();
     // Subscribe to live progress stream
-    _indexProgressSub = _indexManager?.progressStream.listen((evt) {
+  _indexProgressSub = _indexManager?.progressStream.listen((evt) {
       _isBuildingIndex = !evt.complete;
       _indexProgress = evt.progress;
   // Update perf metrics coverage (index fraction). Enrichment coverage handled in repo merges.
@@ -65,6 +65,9 @@ class QuranProvider extends ChangeNotifier {
         await loadSurahMetasArabicOnly();
       });
     }
+  // Kick off full off-main search index build (non-blocking)
+  // ignore: discarded_futures
+  _indexManager?.ensureBuilt();
   }
 
   // Metadata-only list (no verse bodies) to reduce startup memory.
@@ -193,7 +196,7 @@ class QuranProvider extends ChangeNotifier {
     if (_indexManager != null) {
       // Kick incremental build if not started yet (returns immediately) – user-driven start.
       final wasIdle = !_indexManager!.isBuilding && indexProgress <= 0.0;
-      _indexManager!.ensureIncrementalBuild();
+  _indexManager!.ensureBuilt();
       if (wasIdle && !_userTriggeredIndexOnce) {
         _userTriggeredIndexOnce = true;
         Logger.i('Index build triggered by user search input', tag: 'SearchIndex');
@@ -453,7 +456,7 @@ class QuranProvider extends ChangeNotifier {
 
   // Public explicit trigger for incremental index build (phase scheduler & early user actions)
   void ensureIndexBuild() {
-  _indexManager?.ensureIncrementalBuild();
+  _indexManager?.ensureBuilt();
   }
 
   // Ensure verses for a surah are loaded; if different surah from current, switches context.

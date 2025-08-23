@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../providers/quran_provider.dart';
-import '../../domain/repositories/quran_repository.dart';
 import '../theme/theme.dart';
 import '../providers/note_provider.dart';
 import '../providers/app_state_provider.dart';
@@ -19,12 +17,9 @@ import '../widgets/verse_notes_indicator.dart';
 import '../widgets/surah_list_widget.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart';
-import 'sheet_header.dart';
-import 'package:flutter/services.dart';
 import '../../core/services/share_service.dart';
 import '../widgets/note_editor_dialog.dart';
 import 'verse_action_registry.dart';
-
 class QuranViewWidget extends StatefulWidget {
   const QuranViewWidget({super.key});
 
@@ -463,7 +458,13 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
           });
         }
 
-        return Column(
+  // Schedule measurement after this frame to record verse heights
+  _scheduleMeasurement();
+
+  // Compute values that shouldn't cause every row to subscribe independently
+  final playingKey = context.select<AudioProvider, String?>((a) => a.currentTrack?.verseKey);
+
+  return Column(
           children: [
             if (_selectionMode)
               _SelectionBar(
@@ -514,6 +515,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                 },
                 child: ListView.builder(
                   controller: _scrollController,
+                  addAutomaticKeepAlives: false,
+                  addSemanticIndexes: false,
                   padding: EdgeInsets.only(
                     left: context.spaceLg,
                     right: context.spaceLg,
@@ -586,11 +589,15 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                         future: bookmarkProvider.isBookmarked(verse.verseKey),
                         builder: (context, snapshot) {
                           final isBm = snapshot.data ?? false;
-                          final currentPlaying = Provider.of<AudioProvider>(context).currentTrack?.verseKey; // only verse-level listening here (no word index)
-                          final wbwProvider = Provider.of<WordByWordProvider>(context);
-                          var wbw = wbwProvider.getVerseWordData(verse.number);
-                          wbw ??= wbwProvider.error != null ? wbwProvider.buildNaiveFromVerse(verse) : null;
-              final isCurrent = currentPlaying == verse.verseKey;
+                          // Use fine-grained selects to avoid rebuilding all items on provider changes
+                          final isCurrent = playingKey == verse.verseKey;
+                          var wbw = context.select<WordByWordProvider, WordByWordVerse?>((p) => p.getVerseWordData(verse.number));
+                          if (wbw == null) {
+                            final hasError = context.select<WordByWordProvider, bool>((p) => p.error != null);
+                            if (hasError) {
+                              wbw = context.read<WordByWordProvider>().buildNaiveFromVerse(verse);
+                            }
+                          }
               final isSelected = context.watch<SelectionService>().selected.contains(verse.verseKey);
               // Arrival range soft highlight (verse number within range)
               final inArrivalRange = rangeStart != null && rangeEnd != null && verse.number >= rangeStart! && verse.number <= rangeEnd!;
@@ -600,7 +607,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
               final decoration = _mergeSelectionDecoration(context, base: baseDecoration, isSelected: isSelected);
                           final reduceMotion = appState.reduceMotion;
                           final duration = reduceMotion ? Duration.zero : const Duration(milliseconds: 300);
-                          return GestureDetector(
+                          return RepaintBoundary(
+                            child: GestureDetector(
                             key: key,
                             onLongPress: () => _toggleSelection(verse.verseKey),
                             onTap: () {
@@ -620,21 +628,20 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                                 settings: appState.settings,
                                 isBookmarked: isBm,
                                 onBookmarkToggle: () => bookmarkProvider.toggleBookmark(verse.verseKey),
-                                currentPlayingVerseKey: currentPlaying,
+                                currentPlayingVerseKey: playingKey,
                                 wordByWordData: wbw,
                               ),
                             ),
+                            ),
                           );
-                        },
+                        }
                       );
                   },
                 ),
               ),
             ),
           ],
-        );
-  // Schedule measurement after rendering
-  _scheduleMeasurement();
+  );
       },
     );
   }

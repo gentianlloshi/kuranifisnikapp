@@ -27,12 +27,12 @@ A verse is uniquely identified by a composite key `surahNumber:verseNumber` (e.g
 ---
 ## 3. Control Flow Overview
 1. UI calls `QuranProvider.searchVerses(query)`.
-2. Provider ensures the inverted index exists.
-   - Attempts to load a persisted snapshot (v2) from app documents for a fast path.
-   - If not built or partial, starts incremental background build: for each surah, collects raw rows, offloads per‑surah tokenization with `compute(buildInvertedIndex, raw)`, then merges the partial index.
-3. When index ready: `_searchIndexQuery(query)` executes.
-4. Results (ranked `List<Verse>`) assigned to `_searchResults` and `notifyListeners()` triggers UI update.
-5. If index build failed: falls back to `_searchVersesUseCase` (legacy direct search).
+2. Provider ensures the inverted index exists via `SearchIndexManager.ensureBuilt()`.
+   - First tries to load a persisted snapshot (v2) from app documents using a corpus-hash fast path.
+   - If not available, it performs a single full off-main isolate build by parsing asset JSONs and constructing the index entirely in an isolate (see `search_index_isolate.dart`).
+3. When index is ready: the manager executes the in-memory query and returns ranked `List<Verse>`.
+4. Results are assigned to `_searchResults` and `notifyListeners()` triggers UI updates.
+5. If index build fails: the provider can still fall back to `_searchVersesUseCase` (legacy direct search), though in practice the snapshot fast-path or isolate build should cover normal operation.
 
 ---
 ## 4. Inverted Index Structure
@@ -97,7 +97,8 @@ Limitations:
 ## 7. Performance Characteristics
 | Phase | Complexity | Notes |
 |-------|------------|-------|
-| Index Build | O(N * T) where N=verses, T=tokens per verse | Incremental; per‑surah tokenization offloaded to isolate; merged on main. |
+| Index Build | O(N * T) where N=verses, T=tokens per verse | Full build runs in a single isolate using raw asset JSONs (Arabic, translation, transliterations). Main isolate stays responsive. |
+| Snapshot Load | O(S) where S=size of snapshot JSON | Fast-path on startup; validated via corpus hash assembled from asset bytes. |
 | Query | O(sum(len(postingList(token)))) + sort(candidates) | Candidate set small vs full corpus due to prefix pruning. |
 | Memory | ~ (tokens * avgKeyRefs * pointer) | Controlled by prefix cap & normalization. |
 
@@ -109,11 +110,11 @@ If index build fails (exception or isolate error): `_invertedIndex` may remain p
 
 ---
 ## 9. Threading & Concurrency
-- Heavy build uses `compute` (spawns a short-lived isolate). Raw verse list transferred via serialization.
-- No locking required inside index builder isolate.
-- Main isolate only mutates `_invertedIndex` post await; race avoided by `_isBuildingIndex` guard.
+- Heavy build uses `compute` with a single entry point `buildFullIndexFromAssets(payload)` which parses asset JSONs and builds the inverted index off the main isolate.
+- No locking required inside the index builder isolate. The result is a `{ index, verses }` map transferred back to the main isolate.
+- Main isolate only hydrates caches after the compute returns; races are avoided via internal `_building` guard and a build completer.
 
-Edge Case: Multiple simultaneous search calls while build in progress: first call triggers build, others await finishing (no explicit await but they exit early until index ready and later re-trigger search).
+Edge Case: Multiple simultaneous search calls while build in progress: first call ensures a build starts; subsequent calls search the available subset or wait for completion depending on UI logic. Live `progressStream` allows UI to show progress.
 
 ---
 ## 10. Error Handling
@@ -124,7 +125,7 @@ Edge Case: Multiple simultaneous search calls while build in progress: first cal
 ---
 ## 11. Caching & Persistence Strategy
 - Verse objects cached in `_verseCache` keyed by verseKey for quick retrieval after ranking.
-- Index snapshot persistence implemented (v2): JSON `{version, index, verses, createdAt, nextSurah}` stored in app documents; fast‑path load and partial resume.
+- Index snapshot persistence implemented (v2): JSON `{version, dataVersion, index, verses, createdAt, nextSurah}` stored in app documents. `dataVersion` is a lightweight corpus hash derived from asset bytes. On startup we attempt a fast-path load; if the hash mismatches, we rebuild off-main and overwrite the snapshot.
 
 ---
 ## 12. Pagination Interaction
@@ -145,8 +146,7 @@ Search results currently ignore pagination; entire candidate result set stored i
 
 ---
 ## 14. Extension Roadmap
-1. Persisted index with versioning (asset hash).
-2. Weighted multi-field scoring + optional BM25-lite variant (flag scaffolded).
+1. Weighted multi-field scoring + optional BM25-lite variant (flag scaffolded).
 3. Highlight matched tokens in UI (store match spans during scoring pass).
 4. Incremental index updates (if adding notes / annotations in future).
 5. Advanced phonetic matching (soundex-like for transliteration) for mis-typed queries.
@@ -209,10 +209,12 @@ The current search solution balances implementation complexity and performance u
 This section consolidates live testing observations (UI freezes, sporadic ANR risk, indexing latency, missed matches) into a prioritized remediation program.
 
 ### 21.1 Unified Diagnosis
-Primary root cause of perceived freezes / potential ANR:
-- Heavy synchronous work on the main isolate prior to (and separate from) the isolate index build: sequential loading of all surah verses (1..114) inside `_ensureSearchIndex` before handing raw list to `compute`.
-- Immediate, un-debounced execution of `_searchIndexQuery` on each keystroke (high frequency invocations; short queries produce very broad prefix candidate sets early).
-- Rebuilding the index every app launch (no persistence) → repeated cold-start cost.
+Primary root cause of perceived freezes / potential ANR (previous state):
+- Heavy synchronous work on the main isolate prior to the index build (collecting verses per surah) and lack of persistence.
+
+Applied fixes in current implementation:
+- Full off-main isolate build that performs both data parsing and index construction from asset JSONs.
+- Snapshot persistence with corpus-hash validation for fast startup.
 
 Secondary quality issues:
 - Ranking heuristic simplistic (translation-only bonus, no field weighting / proximity).
@@ -221,10 +223,10 @@ Secondary quality issues:
 
 ### 21.2 Prioritized Action Phases
 
-#### Phase 1 (Immediate – Blockers)
-1. Full Off-Main Index Build: Move BOTH verse collection + index construction into a single top-level `buildFullIndex()` run via `compute`. Only minimal progress signaling on main isolate.
-2. Debounce Search Input: 300–400 ms timer reset on `onChanged`; ignore stale queries. Cancel running scoring if a new debounce cycle starts.
-3. Guard Re-Entrancy: If index build in progress, queue latest pending query; execute once ready.
+#### Phase 1 (Done)
+1. Full Off-Main Index Build: Combined data parsing and index construction in `search_index_isolate.buildFullIndexFromAssets` executed via `compute`.
+2. Debounce Search Input: Implemented 350 ms debounce in `QuranProvider.searchVersesDebounced`.
+3. Guard Re-Entrancy: Build guarded by internal completer and state; UI shows progress via `progressStream`.
 
 #### Phase 2 (Performance & UX Hardening)
 4. Persistent Cache: Serialize `{versionHash, index, metadata}` to file; fast path load if hash matches asset corpus.
@@ -241,22 +243,12 @@ Secondary quality issues:
 11. Highlight Matches: Return span metadata for UI emphasis (improves perceived relevance transparency).
 12. Adaptive Debounce: Shorten debounce after index warmed (<50 ms) when user pauses long enough (predictive typing).
 
-### 21.3 Implementation Sketches
+### 21.3 Implementation Notes
 
-Full off-main build (pseudo):
-```dart
-// top_level for compute
-Future<IndexPayload> buildFullIndex(_IndexBuildRequest req) async {
-   final verses = <RawVerse>[];
-   for (final id in req.surahIds) {
-      final vs = await loadSurahVersesSync(id); // NOTE: in isolate (pure parsing / map)
-      verses.addAll(vs);
-   }
-   final index = createInvertedIndex(verses);
-   final version = computeCorpusHash(verses);
-   return IndexPayload(index, version, verses.length);
-}
-```
+Full off-main build entry point: `lib/presentation/providers/search_index_isolate.dart` → `buildFullIndexFromAssets(Map<String,String>)`.
+- Inputs: JSON strings loaded from assets on main isolate (arabic, translation, transliterations).
+- Output: `{ 'index': Map<String,List<String>>, 'verses': Map<String,Map> }`.
+- The manager (`search_index_manager.dart`) hydrates `_invertedIndex` and `_verseCache`, emits progress, and persists a snapshot.
 
 Debounce pattern:
 ```dart

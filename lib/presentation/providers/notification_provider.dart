@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart' show compute;
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:kurani_fisnik_app/core/services/notification_service.dart';
 
@@ -65,41 +66,11 @@ class NotificationProvider extends ChangeNotifier {
     try {
       _isLoading = true; notifyListeners();
       // Load from assets
-      final prayersJson = await rootBundle.loadString('assets/data/lutjet.json');
-      final hadithsJson = await rootBundle.loadString('assets/data/thenie-hadithe.json');
-      final pList = (json.decode(prayersJson) as List).cast<dynamic>();
-      final hList = (json.decode(hadithsJson) as List).cast<dynamic>();
-
-      // Map JSON objects into nicely formatted display strings.
-      _prayers = pList.map((e) {
-        if (e is String) return e;
-        if (e is Map) {
-          final title = (e['titulli'] ?? e['title'] ?? '').toString();
-          final text = (e['shqip'] ?? e['text'] ?? e['content'] ?? '').toString();
-          final source = (e['burimi'] ?? '').toString();
-          final parts = <String>[];
-          if (title.isNotEmpty) parts.add(title);
-          if (text.isNotEmpty) parts.add(text);
-          if (source.isNotEmpty) parts.add('Burimi: $source');
-          return parts.join('\n');
-        }
-        return e.toString();
-      }).toList();
-
-      _hadiths = hList.map((e) {
-        if (e is String) return e;
-        if (e is Map) {
-          final author = (e['autor'] ?? e['author'] ?? '').toString();
-          final text = (e['thenia'] ?? e['text'] ?? e['content'] ?? '').toString();
-          final source = (e['burimi'] ?? '').toString();
-          final parts = <String>[];
-          if (author.isNotEmpty) parts.add('Autori: $author');
-          if (text.isNotEmpty) parts.add(text);
-          if (source.isNotEmpty) parts.add('Burimi: $source');
-          return parts.join('\n');
-        }
-        return e.toString();
-      }).toList();
+  final prayersJson = await rootBundle.loadString('assets/data/lutjet.json');
+  final hadithsJson = await rootBundle.loadString('assets/data/thenie-hadithe.json');
+  // Parse and format off the UI thread
+  _prayers = await compute(_parsePrayersToDisplay, prayersJson);
+  _hadiths = await compute(_parseHadithsToDisplay, hadithsJson);
       _error = null;
     } catch (e) {
   _error = 'Nuk u ngarkuan përmbajtjet e njoftimeve.';
@@ -145,4 +116,41 @@ class NotificationProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+}
+
+// Top-level helpers for background parsing/formatting via compute()
+List<String> _parsePrayersToDisplay(String jsonString) {
+  final raw = json.decode(jsonString) as List<dynamic>;
+  return raw.map((e) {
+    if (e is String) return e;
+    if (e is Map) {
+      final title = (e['titulli'] ?? e['title'] ?? '').toString();
+      final text = (e['shqip'] ?? e['text'] ?? e['content'] ?? '').toString();
+      final source = (e['burimi'] ?? '').toString();
+      final parts = <String>[];
+      if (title.isNotEmpty) parts.add(title);
+      if (text.isNotEmpty) parts.add(text);
+      if (source.isNotEmpty) parts.add('Burimi: $source');
+      return parts.join('\n');
+    }
+    return e.toString();
+  }).toList();
+}
+
+List<String> _parseHadithsToDisplay(String jsonString) {
+  final raw = json.decode(jsonString) as List<dynamic>;
+  return raw.map((e) {
+    if (e is String) return e;
+    if (e is Map) {
+      final author = (e['autor'] ?? e['author'] ?? '').toString();
+      final text = (e['thenia'] ?? e['text'] ?? e['content'] ?? '').toString();
+      final source = (e['burimi'] ?? '').toString();
+      final parts = <String>[];
+      if (author.isNotEmpty) parts.add('Autori: $author');
+      if (text.isNotEmpty) parts.add(text);
+      if (source.isNotEmpty) parts.add('Burimi: $source');
+      return parts.join('\n');
+    }
+    return e.toString();
+  }).toList();
 }

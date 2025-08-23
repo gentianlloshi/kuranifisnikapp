@@ -221,6 +221,11 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
 
   Widget _buildImagePreview() {
     final size = _getImageSize();
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    // Decode any picked background image close to the on-screen size to avoid
+    // large bitmap allocations and expensive downscales during rasterization.
+    final targetDecodeWidth = (size.width * dpr * 2 / 2).round(); // keep <= 2x logical size
+    final targetDecodeHeight = (size.height * dpr * 2 / 2).round();
     
     return Container(
       width: size.width,
@@ -229,8 +234,15 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
         color: _backgroundImagePath == null ? _backgroundColor : null,
         image: _backgroundImagePath != null
             ? DecorationImage(
-                image: FileImage(File(_backgroundImagePath!)),
+                image: ResizeImage(
+                  FileImage(File(_backgroundImagePath!)),
+                  // Limit decode size to approximately the device pixel size of the preview
+                  width: targetDecodeWidth,
+                  height: targetDecodeHeight,
+                  allowUpscaling: false,
+                ),
                 fit: BoxFit.cover,
+                filterQuality: FilterQuality.low,
               )
             : null,
       ),

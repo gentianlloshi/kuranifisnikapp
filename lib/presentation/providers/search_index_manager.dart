@@ -8,6 +8,7 @@ import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
 import 'inverted_index_builder.dart' as idx;
+import 'search_index_isolate.dart' as iso;
 import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import 'package:kurani_fisnik_app/core/search/stemmer.dart';
 import 'package:kurani_fisnik_app/core/search/token_utils.dart' as tq;
@@ -70,33 +71,36 @@ class SearchIndexManager {
     _building = true;
     _buildCompleter = Completer<void>();
     try {
-      final List<Map<String, dynamic>> raw = [];
-      for (int s = 1; s <= 114; s++) {
-        try {
-          final verses = await getSurahVersesUseCase.call(s);
-          for (final v in verses) {
-            final key = '${v.surahNumber}:${v.number}';
-            _verseCache[key] = v;
-            raw.add({
-              'key': key,
-              't': (v.textTranslation ?? '').toString(),
-              'tr': (v.textTransliteration ?? '').toString(),
-              'ar': (v.textArabic ?? '').toString(),
-            });
-          }
-      final p = s / 114.0 * 0.5;
-      _emitProgress(p);
-      if (onProgress != null) onProgress(p);
-          await Future<void>.delayed(const Duration(milliseconds: 1));
-        } catch (_) {
-          // Skip surah silently
-        }
-      }
-    _emitProgress(0.55);
-    if (onProgress != null) onProgress(0.55);
-      _invertedIndex = await compute(idx.buildInvertedIndex, raw);
-    _emitProgress(1.0);
-    if (onProgress != null) onProgress(1.0);
+      // Load required asset JSONs on main isolate (fast; file I/O) and offload heavy parse/build
+      final arabicStr = await rootBundle.loadString('assets/data/arabic_quran.json');
+      // Prefer default translation for index; can be made dynamic later
+      final translationStr = await rootBundle.loadString('assets/data/sq_ahmeti.json');
+      String translitStr = '';
+      try { translitStr = await rootBundle.loadString('assets/data/transliterations.json'); } catch (_) {}
+
+      _emitProgress(0.05); if (onProgress != null) onProgress(0.05);
+      final result = await compute(iso.buildFullIndexFromAssets, {
+        'arabic': arabicStr,
+        'translation': translationStr,
+        'transliterations': translitStr,
+      });
+      final index = (result['index'] as Map).map((k, v) => MapEntry(k as String, (v as List).cast<String>()));
+      final verses = (result['verses'] as Map).cast<String, dynamic>();
+      // Populate caches
+      _invertedIndex = index;
+      verses.forEach((k, v) {
+        final obj = v as Map<String, dynamic>;
+        _verseCache[k] = Verse(
+          surahId: obj['surahNumber'] as int,
+          verseNumber: obj['number'] as int,
+          arabicText: obj['ar'] as String? ?? '',
+          translation: obj['t'] as String?,
+          transliteration: obj['tr'] as String?,
+          verseKey: obj['verseKey'] as String? ?? k,
+          juz: obj['juz'] as int?,
+        );
+      });
+      _emitProgress(1.0); if (onProgress != null) onProgress(1.0);
       // Persist snapshot (fire & forget)
       unawaited(_saveSnapshot());
     } catch (_) {
@@ -113,6 +117,12 @@ class SearchIndexManager {
   void ensureIncrementalBuild({void Function(double progress)? onProgress}) {
     // Already fully built & not in incremental mode
     if (_invertedIndex != null && !_incrementalMode) return;
+    // If full index is built via isolate above, don't run per-surah main-thread batches
+    if (_invertedIndex != null && _nextSurahToIndex > 114) {
+      _emitProgress(1.0);
+      if (onProgress != null) onProgress(1.0);
+      return;
+    }
     // If a build already in progress, just return (callers can await existing completer if exposed later)
     if (_building) return;
     _incrementalMode = true;
@@ -139,6 +149,7 @@ class SearchIndexManager {
           _nextSurahToIndex = s; // record current for snapshot resume
           final batchSw = Stopwatch()..start();
           try {
+            // TODO: Move incremental per-surah collection into isolate as well if needed.
             final verses = await getSurahVersesUseCase.call(s);
             // Keep verse cache for result hydration
             final raw = <Map<String, dynamic>>[];
