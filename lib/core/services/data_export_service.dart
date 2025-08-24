@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 
 import '../../domain/entities/app_settings.dart';
-import '../../domain/entities/bookmark.dart';
-import '../../domain/entities/note.dart';
 import '../../domain/entities/memorization_verse.dart';
 import '../../domain/repositories/storage_repository.dart';
 import '../../presentation/providers/memorization_provider.dart';

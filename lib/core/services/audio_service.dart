@@ -40,8 +40,6 @@ class AudioService {
   List<WordTimestamp> _currentWordTimestamps = []; // Store current word timestamps
   Map<int, List<WordTimestamp>> _allSurahTimestamps = {}; // verseNumber -> timestamps for playlist mode
   String? _preferredReciter; // user selected preferred reciter (folder name)
-  bool _isAdvancing = false; // legacy guard (no longer needed with currentIndexStream) – will be removed after validation
-  final Set<String> _prefetchedUrls = <String>{}; // remember prefetched remote URLs
   bool _isPlaylistMode = false; // active when a playlist is loaded
 
   // Word sync optimization state
@@ -159,7 +157,7 @@ class AudioService {
         // Pre-emit first word index so UI highlights instantly
         _currentWordIndexController.add(0);
       }
-  // DO NOT reset _isAdvancing here; wait until verse actually starts playing to avoid race with completion events.
+  // Verse prepared; playback will start below.
 
       final audioUrl = await _resolveAudioUrlWithFallback(verse);
       if (audioUrl == null) {
@@ -190,8 +188,7 @@ class AudioService {
           await Future.delayed(backoff);
         }
       }
-  // Now that playback has successfully started, allow completion handler again.
-  _isAdvancing = false;
+  // Now that playback has successfully started.
       // No manual prefetch when single verse – playlist prefetch handled separately.
       
     } catch (e) {
@@ -242,7 +239,7 @@ class AudioService {
       }
     }
     await _audioPlayer.play();
-    _isAdvancing = false;
+  // Playlist playback started.
   }
 
   // Seek to a verse inside the current playlist by matching verse identity.
@@ -250,17 +247,17 @@ class AudioService {
   Future<bool> seekToVerseInPlaylist(Verse target, {bool autoPlay = true}) async {
   if (!_isPlaylistMode || _currentPlaylist.isEmpty) return false;
     // Prefer matching by verseKey when present; fallback to surahId+verseNumber
-    final String? key = target.verseKey;
-    final int surah = target.surahId ?? target.surahNumber;
-    final int ayah = target.verseNumber ?? target.number;
+    final String key = target.verseKey;
+    final int surah = target.surahId;
+    final int ayah = target.verseNumber;
     int found = -1;
     for (int i = 0; i < _currentPlaylist.length; i++) {
       final v = _currentPlaylist[i];
-      if (key != null && key.isNotEmpty) {
+      if (key.isNotEmpty) {
         if (v.verseKey == key) { found = i; break; }
       } else {
-        final s = v.surahId ?? v.surahNumber;
-        final a = v.verseNumber ?? v.number;
+        final s = v.surahId;
+        final a = v.verseNumber;
         if (s == surah && a == ayah) { found = i; break; }
       }
     }
@@ -277,7 +274,7 @@ class AudioService {
     }
   }
 
-  void _prefetchNextInPlaylist() {/* obsolete with ConcatenatingAudioSource - retained for compatibility */}
+  // obsolete helper removed after playlist migration
 
   Future<void> play() async {
     try {
@@ -587,7 +584,7 @@ class AudioService {
       _log('Audio downloaded to: $filePath');
     } catch (e) {
       _log('Error downloading audio: $e');
-      throw e;
+      rethrow;
     }
   }
 

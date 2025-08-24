@@ -1,14 +1,10 @@
 import 'dart:async';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import '../providers/quran_provider.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../providers/app_state_provider.dart';
-import '../providers/word_by_word_provider.dart';
-import '../providers/audio_provider.dart';
-import '../providers/texhvid_provider.dart';
-import '../providers/thematic_index_provider.dart';
+// Unused heavy providers removed from startup scheduler imports to reduce load.
 
 /// Lightweight phased startup coordinator to reduce main-isolate burst load.
 /// Phases (relative to first frame):

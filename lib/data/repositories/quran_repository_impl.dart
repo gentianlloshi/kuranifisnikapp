@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';

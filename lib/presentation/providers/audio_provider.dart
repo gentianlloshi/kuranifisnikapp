@@ -122,7 +122,6 @@ class AudioProvider extends ChangeNotifier {
     _audioService.currentVerseStream.listen((v) {
       if (!_abLoopEnabled || _loopStartVerse == null || _loopEndVerse == null) return;
       if (!_audioService.isSingleVerseLoop && isPlaylistMode && v != null) {
-        final startKey = _loopStartVerse!.verseKey;
         final endKey = _loopEndVerse!.verseKey;
         // If we've just reached end verse and loops remaining, schedule jump to start
         if (v.verseKey == endKey) {
@@ -176,7 +175,7 @@ class AudioProvider extends ChangeNotifier {
       Map<int, List<WordTimestamp>>? map;
       if (wbwProvider != null) {
         // Ensure surah data loaded (idempotent)
-        final surahId = verses.isNotEmpty ? (verses.first.surahId ?? verses.first.surahNumber) : null;
+  final surahId = verses.isNotEmpty ? verses.first.surahId : null;
         if (surahId != null) {
           await wbwProvider.ensureLoaded(surahId);
           map = wbwProvider.allTimestamps;
@@ -193,7 +192,7 @@ class AudioProvider extends ChangeNotifier {
       return;
     }
     // Ensure ordering; if user picked in reverse, swap.
-    if ((start.surahId ?? start.surahNumber) == (end.surahId ?? end.surahNumber) && (start.verseNumber ?? start.number) > (end.verseNumber ?? end.number)) {
+  if (start.surahId == end.surahId && start.verseNumber > end.verseNumber) {
       final tmp = start; start = end; end = tmp;
     }
     _loopStartVerse = start;
