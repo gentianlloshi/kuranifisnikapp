@@ -112,7 +112,7 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahs() async {
     _setLoading(true);
     try {
-      final res = await _getSurahsUseCase!.call();
+  final uc = _getSurahsUseCase; if (uc == null) return; final res = await uc.call();
       if (res is Success<List<Surah>>) {
         final sw = Stopwatch()..start();
         final all = res.value.map((s) => SurahMeta.fromSurah(s)).toList();
@@ -143,7 +143,7 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahMetasArabicOnly() async {
     _setLoading(true);
     try {
-      final surahs = await _getSurahsArabicOnlyUseCase!.call();
+  final uc = _getSurahsArabicOnlyUseCase; if (uc == null) return; final surahs = await uc.call();
       final sw = Stopwatch()..start();
       final all = surahs.map((s) => SurahMeta.fromSurah(s)).toList();
       _surahsMeta = [];
@@ -195,28 +195,30 @@ class QuranProvider extends ChangeNotifier {
     }
     if (_indexManager != null) {
       // Kick incremental build if not started yet (returns immediately) – user-driven start.
-      final wasIdle = !_indexManager!.isBuilding && indexProgress <= 0.0;
-  _indexManager!.ensureBuilt();
+      final mgr = _indexManager; // promote for null-safe access
+  final wasIdle = !(mgr.isBuilding) && indexProgress <= 0.0;
+  mgr.ensureBuilt();
       if (wasIdle && !_userTriggeredIndexOnce) {
         _userTriggeredIndexOnce = true;
         Logger.i('Index build triggered by user search input', tag: 'SearchIndex');
       }
       // Perform search over currently indexed subset (results will improve as index grows)
-      _searchResults = _indexManager!.search(
+  _searchResults = (mgr.search(
         query,
         juzFilter: _activeJuzFilter,
         includeTranslation: _filterTranslation,
         includeArabic: _filterArabic,
         includeTransliteration: _filterTransliteration,
-      );
+  ));
       _error = null;
       notifyListeners();
       return;
     }
-    if (_searchVersesUseCase != null) {
+  if (_searchVersesUseCase != null) {
       _setLoading(true);
       try {
-        _searchResults = await _searchVersesUseCase!.call(query);
+        final uc = _searchVersesUseCase!; // promote (non-null by guard)
+        _searchResults = await uc.call(query);
         _error = null;
       } catch (e) {
         _error = e.toString();
@@ -240,19 +242,19 @@ class QuranProvider extends ChangeNotifier {
       if (_prefetchCache.containsKey(surahId)) {
         _allCurrentSurahVerses = _prefetchCache.remove(surahId)!;
       } else {
-        _allCurrentSurahVerses = await _getSurahVersesUseCase!.call(surahId);
+  final uc = _getSurahVersesUseCase; if (uc == null) { _allCurrentSurahVerses = []; } else { _allCurrentSurahVerses = await uc.call(surahId); }
       }
   Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
       // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
       // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
       // ignore: unawaited_futures
-      if (_quranRepository != null) {
+  if (_quranRepository != null) {
         // Fire-and-forget enrichment: translation then transliteration.
         Future(() async {
           try {
-            if (!_quranRepository!.isSurahFullyEnriched(surahId)) {
-              await _quranRepository!.ensureSurahTranslation(surahId);
-              await _quranRepository!.ensureSurahTransliteration(surahId);
+            final repo = _quranRepository; if (repo != null && !repo.isSurahFullyEnriched(surahId)) {
+              await repo.ensureSurahTranslation(surahId);
+              await repo.ensureSurahTransliteration(surahId);
               Logger.d('Surah $surahId enriched on-demand', tag: 'LazySurah');
             }
           } catch (e) {
@@ -262,7 +264,7 @@ class QuranProvider extends ChangeNotifier {
       }
       _currentSurahId = surahId;
       // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
-      if (_currentSurah == null || _currentSurah!.number != surahId) {
+  if (_currentSurah == null || _currentSurah!.number != surahId) {
         _currentSurah = Surah(
           id: surahId,
           number: surahId,
@@ -476,7 +478,7 @@ class QuranProvider extends ChangeNotifier {
     // ignore: unawaited_futures
     Future(() async {
       try {
-        final verses = await _getSurahVersesUseCase!.call(next);
+  final uc = _getSurahVersesUseCase; if (uc == null) return; final verses = await uc.call(next);
         _prefetchCache[next] = verses;
         Logger.d('Prefetched surah=$next verses=${verses.length}', tag: 'Prefetch');
       } catch (e) {
@@ -494,6 +496,26 @@ class QuranProvider extends ChangeNotifier {
       try { return _pagedVerses.firstWhere((v) => v.verseNumber == verseNumber); } catch (_) {}
     }
     return null;
+  }
+
+  /// Resolve a verse for a reference string like "2:255" using current caches.
+  /// Returns null if not available without triggering heavy loads.
+  Verse? resolveVerseByRef(String verseRef) {
+    final parts = verseRef.trim().split(':');
+    if (parts.length != 2) return null;
+    final s = int.tryParse(parts[0]);
+    final v = int.tryParse(parts[1]);
+    if (s == null || v == null) return null;
+    // Check current/prefetched caches first
+    final local = findVerse(s, v);
+    if (local != null) return local;
+    // Try prefetch cache (full surah list if present)
+    final pref = _prefetchCache[s];
+    if (pref != null) {
+      try { return pref.firstWhere((e) => e.verseNumber == v); } catch (_) {}
+    }
+    // Fallback to index manager verse cache (if built/snapshot loaded)
+    return _indexManager?.getVerseByKey('$s:$v');
   }
 
 }

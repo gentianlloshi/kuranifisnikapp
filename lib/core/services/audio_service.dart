@@ -383,7 +383,7 @@ class AudioService {
     _stateController.add(state);
   }
 
-  void _onPlaybackCompleted() {/* obsolete with playlist-driven advancement */}
+  // _onPlaybackCompleted removed (obsolete with playlist-driven advancement)
 
   void _updateCurrentWordIndex(Duration currentPosition) {
     if (_currentWordTimestamps.isEmpty) {

@@ -55,7 +55,8 @@ class AppStateProvider extends ChangeNotifier {
     if (_getSettingsUseCase == null) return; // Skip loading if no use case
 
     try {
-      final loadedSettings = await _getSettingsUseCase!.call();
+      final getter = _getSettingsUseCase;
+      final loadedSettings = await getter!.call();
       if (loadedSettings != null) {
         _settings = loadedSettings;
         notifyListeners();
@@ -206,7 +207,10 @@ class AppStateProvider extends ChangeNotifier {
 
   Future<void> _updateSettings(AppSettings newSettings) async {
     try {
-      await _saveSettingsUseCase!.call(newSettings);
+      final saver = _saveSettingsUseCase;
+      if (saver != null) {
+        await saver.call(newSettings);
+      }
       _settings = newSettings;
       notifyListeners();
     } catch (e, st) {

@@ -141,6 +141,7 @@ class _MemorizationTabState extends State<MemorizationTab> {
     final global = mem.globalStatusCounts();
     final active = mem.statusCountsForActive();
     final activeSurah = mem.activeSurah;
+  final repeat = mem.session?.repeatTarget ?? 1;
     return Material(
       color: Theme.of(context).colorScheme.surface,
       elevation: 2,
@@ -186,6 +187,37 @@ class _MemorizationTabState extends State<MemorizationTab> {
                         _StatChip(label: 'Të reja', value: global['new'] ?? 0, color: Colors.blueGrey),
                       ],
                     ),
+                  ),
+                ),
+                // Repeat control (stepper)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Përsëritje'),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        tooltip: 'Ul përsëritjen',
+                        onPressed: repeat > 1 ? () => mem.setRepeatTarget(repeat - 1) : null,
+                        icon: const Icon(Icons.remove, size: 18),
+                        constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+                        padding: EdgeInsets.zero,
+                      ),
+                      Text('$repeat', style: const TextStyle(fontFeatures: [])),
+                      IconButton(
+                        tooltip: 'Rrit përsëritjen',
+                        onPressed: repeat < 99 ? () => mem.setRepeatTarget(repeat + 1) : null,
+                        icon: const Icon(Icons.add, size: 18),
+                        constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
                   ),
                 ),
                 IconButton(
@@ -271,7 +303,7 @@ class _MemorizationTabState extends State<MemorizationTab> {
     final sel = context.read<SelectionService>();
     final selecting = sel.mode == SelectionMode.memorization;
     final keyStr = '${mv.surah}:${mv.verse}';
-    final isSelected = selecting && sel.contains(keyStr);
+  // selection presence handled via SelectionService; local flag not used by tile
     return _MemorizationVerseTile(
       key: ValueKey(mv.key),
       verse: mv,
@@ -287,11 +319,7 @@ class _MemorizationTabState extends State<MemorizationTab> {
     );
   }
 
-  String _statusLabel(MemorizationStatus status) => switch (status) {
-        MemorizationStatus.newVerse => 'I Ri',
-        MemorizationStatus.inProgress => 'Në Progres',
-        MemorizationStatus.mastered => 'I Mësuar',
-      };
+  // _statusLabel removed (unused)
 
   DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const _autoScrollCooldown = Duration(milliseconds: 500);
@@ -371,8 +399,8 @@ class _StatusCycleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    Color statusColor;
-    String label;
+  Color statusColor;
+  String label;
     switch (mv.status) {
       case MemorizationStatus.newVerse:
         label = 'I Ri';
@@ -473,11 +501,7 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
     }
   }
 
-  Color _statusColor(MemorizationStatus status) => switch (status) {
-        MemorizationStatus.newVerse => Colors.blueGrey,
-        MemorizationStatus.inProgress => Colors.orange,
-        MemorizationStatus.mastered => Colors.green,
-      };
+  // _statusColor removed (unused)
 
   @override
   void dispose() {
@@ -490,7 +514,7 @@ class _MemorizationVerseTileState extends State<_MemorizationVerseTile> with Sin
     final mv = widget.verse;
     final colorScheme = Theme.of(context).colorScheme;
   final tileColor = widget.selected ? colorScheme.primary.withValues(alpha: 0.12) : Colors.transparent;
-    final statusColor = _statusColor(mv.status);
+  // status color is used inside the status button; no local usage here
     return InkWell(
       onTap: widget.onSelect,
       child: Container(

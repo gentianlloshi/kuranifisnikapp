@@ -41,6 +41,7 @@ class ThematicIndexProvider extends ChangeNotifier {
   final Set<String> _expandedThemes = <String>{};
   final Map<String, ThematicNode> _themeNodes = {}; // root themes cached
   static const String _prefsExpandedKey = 'thematic_expanded_v1';
+  final Map<String, int> _themeVerseCounts = {}; // cached total verse refs per theme
 
   Map<String, dynamic> get thematicIndex => _rawIndex;
   List<String> get filteredThemes => _filteredThemes;
@@ -58,8 +59,18 @@ class ThematicIndexProvider extends ChangeNotifier {
       _filteredThemes = _rawIndex.keys.toList()..sort();
       // Build lightweight root nodes (children deferred)
       _themeNodes.clear();
+      _themeVerseCounts.clear();
       for (final theme in _filteredThemes) {
         _themeNodes[theme] = ThematicNode(id: theme, label: theme, isLeaf: false);
+        // Pre-compute counts for badges
+        final sub = _rawIndex[theme];
+        int total = 0;
+        if (sub is Map<String, dynamic>) {
+          sub.forEach((_, verses) {
+            if (verses is List) total += verses.length;
+          });
+        }
+        _themeVerseCounts[theme] = total;
       }
       await _restoreExpanded();
       _error = null;
@@ -130,6 +141,8 @@ class ThematicIndexProvider extends ChangeNotifier {
     }
     return [];
   }
+
+  int totalVersesForTheme(String theme) => _themeVerseCounts[theme] ?? 0;
 
   bool isThemeExpanded(String theme) => _expandedThemes.contains(theme);
 

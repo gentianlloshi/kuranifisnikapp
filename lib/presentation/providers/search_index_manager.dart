@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
@@ -57,6 +55,10 @@ class SearchIndexManager {
     required this.getSurahVersesUseCase,
     SnapshotStore? snapshotStore,
   }) : _snapshotStore = snapshotStore ?? DefaultSnapshotStore(fileName: _snapshotFile);
+
+  /// Lightweight lookup for an already-cached verse by its key (e.g., "2:255").
+  /// Returns null if the verse hasn't been indexed yet.
+  Verse? getVerseByKey(String verseKey) => _verseCache[verseKey];
 
   /// Ensures the index is fully built (blocking until completion) unless already built.
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
@@ -162,7 +164,7 @@ class SearchIndexManager {
                 'key': key,
                 't': (v.textTranslation ?? '').toString(),
                 'tr': (v.textTransliteration ?? '').toString(),
-                'ar': (v.textArabic ?? '').toString(),
+                'ar': v.textArabic.toString(),
               });
             }
             if (raw.isNotEmpty) {
@@ -197,8 +199,9 @@ class SearchIndexManager {
       } finally {
         if (session == _buildSessionId) {
           _building = false;
-          if (!(_buildCompleter?.isCompleted ?? true)) {
-            _buildCompleter!.complete();
+          final comp = _buildCompleter;
+          if (comp != null && !comp.isCompleted) {
+            comp.complete();
           }
         }
       }
@@ -317,37 +320,10 @@ class SearchIndexManager {
   }
 
   List<String> _expandQueryTokens(String query) {
-  return tq.expandQueryTokens(query, lightStem);
+    return tq.expandQueryTokens(query, lightStem);
   }
 
-  // Tokenize & insert a single verse into the existing in-memory inverted index (incremental mode)
-  void _indexVerse(Verse v) {
-    if (_invertedIndex == null) return;
-    final key = '${v.surahNumber}:${v.number}';
-    final tokens = <String>{}
-  ..addAll(tq.tokenizeLatin((v.textTranslation ?? '')))
-  ..addAll(tq.tokenizeLatin((v.textTransliteration ?? '')))
-  ..addAll(tq.tokenizeLatin(_normalizeArabic((v.textArabic))));
-    final seenVerseTokens = <String>{};
-    for (final tok in tokens) {
-      if (tok.isEmpty) continue;
-      final norm = _normalizeLatin(tok);
-      void addToken(String t) {
-        if (seenVerseTokens.add(t)) {
-          final list = _invertedIndex!.putIfAbsent(t, () => <String>[]);
-          list.add(key);
-        }
-      }
-      addToken(tok);
-      if (norm != tok) addToken(norm);
-      if (norm.length >= 3) {
-        final maxPref = norm.length - 1 < 10 ? norm.length - 1 : 10;
-        for (int l = 2; l <= maxPref; l++) {
-          addToken(norm.substring(0, l));
-        }
-      }
-    }
-  }
+  // _indexVerse removed (was unused after isolate-based build)
 
   String _normalizeArabic(String input) {
     var s = input;
@@ -451,10 +427,6 @@ int _levenshtein(String a, String b, int maxDist) {
 }
 
 extension on SearchIndexManager {
-  Future<File> _snapshotPath() async {
-    final dir = await getApplicationDocumentsDirectory();
-  return File('${dir.path}/${SearchIndexManager._snapshotFile}');
-  }
 
   Future<bool> _tryLoadSnapshot() async {
     try {

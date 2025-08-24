@@ -83,7 +83,6 @@ class AppPalettes {
 }
 
 ColorScheme buildSepiaScheme(Brightness brightness) {
-  final isDark = brightness == Brightness.dark;
   // For dark variant we could invert some values, but initial sprint focuses on light sepia.
   return ColorScheme(
     brightness: brightness,

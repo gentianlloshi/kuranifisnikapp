@@ -315,8 +315,8 @@ class AudioProvider extends ChangeNotifier {
     // Simpler: attempt resolve (may cost a HEAD) – acceptable for on-demand button
     try {
       // Reuse play resolution indirectly by constructing code
-      final surah = (verse.surahId ?? verse.surahNumber).toString().padLeft(3,'0');
-      final ayah = (verse.verseNumber ?? verse.number).toString().padLeft(3,'0');
+  final surah = verse.surahId.toString().padLeft(3,'0');
+  final ayah = verse.verseNumber.toString().padLeft(3,'0');
       final code = '$surah$ayah';
       // Check known reciter folders
       const reciters = ['Alafasy_128kbps','Abdul_Basit_Mujawwad','AbdulSamad_64kbps'];
@@ -329,8 +329,8 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> downloadVerseAudio(Verse verse, Function(double) onProgress) async {
-    final surah = (verse.surahId ?? verse.surahNumber).toString().padLeft(3,'0');
-    final ayah = (verse.verseNumber ?? verse.number).toString().padLeft(3,'0');
+  final surah = verse.surahId.toString().padLeft(3,'0');
+  final ayah = verse.verseNumber.toString().padLeft(3,'0');
     final code = '$surah$ayah';
     // Prefer first reciter; fallback list could be added
     final url = 'https://everyayah.com/data/Alafasy_128kbps/$code.mp3';
@@ -338,8 +338,8 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> deleteVerseAudio(Verse verse) async {
-    final surah = (verse.surahId ?? verse.surahNumber).toString().padLeft(3,'0');
-    final ayah = (verse.verseNumber ?? verse.number).toString().padLeft(3,'0');
+  final surah = verse.surahId.toString().padLeft(3,'0');
+  final ayah = verse.verseNumber.toString().padLeft(3,'0');
     final code = '$surah$ayah';
     const reciters = ['Alafasy_128kbps','Abdul_Basit_Mujawwad','AbdulSamad_64kbps'];
     for (final r in reciters) {

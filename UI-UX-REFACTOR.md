@@ -1,3 +1,14 @@
+## 2025-08-24 UI changes
+
+- Thematic Index
+  - List item titles now use onSurface for better contrast; highlighted segments use semi-bold and toned primary background.
+  - Auto-expansion on search query to expose results; subtheme subtitles fixed.
+  - Bottom sheets: consistent SheetHeader + friendly placeholders.
+
+- Memorization
+  - Sticky controls header with stats chips and repeat stepper.
+  - Verse tiles show status chip and hide-text mask with “peek” timer.
+
 # Kurani Fisnik – UI/UX Refactor Strategic Plan
 
 Version: 1.0  

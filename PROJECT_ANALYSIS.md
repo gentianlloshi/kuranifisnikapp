@@ -1,3 +1,14 @@
+### 2025-08-24 – Thematic Index and Memorization polish
+
+- Thematic Index
+   - Fixed malformed widget and refactored to clean structure.
+   - Added category icons, search highlight, and range preview logic.
+   - Improved bottom sheet UX (empty state, quick actions, preview placeholders).
+- Memorization
+   - Implemented sticky header with stats and group navigation.
+   - Added repeat control to session settings.
+   - Hide-text mode with tap-to-peek overlay and selection/removal flow.
+
 # Analiza e Projektit - Kurani Fisnik Flutter App (FINALIZUAR + POST UPDATES)
 
 **Data e Analizës (Fillestare):** 9 Gusht 2025 (FINAL UPDATE)  

@@ -54,7 +54,7 @@ ThemeData buildAppTheme(ColorScheme scheme, {double scaleFactor = 1.0}) {
   final Color surface3 = isDark ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.08), scheme.surface) : scheme.surface;
   final Color surface4 = isDark ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.12), scheme.surface) : scheme.surface;
   final Color dividerColor = isDark ? scheme.outline.withValues(alpha: 0.35) : scheme.outline.withValues(alpha: 0.6);
-  final Color outlineVariant = isDark ? scheme.outlineVariant.withValues(alpha: 0.35) : scheme.outlineVariant;
+  // outlineVariant derived when needed from scheme
 
   return ThemeData(
     useMaterial3: true,

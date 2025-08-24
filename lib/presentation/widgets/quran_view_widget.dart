@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../providers/quran_provider.dart';
 import '../theme/theme.dart';
-import '../providers/note_provider.dart';
+// import '../providers/note_provider.dart'; // not used directly here
 import '../providers/app_state_provider.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/audio_provider.dart';
@@ -18,7 +18,7 @@ import '../widgets/surah_list_widget.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart';
 import '../../core/services/share_service.dart';
-import '../widgets/note_editor_dialog.dart';
+// import '../widgets/note_editor_dialog.dart'; // handled via VerseActionRegistry sheet
 import 'verse_action_registry.dart';
 class QuranViewWidget extends StatefulWidget {
   const QuranViewWidget({super.key});
@@ -33,7 +33,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   final Map<String, GlobalKey> _verseKeys = {}; // verseKey -> GlobalKey
   final Map<String, double> _verseHeights = {}; // verseKey -> measured height
   final Map<String, double> _cumulativeOffsets = {}; // verseKey -> cumulative offset before this verse
-  bool _layoutReady = false;
+  // Removed unused _layoutReady flag
   DateTime _lastAutoScroll = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _autoScrollThrottle = Duration(milliseconds: 350);
   DateTime _lastUserScroll = DateTime.fromMillisecondsSinceEpoch(0);
@@ -41,7 +41,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
   // Accurate progress tracking cadence
   DateTime _lastAccurateProgressCalc = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _progressCalcThrottle = Duration(milliseconds: 120);
-  static const bool kUseNewVerseHighlight = true; // feature flag for new highlight spec
+  // Feature flag retained in design doc; not needed in code anymore
   final TextEditingController _jumpSurahCtrl = TextEditingController();
   final TextEditingController _jumpVerseCtrl = TextEditingController();
   // Selection mode state
@@ -97,23 +97,6 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
       borderRadius: BorderRadius.circular(10),
       color: blended,
   border: Border(left: BorderSide(color: scheme.tertiary.withValues(alpha: dark ? 0.7 : 0.9), width: 2)),
-    );
-  }
-
-  void _openAddNote(BuildContext context, Verse verse) {
-    showDialog(
-      context: context,
-      builder: (ctx) => NoteEditorDialog(
-        verseKey: verse.verseKey,
-        onSave: (note) {
-          final provider = context.read<NoteProvider>();
-          if (note.id.isEmpty) {
-            provider.addNote(note.verseKey, note.content, tags: note.tags);
-          } else {
-            provider.updateNote(note);
-          }
-        },
-      ),
     );
   }
 
@@ -179,7 +162,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
     // Register default verse actions once (idempotent)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final reg = context.read<VerseActionRegistry?>();
-      if (reg != null && reg.actionsFor != null) { // existence guard
+      if (reg != null) { // existence guard
         if (reg.actionsFor(context, const Verse(surahId: 1, verseNumber: 1, arabicText: '', translation: null, transliteration: null, verseKey: '1:1')).isEmpty) {
           reg.registerAll(buildDefaultVerseActions());
         }
@@ -393,14 +376,15 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
             final idx = verses.indexWhere((v) => v.number == pendingTarget);
             if (idx >= 0 && _scrollController.hasClients) {
               // Prefer precise ensureVisible using the GlobalKey if available
-              final key = _verseKeys['${quranProvider.currentSurah!.number}:$pendingTarget'];
+              final cur = quranProvider.currentSurah;
+              final key = _verseKeys['${cur?.number}:$pendingTarget'];
               final ctx = key?.currentContext;
               if (ctx != null) {
                 try {
                   await Scrollable.ensureVisible(
                     ctx,
                     duration: const Duration(milliseconds: 480),
-                    alignment: 0.08,
+                    alignment: 0.02,
                     curve: Curves.easeInOutCubic,
                   );
                   quranProvider.consumePendingScrollTarget();
@@ -411,7 +395,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
               // Fallback to computed offset if key context not ready
               final position = _computeScrollOffsetForIndex(idx, verses).clamp(0.0, _scrollController.position.maxScrollExtent);
               _scrollController.animateTo(
-                position as double,
+                position.toDouble(),
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeInOutCubic,
               );
@@ -600,7 +584,9 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                           }
               final isSelected = context.watch<SelectionService>().selected.contains(verse.verseKey);
               // Arrival range soft highlight (verse number within range)
-              final inArrivalRange = rangeStart != null && rangeEnd != null && verse.number >= rangeStart! && verse.number <= rangeEnd!;
+              final rs = rangeStart;
+              final re = rangeEnd;
+              final inArrivalRange = (rs != null && re != null) && verse.number >= rs && verse.number <= re;
               final baseDecoration = isCurrent
                 ? _buildVerseHighlightDecoration(context, isActive: true)
                 : (inArrivalRange ? _buildRangeHighlightDecoration(context) : const BoxDecoration());
@@ -669,11 +655,7 @@ class VerseWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool isCurrentVersePlaying = currentPlayingVerseKey == verse.verseKey;
-    TextStyle _buildWordArabicStyle(BuildContext context, {required bool isHighlighted, required double baseSize}) {
-      final t = Theme.of(context).textTheme.bodyArabic.copyWith(fontSize: baseSize, height: 1.65);
-      if (!isHighlighted) return t;
-      return t.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold);
-    }
+  // Arabic style is derived from theme.textTheme.bodyArabic at render sites.
     
     return Padding(
       padding: EdgeInsets.only(bottom: context.spaceMd),
@@ -801,12 +783,12 @@ class VerseWidget extends StatelessWidget {
             if (settings.showArabic)
               Padding(
                 padding: EdgeInsets.only(bottom: context.spaceMd),
-                child: settings.showWordByWord && wordByWordData != null && wordByWordData!.words.isNotEmpty
+                child: settings.showWordByWord && (wordByWordData?.words.isNotEmpty ?? false)
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: _WordByWordLine(
                           verseKey: verse.verseKey,
-                          words: wordByWordData!.words,
+                          words: wordByWordData?.words ?? const [],
                           baseSize: settings.fontSizeArabic.toDouble(),
                         ),
                       )
@@ -858,38 +840,7 @@ class VerseWidget extends StatelessWidget {
     );
   }
 
-  // Local add note helper (mirrors QuranViewWidget implementation) to allow bottom sheet action inside VerseWidget
-  void _openAddNote(BuildContext context, Verse verse) {
-    showDialog(
-      context: context,
-      builder: (ctx) => NoteEditorDialog(
-        verseKey: verse.verseKey,
-        onSave: (note) {
-          final provider = context.read<NoteProvider>();
-          if (note.id.isEmpty) {
-            provider.addNote(note.verseKey, note.content, tags: note.tags);
-          } else {
-            provider.updateNote(note);
-          }
-        },
-      ),
-    );
-  }
-
-  void _playVerse(BuildContext context, Verse verse) {
-    context.read<AudioProvider>().playVerse(verse);
-  }
-
-  void _playFromVerse(BuildContext context, Verse verse) {
-    final quranProvider = context.read<QuranProvider>();
-    final verses = quranProvider.currentVerses;
-    final startIndex = verses.indexWhere((v) => v.number == verse.number);
-    
-    if (startIndex != -1) {
-  final wbwProv = context.read<WordByWordProvider>();
-  context.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
-    }
-  }
+  // Removed unused helpers: _openAddNote, _playVerse, _playFromVerse
 
   void _shareVerse(BuildContext context, Verse verse) {
     ShareService.shareVerse(

@@ -6,13 +6,12 @@ Aplikacion Flutter për leximin dhe studimin e Kuranit Fisnik në gjuhën shqipe
 
 Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërkimin në Kuranin Fisnik, i fokusuar te përdoruesit shqipfolës. Aplikacioni përmban përkthime të shumta në shqip, krahas tekstit origjinal arab dhe transliterimit latin.
 
-## Çfarë ka të re (23 Gusht 2025)
+## Çfarë ka të re (24 Gusht 2025)
 
- - Njoftimet: “Lutja e Ditës” dhe “Hadithi i Ditës” ngarkohen nga asetet dhe shfaqen të formatuara (titull/autor + tekst + burim). Butoni “Test Njoftimi” dërgon një njoftim lokal të punueshëm. “Rifresko” zgjedh rastësisht përmbajtje të re pa përsëritje të menjëhershme.
- - Indeksi Tematik: thellë‑linku hap pamjen e Kuranit te ajeti ose rangu dhe e thekson për ~6s. Scroll‑i është forcuar me ensureVisible + fallback offset dhe ‘retry’ të kufizuar.
- - Kërkimi: highlight i pjesshëm i termave me heqje diakritikash; shtuar fuzzy fallback i kufizuar (Levenshtein), filtër i shkronjës së parë dhe kërkesë për të paktën një nën‑varg normalizuar në fushat e përzgjedhura. Shfaqet numri i rezultateve.
- - UI/UX: titujt në AppBar kanë kontrast më të lartë në sfona të çelëta; tekstet me ë/ç në Ndihmë shfaqen me font të qëndrueshëm latin.
- - Perf: Dev Perf Overlay vendoset nën MaterialApp.builder; përmbledhësi i metrikeve si widget i veçantë.
+ - Indeksi Tematik: Ikona sipas kategorisë, parapamje e lehtë për vargje (snippet i ajetit të parë ose “S–E”), bottom sheet me bosh/placeholder miqësor. Kërkimi tani thekson rezultatet dhe zgjeron kategoritë automatikisht. “Shko te ajeti/rangu” skrollon në krye te ajeti i parë dhe thekson vargun ~6s.
+ - Kërkimi (UI): Ngjyrosje me kontrast më të lartë për pjesët e përputhura në listime.
+ - Memorizimi: Tab i ri me kokë “sticky”, statistika globale/aktive, navigim mes grupeve (sure), maskim teksti me “Prek për të parë”, përzgjedhje e ajeve, status ciklik (I Ri → Në Progres → I Mësuar), dhe kontroll i përsëritjeve të seancës.
+ - Stabilitet: Pastrim i kodit të indeksit tematik dhe teste të reja për utilitetet e parapamjes/ikonave.
 
 ## Karakteristikat Kryesore
 

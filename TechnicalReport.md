@@ -1,3 +1,23 @@
+## Update 2025-08-24
+
+This update focuses on Thematic Index UX and Memorization features.
+
+- Thematic Index
+   - Category icon mapping by label heuristics.
+   - Lightweight range previews in subtheme sheet (first verse snippet or fallback "Ajetet S–E").
+   - Empty/placeholder states in bottom sheets.
+   - Search refinements: auto-expand on query and inline highlight of matches.
+   - Navigation opens Quran view at verse/range with arrival highlighting for ~6s and alignment near top.
+
+- Memorization
+   - New sticky header with global/active stats.
+   - Group navigation across surahs with stored active surah.
+   - Verse tiles with status cycling and optional hide-text mode with tap-to-peek.
+   - Session selection persisted and repeat count control added (1–99).
+
+- Tests
+   - Added unit tests for icon mapping and range preview utilities.
+
 # Raport Teknik: Vlerësim i Projektit "Kurani Fisnik"
 
 ## Tabela e Përmbajtjes
