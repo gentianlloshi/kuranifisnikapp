@@ -33,7 +33,8 @@ void main() {
       final mgrFromSnapshot = SearchIndexManager(
         getSurahsUseCase: dummyGetSurahs,
         getSurahVersesUseCase: dummyGetVerses,
-        snapshotStore: store,
+  snapshotStore: store,
+  enablePrebuiltAsset: false,
       );
       await mgrFromSnapshot.ensureBuilt();
       expect(mgrFromSnapshot.isBuilt, isTrue);
@@ -45,7 +46,8 @@ void main() {
       final mgrBuilt = SearchIndexManager(
         getSurahsUseCase: dummyGetSurahs,
         getSurahVersesUseCase: dummyGetVerses,
-        snapshotStore: store,
+  snapshotStore: store,
+  enablePrebuiltAsset: false,
       );
       await mgrBuilt.ensureBuilt();
       expect(mgrBuilt.isBuilt, isTrue);

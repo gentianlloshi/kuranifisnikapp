@@ -24,7 +24,11 @@ class VerseActionRegistry extends ChangeNotifier {
   final List<VerseAction> _actions = [];
   List<VerseAction> actionsFor(BuildContext ctx, Verse v) => _actions.where((a) => a.visibleIf?.call(ctx, v) ?? true).toList(growable: false);
   void register(VerseAction action) { if (_actions.any((a) => a.id == action.id)) return; _actions.add(action); notifyListeners(); }
-  void registerAll(Iterable<VerseAction> acts) { for (final a in acts) register(a); }
+  void registerAll(Iterable<VerseAction> acts) {
+    for (final a in acts) {
+      register(a);
+    }
+  }
   void clear() { _actions.clear(); notifyListeners(); }
 }
 

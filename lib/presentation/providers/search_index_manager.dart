@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../../domain/entities/verse.dart';
@@ -43,6 +44,7 @@ class SearchIndexManager {
   // Computed corpus hash (lazy). Used to invalidate old snapshots when assets change.
   String? _cachedCorpusHash;
   final SnapshotStore _snapshotStore;
+  final bool _enablePrebuiltAsset;
 
   // Scoring weights (tunable)
   static const int _baseHitWeight = 10;
@@ -54,7 +56,40 @@ class SearchIndexManager {
     required this.getSurahsUseCase,
     required this.getSurahVersesUseCase,
     SnapshotStore? snapshotStore,
-  }) : _snapshotStore = snapshotStore ?? DefaultSnapshotStore(fileName: _snapshotFile);
+    bool enablePrebuiltAsset = true,
+  }) : _snapshotStore = snapshotStore ?? DefaultSnapshotStore(fileName: _snapshotFile),
+        _enablePrebuiltAsset = enablePrebuiltAsset;
+
+  Future<bool> _tryLoadPrebuiltAsset() async {
+    // Expect optional asset at assets/data/search_index.json containing keys: index, verses
+    try {
+      final jsonStr = await rootBundle.loadString('assets/data/search_index.json');
+      if (jsonStr.isEmpty) return false;
+      final obj = json.decode(jsonStr) as Map<String, dynamic>;
+      final idxMap = (obj['index'] as Map?)?.cast<String, dynamic>();
+      final versesMap = (obj['verses'] as Map?)?.cast<String, dynamic>();
+      if (idxMap == null || versesMap == null) return false;
+      _invertedIndex = idxMap.map((k, v) => MapEntry(k, (v as List).cast<String>()));
+      _verseCache.clear();
+      versesMap.forEach((k, v) {
+        final m = (v as Map).cast<String, dynamic>();
+        _verseCache[k] = Verse(
+          surahId: (m['surahNumber'] as num?)?.toInt() ?? m['surahId'] as int? ?? 0,
+          verseNumber: (m['number'] as num?)?.toInt() ?? m['verseNumber'] as int? ?? 0,
+          arabicText: (m['ar'] ?? '') as String,
+          translation: (m['t'] as String?) ?? m['translation'] as String?,
+          transliteration: (m['tr'] as String?) ?? m['transliteration'] as String?,
+          verseKey: (m['verseKey'] as String?) ?? k,
+          juz: (m['juz'] as num?)?.toInt(),
+        );
+      });
+      _nextSurahToIndex = 115; // mark as complete
+      _incrementalMode = false;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   /// Lightweight lookup for an already-cached verse by its key (e.g., "2:255").
   /// Returns null if the verse hasn't been indexed yet.
@@ -64,6 +99,13 @@ class SearchIndexManager {
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
     if (_invertedIndex != null) return;
     // Try fast-path load from snapshot
+    // 1) Prefer prebuilt asset if present and valid
+  if (_enablePrebuiltAsset && await _tryLoadPrebuiltAsset()) {
+      _emitProgress(1.0);
+      if (onProgress != null) onProgress(1.0);
+      return;
+    }
+    // 2) Try on-device snapshot
     if (await _tryLoadSnapshot()) {
   _emitProgress(1.0);
   if (onProgress != null) onProgress(1.0); // backward compatibility

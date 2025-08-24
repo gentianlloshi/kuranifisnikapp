@@ -61,9 +61,8 @@ class StartupScheduler {
   }
 
   void _phase4() {
-    // Light warmups (avoid heavy decoding if user inactive). Keep optional.
-    // For now we can just ensure word-by-word provider map structure if cheap.
-    // Intentionally minimal; real prewarm hooks can be added.
+  // Light warmups only; heavy Hive warmups removed (large assets now in-memory cached on demand).
+  // Keep hook here for future minor prewarms if needed.
   }
 
   void dispose() {

@@ -299,7 +299,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
               onPressed: provider.isLastQuestion
                   ? () async {
                       final result = await provider.finishQuiz();
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       _showQuizSummary(context, provider, result);
                     }
                   : provider.nextQuestion,

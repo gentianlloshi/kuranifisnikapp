@@ -5,10 +5,13 @@ import '../../core/i18n/app_localizations.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
+import '../providers/note_provider.dart';
 import '../../domain/entities/verse.dart';
+import '../../domain/entities/note.dart';
 import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import '../theme/theme.dart';
 import 'sheet_header.dart';
+import '../search/unified_ranking.dart';
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key});
@@ -352,6 +355,35 @@ class _SearchWidgetState extends State<SearchWidget> {
     quranProvider.searchVerses(query);
   }
 
+  // Show a modal with the full list of note hits
+  void _showAllNoteHits(List<Note> notes, String query) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return BottomSheetWrapper(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SheetHeader(title: 'Të gjitha shënimet e gjetura', leadingIcon: Icons.note),
+              SizedBox(
+                height: 420,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemBuilder: (_, i) => _NoteHitCard(note: notes[i], query: query),
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemCount: notes.length,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
   Widget _buildSearchResults(QuranProvider quranProvider, AppStateProvider appState) {
     // isSearching not implemented; rely on isLoading
     if (quranProvider.isLoading) {
@@ -384,7 +416,14 @@ class _SearchWidgetState extends State<SearchWidget> {
       );
     }
 
-    final searchResults = quranProvider.searchResults;
+  final searchResults = quranProvider.searchResults;
+  final noteProvider = context.read<NoteProvider>();
+  // Get a larger set for unified ranking and for the bottom-sheet "show all"
+  final allNoteHits = _searchController.text.trim().isNotEmpty
+    ? noteProvider.quickSearchNotes(_searchController.text.trim(), limit: 50)
+    : const <Note>[];
+  // Keep a small preview strip (legacy UI) while also computing unified top picks
+  final noteHitsPreview = allNoteHits.length > 5 ? allNoteHits.sublist(0, 5) : allNoteHits;
     
     if (_searchController.text.trim().isEmpty) {
       return const Center(
@@ -418,11 +457,76 @@ class _SearchWidgetState extends State<SearchWidget> {
       );
     }
 
+  // Build unified top results (combined verse + note) limited to 5 items
+  final unifiedTop = computeUnifiedTop(
+      verses: searchResults.length > 50 ? searchResults.sublist(0, 50) : searchResults,
+      notes: allNoteHits,
+      query: _searchController.text.trim(),
+      limit: 5,
+    );
     final count = searchResults.length;
     final label = count == 1 ? 'U gjet 1 rezultat' : 'U gjetën $count rezultate';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (unifiedTop.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                const Icon(Icons.star, size: 16),
+                const SizedBox(width: 6),
+                Text('Top rezultate (të kombinuara)', style: Theme.of(context).textTheme.labelMedium),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          ...unifiedTop.map((it) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: it.note != null
+                    ? _NoteHitCard(note: it.note!, query: _searchController.text.trim())
+                    : SearchResultItem(
+                        verse: it.verse!,
+                        searchQuery: _searchController.text,
+                        settings: appState.settings,
+                      ),
+              )),
+          const SizedBox(height: 8),
+        ],
+  // Only show the horizontal strip if unifiedTop doesn't already include a note
+  if (noteHitsPreview.isNotEmpty && unifiedTop.every((it) => it.note == null)) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                const Icon(Icons.note, size: 16),
+                const SizedBox(width: 6),
+                Text('Shënime të gjetura (${allNoteHits.length})', style: Theme.of(context).textTheme.labelMedium),
+                const Spacer(),
+                if (allNoteHits.length > noteHitsPreview.length)
+                  TextButton(
+                    onPressed: () => _showAllNoteHits(allNoteHits, _searchController.text.trim()),
+                    child: const Text('Shfaq të gjitha'),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemBuilder: (_, i) {
+                final n = noteHitsPreview[i];
+                return _NoteHitCard(note: n, query: _searchController.text.trim());
+              },
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemCount: noteHitsPreview.length,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: Text(
@@ -533,11 +637,13 @@ class _SearchResultItemState extends State<SearchResultItem> {
                         color: isMarked ? theme.colorScheme.primary : theme.iconTheme.color,
                         tooltip: isMarked ? 'Hiq nga favoritët' : 'Shto në favoritë',
                         onPressed: () async {
+                          final wasMarked = isMarked;
                           await bookmarkProvider.toggleBookmark(key);
+                          if (!context.mounted) return;
                           final locale = Localizations.localeOf(context);
                           final strings = Strings(Strings.resolve(locale));
                           context.read<AppStateProvider>().enqueueSnack(
-                            isMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added'),
+                            wasMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added'),
                             duration: const Duration(seconds: 2),
                           );
                         },
@@ -842,6 +948,153 @@ class _ProfilingRichText extends StatelessWidget {
     return Semantics(
       label: 'Tekst me theksim të rezultateve',
       child: RichText(text: span),
+    );
+  }
+}
+
+class _NoteHitCard extends StatelessWidget {
+  final Note note;
+  final String query;
+  const _NoteHitCard({required this.note, required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final parts = note.verseKey.split(':');
+    final ref = parts.length == 2 ? '${parts[0]}:${parts[1]}' : note.verseKey;
+    return InkWell(
+      onTap: () {
+        final s = int.tryParse(parts.isNotEmpty ? parts[0] : '') ?? 1;
+        final v = int.tryParse(parts.length > 1 ? parts[1] : '') ?? 1;
+        context.read<QuranProvider>().openSurahAtVerse(s, v);
+        final controller = DefaultTabController.maybeOf(context);
+        controller?.animateTo(0);
+      },
+      child: Container(
+        width: 280,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceElevated(1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.note, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  'Ajeti: $ref',
+                  style: theme.textTheme.labelSmall,
+                ),
+                const Spacer(),
+                Text(
+                  _formatDate(note.updatedAt),
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.hintColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: _HighlightedSnippet(text: note.content, query: query),
+            ),
+            if (note.tags.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 26,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (_, i) => Chip(label: Text(note.tags[i]), visualDensity: VisualDensity.compact, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  separatorBuilder: (_, __) => const SizedBox(width: 4),
+                  itemCount: note.tags.length,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _formatDate(DateTime dt) {
+    return '${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _HighlightedSnippet extends StatelessWidget {
+  final String text;
+  final String query;
+  const _HighlightedSnippet({required this.text, required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (query.isEmpty) return Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyMedium);
+    String norm(String s) {
+      s = s.toLowerCase();
+      s = s.replaceAll('ç', 'c').replaceAll('ë', 'e');
+      const mapping = {
+        'á':'a','à':'a','ä':'a','â':'a','ã':'a','å':'a','ā':'a','ă':'a','ą':'a',
+        'é':'e','è':'e','ë':'e','ê':'e','ě':'e','ē':'e','ę':'e','ė':'e',
+        'í':'i','ì':'i','ï':'i','î':'i','ī':'i','į':'i','ı':'i',
+        'ó':'o','ò':'o','ö':'o','ô':'o','õ':'o','ø':'o','ō':'o','ő':'o',
+        'ú':'u','ù':'u','ü':'u','û':'u','ū':'u','ů':'u','ű':'u','ť':'t','š':'s','ž':'z','ñ':'n'
+      };
+      final sb = StringBuffer();
+      for (final ch in s.split('')) { sb.write(mapping[ch] ?? ch); }
+      return sb.toString();
+    }
+    final base = theme.textTheme.bodyMedium;
+    final tn = norm(text);
+    final qTokens = query
+        .split(RegExp(r"[^\p{L}\p{N}]+", unicode: true))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .map(norm)
+        .toSet();
+    final intervals = <List<int>>[];
+    for (final tok in qTokens) {
+      int start = 0;
+      while (true) {
+        final i = tn.indexOf(tok, start);
+        if (i == -1) break;
+        intervals.add([i, i + tok.length]);
+        start = i + tok.length;
+      }
+    }
+    if (intervals.isEmpty) return Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: base);
+    intervals.sort((a, b) => a[0].compareTo(b[0]));
+    final merged = <List<int>>[];
+    for (final iv in intervals) {
+      if (merged.isEmpty || iv[0] > merged.last[1]) { merged.add([iv[0], iv[1]]); }
+      else if (iv[1] > merged.last[1]) { merged.last[1] = iv[1]; }
+    }
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final iv in merged) {
+      final a = iv[0], b = iv[1];
+      if (a > cursor) spans.add(TextSpan(text: text.substring(cursor, a), style: base));
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(text.substring(a, b), style: base?.copyWith(fontWeight: FontWeight.w700, height: 1.2, color: theme.colorScheme.onSecondaryContainer)),
+        ),
+      ));
+      cursor = b;
+    }
+    if (cursor < text.length) spans.add(TextSpan(text: text.substring(cursor), style: base));
+    return RichText(
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(children: spans),
     );
   }
 }

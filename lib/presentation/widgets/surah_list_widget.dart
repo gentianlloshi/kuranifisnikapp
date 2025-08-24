@@ -172,6 +172,7 @@ class SurahListWidget extends StatelessWidget {
   Future<void> _playSingleSurah(BuildContext context, SurahMeta surah) async {
     final provider = context.read<QuranProvider>();
     await provider.ensureSurahLoaded(surah.number);
+  if (!context.mounted) return;
     final wbw = context.read<WordByWordProvider>();
     final verses = provider.fullCurrentSurahVerses; // full surah verses
     if (verses.isEmpty) return;
@@ -184,6 +185,7 @@ class SurahListWidget extends StatelessWidget {
     final first = selected.first;
     final surah = q.surahs.firstWhere((s) => s.number == first, orElse: () => q.surahs.first);
     await _playSingleSurah(context, surah);
+  if (!context.mounted) return;
   context.read<AppStateProvider>().enqueueSnack('Luajti ${selected.length} sure (multi playlist TODO)');
     context.read<SurahSelectionProvider>().clear();
   }

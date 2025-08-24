@@ -33,7 +33,9 @@ class MemorizationProvider extends ChangeNotifier {
 
   List<int> get groupedSurahs {
     final set = <int>{};
-    for (final v in _verses.values) set.add(v.surah);
+    for (final v in _verses.values) {
+      set.add(v.surah);
+    }
     final list = set.toList()..sort();
     return list;
   }

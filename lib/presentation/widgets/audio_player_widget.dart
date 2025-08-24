@@ -71,9 +71,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                audioProvider.formatDuration(audioProvider.currentPosition) + 
-                ' / ' + 
-                (audioProvider.currentDuration != null ? audioProvider.formatDuration(audioProvider.currentDuration!) : '--:--'),
+                '${audioProvider.formatDuration(audioProvider.currentPosition)} / '
+                '${audioProvider.currentDuration != null ? audioProvider.formatDuration(audioProvider.currentDuration!) : '--:--'}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -283,13 +282,17 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               });
               try {
                 await audioProvider.downloadVerseAudio(currentVerse, (progress) {
+                  if (!context.mounted) return;
                   setState(() {
                     _downloadProgress = progress;
                   });
                 });
+                if (!context.mounted) return;
                 context.read<AppStateProvider>().enqueueSnack('Audio u shkarkua me sukses!');
               } catch (e) {
-                context.read<AppStateProvider>().enqueueSnack('Gabim gjatë shkarkimit: $e');
+                if (context.mounted) {
+                  context.read<AppStateProvider>().enqueueSnack('Gabim gjatë shkarkimit: $e');
+                }
               } finally {
                 setState(() {
                   _isDownloading = false;

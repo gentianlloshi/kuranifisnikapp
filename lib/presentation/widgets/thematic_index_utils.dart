@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 /// Map a human-readable thematic category label to a representative icon.
 IconData iconForThemeLabel(String label) {
   final l = label.toLowerCase();
-  if (l.contains('zot') || l.contains('allah') || l.contains('besim')) return Icons.auto_awesome;
-  if (l.contains('njeri') || l.contains('moral') || l.contains('sjellje')) return Icons.people_alt_outlined;
-  if (l.contains('famil') || l.contains('martes') || l.contains('prind')) return Icons.family_restroom;
-  if (l.contains('ekonomi') || l.contains('tregt') || l.contains('pasur')) return Icons.attach_money;
-  if (l.contains('ligj') || l.contains('urdh') || l.contains('ndal')) return Icons.gavel;
-  if (l.contains('histor') || l.contains('pejgamber') || l.contains('profet')) return Icons.menu_book_outlined;
-  if (l.contains('namaz') || l.contains('falje') || l.contains('adhu')) return Icons.self_improvement;
-  if (l.contains('durim') || l.contains('sprov') || l.contains('dhemb')) return Icons.favorite_border;
-  if (l.contains('dit') && l.contains('gjykim')) return Icons.balance_outlined;
+  if (l.contains('zot') || l.contains('allah') || l.contains('besim') || l.contains('teuhe')) return Icons.auto_awesome;
+  if (l.contains('njeri') || l.contains('moral') || l.contains('sjellje') || l.contains('etik')) return Icons.people_alt_outlined;
+  if (l.contains('famil') || l.contains('martes') || l.contains('prind') || l.contains('grua') || l.contains('fëmij')) return Icons.family_restroom;
+  if (l.contains('ekonomi') || l.contains('tregt') || l.contains('pasur') || l.contains('zakat') || l.contains('sadak')) return Icons.attach_money;
+  if (l.contains('ligj') || l.contains('urdh') || l.contains('ndal') || l.contains('fiqh') || l.contains('hallall') || l.contains('haram')) return Icons.gavel;
+  if (l.contains('histor') || l.contains('pejgamber') || l.contains('profet') || l.contains('popuj')) return Icons.menu_book_outlined;
+  if (l.contains('namaz') || l.contains('falje') || l.contains('adhu') || l.contains('ibadet') || l.contains('lutj')) return Icons.self_improvement;
+  if (l.contains('durim') || l.contains('sprov') || l.contains('dhemb') || l.contains('falje') || l.contains('mëshir')) return Icons.favorite_border;
+  if ((l.contains('dit') && l.contains('gjykim')) || l.contains('ahiret') || l.contains('xhenet') || l.contains('xhehennem')) return Icons.balance_outlined;
   return Icons.category;
 }
 

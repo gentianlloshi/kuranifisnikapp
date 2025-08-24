@@ -18,6 +18,10 @@ This update focuses on Thematic Index UX and Memorization features.
 - Tests
    - Added unit tests for icon mapping and range preview utilities.
 
+- Performance
+   - StartupScheduler: shtuar hapje të vonuara/staggered për kutitë jo-kritike Hive në fazën 4 (+100ms, +280ms, +480ms, +660ms) për të ulur burst‑et I/O në fije kryesore.
+   - DevTools/Timings: aktiv PerformanceMonitor me `addTimingsCallback` për të loguar korniza >32ms; plan profilizimi: krahasim para/pas me Cold Start dhe navigim në Search/Memorization.
+
 # Raport Teknik: Vlerësim i Projektit "Kurani Fisnik"
 
 ## Tabela e Përmbajtjes

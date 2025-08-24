@@ -291,8 +291,9 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
         final cont = await _showVersionDialog(bundle.version);
         if (!cont) { setState(()=>_loading=false); return; }
       }
-      final diff = await _importService.dryRunDiff(bundle);
-      setState(() { _diff = diff; });
+  final diff = await _importService.dryRunDiff(bundle);
+  if (!mounted) return;
+  setState(() { _diff = diff; });
     } catch (e) {
       setState(() { _error = 'Analiza dështoi: $e'; });
     } finally { setState(() { _loading = false; }); }
@@ -303,7 +304,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
     final proceed = await _confirmApply();
     if (!proceed) return;
     setState(() { _loading = true; _error = null; _applyResult = null; });
-    try {
+  try {
       final bundle = await _importService.parse(_importRaw);
       final options = DataImportOptions(
   overwriteSettings: _settings && !_settingsMerge,
@@ -313,8 +314,10 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
         importReadingProgress: _readingProgress,
         noteConflictResolutions: Map.of(_conflictResolutions),
       );
-      final res = await _importService.applyImport(bundle: bundle, options: options, precomputedDiff: _diff);
-      setState(() { _applyResult = res; });
+  final res = await _importService.applyImport(bundle: bundle, options: options, precomputedDiff: _diff);
+  if (!mounted) return;
+  setState(() { _applyResult = res; });
+  if (!context.mounted) return;
   context.read<AppStateProvider>().enqueueSnack('Importi u aplikua');
     } catch (e) {
       setState(() { _error = 'Aplikimi dështoi: $e'; });
@@ -329,10 +332,10 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
       switch (p.phase) {
         case 'init': return p.message ?? 'Përgatitje…';
         case 'settings': return p.message ?? 'Po aplikohen cilësimet…';
-        case 'bookmarks': return 'Favoritet (${p.current}/${p.total})';
-        case 'notes': return 'Shënimet (${p.current}/${p.total})';
+  case 'bookmarks': return 'Favoritet (${p.current}/${p.total})';
+  case 'notes': return 'Shënimet (${p.current}/${p.total})';
         case 'memorization': return p.message ?? 'Memorizimi…';
-        case 'readingProgress': return 'Progresi Leximit (${p.current}/${p.total})';
+  case 'readingProgress': return 'Progresi Leximit (${p.current}/${p.total})';
         case 'done': return p.message ?? 'Përfundoi';
         case 'canceled': return 'U anulua';
         default: return p.message ?? p.phase;
@@ -490,9 +493,9 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
                               children: [
                                 Text('Note ID: $id', style: const TextStyle(fontWeight: FontWeight.bold)),
                                 const SizedBox(height:4),
-                                Text('Lokale: '+ (nc.local['content']??'').toString(), maxLines:3, overflow: TextOverflow.ellipsis),
+                                Text('Lokale: ${(nc.local['content']??'').toString()}', maxLines:3, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height:4),
-                                Text('Import: '+ (nc.imported['content']??'').toString(), maxLines:3, overflow: TextOverflow.ellipsis),
+                                Text('Import: ${(nc.imported['content']??'').toString()}', maxLines:3, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height:6),
                                 Row(children:[
                                   Expanded(child: OutlinedButton(

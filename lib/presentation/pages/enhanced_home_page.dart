@@ -445,8 +445,8 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
 class _QuranOverflowMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      onSelected: (value) async {
+  return PopupMenuButton<String>(
+  onSelected: (value) async {
         if (value == 'resume') {
           final audio = context.read<AudioProvider>();
           final quran = context.read<QuranProvider>();
@@ -459,10 +459,11 @@ class _QuranOverflowMenu extends StatelessWidget {
             }
           } catch (_) {}
           if (resume == null) {
-            context.read<AppStateProvider>().enqueueSnack('Asnjë pikë leximi e fundit.');
+    if (!context.mounted) return;
+    context.read<AppStateProvider>().enqueueSnack('Asnjë pikë leximi e fundit.');
             return;
           }
-          await quran.ensureSurahLoaded(resume.surah);
+      await quran.ensureSurahLoaded(resume.surah);
           final verse = quran.findVerse(resume.surah, resume.verse) ?? Verse(
             surahId: resume.surah,
             verseNumber: resume.verse,
@@ -471,11 +472,15 @@ class _QuranOverflowMenu extends StatelessWidget {
             transliteration: null,
             verseKey: '${resume.surah}:${resume.verse}',
           );
-          await audio.playVerse(verse);
+      if (!context.mounted) return;
+      await audio.playVerse(verse);
         }
       },
       itemBuilder: (ctx) => const [
-        PopupMenuItem(value: 'resume', child: Text('Vazhdo nga leximi i fundit')),
+        PopupMenuItem(
+          value: 'resume',
+          child: Text('Vazhdo nga leximi i fundit'),
+        ),
       ],
     );
   }

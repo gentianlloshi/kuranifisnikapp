@@ -170,11 +170,12 @@ class _FullPlayerCore extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Semantics(
-                  label: 'A deri B aktiv nga ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} deri ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}' + (audio.remainingABLoops != null ? ', mbetur ${audio.remainingABLoops} herë' : ''),
+                  label: 'A deri B aktiv nga ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} deri ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}'
+                      '${audio.remainingABLoops != null ? ', mbetur ${audio.remainingABLoops} herë' : ''}',
                   child: InputChip(
                   label: Text(
-                    'A-B: ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} → ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}' +
-                    (audio.remainingABLoops != null ? ' ×${audio.remainingABLoops}' : ''),
+                    'A-B: ${audio.loopStartVerse!.surahNumber}:${audio.loopStartVerse!.number} → ${audio.loopEndVerse!.surahNumber}:${audio.loopEndVerse!.number}'
+                    '${audio.remainingABLoops != null ? ' ×${audio.remainingABLoops}' : ''}',
                   ),
                   avatar: const Icon(Icons.loop, size: 18),
                   onDeleted: audio.disableABLoop,

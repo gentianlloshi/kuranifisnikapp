@@ -326,7 +326,8 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
             alignment = 0.08;
           }
         }
-        await Scrollable.ensureVisible(
+  if (!context.mounted) return;
+  await Scrollable.ensureVisible(
           ctx,
           duration: const Duration(milliseconds: 420),
           alignment: alignment,

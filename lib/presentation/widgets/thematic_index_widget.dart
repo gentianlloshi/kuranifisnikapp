@@ -166,14 +166,20 @@ class _ThemeNodeCard extends StatelessWidget {
                 ),
               )
             else
-              SizedBox(
-                height: (MediaQuery.of(context).size.height * 0.4).clamp(200.0, 500.0),
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: node.children.length,
-                  itemBuilder: (ctx, i) => _ThemeSubthemeTile(subNode: node.children[i]),
-                ),
-              ),
+              Builder(builder: (context) {
+                final q = provider.searchQuery.trim().toLowerCase();
+                final children = q.isEmpty
+                    ? node.children
+                    : node.children.where((c) => c.label.toLowerCase().contains(q)).toList();
+                return SizedBox(
+                  height: (MediaQuery.of(context).size.height * 0.4).clamp(200.0, 500.0),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: children.length,
+                    itemBuilder: (ctx, i) => _ThemeSubthemeTile(subNode: children[i]),
+                  ),
+                );
+              }),
           ],
         ],
       ),

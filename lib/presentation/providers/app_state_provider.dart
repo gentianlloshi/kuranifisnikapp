@@ -52,11 +52,10 @@ class AppStateProvider extends ChangeNotifier {
   bool get searchRankingBm25Lite => _settings.searchRankingBm25Lite;
 
   Future<void> _loadSettings() async {
-    if (_getSettingsUseCase == null) return; // Skip loading if no use case
-
     try {
       final getter = _getSettingsUseCase;
-      final loadedSettings = await getter!.call();
+      if (getter == null) return;
+      final loadedSettings = await getter.call();
       if (loadedSettings != null) {
         _settings = loadedSettings;
         notifyListeners();

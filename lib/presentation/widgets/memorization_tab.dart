@@ -24,6 +24,9 @@ class MemorizationTab extends StatefulWidget {
 class _MemorizationTabState extends State<MemorizationTab> {
   bool _initialized = false;
   final ScrollController _scrollController = ScrollController();
+  // Quick filters (local UI state)
+  MemorizationStatus? _statusFilter; // null => All
+  bool _onlySelected = false;
   int? _requestedArabicSurah; // MEMO-3: avoid redundant surah loads for Arabic text
 
   // reserved for future audio binding (auto-scroll listener)
@@ -93,19 +96,49 @@ class _MemorizationTabState extends State<MemorizationTab> {
               ),
             SliverPersistentHeader(
               pinned: true,
-              delegate: _StickyHeaderDelegate(child: _buildHeader(context, mem), minExtent: 140, maxExtent: 180),
+              delegate: _StickyHeaderDelegate(child: _buildHeader(context, mem), minExtent: 130, maxExtent: 190),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (ctx, index) {
-                  final verses = mem.versesForActiveSurah();
-                  if (index >= verses.length) return null;
-                  final mv = verses[index];
-                  return _buildVerseTile(context, mem, mv);
-                },
-                childCount: mem.versesForActiveSurah().length,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: context.spaceMd, vertical: context.spaceSm),
+                child: _buildStatsRow(context, mem),
               ),
             ),
+            // Filters row (not pinned) to avoid header overflows on small screens
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(left: context.spaceMd, right: context.spaceMd, top: context.spaceSm, bottom: context.spaceSm),
+                child: _buildFiltersRow(mem),
+              ),
+            ),
+            ...() {
+              final filtered = _filteredVerses(mem);
+              return [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (ctx, index) {
+                      if (index >= filtered.length) return null;
+                      final mv = filtered[index];
+                      return _buildVerseTile(context, mem, mv);
+                    },
+                    childCount: filtered.length,
+                  ),
+                ),
+                if (filtered.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(context.spaceXl),
+                      child: Center(
+                        child: Text(
+                          mem.versesForActiveSurah().isEmpty
+                              ? 'Nuk ka ajete të zgjedhura për këtë sure.'
+                              : 'Asnjë ajet nuk përputhet me filtrat.',
+                        ),
+                      ),
+                    ),
+                  ),
+              ];
+            }(),
             if (mem.versesForActiveSurah().isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
@@ -138,7 +171,6 @@ class _MemorizationTabState extends State<MemorizationTab> {
   }
 
   Widget _buildHeader(BuildContext context, MemorizationProvider mem) {
-    final global = mem.globalStatusCounts();
     final active = mem.statusCountsForActive();
     final activeSurah = mem.activeSurah;
   final repeat = mem.session?.repeatTarget ?? 1;
@@ -167,28 +199,16 @@ class _MemorizationTabState extends State<MemorizationTab> {
             if (activeSurah != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
-                child: Text('Sure $activeSurah  •  ${active['new']} të reja  •  ${active['inProgress']} në progres  •  ${active['mastered']} të mësuara',
-                    style: Theme.of(context).textTheme.bodySmall),
+                child: Text(
+                  'Sure $activeSurah  •  ${active['new']} të reja  •  ${active['inProgress']} në progres  •  ${active['mastered']} të mësuara',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
-            SizedBox(height: context.spaceSm),
+            SizedBox(height: context.spaceXs),
             Row(
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _StatChip(label: 'Totale', value: global.values.fold<int>(0, (a, b) => a + b)),
-                        SizedBox(width: context.spaceSm),
-                        _StatChip(label: 'Të mësuara', value: global['mastered'] ?? 0, color: Colors.green),
-                        SizedBox(width: context.spaceSm),
-                        _StatChip(label: 'Në progres', value: global['inProgress'] ?? 0, color: Colors.orange),
-                        SizedBox(width: context.spaceSm),
-                        _StatChip(label: 'Të reja', value: global['new'] ?? 0, color: Colors.blueGrey),
-                      ],
-                    ),
-                  ),
-                ),
                 // Repeat control (stepper)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -232,10 +252,81 @@ class _MemorizationTabState extends State<MemorizationTab> {
                 ),
               ],
             ),
+            // Filters moved out of pinned header
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildStatsRow(BuildContext context, MemorizationProvider mem) {
+    final global = mem.globalStatusCounts();
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _StatChip(label: 'Totale', value: global.values.fold<int>(0, (a, b) => a + b)),
+          SizedBox(width: context.spaceSm),
+          _StatChip(label: 'Të mësuara', value: global['mastered'] ?? 0, color: Colors.green),
+          SizedBox(width: context.spaceSm),
+          _StatChip(label: 'Në progres', value: global['inProgress'] ?? 0, color: Colors.orange),
+          SizedBox(width: context.spaceSm),
+          _StatChip(label: 'Të reja', value: global['new'] ?? 0, color: Colors.blueGrey),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFiltersRow(MemorizationProvider mem) {
+    final active = mem.statusCountsForActive();
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          FilterChip(
+            label: const Text('Të gjitha'),
+            selected: _statusFilter == null && !_onlySelected,
+            onSelected: (_) => setState(() { _statusFilter = null; _onlySelected = false; }),
+          ),
+          SizedBox(width: context.spaceSm),
+          FilterChip(
+            label: Text('Të reja (${active['new'] ?? 0})'),
+            selected: _statusFilter == MemorizationStatus.newVerse,
+            onSelected: (_) => setState(() { _statusFilter = MemorizationStatus.newVerse; }),
+          ),
+          SizedBox(width: context.spaceSm),
+          FilterChip(
+            label: Text('Në progres (${active['inProgress'] ?? 0})'),
+            selected: _statusFilter == MemorizationStatus.inProgress,
+            onSelected: (_) => setState(() { _statusFilter = MemorizationStatus.inProgress; }),
+          ),
+          SizedBox(width: context.spaceSm),
+          FilterChip(
+            label: Text('Të mësuara (${active['mastered'] ?? 0})'),
+            selected: _statusFilter == MemorizationStatus.mastered,
+            onSelected: (_) => setState(() { _statusFilter = MemorizationStatus.mastered; }),
+          ),
+          SizedBox(width: context.spaceSm),
+          FilterChip(
+            label: const Text('Vetëm të përzgjedhura'),
+            selected: _onlySelected,
+            onSelected: (sel) => setState(() { _onlySelected = sel; if (sel) _statusFilter = null; }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<MemorizationVerse> _filteredVerses(MemorizationProvider mem) {
+    var list = mem.versesForActiveSurah();
+    if (_statusFilter != null) {
+      list = list.where((v) => v.status == _statusFilter).toList();
+    }
+    if (_onlySelected && mem.session != null) {
+      final keys = mem.session!.selectedVerseKeys;
+      list = list.where((v) => keys.contains(v.key)).toList();
+    }
+    return list;
   }
 
   Future<void> _playSession(BuildContext context, MemorizationProvider mem) async {

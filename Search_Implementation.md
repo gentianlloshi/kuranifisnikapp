@@ -360,3 +360,31 @@ Phase behind debug flag `enableSearchIndexPersistence` for first release; collec
 ---
 End Section 22.
 
+## 23. Profiling Playbook (Cold Start & Search)
+
+This section captures how to verify performance characteristics locally and what “good” looks like after moving to the prebuilt asset index and removing heavy Hive startup.
+
+Targets (typical mid‑range Android):
+- Cold app start to first interactive frame: < 1.2 s visual; no >250 ms jank on main thread
+- Search readiness (index available): instant via asset load (< 50 ms to hydrate)
+- First query time (warm): < 30 ms median; < 80 ms p95
+- Skipped frames in first 2 seconds: ideally < 10 total
+
+How to measure:
+1) Enable Performance Overlay (already wired via DevPerfOverlay in debug). Observe frame bars on cold start; look for tall red bars (>16 ms). Count skipped frames in the first 2 seconds.
+2) Run Flutter DevTools (Performance tab):
+   - Record from app launch to first search.
+   - Verify absence of large asset/Hive I/O blocks on main isolate.
+   - Confirm SearchIndexManager emits progress immediately to 100% when asset index is present.
+3) Micro-benchmark query:
+   - In the Search screen, issue 10 representative queries (e.g., “rahmet”, “Fatiha”, “Allahu i mëshirshëm”).
+   - Check PerfMetrics logs for highlight build and query durations; median should be < 20 ms.
+
+Before vs After (expected):
+- Before: heavy Hive opens (8–9 s cumulative) and many skipped frames (>200) during early init.
+- After: no heavy box opens for static data; search index loaded from assets; skipped frames near zero during idle cold start.
+
+Troubleshooting:
+- If index progress stays below 1.0 on cold start, ensure assets/data/search_index.json exists in the bundle and pubspec includes assets/data/.
+- If query latency spikes, check for debug-mode overhead (hot reload active). Try profile mode.
+

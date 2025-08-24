@@ -195,9 +195,9 @@ class QuranProvider extends ChangeNotifier {
     }
     if (_indexManager != null) {
       // Kick incremental build if not started yet (returns immediately) – user-driven start.
-      final mgr = _indexManager; // promote for null-safe access
+  final mgr = _indexManager; // promote for null-safe access
   final wasIdle = !(mgr.isBuilding) && indexProgress <= 0.0;
-  mgr.ensureBuilt();
+  mgr.ensureIncrementalBuild();
       if (wasIdle && !_userTriggeredIndexOnce) {
         _userTriggeredIndexOnce = true;
         Logger.i('Index build triggered by user search input', tag: 'SearchIndex');
@@ -214,10 +214,10 @@ class QuranProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-  if (_searchVersesUseCase != null) {
+    if (_searchVersesUseCase != null) {
       _setLoading(true);
       try {
-        final uc = _searchVersesUseCase!; // promote (non-null by guard)
+        final uc = _searchVersesUseCase!;
         _searchResults = await uc.call(query);
         _error = null;
       } catch (e) {
@@ -240,7 +240,12 @@ class QuranProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       if (_prefetchCache.containsKey(surahId)) {
-        _allCurrentSurahVerses = _prefetchCache.remove(surahId)!;
+        final cached = _prefetchCache.remove(surahId);
+        if (cached != null) {
+          _allCurrentSurahVerses = cached;
+        } else {
+          _allCurrentSurahVerses = [];
+        }
       } else {
   final uc = _getSurahVersesUseCase; if (uc == null) { _allCurrentSurahVerses = []; } else { _allCurrentSurahVerses = await uc.call(surahId); }
       }
@@ -252,7 +257,8 @@ class QuranProvider extends ChangeNotifier {
         // Fire-and-forget enrichment: translation then transliteration.
         Future(() async {
           try {
-            final repo = _quranRepository; if (repo != null && !repo.isSurahFullyEnriched(surahId)) {
+            final repo = _quranRepository!;
+            if (!repo.isSurahFullyEnriched(surahId)) {
               await repo.ensureSurahTranslation(surahId);
               await repo.ensureSurahTransliteration(surahId);
               Logger.d('Surah $surahId enriched on-demand', tag: 'LazySurah');
@@ -262,9 +268,10 @@ class QuranProvider extends ChangeNotifier {
           }
         });
       }
-      _currentSurahId = surahId;
-      // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
-  if (_currentSurah == null || _currentSurah!.number != surahId) {
+  _currentSurahId = surahId;
+  // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
+  final currentNumber = _currentSurah?.number;
+  if (_currentSurah == null || currentNumber != surahId) {
         _currentSurah = Surah(
           id: surahId,
           number: surahId,
@@ -275,7 +282,7 @@ class QuranProvider extends ChangeNotifier {
           versesCount: _allCurrentSurahVerses.length,
           verses: const [],
         );
-      }
+  }
       _loadedVerseCount = 0;
       _pagedVerses = [];
       _appendMoreVerses();
@@ -458,7 +465,7 @@ class QuranProvider extends ChangeNotifier {
 
   // Public explicit trigger for incremental index build (phase scheduler & early user actions)
   void ensureIndexBuild() {
-  _indexManager?.ensureBuilt();
+  _indexManager?.ensureIncrementalBuild();
   }
 
   // Ensure verses for a surah are loaded; if different surah from current, switches context.
