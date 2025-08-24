@@ -42,7 +42,7 @@ class AudioService {
   String? _preferredReciter; // user selected preferred reciter (folder name)
   bool _isAdvancing = false; // legacy guard (no longer needed with currentIndexStream) – will be removed after validation
   final Set<String> _prefetchedUrls = <String>{}; // remember prefetched remote URLs
-  ConcatenatingAudioSource? _playlistSource; // active playlist audio source
+  bool _isPlaylistMode = false; // active when a playlist is loaded
 
   // Word sync optimization state
   int _wordPtr = 0; // current pointer into _currentWordTimestamps (monotonic advance during playback)
@@ -134,7 +134,7 @@ class AudioService {
 
       // Rely on just_audio's internal advancement. For single verse playback we'll still observe completion -> stopped state.
       _audioPlayer.processingStateStream.listen((processingState) {
-        if (processingState == ProcessingState.completed && _playlistSource == null) {
+        if (processingState == ProcessingState.completed && !_isPlaylistMode) {
           // Single verse ended
           stop();
         }
@@ -149,6 +149,7 @@ class AudioService {
   Future<void> playVerse(Verse verse, {List<WordTimestamp>? wordTimestamps}) async {
     try {
       _setState(AudioState.loading);
+  _isPlaylistMode = false;
   _singleVerseLoop = false; // reset per new verse
       _currentVerse = verse;
       _currentVerseController.add(verse);
@@ -205,7 +206,7 @@ class AudioService {
     _currentPlaylist = verses;
     _currentIndex = startIndex.clamp(0, verses.length - 1);
     _allSurahTimestamps = allTimestamps;
-    _playlistSource?.clear();
+  _isPlaylistMode = true;
     // Build sources (prefer local cached files if present / prefetch flag)
     final children = <AudioSource>[];
     for (final v in verses) {
@@ -219,9 +220,7 @@ class AudioService {
   if (path != null) { PerfMetrics.instance.incAudioCacheHit(); }
       children.add(AudioSource.uri(effective));
     }
-    final source = ConcatenatingAudioSource(children: children);
-    _playlistSource = source;
-    await _audioPlayer.setAudioSource(source, initialIndex: _currentIndex);
+  await _audioPlayer.setAudioSources(children, initialIndex: _currentIndex);
     // Pre-initialize current verse + timestamps before playback starts so UI can highlight immediately
     if (_currentPlaylist.isNotEmpty) {
       final initialVerse = _currentPlaylist[_currentIndex];
@@ -249,7 +248,7 @@ class AudioService {
   // Seek to a verse inside the current playlist by matching verse identity.
   // Returns true if the verse was found and seek performed. If [autoPlay] is true, resumes playback after seek.
   Future<bool> seekToVerseInPlaylist(Verse target, {bool autoPlay = true}) async {
-    if (_playlistSource == null || _currentPlaylist.isEmpty) return false;
+  if (!_isPlaylistMode || _currentPlaylist.isEmpty) return false;
     // Prefer matching by verseKey when present; fallback to surahId+verseNumber
     final String? key = target.verseKey;
     final int surah = target.surahId ?? target.surahNumber;
@@ -307,6 +306,7 @@ class AudioService {
   _allSurahTimestamps = {};
       _currentWordIndexController.add(null); // Clear word index on stop
   _singleVerseLoop = false;
+  _isPlaylistMode = false;
       _setState(AudioState.stopped);
     } catch (e) {
       _log('Error stopping audio: $e');
@@ -323,13 +323,13 @@ class AudioService {
   }
 
   Future<void> playNext() async {
-    if (_playlistSource != null) {
+  if (_isPlaylistMode) {
       try { await _audioPlayer.seekToNext(); } catch (_) {}
     }
   }
 
   Future<void> playPrevious() async {
-    if (_playlistSource != null) {
+  if (_isPlaylistMode) {
       try { await _audioPlayer.seekToPrevious(); } catch (_) {}
     }
   }
@@ -341,7 +341,7 @@ class AudioService {
 
   Future<void> setSingleVerseLoop(bool enable) async {
     _singleVerseLoop = enable;
-    if (_playlistSource != null) return; // only for single verse mode
+  if (_isPlaylistMode) return; // only for single verse mode
     await _audioPlayer.setLoopMode(enable ? LoopMode.one : LoopMode.off);
   }
 
