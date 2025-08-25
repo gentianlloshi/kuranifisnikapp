@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/hive_boxes.dart';
-import 'package:path/path.dart' as p;
 import 'dart:io';
 import 'package:kurani_fisnik_app/presentation/providers/memorization_provider.dart';
 import 'package:kurani_fisnik_app/domain/entities/memorization_verse.dart';

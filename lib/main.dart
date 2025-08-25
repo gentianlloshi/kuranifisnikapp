@@ -64,23 +64,23 @@ import 'package:kurani_fisnik_app/presentation/widgets/dev_perf_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final _startupSw = Stopwatch()..start();
+  final startupSw = Stopwatch()..start();
   Logger.configure();
   Logger.i('Startup: begin', tag: 'Startup');
 
   // Initialize Hive
   await Hive.initFlutter();
 
-  Future<Box> _openTimed(String name) async {
+  Future<Box> openTimed(String name) async {
     final sw = Stopwatch()..start();
     final box = await Hive.openBox(name);
     Logger.d('Hive box $name opened in ${sw.elapsedMilliseconds}ms', tag: 'HiveInit');
     return box;
   }
   // Critical boxes only (keep cold start minimal).
-  final quranBox = await _openTimed("quranBox");
-  final translationBox = await _openTimed("translationBox");
-  Logger.i('Startup: critical boxes opened elapsed=${_startupSw.elapsedMilliseconds}ms', tag: 'Startup');
+  final quranBox = await openTimed("quranBox");
+  final translationBox = await openTimed("translationBox");
+  Logger.i('Startup: critical boxes opened elapsed=${startupSw.elapsedMilliseconds}ms', tag: 'Startup');
 
   // Non-critical boxes: open lazily (first use) or scheduled later.
   // We pass null to providers; they will open on demand.
@@ -114,10 +114,10 @@ void main() async {
   });
   // First frame callback instrumentation
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    Logger.i('Startup: first frame in ${_startupSw.elapsedMilliseconds}ms', tag: 'Startup');
+    Logger.i('Startup: first frame in ${startupSw.elapsedMilliseconds}ms', tag: 'Startup');
     // Defer a microtask to allow any phase 2 meta timing to be recorded by providers then output summary marker.
     Future.microtask(() {
-      Logger.i('PerfSummary: firstFrameMs=${_startupSw.elapsedMilliseconds}', tag: 'PerfSummary');
+      Logger.i('PerfSummary: firstFrameMs=${startupSw.elapsedMilliseconds}', tag: 'PerfSummary');
     });
   });
 }

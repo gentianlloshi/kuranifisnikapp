@@ -125,7 +125,7 @@ class QuranProvider extends ChangeNotifier {
           notifyListeners();
           // Yield control between batches (except last) to allow frames.
           if (end < all.length) {
-            await Future.delayed(Duration(milliseconds: 1));
+            await Future.delayed(const Duration(milliseconds: 1));
           }
         }
         Logger.d('Loaded surah metadata count=${_surahsMeta.length} in ${sw.elapsedMilliseconds}ms', tag: 'StartupPhase');
@@ -214,10 +214,10 @@ class QuranProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    if (_searchVersesUseCase != null) {
+  final uc = _searchVersesUseCase;
+  if (uc != null) {
       _setLoading(true);
       try {
-        final uc = _searchVersesUseCase!;
         _searchResults = await uc.call(query);
         _error = null;
       } catch (e) {
@@ -253,12 +253,12 @@ class QuranProvider extends ChangeNotifier {
       // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
       // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
       // ignore: unawaited_futures
-  if (_quranRepository != null) {
+  final repo = _quranRepository;
+  if (repo != null) {
         // Fire-and-forget enrichment: translation then transliteration.
         Future(() async {
           try {
-            final repo = _quranRepository!;
-            if (!repo.isSurahFullyEnriched(surahId)) {
+    if (!repo.isSurahFullyEnriched(surahId)) {
               await repo.ensureSurahTranslation(surahId);
               await repo.ensureSurahTransliteration(surahId);
               Logger.d('Surah $surahId enriched on-demand', tag: 'LazySurah');

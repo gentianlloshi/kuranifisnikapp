@@ -236,7 +236,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
         ...items.map((r) => Row(
           children: [
             Expanded(child: Text(r.label)),
-            Text(r.value, style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(r.value, style: const TextStyle(fontWeight: FontWeight.w600)),
           ],
         )),
       ],
@@ -359,7 +359,7 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
             ),
         ]),
         const SizedBox(height: 8),
-        LinearProgressIndicator(value: value),
+  LinearProgressIndicator(value: value),
       ],
     );
   }
@@ -389,13 +389,13 @@ class _DataManagementSheetState extends State<DataManagementSheet> {
     final d = _diff!;
     return await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+              builder: (ctx) => AlertDialog(
         title: const Text('Konfirmo Importin'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Do të aplikohen:'),
+            const Text('Do të aplikohen:'),
             const SizedBox(height: 8),
             _confirmLine('Cilësimet', _settings && d.settingsChange!=SettingsChange.none),
             _confirmLine('Favoritet', _bookmarks && (d.bookmarkAdds.isNotEmpty || d.bookmarkUpdates.isNotEmpty)),

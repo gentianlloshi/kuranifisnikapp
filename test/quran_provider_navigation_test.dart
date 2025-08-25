@@ -7,7 +7,6 @@ import 'package:kurani_fisnik_app/domain/usecases/get_surah_verses_usecase.dart'
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_arabic_only_usecase.dart';
 import 'package:kurani_fisnik_app/domain/usecases/search_verses_usecase.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
-import 'package:kurani_fisnik_app/core/utils/result.dart';
 import 'package:kurani_fisnik_app/data/repositories/quran_repository_impl.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/quran_local_data_source.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dart';
