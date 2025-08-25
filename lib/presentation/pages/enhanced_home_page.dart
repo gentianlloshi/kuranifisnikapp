@@ -152,7 +152,7 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
           ),
           // Settings
           Builder(
-            builder: (context) => IconButton(
+          builder: (context) => AlertDialog(
               onPressed: () => Scaffold.of(context).openEndDrawer(),
               icon: const Icon(Icons.settings),
               tooltip: 'Cilësimet',
@@ -174,11 +174,11 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
                 text: tab.title,
               )).toList(),
         ),
-      ),
+            TextButton(
       endDrawer: const SettingsDrawer(),
       body: Stack(
         children: [
-          Column(
+            TextButton(
         children: [
           if (_showPerfPanel) const _PerfPanel(),
           // Main Content (tabs)
@@ -204,42 +204,42 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
       case 0: // Quran
         return FloatingActionButton(
           onPressed: () => _showQuickNavigation(context),
-          child: const Icon(Icons.navigation),
           tooltip: 'Navigim i Shpejtë',
+          child: const Icon(Icons.navigation),
         );
       case 1: // Search
         return null; // Search has its own input
       case 2: // Bookmarks
         return FloatingActionButton(
           onPressed: () => _addCurrentVerseToBookmarks(),
-          child: const Icon(Icons.bookmark_add),
           tooltip: 'Shto në Favoritet',
+          child: const Icon(Icons.bookmark_add),
         );
       case 3: // Notes
         return FloatingActionButton(
           onPressed: () => _createNewNote(),
-          child: const Icon(Icons.add),
           tooltip: 'Shënim i Ri',
+          child: const Icon(Icons.add),
         );
       case 4: // Memorization
         return FloatingActionButton(
           onPressed: () => _addToMemorization(),
-          child: const Icon(Icons.add),
           tooltip: 'Shto për Memorizim',
+          child: const Icon(Icons.add),
         );
       case 5: // Texhvid
         return FloatingActionButton(
           onPressed: () => _startTexhvidQuiz(),
-          child: const Icon(Icons.quiz),
           tooltip: 'Fillo Kuizin',
+          child: const Icon(Icons.quiz),
         );
       case 6: // Thematic Index
         return null; // Has its own search
       case 7: // Notifications
         return FloatingActionButton(
           onPressed: () => _createReminder(),
-          child: const Icon(Icons.alarm_add),
           tooltip: 'Krijo Kujtesë',
+          child: const Icon(Icons.alarm_add),
         );
       default:
         return null;

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kurani_fisnik_app/presentation/providers/audio_provider.dart';
-import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 
 void main() {
   group('AudioProvider loop guards', () {

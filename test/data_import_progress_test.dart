@@ -1,5 +1,5 @@
+// ignore_for_file: unnecessary_import
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kurani_fisnik_app/core/services/data_import_service.dart';
 import 'package:kurani_fisnik_app/core/services/data_export_service.dart';

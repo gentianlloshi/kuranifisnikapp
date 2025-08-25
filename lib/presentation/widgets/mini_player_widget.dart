@@ -154,7 +154,7 @@ class _FullPlayerCore extends StatelessWidget {
       final scheme = Theme.of(context).colorScheme;
       final pos = audio.currentPosition;
       final dur = audio.currentDuration ?? Duration.zero;
-      String _fmt(Duration d){
+  String fmt(Duration d){
         final m = d.inMinutes.remainder(60).toString().padLeft(2,'0');
         final s = d.inSeconds.remainder(60).toString().padLeft(2,'0');
         return '$m:$s';
@@ -191,11 +191,11 @@ class _FullPlayerCore extends StatelessWidget {
             onChanged: (v) => audio.seekToProgress(v),
             ),
           ),
-          Row(
+      Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
-              Text(_fmt(dur), style: Theme.of(context).textTheme.bodySmall),
+        Text(fmt(pos), style: Theme.of(context).textTheme.bodySmall),
+        Text(fmt(dur), style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
           SizedBox(height: context.spaceLg),
