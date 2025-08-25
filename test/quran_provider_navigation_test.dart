@@ -28,7 +28,6 @@ class _FakeQuranRepo implements QuranRepository {
     ),
   ];
 
-  @override
   Future<List<Surah>> getSurahs() async => _surahs;
   @override
   Future<List<Surah>> getAllSurahs() async => _surahs;

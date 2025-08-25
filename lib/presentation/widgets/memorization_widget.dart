@@ -191,9 +191,9 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
           return Card(
             margin: EdgeInsets.only(bottom: context.spaceSm),
             child: ExpansionTile(
-              title: Text('Sure $surahNumber'),
-              subtitle: Text('${verses.length} ajete të memorizuara'),
-      children: verses.map((verseKey) {
+        title: Text('Sure $surahNumber'),
+        subtitle: Text('${verses.length} ajete të memorizuara'),
+    children: verses.map<Widget>((verseKey) {
                 final parts = verseKey.split(':');
                 final verseNumber = parts.length == 2 ? parts[1] : '';
                 
@@ -222,10 +222,10 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                     }
                   },
                 );
-      }).toList(),
+  }).toList(),
             ),
           );
-        }).toList(),
+  }),
       ],
     );
   }
