@@ -150,9 +150,9 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
               return const SizedBox.shrink();
             },
           ),
-          // Settings
+          // Settings (open end drawer)
           Builder(
-          builder: (context) => AlertDialog(
+            builder: (context) => IconButton(
               onPressed: () => Scaffold.of(context).openEndDrawer(),
               icon: const Icon(Icons.settings),
               tooltip: 'Cilësimet',
@@ -174,29 +174,29 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
                 text: tab.title,
               )).toList(),
         ),
-            TextButton(
+      ),
       endDrawer: const SettingsDrawer(),
       body: Stack(
         children: [
-            TextButton(
-        children: [
-          if (_showPerfPanel) const _PerfPanel(),
-          // Main Content (tabs)
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: _tabs.map((tab) => tab.widget).toList(),
-            ),
-          ),
-          // Global Mini Player (persistent at bottom)
-          const MiniPlayerWidget(),
-        ],
+          Column(
+            children: [
+              if (_showPerfPanel) const _PerfPanel(),
+              // Main Content (tabs)
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: _tabs.map((tab) => tab.widget).toList(),
+                ),
+              ),
+              // Global Mini Player (persistent at bottom)
+              const MiniPlayerWidget(),
+            ],
           ),
           const _SnackHost(),
         ],
       ),
       floatingActionButton: _buildFloatingActionButton(),
-  ));
+    ));
   }
 
   Widget? _buildFloatingActionButton() {
@@ -405,18 +405,18 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Krijo Kujtesë'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Titulli i Kujtesës',
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Përshkrimi',
                 border: OutlineInputBorder(),
               ),

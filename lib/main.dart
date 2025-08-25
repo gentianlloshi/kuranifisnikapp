@@ -85,10 +85,10 @@ void main() async {
   // Non-critical boxes: open lazily (first use) or scheduled later.
   // We pass null to providers; they will open on demand.
   // Large static assets are cached in-memory; no Hive boxes for them
-  final Box? thematicIndexBox = null;
-  final Box? transliterationBox = null;
-  final Box? wordByWordBox = null;
-  final Box? timestampBox = null;
+  const Box? thematicIndexBox = null;
+  const Box? transliterationBox = null;
+  const Box? wordByWordBox = null;
+  const Box? timestampBox = null;
 
   // Defer heavy service initialization until after first frame to avoid jank.
   final notificationService = NotificationService();

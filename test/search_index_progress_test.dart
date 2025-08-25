@@ -7,7 +7,6 @@ import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 
 class _FakeRepo implements QuranRepository {
-  @override
   Future<List<Surah>> getSurahs() async => [Surah(id:1, number:1, nameArabic:'', nameTranslation:'', nameTransliteration:'', revelation:'', versesCount:7, verses:const [])];
   @override
   Future<List<Surah>> getAllSurahs() async => getSurahs();

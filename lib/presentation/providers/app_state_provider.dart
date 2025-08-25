@@ -8,7 +8,7 @@ class AppStateProvider extends ChangeNotifier {
   final GetSettingsUseCase? _getSettingsUseCase;
   final SaveSettingsUseCase? _saveSettingsUseCase;
   // Snackbar queue (ERR-1)
-  final Queue<_SnackMessage> _snackQueue = Queue<_SnackMessage>();
+  final Queue<SnackMessage> _snackQueue = Queue<SnackMessage>();
   bool _snackShowing = false;
 
   AppStateProvider({
@@ -173,11 +173,11 @@ class AppStateProvider extends ChangeNotifier {
 
   // --- Snackbar Queue API ---
   void enqueueSnack(String text, {Duration duration = const Duration(seconds: 3)}) {
-    _snackQueue.add(_SnackMessage(text, duration));
+    _snackQueue.add(SnackMessage(text, duration));
     if (!_snackShowing) _drainSnackQueue();
   }
 
-  _SnackMessage? get currentSnack => _snackQueue.isEmpty ? null : _snackQueue.first;
+  SnackMessage? get currentSnack => _snackQueue.isEmpty ? null : _snackQueue.first;
   bool get hasSnack => _snackQueue.isNotEmpty;
   bool get isSnackDisplaying => _snackShowing;
 
@@ -218,8 +218,8 @@ class AppStateProvider extends ChangeNotifier {
   }
 }
 
-class _SnackMessage {
+class SnackMessage {
   final String text;
   final Duration duration;
-  _SnackMessage(this.text, this.duration);
+  SnackMessage(this.text, this.duration);
 }
