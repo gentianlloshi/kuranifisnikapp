@@ -1,6 +1,6 @@
 # Qur'an Search Implementation
 
-_Last updated: 2025-08-12_
+_Last updated: 2025-08-23_
 
 This document provides a deep dive into the current search architecture in the Kurani Fisnik Flutter app: data flow, indexing strategy, tokenization & normalization, ranking, fallback paths, performance characteristics, limitations, and recommended enhancements.
 
@@ -13,6 +13,7 @@ The search feature must:
 - Tolerate diacritic / orthographic variance (ç→c, ë→e, Arabic diacritics removed)
 - Provide relevant ranking rather than raw occurrence order
 - Degrade gracefully if the index build fails (fallback to domain use case)
+ - UI highlights partial matches (diacritic‑insensitive) and shows total results count
 
 ---
 ## 2. Data Sources & Entities
@@ -26,12 +27,12 @@ A verse is uniquely identified by a composite key `surahNumber:verseNumber` (e.g
 ---
 ## 3. Control Flow Overview
 1. UI calls `QuranProvider.searchVerses(query)`.
-2. Provider ensures the inverted index exists (`_ensureSearchIndex`).
-   - If not built, loads all surah verses sequentially using `GetSurahVersesUseCase` (1..114) and accumulates raw verse maps.
-   - Spawns an isolate via `compute(buildInvertedIndex, raw)` to build the inverted index.
-3. When index ready: `_searchIndexQuery(query)` executes.
-4. Results (ranked `List<Verse>`) assigned to `_searchResults` and `notifyListeners()` triggers UI update.
-5. If index build failed: falls back to `_searchVersesUseCase` (legacy direct search).
+2. Provider ensures the inverted index exists via `SearchIndexManager.ensureBuilt()`.
+   - First tries to load a persisted snapshot (v2) from app documents using a corpus-hash fast path.
+   - If not available, it performs a single full off-main isolate build by parsing asset JSONs and constructing the index entirely in an isolate (see `search_index_isolate.dart`).
+3. When index is ready: the manager executes the in-memory query and returns ranked `List<Verse>`.
+4. Results are assigned to `_searchResults` and `notifyListeners()` triggers UI updates.
+5. If index build fails: the provider can still fall back to `_searchVersesUseCase` (legacy direct search), though in practice the snapshot fast-path or isolate build should cover normal operation.
 
 ---
 ## 4. Inverted Index Structure
@@ -63,15 +64,15 @@ Mapping reduces e.g. `ç→c`, `ë→e`, plus broad vowel/accent normalization (
 
 ### 5.4 Prefix Indexing
 For each normalized Latin token (length ≥3):
-- Generate prefixes of length 2..min(len-1, 10)
+- Generate prefixes of length 3..min(len-1, 10)
 - Enables incremental suggestions while user types.
 - Arabic tokens are effectively normalized then tokenized; prefixes generated the same way because after normalization they are plain letters.
 
 ### 5.5 Query Expansion
 `_expandQueryTokens(query)` adds:
 - Original tokens
-- Diacritic-stripped variants (ç, ë replacements)
-- (Potential future) Arabic folded forms
+- Diacritic‑stripped variants (ç, ë → c, e)
+- Light Albanian stems (e.g., -ave, -eve, -uar, -shme, -isht, -it, -in, -ve)
 Result deduplicated via `toSet()`.
 
 ---
@@ -83,6 +84,10 @@ Given candidate verse keys (union of posting lists for expanded tokens):
 
 Rationale: Simple, computationally cheap O(k) where k = candidate count. Avoids heavy TF-IDF; acceptable since corpus is small (6236 verses) & largely static.
 
+Filtering & Fuzzy Gate:
+- After candidate generation, we require at least one diacritic‑folded substring hit in selected fields (e.g., translation) to keep a verse. This eliminates spurious fuzzy matches (e.g., far tokens matching by edit distance only).
+- Fuzzy fallback uses bounded Levenshtein with a first‑letter match filter.
+
 Limitations:
 - Does not weight Arabic vs translation differently.
 - No position or proximity scoring.
@@ -92,7 +97,8 @@ Limitations:
 ## 7. Performance Characteristics
 | Phase | Complexity | Notes |
 |-------|------------|-------|
-| Index Build | O(N * T) where N=verses, T=tokens per verse | Done once per app session in isolate; may take a few 100 ms. |
+| Index Build | O(N * T) where N=verses, T=tokens per verse | Full build runs in a single isolate using raw asset JSONs (Arabic, translation, transliterations). Main isolate stays responsive. |
+| Snapshot Load | O(S) where S=size of snapshot JSON | Fast-path on startup; validated via corpus hash assembled from asset bytes. |
 | Query | O(sum(len(postingList(token)))) + sort(candidates) | Candidate set small vs full corpus due to prefix pruning. |
 | Memory | ~ (tokens * avgKeyRefs * pointer) | Controlled by prefix cap & normalization. |
 
@@ -100,15 +106,15 @@ Warm Index Expected Query Latency: ~1–10 ms typical (device-dependent).
 
 ---
 ## 8. Fallback Path
-If index build fails (exception or isolate error): `_invertedIndex` remains null → provider uses `_searchVersesUseCase` which likely performs linear scan / repository filtering (slower, but functional).
+If index build fails (exception or isolate error): `_invertedIndex` may remain partial → provider searches the available subset or falls back to `_searchVersesUseCase`.
 
 ---
 ## 9. Threading & Concurrency
-- Heavy build uses `compute` (spawns a short-lived isolate). Raw verse list transferred via serialization.
-- No locking required inside index builder isolate.
-- Main isolate only mutates `_invertedIndex` post await; race avoided by `_isBuildingIndex` guard.
+- Heavy build uses `compute` with a single entry point `buildFullIndexFromAssets(payload)` which parses asset JSONs and builds the inverted index off the main isolate.
+- No locking required inside the index builder isolate. The result is a `{ index, verses }` map transferred back to the main isolate.
+- Main isolate only hydrates caches after the compute returns; races are avoided via internal `_building` guard and a build completer.
 
-Edge Case: Multiple simultaneous search calls while build in progress: first call triggers build, others await finishing (no explicit await but they exit early until index ready and later re-trigger search).
+Edge Case: Multiple simultaneous search calls while build in progress: first call ensures a build starts; subsequent calls search the available subset or wait for completion depending on UI logic. Live `progressStream` allows UI to show progress.
 
 ---
 ## 10. Error Handling
@@ -117,9 +123,9 @@ Edge Case: Multiple simultaneous search calls while build in progress: first cal
 - Improvements suggested: capture exception details to a diagnostic log buffer.
 
 ---
-## 11. Caching Strategy
+## 11. Caching & Persistence Strategy
 - Verse objects cached in `_verseCache` keyed by verseKey for quick retrieval after ranking.
-- Index built once; no persistence yet (lost on app restart). Potential enhancement: serialize to local file with version stamp (hash of underlying data assets).
+- Index snapshot persistence implemented (v2): JSON `{version, dataVersion, index, verses, createdAt, nextSurah}` stored in app documents. `dataVersion` is a lightweight corpus hash derived from asset bytes. On startup we attempt a fast-path load; if the hash mismatches, we rebuild off-main and overwrite the snapshot.
 
 ---
 ## 12. Pagination Interaction
@@ -140,8 +146,7 @@ Search results currently ignore pagination; entire candidate result set stored i
 
 ---
 ## 14. Extension Roadmap
-1. Persisted index with versioning (asset hash).
-2. Weighted multi-field scoring + optional BM25-lite variant.
+1. Weighted multi-field scoring + optional BM25-lite variant (flag scaffolded).
 3. Highlight matched tokens in UI (store match spans during scoring pass).
 4. Incremental index updates (if adding notes / annotations in future).
 5. Advanced phonetic matching (soundex-like for transliteration) for mis-typed queries.
@@ -196,7 +201,7 @@ Store ordered token positions per verse (Map<verseKey, List<int>> per token). Du
 
 ---
 ## 20. Summary
-The current search solution balances implementation complexity and performance using a single in-memory inverted index with normalized, prefix-extended tokens. It meets responsiveness goals but leaves room for improved ranking sophistication, persistence, and UX refinements.
+The current search solution balances implementation complexity and performance using a single in-memory inverted index with normalized, prefix-extended tokens. It meets responsiveness goals; a fuzzy-but-gated layer improves relevance. Next steps are persisted index tuning and multi-field ranking sophistication.
 
 ---
 ## 21. Unified Executive Summary & Final Action Plan (From Field Analysis)
@@ -204,10 +209,12 @@ The current search solution balances implementation complexity and performance u
 This section consolidates live testing observations (UI freezes, sporadic ANR risk, indexing latency, missed matches) into a prioritized remediation program.
 
 ### 21.1 Unified Diagnosis
-Primary root cause of perceived freezes / potential ANR:
-- Heavy synchronous work on the main isolate prior to (and separate from) the isolate index build: sequential loading of all surah verses (1..114) inside `_ensureSearchIndex` before handing raw list to `compute`.
-- Immediate, un-debounced execution of `_searchIndexQuery` on each keystroke (high frequency invocations; short queries produce very broad prefix candidate sets early).
-- Rebuilding the index every app launch (no persistence) → repeated cold-start cost.
+Primary root cause of perceived freezes / potential ANR (previous state):
+- Heavy synchronous work on the main isolate prior to the index build (collecting verses per surah) and lack of persistence.
+
+Applied fixes in current implementation:
+- Full off-main isolate build that performs both data parsing and index construction from asset JSONs.
+- Snapshot persistence with corpus-hash validation for fast startup.
 
 Secondary quality issues:
 - Ranking heuristic simplistic (translation-only bonus, no field weighting / proximity).
@@ -216,10 +223,10 @@ Secondary quality issues:
 
 ### 21.2 Prioritized Action Phases
 
-#### Phase 1 (Immediate – Blockers)
-1. Full Off-Main Index Build: Move BOTH verse collection + index construction into a single top-level `buildFullIndex()` run via `compute`. Only minimal progress signaling on main isolate.
-2. Debounce Search Input: 300–400 ms timer reset on `onChanged`; ignore stale queries. Cancel running scoring if a new debounce cycle starts.
-3. Guard Re-Entrancy: If index build in progress, queue latest pending query; execute once ready.
+#### Phase 1 (Done)
+1. Full Off-Main Index Build: Combined data parsing and index construction in `search_index_isolate.buildFullIndexFromAssets` executed via `compute`.
+2. Debounce Search Input: Implemented 350 ms debounce in `QuranProvider.searchVersesDebounced`.
+3. Guard Re-Entrancy: Build guarded by internal completer and state; UI shows progress via `progressStream`.
 
 #### Phase 2 (Performance & UX Hardening)
 4. Persistent Cache: Serialize `{versionHash, index, metadata}` to file; fast path load if hash matches asset corpus.
@@ -236,22 +243,12 @@ Secondary quality issues:
 11. Highlight Matches: Return span metadata for UI emphasis (improves perceived relevance transparency).
 12. Adaptive Debounce: Shorten debounce after index warmed (<50 ms) when user pauses long enough (predictive typing).
 
-### 21.3 Implementation Sketches
+### 21.3 Implementation Notes
 
-Full off-main build (pseudo):
-```dart
-// top_level for compute
-Future<IndexPayload> buildFullIndex(_IndexBuildRequest req) async {
-   final verses = <RawVerse>[];
-   for (final id in req.surahIds) {
-      final vs = await loadSurahVersesSync(id); // NOTE: in isolate (pure parsing / map)
-      verses.addAll(vs);
-   }
-   final index = createInvertedIndex(verses);
-   final version = computeCorpusHash(verses);
-   return IndexPayload(index, version, verses.length);
-}
-```
+Full off-main build entry point: `lib/presentation/providers/search_index_isolate.dart` → `buildFullIndexFromAssets(Map<String,String>)`.
+- Inputs: JSON strings loaded from assets on main isolate (arabic, translation, transliterations).
+- Output: `{ 'index': Map<String,List<String>>, 'verses': Map<String,Map> }`.
+- The manager (`search_index_manager.dart`) hydrates `_invertedIndex` and `_verseCache`, emits progress, and persists a snapshot.
 
 Debounce pattern:
 ```dart
@@ -362,4 +359,32 @@ Phase behind debug flag `enableSearchIndexPersistence` for first release; collec
 
 ---
 End Section 22.
+
+## 23. Profiling Playbook (Cold Start & Search)
+
+This section captures how to verify performance characteristics locally and what “good” looks like after moving to the prebuilt asset index and removing heavy Hive startup.
+
+Targets (typical mid‑range Android):
+- Cold app start to first interactive frame: < 1.2 s visual; no >250 ms jank on main thread
+- Search readiness (index available): instant via asset load (< 50 ms to hydrate)
+- First query time (warm): < 30 ms median; < 80 ms p95
+- Skipped frames in first 2 seconds: ideally < 10 total
+
+How to measure:
+1) Enable Performance Overlay (already wired via DevPerfOverlay in debug). Observe frame bars on cold start; look for tall red bars (>16 ms). Count skipped frames in the first 2 seconds.
+2) Run Flutter DevTools (Performance tab):
+   - Record from app launch to first search.
+   - Verify absence of large asset/Hive I/O blocks on main isolate.
+   - Confirm SearchIndexManager emits progress immediately to 100% when asset index is present.
+3) Micro-benchmark query:
+   - In the Search screen, issue 10 representative queries (e.g., “rahmet”, “Fatiha”, “Allahu i mëshirshëm”).
+   - Check PerfMetrics logs for highlight build and query durations; median should be < 20 ms.
+
+Before vs After (expected):
+- Before: heavy Hive opens (8–9 s cumulative) and many skipped frames (>200) during early init.
+- After: no heavy box opens for static data; search index loaded from assets; skipped frames near zero during idle cold start.
+
+Troubleshooting:
+- If index progress stays below 1.0 on cold start, ensure assets/data/search_index.json exists in the bundle and pubspec includes assets/data/.
+- If query latency spikes, check for debug-mode overhead (hot reload active). Try profile mode.
 

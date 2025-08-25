@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
 import '../providers/memorization_provider.dart';
 import '../providers/quran_provider.dart';
 import '../theme/theme.dart';
@@ -109,9 +110,9 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
     return Container(
       padding: EdgeInsets.all(context.spaceMd),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+  color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(context.radiusSmall.x),
-        border: Border.all(color: color.withOpacity(0.25)),
+  border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
@@ -143,16 +144,16 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
           child: Center(
             child: Column(
               children: [
-                Icon(Icons.school, size: 64, color: Theme.of(context).colorScheme.primary.withOpacity(0.4)),
+                Icon(Icons.school, size: 64, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
                 SizedBox(height: context.spaceLg),
                 Text(
                   'Nuk keni ajete të memorizuara',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).textTheme.titleMedium?.color?.withOpacity(0.75)),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).textTheme.titleMedium?.color?.withValues(alpha: 0.75)),
                 ),
                 SizedBox(height: context.spaceSm),
                 Text(
                   'Shtoni ajete në memorizim duke klikuar ikonën e memorizimit në çdo ajet.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7)),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -198,7 +199,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                 
         return ListTile(
                   leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
                     child: Text(
                       verseNumber,
                       style: const TextStyle(
@@ -217,8 +218,7 @@ class _MemorizationWidgetState extends State<MemorizationWidget> {
                     final vn = int.tryParse(verseNumber);
                     if (sn != null && vn != null) {
                       quranProvider.openSurahAtVerse(sn, vn);
-                      // switch to Quran tab by popping until home uses tab index? Simpler: show snackbar
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('U hap Sure $sn, Ajeti $vn')));
+                      context.read<AppStateProvider>().enqueueSnack('U hap Sure $sn, Ajeti $vn');
                     }
                   },
                 );

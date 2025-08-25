@@ -4,6 +4,7 @@ import 'package:kurani_fisnik_app/domain/entities/app_settings.dart';
 import 'package:kurani_fisnik_app/domain/entities/bookmark.dart';
 import 'package:kurani_fisnik_app/domain/entities/note.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 
 abstract class StorageDataSource {
   Future<AppSettings> getSettings();
@@ -105,6 +106,7 @@ class StorageDataSourceImpl implements StorageDataSource {
     final cacheKey = 'translation_$translationKey';
     final cacheJson = prefs.getString(cacheKey);
     if (cacheJson != null) {
+  PerfMetrics.instance.incTranslationCacheHit();
       return json.decode(cacheJson);
     }
     return {};

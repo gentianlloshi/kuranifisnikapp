@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/quran_local_data_source.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dart';
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 
 class QuranRepositoryImpl implements QuranRepository {
   final QuranLocalDataSource _localDataSource;
@@ -12,6 +13,14 @@ class QuranRepositoryImpl implements QuranRepository {
   // Track which surahs have translation / transliteration merged (by translation key)
   final Map<String, Set<int>> _translationMerged = {}; // key -> set of surahNumbers
   final Set<int> _transliterationMerged = <int>{};
+  // Reactive controllers (broadcast) for coverage updates
+  final StreamController<double> _enrichmentCoverageController = StreamController<double>.broadcast();
+  final StreamController<Map<String,double>> _translationCoverageController = StreamController<Map<String,double>>.broadcast();
+
+  @override
+  Stream<double> get enrichmentCoverageStream => _enrichmentCoverageController.stream;
+  @override
+  Stream<Map<String,double>> get translationCoverageStream => _translationCoverageController.stream;
 
   QuranRepositoryImpl(this._localDataSource, this._storageDataSource);
 
@@ -35,6 +44,7 @@ class QuranRepositoryImpl implements QuranRepository {
     }
     await _storageDataSource.cacheQuranData(surahs);
     Logger.d('getAllSurahs full ${sw.elapsedMilliseconds}ms', tag: 'Perf');
+  _updateEnrichmentCoverage(); // full load likely enriched now
     return surahs;
   }
 
@@ -80,6 +90,7 @@ class QuranRepositoryImpl implements QuranRepository {
     } catch (e) {
   Logger.w('Error loading translation $translationKey: $e', tag: 'QuranRepo');
     }
+  _updateEnrichmentCoverage();
   }
 
   Future<void> _loadAndMergeTransliteration(List<Surah> surahsToUpdate) async {
@@ -103,6 +114,7 @@ class QuranRepositoryImpl implements QuranRepository {
     } catch (e) {
   Logger.w('Error loading transliterations: $e', tag: 'QuranRepo');
     }
+  _updateEnrichmentCoverage();
   }
 
   @override
@@ -203,5 +215,35 @@ class QuranRepositoryImpl implements QuranRepository {
     final hasTrans = (_translationMerged['sq_ahmeti']?.contains(surahNumber) ?? false);
     final hasTranslit = _transliterationMerged.contains(surahNumber);
     return hasTrans && hasTranslit;
+  }
+
+  void _updateEnrichmentCoverage() {
+    // Compute fraction of surahs that have both translation+transliteration merged for default translation.
+    final enriched = _transliterationMerged.where((s) => _translationMerged['sq_ahmeti']?.contains(s) ?? false).length;
+    final coverage = enriched / 114.0;
+    PerfMetrics.instance.setEnrichmentCoverage(coverage);
+    // Emit to reactive stream (ignore if closed)
+    if (!_enrichmentCoverageController.isClosed) {
+      _enrichmentCoverageController.add(coverage);
+    }
+    // Also emit translation coverage map to unify updates for panel dialog if both shift.
+    if (!_translationCoverageController.isClosed) {
+      _translationCoverageController.add(translationCoverageByKey());
+    }
+  }
+
+  @override
+  Map<String,double> translationCoverageByKey() {
+    final Map<String,double> out = {};
+    for (final entry in _translationMerged.entries) {
+      out[entry.key] = entry.value.length / 114.0;
+    }
+    return out;
+  }
+
+  // Ensure controllers are closed when repository disposed (if ever) – defensive
+  void dispose() {
+    _enrichmentCoverageController.close();
+    _translationCoverageController.close();
   }
 }

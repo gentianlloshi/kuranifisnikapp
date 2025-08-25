@@ -1,3 +1,14 @@
+## 2025-08-24 UI changes
+
+- Thematic Index
+  - List item titles now use onSurface for better contrast; highlighted segments use semi-bold and toned primary background.
+  - Auto-expansion on search query to expose results; subtheme subtitles fixed.
+  - Bottom sheets: consistent SheetHeader + friendly placeholders.
+
+- Memorization
+  - Sticky controls header with stats chips and repeat stepper.
+  - Verse tiles show status chip and hide-text mask with “peek” timer.
+
 # Kurani Fisnik – UI/UX Refactor Strategic Plan
 
 Version: 1.0  
@@ -354,3 +365,12 @@ Summary: Foundation (tokens, palettes, theme, verse styling, filter persistence)
 - Refactored Help page into structured model using tokens.
 
 Next Focus (Sprint Continuation): Typography scaler, search result chip grouping & highlight radius, responsive Surah grid, selection mode scaffolding.
+
+Recent Polishing (Aug 22):
+- Texhvid content sanitization at model layer removes stray HTML tags in descriptions/examples/quiz, ensuring clean typography rendering without external renderers.
+- Predictive back enabled on Android; full-player sheet uses modern back handling for smoother UX.
+
+Recent Polishing (Aug 23):
+- AppBar title contrast improved on light backgrounds; Help page titles use onPrimaryContainer for readability.
+- Consistent Latin typography ensures ë/ç render correctly in Help and related pages.
+- Thematic Index deep‑link scroll is robust (ensureVisible + offset fallback + retries) and highlights the target range for ~6s.

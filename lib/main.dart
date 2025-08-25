@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -14,6 +15,10 @@ import 'package:kurani_fisnik_app/presentation/providers/texhvid_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/thematic_index_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/word_by_word_provider.dart';
 import 'package:kurani_fisnik_app/presentation/providers/surah_selection_provider.dart';
+// Verse action registry + selection service
+import 'package:kurani_fisnik_app/presentation/widgets/verse_action_registry.dart';
+import 'package:kurani_fisnik_app/presentation/providers/selection_service.dart';
+import 'package:kurani_fisnik_app/presentation/providers/reading_progress_provider.dart';
 
 // Pages and Widgets
 import 'package:kurani_fisnik_app/presentation/pages/home_page.dart';
@@ -49,12 +54,13 @@ import 'package:kurani_fisnik_app/domain/usecases/thematic_index_usecases.dart' 
 // Services
 import 'package:kurani_fisnik_app/core/services/notification_service.dart';
 import 'package:kurani_fisnik_app/core/services/audio_service.dart';
+import 'package:kurani_fisnik_app/core/services/service_locator.dart';
 import 'presentation/theme/design_tokens.dart';
 import 'presentation/theme/theme.dart';
 import 'presentation/startup/startup_scheduler.dart';
 import 'presentation/startup/performance_monitor.dart';
 import 'core/utils/logger.dart';
-import 'core/utils/logger.dart';
+import 'package:kurani_fisnik_app/presentation/widgets/dev_perf_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +84,7 @@ void main() async {
 
   // Non-critical boxes: open lazily (first use) or scheduled later.
   // We pass null to providers; they will open on demand.
+  // Large static assets are cached in-memory; no Hive boxes for them
   final Box? thematicIndexBox = null;
   final Box? transliterationBox = null;
   final Box? wordByWordBox = null;
@@ -150,8 +157,6 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (_) => QuranLocalDataSourceImpl(
             quranBox: quranBox,
             translationBox: translationBox,
-            thematicIndexBox: thematicIndexBox ?? (Hive.isBoxOpen('thematicIndexBox') ? Hive.box('thematicIndexBox') : null),
-            transliterationBox: transliterationBox ?? (Hive.isBoxOpen('transliterationBox') ? Hive.box('transliterationBox') : null),
           ),
         ),
         Provider<StorageDataSource>(
@@ -169,8 +174,12 @@ class KuraniFisnikApp extends StatelessWidget {
 
         // Repositories
         ProxyProvider2<QuranLocalDataSource, StorageDataSource, QuranRepositoryImpl>(
-          update: (_, localDataSource, storageDataSource, __) =>
-              QuranRepositoryImpl(localDataSource, storageDataSource),
+          update: (_, localDataSource, storageDataSource, __) {
+            final repo = QuranRepositoryImpl(localDataSource, storageDataSource);
+            // Register for global diagnostics access
+            ServiceLocator.instance.registerQuranRepository(repo);
+            return repo;
+          },
         ),
         ProxyProvider<StorageDataSource, StorageRepositoryImpl>(
           update: (_, storageDataSource, __) => StorageRepositoryImpl(storageDataSource),
@@ -224,19 +233,19 @@ class KuraniFisnikApp extends StatelessWidget {
 
         // Providers
   // App state provider depends on settings use cases
-  ChangeNotifierProxyProvider2<GetSettingsUseCase, SaveSettingsUseCase, AppStateProvider>(
-          create: (_) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(_, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(_, listen: false)),
-          update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
+        ChangeNotifierProxyProvider2<GetSettingsUseCase, SaveSettingsUseCase, AppStateProvider>(
+          create: (ctx) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(ctx, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(ctx, listen: false)),
+          update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => previous ?? AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
         ),
         ChangeNotifierProxyProvider5<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, QuranProvider>(
-          create: (_) => QuranProvider(
-            getSurahsUseCase: Provider.of<GetSurahsUseCase>(_, listen:false),
-            getSurahsArabicOnlyUseCase: Provider.of<GetSurahsArabicOnlyUseCase>(_, listen:false),
-            searchVersesUseCase: Provider.of<SearchVersesUseCase>(_, listen:false),
-            getSurahVersesUseCase: Provider.of<get_verses.GetSurahVersesUseCase>(_, listen:false),
-            quranRepository: Provider.of<QuranRepositoryImpl>(_, listen:false),
+          create: (ctx) => QuranProvider(
+            getSurahsUseCase: Provider.of<GetSurahsUseCase>(ctx, listen:false),
+            getSurahsArabicOnlyUseCase: Provider.of<GetSurahsArabicOnlyUseCase>(ctx, listen:false),
+            searchVersesUseCase: Provider.of<SearchVersesUseCase>(ctx, listen:false),
+            getSurahVersesUseCase: Provider.of<get_verses.GetSurahVersesUseCase>(ctx, listen:false),
+            quranRepository: Provider.of<QuranRepositoryImpl>(ctx, listen:false),
           ),
-          update: (_, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, repo, previous) => QuranProvider(
+          update: (ctx, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, repo, previous) => QuranProvider(
             getSurahsUseCase: getSurahsUseCase,
             getSurahsArabicOnlyUseCase: getSurahsArabicOnlyUseCase,
             searchVersesUseCase: searchVersesUseCase,
@@ -247,44 +256,88 @@ class KuraniFisnikApp extends StatelessWidget {
 
         // Additional Providers
         ChangeNotifierProvider<AudioProvider>(
-          create: (_) => AudioProvider(),
+          create: (ctx) => AudioProvider(),
         ),
         ProxyProvider<BookmarkRepositoryImpl, BookmarkUseCases>(
-          update: (_, repo, __) => BookmarkUseCases(repo),
+          update: (ctx, repo, previous) => BookmarkUseCases(repo),
         ),
         ChangeNotifierProxyProvider<BookmarkUseCases, BookmarkProvider>(
-          create: (_) => BookmarkProvider(bookmarkUseCases: Provider.of<BookmarkUseCases>(_, listen: false)),
-          update: (_, useCases, previous) => BookmarkProvider(bookmarkUseCases: useCases),
+          create: (ctx) => BookmarkProvider(bookmarkUseCases: Provider.of<BookmarkUseCases>(ctx, listen: false)),
+          update: (ctx, useCases, previous) => BookmarkProvider(bookmarkUseCases: useCases),
         ),
         ChangeNotifierProvider<NoteProvider>(
-          create: (_) => NoteProvider(),
+          create: (ctx) => NoteProvider(),
         ),
         ChangeNotifierProvider<MemorizationProvider>(
-          create: (_) => MemorizationProvider(),
+          create: (ctx) => MemorizationProvider(),
         ),
         ChangeNotifierProvider<NotificationProvider>(
-          create: (_) => NotificationProvider(),
+          create: (ctx) => NotificationProvider(service: notificationService),
         ),
         ChangeNotifierProxyProvider<TexhvidUseCases, TexhvidProvider>(
-          create: (_) => TexhvidProvider(texhvidUseCases: Provider.of<TexhvidUseCases>(_, listen:false)),
-          update: (_, texhvidUseCases, previous) => TexhvidProvider(texhvidUseCases: texhvidUseCases),
+          create: (ctx) => TexhvidProvider(texhvidUseCases: Provider.of<TexhvidUseCases>(ctx, listen:false)),
+          update: (ctx, texhvidUseCases, previous) => TexhvidProvider(texhvidUseCases: texhvidUseCases),
         ),
         ChangeNotifierProxyProvider<GetThematicIndexUseCase, ThematicIndexProvider>(
-          create: (_) => ThematicIndexProvider(getThematicIndexUseCase: Provider.of<GetThematicIndexUseCase>(_, listen:false)),
-          update: (_, getThematicIndexUseCase, previous) => ThematicIndexProvider(getThematicIndexUseCase: getThematicIndexUseCase),
+          create: (ctx) => ThematicIndexProvider(getThematicIndexUseCase: Provider.of<GetThematicIndexUseCase>(ctx, listen:false)),
+          update: (ctx, getThematicIndexUseCase, previous) => ThematicIndexProvider(getThematicIndexUseCase: getThematicIndexUseCase),
         ),
         ChangeNotifierProxyProvider2<GetWordByWordDataUseCase, GetTimestampDataUseCase, WordByWordProvider>(
-          create: (_) => WordByWordProvider(
-            getWordByWordDataUseCase: Provider.of<GetWordByWordDataUseCase>(_, listen: false),
-            getTimestampDataUseCase: Provider.of<GetTimestampDataUseCase>(_, listen: false),
+          create: (ctx) => WordByWordProvider(
+            getWordByWordDataUseCase: Provider.of<GetWordByWordDataUseCase>(ctx, listen: false),
+            getTimestampDataUseCase: Provider.of<GetTimestampDataUseCase>(ctx, listen: false),
           ),
-          update: (_, wUse, tUse, prev) => WordByWordProvider(
+          update: (ctx, wUse, tUse, prev) => WordByWordProvider(
             getWordByWordDataUseCase: wUse,
             getTimestampDataUseCase: tUse,
           ),
         ),
         ChangeNotifierProvider<SurahSelectionProvider>(
-          create: (_) => SurahSelectionProvider(),
+          create: (ctx) => SurahSelectionProvider(),
+        ),
+        ChangeNotifierProxyProvider<StorageRepositoryImpl, ReadingProgressProvider>(
+          create: (ctx) => ReadingProgressProvider(storage: Provider.of<StorageRepositoryImpl>(ctx, listen:false)),
+          update: (ctx, storageRepo, previous) => ReadingProgressProvider(storage: storageRepo),
+        ),
+        ChangeNotifierProvider<VerseActionRegistry>(
+          create: (ctx) => VerseActionRegistry()
+            ..registerAll([
+              VerseAction(
+                id: 'play',
+                label: 'Luaj këtë ajet',
+                icon: Icons.play_arrow,
+                handler: (ctx, verse) async {
+                  ctx.read<AudioProvider>().playVerse(verse);
+                },
+              ),
+              VerseAction(
+                id: 'play_from_here',
+                label: 'Luaj nga ky ajet',
+                icon: Icons.playlist_play,
+                handler: (ctx, verse) async {
+                  final q = ctx.read<QuranProvider>();
+                  final verses = q.currentVerses;
+                  final startIndex = verses.indexWhere((v) => v.number == verse.number);
+                  if (startIndex != -1) {
+                    final wbwProv = ctx.read<WordByWordProvider>();
+                    ctx.read<AudioProvider>().playSurah(verses, startIndex: startIndex, wbwProvider: wbwProv);
+                  }
+                },
+              ),
+              VerseAction(
+                id: 'memorization_toggle',
+                label: 'Ndrysho Status Memorizimi',
+                icon: Icons.psychology,
+                handler: (ctx, verse) async {
+                  final mem = ctx.read<MemorizationProvider>();
+                  mem.toggleVerseMemorization('${verse.surahNumber}:${verse.number}');
+                },
+              ),
+            ]),
+        ),
+        // Global selection service (multi-domain selection future)
+        ChangeNotifierProvider<SelectionService>(
+          create: (ctx) => SelectionService(),
         ),
       ],
       child: Consumer<AppStateProvider>(
@@ -318,23 +371,31 @@ class KuraniFisnikApp extends StatelessWidget {
           PerformanceMonitor.ensureStarted();
                 }
               });
-              return _StartupSchedulerMarker(child: MaterialApp(
-                title: 'Kurani Fisnik',
-                debugShowCheckedModeBanner: false,
-                theme: theme,
-                home: EnhancedHomePage(),
-                routes: {
-                  '/home': (context) => EnhancedHomePage(),
-                  '/quran': (context) => HomePage(),
-                  '/search': (context) => HomePage(),
-                  '/bookmarks': (context) => HomePage(),
-                  '/notes': (context) => HomePage(),
-                  '/memorization': (context) => HomePage(),
-                  '/texhvid': (context) => HomePage(),
-                  '/thematic': (context) => HomePage(),
-                  '/settings': (context) => HomePage(),
-                },
-              ));
+              return _StartupSchedulerMarker(
+                child: MaterialApp(
+                  title: 'Kurani Fisnik',
+                  debugShowCheckedModeBanner: false,
+                  theme: theme,
+                  // Wrap all app pages with the DevPerfOverlay in debug builds, ensuring
+                  // it sits under MaterialApp so Directionality is available.
+                  builder: (context, child) => DevPerfOverlay(
+                    enabled: kDebugMode,
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                  home: const EnhancedHomePage(),
+                  routes: {
+                    '/home': (context) => const EnhancedHomePage(),
+                    '/quran': (context) => const HomePage(),
+                    '/search': (context) => const HomePage(),
+                    '/bookmarks': (context) => const HomePage(),
+                    '/notes': (context) => const HomePage(),
+                    '/memorization': (context) => const HomePage(),
+                    '/texhvid': (context) => const HomePage(),
+                    '/thematic': (context) => const HomePage(),
+                    '/settings': (context) => const HomePage(),
+                  },
+                ),
+              );
             },
           );
         },

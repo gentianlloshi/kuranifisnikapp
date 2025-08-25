@@ -97,7 +97,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       case 1: // Quran View
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Implement jump to verse functionality
             _showJumpToVerseDialog();
           },
           child: const Icon(Icons.navigation),
@@ -116,39 +115,46 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showJumpToVerseDialog() {
+    final surahController = TextEditingController();
+    final verseController = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text('Shko te ajeti'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              decoration: InputDecoration(
-                labelText: 'Numri i sures',
-                hintText: 'p.sh. 2',
-              ),
+              controller: surahController,
+              decoration: const InputDecoration(labelText: 'Nr. i Sures (1-114)'),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 12),
             TextField(
-              decoration: InputDecoration(
-                labelText: 'Numri i ajetit',
-                hintText: 'p.sh. 255',
-              ),
+              controller: verseController,
+              decoration: const InputDecoration(labelText: 'Nr. i Ajetit (opsional)'),
               keyboardType: TextInputType.number,
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Anulo'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Anulo')),
           TextButton(
             onPressed: () {
-              // TODO: Implement navigation to verse
-              Navigator.of(context).pop();
+              final surah = int.tryParse(surahController.text.trim());
+              final verse = int.tryParse(verseController.text.trim());
+              if (surah == null || surah < 1 || surah > 114) {
+                context.read<AppStateProvider>().enqueueSnack('Numër sureje i pavlefshëm');
+                return;
+              }
+              Navigator.pop(ctx);
+              final qp = context.read<QuranProvider>();
+              if (verse != null && verse > 0) {
+                qp.openSurahAtVerse(surah, verse);
+              } else {
+                qp.navigateToSurah(surah);
+              }
+              _tabController.animateTo(1);
             },
             child: const Text('Shko'),
           ),

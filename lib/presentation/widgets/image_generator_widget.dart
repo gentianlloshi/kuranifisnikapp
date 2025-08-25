@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
+// services import not needed (unused)
 import 'dart:ui' as ui;
 import '../theme/theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
 import 'dart:io';
 
 class ImageGeneratorWidget extends StatefulWidget {
@@ -219,6 +221,11 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
 
   Widget _buildImagePreview() {
     final size = _getImageSize();
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    // Decode any picked background image close to the on-screen size to avoid
+    // large bitmap allocations and expensive downscales during rasterization.
+    final targetDecodeWidth = (size.width * dpr * 2 / 2).round(); // keep <= 2x logical size
+    final targetDecodeHeight = (size.height * dpr * 2 / 2).round();
     
     return Container(
       width: size.width,
@@ -227,15 +234,22 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
         color: _backgroundImagePath == null ? _backgroundColor : null,
         image: _backgroundImagePath != null
             ? DecorationImage(
-                image: FileImage(File(_backgroundImagePath!)),
+                image: ResizeImage(
+                  FileImage(File(_backgroundImagePath!)),
+                  // Limit decode size to approximately the device pixel size of the preview
+                  width: targetDecodeWidth,
+                  height: targetDecodeHeight,
+                  allowUpscaling: false,
+                ),
                 fit: BoxFit.cover,
+                filterQuality: FilterQuality.low,
               )
             : null,
       ),
       child: Container(
         decoration: _backgroundImagePath != null
             ? BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
               )
             : null,
         padding: const EdgeInsets.all(24),
@@ -258,7 +272,7 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
                 Text(
                   _referenceController.text,
                   style: TextStyle(
-                    color: _textColor.withOpacity(0.8),
+                    color: _textColor.withValues(alpha: 0.8),
                     fontSize: _fontSize * 0.6,
                     fontWeight: FontWeight.w500,
                   ),
@@ -269,13 +283,13 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
               Icon(
                 Icons.text_fields,
                 size: 64,
-                color: _textColor.withOpacity(0.5),
+                color: _textColor.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 'Shkruani tekstin e ajetit për ta parë këtu',
                 style: TextStyle(
-                  color: _textColor.withOpacity(0.7),
+                  color: _textColor.withValues(alpha: 0.7),
                   fontSize: 16,
                 ),
                 textAlign: TextAlign.center,
@@ -394,24 +408,12 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
         await file.writeAsBytes(bytes);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Imazhi u ruajt në: ${file.path}'),
-              action: SnackBarAction(
-                label: 'Shiko',
-                onPressed: () {
-                  // Open file manager or gallery
-                },
-              ),
-            ),
-          );
+          context.read<AppStateProvider>().enqueueSnack('Imazhi u ruajt në: ${file.path}');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gabim në ruajtjen e imazhit: $e')),
-        );
+        context.read<AppStateProvider>().enqueueSnack('Gabim në ruajtjen e imazhit: $e');
       }
     } finally {
       setState(() => _isGenerating = false);
@@ -443,9 +445,7 @@ class _ImageGeneratorWidgetState extends State<ImageGeneratorWidget> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gabim në ndarjen e imazhit: $e')),
-        );
+        context.read<AppStateProvider>().enqueueSnack('Gabim në ndarjen e imazhit: $e');
       }
     } finally {
       setState(() => _isGenerating = false);

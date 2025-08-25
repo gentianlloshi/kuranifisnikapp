@@ -68,7 +68,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(16),
                 ),
@@ -100,7 +100,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: provider.isQuizMode ? null : () => provider.startQuiz(),
+                      onPressed: provider.isQuizMode ? null : () => _openStartQuizDialog(context, provider),
                       icon: const Icon(Icons.quiz),
                       label: const Text('Fillo Kuizin'),
                       style: ElevatedButton.styleFrom(
@@ -188,27 +188,36 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Progress
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          Semantics(
+            label: 'Progres kuizi ${(progress * 100).toStringAsFixed(0)} përqind',
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+            ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Pyetja ${provider.currentQuestionIndex + 1} nga ${provider.totalQuestions}',
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
+          Semantics(
+            label: 'Pyetja ${provider.currentQuestionIndex + 1} nga ${provider.totalQuestions}',
+            child: Text(
+              'Pyetja ${provider.currentQuestionIndex + 1} nga ${provider.totalQuestions}',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: 24),
 
           // Question
-          Card(
+          Semantics(
+            label: 'Pyetje kuizi',
+            child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
                 question.question,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+            ),
             ),
           ),
           const SizedBox(height: 16),
@@ -238,11 +247,14 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                     icon = Icons.cancel;
                   }
                 } else if (isSelected) {
-                  backgroundColor = Theme.of(context).primaryColor.withOpacity(0.1);
+                  backgroundColor = Theme.of(context).colorScheme.primary.withValues(alpha: 0.1);
                   textColor = Theme.of(context).primaryColor;
                 }
 
-        return Card(
+  return Semantics(
+      button: !showResult,
+      label: 'Opsion ${index + 1}${isSelected ? ', i zgjedhur' : ''}${showResult && isCorrect ? ', i saktë' : ''}',
+      child: Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   color: backgroundColor,
                   child: ListTile(
@@ -250,6 +262,7 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                     trailing: icon != null ? Icon(icon, color: textColor) : null,
           onTap: showResult ? null : () => provider.selectAnswer(optionText),
                   ),
+      ),
                 );
               },
             ),
@@ -279,16 +292,30 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
                 ),
               ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: provider.nextQuestion,
+            Semantics(
+              button: true,
+              label: provider.isLastQuestion ? 'Përfundo kuizin' : 'Pyetja tjetër',
+              child: ElevatedButton(
+              onPressed: provider.isLastQuestion
+                  ? () async {
+                      final result = await provider.finishQuiz();
+                      if (!context.mounted) return;
+                      _showQuizSummary(context, provider, result);
+                    }
+                  : provider.nextQuestion,
               child: Text(
                 provider.isLastQuestion ? 'Përfundo Kuizin' : 'Pyetja Tjetër',
               ),
+              ),
             ),
           ] else if (provider.selectedAnswer != null) ...[
-            ElevatedButton(
+            Semantics(
+              button: true,
+              label: 'Konfirmo përgjigjen',
+              child: ElevatedButton(
               onPressed: provider.submitAnswer,
               child: const Text('Konfirmo Përgjigjen'),
+              ),
             ),
           ],
         ],
@@ -354,4 +381,93 @@ class _TexhvidWidgetState extends State<TexhvidWidget> {
       ),
     );
   }
+
+  void _openStartQuizDialog(BuildContext context, TexhvidProvider provider) {
+    String? selectedCategory;
+    int? limit;
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Fillo Kuizin'),
+          content: StatefulBuilder(
+            builder: (ctx, setState) {
+              final categories = ['Të gjitha', ...provider.categories];
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: selectedCategory,
+                    items: categories
+                        .map((c) => DropdownMenuItem<String>(
+                              value: c == 'Të gjitha' ? null : c,
+                              child: Text(c),
+                            ))
+                        .toList(),
+                    decoration: const InputDecoration(labelText: 'Kategoria'),
+                    onChanged: (val) => setState(() => selectedCategory = val),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    value: limit,
+                    items: const [
+                      DropdownMenuItem(value: 5, child: Text('5 pyetje')),
+                      DropdownMenuItem(value: 10, child: Text('10 pyetje')),
+                      DropdownMenuItem(value: 20, child: Text('20 pyetje')),
+                    ],
+                    decoration: const InputDecoration(labelText: 'Numri i pyetjeve (opsionale)'),
+                    onChanged: (val) => setState(() => limit = val),
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Anulo'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                provider.startQuiz(category: selectedCategory, limit: limit, shuffle: true);
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Fillo'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+void _showQuizSummary(BuildContext context, TexhvidProvider provider, QuizResult result) {
+  showDialog(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        title: const Text('Përmbledhje e Kuizit'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Rezultati: ${result.correct}/${result.total} (${(result.accuracy * 100).toStringAsFixed(0)}%)'),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text('Totali i kuizeve: ${provider.totalQuizzes}'),
+            Text('Saktësia gjithsej: ${(provider.lifetimeAccuracy * 100).toStringAsFixed(0)}%'),
+            if (provider.lastQuizAt != null) Text('Kuizi i fundit: ${provider.lastQuizAt}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Mbyll'),
+          ),
+        ],
+      );
+    },
+  );
 }

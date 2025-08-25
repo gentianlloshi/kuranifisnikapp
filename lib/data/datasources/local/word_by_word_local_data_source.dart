@@ -34,7 +34,14 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
   // ignore: avoid_print
   // ignore: use_build_context_synchronously
   Logger.d('cache hit words surah=$surahNumber count=${cachedData.length}', tag: 'WBW');
-      return cachedData.map((json) => WordByWordVerse.fromJson(json)).toList();
+      return cachedData.map((item) {
+        if (item is Map) {
+          // Coerce to Map<String,dynamic> for model parser
+          final map = item.map((k, v) => MapEntry(k.toString(), v));
+          return WordByWordVerse.fromJson(map);
+        }
+        return WordByWordVerse.fromJson(item as Map<String, dynamic>);
+      }).toList();
     }
 
     try {
@@ -60,7 +67,13 @@ class WordByWordLocalDataSourceImpl implements WordByWordLocalDataSource {
       final List<dynamic> cachedData = _timestampBox!.get(boxKey);
   // ignore: avoid_print
   Logger.d('cache hit ts surah=$surahNumber count=${cachedData.length}', tag: 'WBW');
-      return cachedData.map((json) => TimestampData.fromJson(json)).toList();
+      return cachedData.map((item) {
+        if (item is Map) {
+          final map = item.map((k, v) => MapEntry(k.toString(), v));
+          return TimestampData.fromJson(map);
+        }
+        return TimestampData.fromJson(item as Map<String, dynamic>);
+      }).toList();
     }
 
     try {

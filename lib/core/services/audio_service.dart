@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart'; // Import WordByWord entities
+import '../metrics/perf_metrics.dart';
 
 enum AudioState {
   stopped,
@@ -34,13 +35,12 @@ class AudioService {
   List<Verse> _currentPlaylist = [];
   int _currentIndex = 0; // mirrors player.currentIndex; kept for legacy callers
   bool _isRepeatMode = false;
+  bool _singleVerseLoop = false; // single verse loop (non-playlist)
   bool _isAutoPlayNext = true; // with ConcatenatingAudioSource this is always true unless disabled
   List<WordTimestamp> _currentWordTimestamps = []; // Store current word timestamps
   Map<int, List<WordTimestamp>> _allSurahTimestamps = {}; // verseNumber -> timestamps for playlist mode
   String? _preferredReciter; // user selected preferred reciter (folder name)
-  bool _isAdvancing = false; // legacy guard (no longer needed with currentIndexStream) – will be removed after validation
-  final Set<String> _prefetchedUrls = <String>{}; // remember prefetched remote URLs
-  ConcatenatingAudioSource? _playlistSource; // active playlist audio source
+  bool _isPlaylistMode = false; // active when a playlist is loaded
 
   // Word sync optimization state
   int _wordPtr = 0; // current pointer into _currentWordTimestamps (monotonic advance during playback)
@@ -65,8 +65,10 @@ class AudioService {
   AudioState get currentState => _currentState;
   Verse? get currentVerse => _currentVerse;
   bool get isRepeatMode => _isRepeatMode;
+  bool get isSingleVerseLoop => _singleVerseLoop;
   bool get isAutoPlayNext => _isAutoPlayNext;
   AudioPlayer get player => _audioPlayer; // Expose player for external access if needed
+  int get currentPlaylistLength => _currentPlaylist.length; // 0 or >0 if playlist mode
 
   Future<void> initialize() async {
     try {
@@ -130,7 +132,7 @@ class AudioService {
 
       // Rely on just_audio's internal advancement. For single verse playback we'll still observe completion -> stopped state.
       _audioPlayer.processingStateStream.listen((processingState) {
-        if (processingState == ProcessingState.completed && _playlistSource == null) {
+        if (processingState == ProcessingState.completed && !_isPlaylistMode) {
           // Single verse ended
           stop();
         }
@@ -145,6 +147,8 @@ class AudioService {
   Future<void> playVerse(Verse verse, {List<WordTimestamp>? wordTimestamps}) async {
     try {
       _setState(AudioState.loading);
+  _isPlaylistMode = false;
+  _singleVerseLoop = false; // reset per new verse
       _currentVerse = verse;
       _currentVerseController.add(verse);
       _currentWordTimestamps = wordTimestamps ?? [];
@@ -153,7 +157,7 @@ class AudioService {
         // Pre-emit first word index so UI highlights instantly
         _currentWordIndexController.add(0);
       }
-  // DO NOT reset _isAdvancing here; wait until verse actually starts playing to avoid race with completion events.
+  // Verse prepared; playback will start below.
 
       final audioUrl = await _resolveAudioUrlWithFallback(verse);
       if (audioUrl == null) {
@@ -166,6 +170,7 @@ class AudioService {
       }
       // Fallback to streaming if prefetch disabled or failed
       final isLocal = playPath != null;
+  if (isLocal) { PerfMetrics.instance.incAudioCacheHit(); }
 
       bool success = false;
       for (int attempt = 0; attempt < _maxRetries && !success; attempt++) {
@@ -183,8 +188,7 @@ class AudioService {
           await Future.delayed(backoff);
         }
       }
-  // Now that playback has successfully started, allow completion handler again.
-  _isAdvancing = false;
+  // Now that playback has successfully started.
       // No manual prefetch when single verse – playlist prefetch handled separately.
       
     } catch (e) {
@@ -199,7 +203,7 @@ class AudioService {
     _currentPlaylist = verses;
     _currentIndex = startIndex.clamp(0, verses.length - 1);
     _allSurahTimestamps = allTimestamps;
-    _playlistSource?.clear();
+  _isPlaylistMode = true;
     // Build sources (prefer local cached files if present / prefetch flag)
     final children = <AudioSource>[];
     for (final v in verses) {
@@ -210,11 +214,10 @@ class AudioService {
         path = await _ensureLocalFile(url);
       }
       final effective = path != null ? Uri.file(path) : Uri.parse(url);
+  if (path != null) { PerfMetrics.instance.incAudioCacheHit(); }
       children.add(AudioSource.uri(effective));
     }
-    final source = ConcatenatingAudioSource(children: children);
-    _playlistSource = source;
-    await _audioPlayer.setAudioSource(source, initialIndex: _currentIndex);
+  await _audioPlayer.setAudioSources(children, initialIndex: _currentIndex);
     // Pre-initialize current verse + timestamps before playback starts so UI can highlight immediately
     if (_currentPlaylist.isNotEmpty) {
       final initialVerse = _currentPlaylist[_currentIndex];
@@ -236,10 +239,42 @@ class AudioService {
       }
     }
     await _audioPlayer.play();
-    _isAdvancing = false;
+  // Playlist playback started.
   }
 
-  void _prefetchNextInPlaylist() {/* obsolete with ConcatenatingAudioSource - retained for compatibility */}
+  // Seek to a verse inside the current playlist by matching verse identity.
+  // Returns true if the verse was found and seek performed. If [autoPlay] is true, resumes playback after seek.
+  Future<bool> seekToVerseInPlaylist(Verse target, {bool autoPlay = true}) async {
+  if (!_isPlaylistMode || _currentPlaylist.isEmpty) return false;
+    // Prefer matching by verseKey when present; fallback to surahId+verseNumber
+    final String key = target.verseKey;
+    final int surah = target.surahId;
+    final int ayah = target.verseNumber;
+    int found = -1;
+    for (int i = 0; i < _currentPlaylist.length; i++) {
+      final v = _currentPlaylist[i];
+      if (key.isNotEmpty) {
+        if (v.verseKey == key) { found = i; break; }
+      } else {
+        final s = v.surahId;
+        final a = v.verseNumber;
+        if (s == surah && a == ayah) { found = i; break; }
+      }
+    }
+    if (found < 0) return false;
+    try {
+      await _audioPlayer.seek(Duration.zero, index: found);
+      if (autoPlay) {
+        await _audioPlayer.play();
+      }
+      return true;
+    } catch (e) {
+      _log('seekToVerseInPlaylist failed: $e');
+      return false;
+    }
+  }
+
+  // obsolete helper removed after playlist migration
 
   Future<void> play() async {
     try {
@@ -267,6 +302,8 @@ class AudioService {
       _currentWordTimestamps = []; // Clear timestamps on stop
   _allSurahTimestamps = {};
       _currentWordIndexController.add(null); // Clear word index on stop
+  _singleVerseLoop = false;
+  _isPlaylistMode = false;
       _setState(AudioState.stopped);
     } catch (e) {
       _log('Error stopping audio: $e');
@@ -283,13 +320,13 @@ class AudioService {
   }
 
   Future<void> playNext() async {
-    if (_playlistSource != null) {
+  if (_isPlaylistMode) {
       try { await _audioPlayer.seekToNext(); } catch (_) {}
     }
   }
 
   Future<void> playPrevious() async {
-    if (_playlistSource != null) {
+  if (_isPlaylistMode) {
       try { await _audioPlayer.seekToPrevious(); } catch (_) {}
     }
   }
@@ -297,6 +334,12 @@ class AudioService {
   void toggleRepeatMode() {
     _isRepeatMode = !_isRepeatMode;
     _audioPlayer.setLoopMode(_isRepeatMode ? LoopMode.all : LoopMode.off);
+  }
+
+  Future<void> setSingleVerseLoop(bool enable) async {
+    _singleVerseLoop = enable;
+  if (_isPlaylistMode) return; // only for single verse mode
+    await _audioPlayer.setLoopMode(enable ? LoopMode.one : LoopMode.off);
   }
 
   void toggleAutoPlayNext() {
@@ -340,7 +383,7 @@ class AudioService {
     _stateController.add(state);
   }
 
-  void _onPlaybackCompleted() {/* obsolete with playlist-driven advancement */}
+  // _onPlaybackCompleted removed (obsolete with playlist-driven advancement)
 
   void _updateCurrentWordIndex(Duration currentPosition) {
     if (_currentWordTimestamps.isEmpty) {
@@ -541,7 +584,7 @@ class AudioService {
       _log('Audio downloaded to: $filePath');
     } catch (e) {
       _log('Error downloading audio: $e');
-      throw e;
+      rethrow;
     }
   }
 

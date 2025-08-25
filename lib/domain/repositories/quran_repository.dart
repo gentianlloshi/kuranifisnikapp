@@ -15,4 +15,9 @@ abstract class QuranRepository {
   Future<void> ensureSurahTranslation(int surahNumber, {String translationKey = 'sq_ahmeti'});
   Future<void> ensureSurahTransliteration(int surahNumber);
   bool isSurahFullyEnriched(int surahNumber);
+  Map<String,double> translationCoverageByKey();
+  // Reactive streams (PERF-2) for UI to subscribe to coverage changes
+  Stream<double> get enrichmentCoverageStream; // emits 0..1 when enrichment coverage changes
+  // Optional: translation coverage per key aggregate (emit map for simplicity)
+  Stream<Map<String,double>> get translationCoverageStream; // emits updated coverage map per translation key
 }

@@ -20,6 +20,8 @@ abstract class StorageRepository {
   // Last read position methods
   Future<void> saveLastReadPosition(int surahNumber, int verseNumber);
   Future<Map<String, int>> getLastReadPosition();
+  // Last read timestamps (epoch seconds) for continue button ordering
+  Future<Map<String, int>> getLastReadTimestamps();
   
   // Memorization methods
   Future<void> addVerseToMemorization(String verseKey);

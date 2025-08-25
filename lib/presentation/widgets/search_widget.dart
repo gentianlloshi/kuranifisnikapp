@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/app_state_provider.dart';
+import '../providers/note_provider.dart';
 import '../../domain/entities/verse.dart';
+import '../../domain/entities/note.dart';
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import '../theme/theme.dart';
 import 'sheet_header.dart';
+import '../search/unified_ranking.dart';
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key});
@@ -55,6 +60,23 @@ class _SearchWidgetState extends State<SearchWidget> {
   Widget build(BuildContext context) {
     return Consumer2<QuranProvider, AppStateProvider>(
       builder: (context, quranProvider, appState, child) {
+        final double p = quranProvider.indexProgress;
+        String readinessLabel;
+        Color readinessColor;
+        if (p >= 1.0) {
+          readinessLabel = 'Index i Plotë'; readinessColor = Colors.green;
+        } else if (p >= 0.8) {
+          readinessLabel = '80%'; readinessColor = Colors.lightGreen;
+        } else if (p >= 0.5) {
+          readinessLabel = '50%'; readinessColor = Colors.orange;
+        } else if (p >= 0.2) {
+          readinessLabel = '20%'; readinessColor = Colors.deepOrange;
+        } else if (p > 0) {
+          readinessLabel = '…'; readinessColor = Colors.grey;
+        } else {
+          readinessLabel = '0%'; readinessColor = Colors.grey;
+        }
+        final bool gatingActive = p < 0.2 && _searchController.text.trim().isNotEmpty;
         return Column(
           children: [
             // Search input and filters
@@ -63,7 +85,7 @@ class _SearchWidgetState extends State<SearchWidget> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceElevated(1),
                 borderRadius: BorderRadius.circular(context.radiusCard.x),
-                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4)),
+                border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.4)),
               ),
               child: Column(
                 children: [
@@ -86,10 +108,15 @@ class _SearchWidgetState extends State<SearchWidget> {
                   // Search field
                   TextField(
                     controller: _searchController,
+                    enabled: !gatingActive,
                     decoration: InputDecoration(
                       hintText: 'Kërko në Kuran...',
                       prefixIcon: const Icon(Icons.search),
                       contentPadding: EdgeInsets.symmetric(horizontal: context.spaceMd, vertical: context.spaceSm),
+                      prefix: Padding(
+                        padding: const EdgeInsets.only(right: 4.0),
+                        child: _IndexBadge(label: readinessLabel, color: readinessColor),
+                      ),
                       suffix: Consumer<QuranProvider>(
                         builder: (ctx, qp, _) => qp.isBuildingIndex
                             ? const SizedBox(
@@ -115,6 +142,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     onChanged: (query) {
                       setState(() {}); // Update clear icon state
                       if (query.isNotEmpty) {
+                        if (gatingActive) return; // block queries early readiness
                         final app = context.read<AppStateProvider>();
                         if (app.backgroundIndexingEnabled && !_indexKickIssued) {
                           final qp = context.read<QuranProvider>();
@@ -128,10 +156,15 @@ class _SearchWidgetState extends State<SearchWidget> {
                         quranProvider.clearSearch();
                         _indexKickIssued = false; // reset when cleared
                       } else {
-                        quranProvider.searchVersesDebounced(query.trim());
+                        if (!gatingActive) {
+                          // Debounce at the widget level to minimize rapid provider churn
+                          quranProvider.searchVersesDebounced(query.trim());
+                        }
                       }
                     },
-                    onSubmitted: (query) => quranProvider.searchVerses(query.trim()),
+                    onSubmitted: (query) {
+                      if (!gatingActive) quranProvider.searchVerses(query.trim());
+                    },
                   ),
                   SizedBox(height: context.spaceMd),
                   
@@ -249,7 +282,9 @@ class _SearchWidgetState extends State<SearchWidget> {
                   }
                   return false;
                 },
-                child: _buildSearchResults(quranProvider, appState),
+        child: gatingActive
+          ? _GatingNotice(progress: p)
+          : _buildSearchResults(quranProvider, appState),
               ),
             ),
           ],
@@ -320,6 +355,35 @@ class _SearchWidgetState extends State<SearchWidget> {
     quranProvider.searchVerses(query);
   }
 
+  // Show a modal with the full list of note hits
+  void _showAllNoteHits(List<Note> notes, String query) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return BottomSheetWrapper(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SheetHeader(title: 'Të gjitha shënimet e gjetura', leadingIcon: Icons.note),
+              SizedBox(
+                height: 420,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemBuilder: (_, i) => _NoteHitCard(note: notes[i], query: query),
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemCount: notes.length,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
   Widget _buildSearchResults(QuranProvider quranProvider, AppStateProvider appState) {
     // isSearching not implemented; rely on isLoading
     if (quranProvider.isLoading) {
@@ -352,7 +416,14 @@ class _SearchWidgetState extends State<SearchWidget> {
       );
     }
 
-    final searchResults = quranProvider.searchResults;
+  final searchResults = quranProvider.searchResults;
+  final noteProvider = context.read<NoteProvider>();
+  // Get a larger set for unified ranking and for the bottom-sheet "show all"
+  final allNoteHits = _searchController.text.trim().isNotEmpty
+    ? noteProvider.quickSearchNotes(_searchController.text.trim(), limit: 50)
+    : const <Note>[];
+  // Keep a small preview strip (legacy UI) while also computing unified top picks
+  final noteHitsPreview = allNoteHits.length > 5 ? allNoteHits.sublist(0, 5) : allNoteHits;
     
     if (_searchController.text.trim().isEmpty) {
       return const Center(
@@ -386,22 +457,107 @@ class _SearchWidgetState extends State<SearchWidget> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: searchResults.length,
-      itemBuilder: (context, index) {
-        final verse = searchResults[index];
-        return SearchResultItem(
-          verse: verse,
-          searchQuery: _searchController.text,
-          settings: appState.settings,
-        );
-      },
+  // Build unified top results (combined verse + note) limited to 5 items
+  final unifiedTop = computeUnifiedTop(
+      verses: searchResults.length > 50 ? searchResults.sublist(0, 50) : searchResults,
+      notes: allNoteHits,
+      query: _searchController.text.trim(),
+      limit: 5,
+    );
+    final count = searchResults.length;
+    final label = count == 1 ? 'U gjet 1 rezultat' : 'U gjetën $count rezultate';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (unifiedTop.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                const Icon(Icons.star, size: 16),
+                const SizedBox(width: 6),
+                Text('Top rezultate (të kombinuara)', style: Theme.of(context).textTheme.labelMedium),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          ...unifiedTop.map((it) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: it.note != null
+                    ? _NoteHitCard(note: it.note!, query: _searchController.text.trim())
+                    : SearchResultItem(
+                        verse: it.verse!,
+                        searchQuery: _searchController.text,
+                        settings: appState.settings,
+                      ),
+              )),
+          const SizedBox(height: 8),
+        ],
+  // Only show the horizontal strip if unifiedTop doesn't already include a note
+  if (noteHitsPreview.isNotEmpty && unifiedTop.every((it) => it.note == null)) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                const Icon(Icons.note, size: 16),
+                const SizedBox(width: 6),
+                Text('Shënime të gjetura (${allNoteHits.length})', style: Theme.of(context).textTheme.labelMedium),
+                const Spacer(),
+                if (allNoteHits.length > noteHitsPreview.length)
+                  TextButton(
+                    onPressed: () => _showAllNoteHits(allNoteHits, _searchController.text.trim()),
+                    child: const Text('Shfaq të gjitha'),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemBuilder: (_, i) {
+                final n = noteHitsPreview[i];
+                return _NoteHitCard(note: n, query: _searchController.text.trim());
+              },
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemCount: noteHitsPreview.length,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: searchResults.length,
+            itemBuilder: (context, index) {
+              final verse = searchResults[index];
+              return SearchResultItem(
+                verse: verse,
+                searchQuery: _searchController.text,
+                settings: appState.settings,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
 
-class SearchResultItem extends StatelessWidget {
+class SearchResultItem extends StatefulWidget {
   final Verse verse;
   final String searchQuery;
   final dynamic settings; // AppSettings
@@ -414,18 +570,49 @@ class SearchResultItem extends StatelessWidget {
   });
 
   @override
+  State<SearchResultItem> createState() => _SearchResultItemState();
+}
+
+class _SearchResultItemState extends State<SearchResultItem> {
+  bool _expanded = false;
+  Verse? _prev;
+  Verse? _next;
+  bool _loadingCtx = false;
+
+  Future<void> _loadContext(BuildContext context) async {
+    if (_expanded) return; // already loaded or in process
+    setState(() { _expanded = true; _loadingCtx = true; });
+    try {
+      final q = context.read<QuranProvider>();
+      // Ensure surah verses loaded (lightweight if cached)
+      await q.ensureSurahLoaded(widget.verse.surahNumber);
+      final all = q.fullCurrentSurahVerses;
+      final idx = all.indexWhere((v) => v.number == widget.verse.number);
+      if (idx != -1) {
+        if (idx > 0) _prev = all[idx - 1];
+        if (idx + 1 < all.length) _next = all[idx + 1];
+      }
+    } catch (_) {}
+    if (mounted) setState(() { _loadingCtx = false; });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-  final scheme = theme.colorScheme;
-  final isDark = scheme.brightness == Brightness.dark;
-  final surface = scheme.surfaceElevated(isDark ? 1 : 0);
-  final baseBlend = isDark
-    ? Color.alphaBlend(scheme.primary.withOpacity(0.06), surface)
-    : Color.alphaBlend(scheme.primary.withOpacity(0.03), surface);
-  return Card(
-  color: baseBlend,
-  elevation: 0,
+    final settings = widget.settings;
+    final searchQuery = widget.searchQuery;
+    final verse = widget.verse;
+
+    final scheme = theme.colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+    final surface = scheme.surfaceElevated(isDark ? 1 : 0);
+    final baseBlend = isDark
+  ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.06), surface)
+  : Color.alphaBlend(scheme.primary.withValues(alpha: 0.03), surface);
+
+    return Card(
+      color: baseBlend,
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -450,28 +637,34 @@ class SearchResultItem extends StatelessWidget {
                         color: isMarked ? theme.colorScheme.primary : theme.iconTheme.color,
                         tooltip: isMarked ? 'Hiq nga favoritët' : 'Shto në favoritë',
                         onPressed: () async {
+                          final wasMarked = isMarked;
                           await bookmarkProvider.toggleBookmark(key);
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          if (!context.mounted) return;
                           final locale = Localizations.localeOf(context);
                           final strings = Strings(Strings.resolve(locale));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(isMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added')),
+                          context.read<AppStateProvider>().enqueueSnack(
+                            wasMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added'),
                             duration: const Duration(seconds: 2),
-                          ));
+                          );
                         },
                       );
                     },
+                  ),
+                  IconButton(
+                    icon: Icon(_expanded ? Icons.unfold_less : Icons.unfold_more),
+                    tooltip: _expanded ? 'Mbyll kontekstin' : 'Kontekst',
+                    onPressed: () => _loadContext(context),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               
               // Arabic text (if enabled)
-              if (settings.showArabic)
+      if (settings.showArabic)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    verse.textArabic,
+        verse.textArabic,
                     style: theme.textTheme.bodyArabic.copyWith(
                       fontSize: (settings.fontSizeArabic - 4).toDouble(),
                       height: 1.6,
@@ -483,12 +676,58 @@ class SearchResultItem extends StatelessWidget {
               
               // Translation with highlighting
               if (settings.showTranslation && verse.textTranslation != null)
-                RichText(
-                  text: _buildHighlightedText(
+                _ProfilingRichText(
+                  buildSpan: () => _buildHighlightedText(
                     verse.textTranslation!,
                     searchQuery,
                     theme,
                   ),
+                ),
+              if (_expanded)
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: _loadingCtx
+                      ? Padding(
+                          key: const ValueKey('loading'),
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              const SizedBox(width: 12),
+                              Text('Duke marrë kontekstin...', style: theme.textTheme.bodySmall),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          key: const ValueKey('ctx'),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_prev != null) ...[
+                              const SizedBox(height: 12),
+                              Opacity(
+                                opacity: 0.75,
+                                child: Text(
+                                  '${_prev!.number}. ${_prev!.textTranslation ?? ''}',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                            ],
+                            if (_next != null) ...[
+                              const SizedBox(height: 8),
+                              Opacity(
+                                opacity: 0.75,
+                                child: Text(
+                                  '${_next!.number}. ${_next!.textTranslation ?? ''}',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                 ),
             ],
           ),
@@ -502,40 +741,86 @@ class SearchResultItem extends StatelessWidget {
       return TextSpan(
         text: text,
         style: theme.textTheme.bodyLarge?.copyWith(
-          fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+          fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
           height: 1.4,
         ),
       );
     }
+    // Diacritic-insensitive, token-based partial highlighting
+    final bool isDark = theme.brightness == Brightness.dark;
+    final highlightBg = isDark
+  ? theme.colorScheme.tertiary.withValues(alpha: 0.28)
+        : theme.colorScheme.tertiaryContainer;
+    final highlightColor = theme.colorScheme.onTertiaryContainer;
 
-  final List<InlineSpan> spans = [];
-    final String lowerText = text.toLowerCase();
-    final String lowerQuery = query.toLowerCase();
-    
-    int start = 0;
-    int index = lowerText.indexOf(lowerQuery);
-    
-    while (index != -1) {
-      // Add text before the match
-      if (index > start) {
-        spans.add(TextSpan(
-          text: text.substring(start, index),
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontSize: (settings.fontSizeTranslation - 2).toDouble(),
-            height: 1.4,
-          ),
-        ));
+    // Normalization helper for Albanian and common Latin accents
+    String norm(String s) {
+      s = s.toLowerCase();
+      s = s.replaceAll('ç', 'c').replaceAll('ë', 'e');
+      const mapping = {
+        'á':'a','à':'a','ä':'a','â':'a','ã':'a','å':'a','ā':'a','ă':'a','ą':'a',
+        'é':'e','è':'e','ë':'e','ê':'e','ě':'e','ē':'e','ę':'e','ė':'e',
+        'í':'i','ì':'i','ï':'i','î':'i','ī':'i','į':'i','ı':'i',
+        'ó':'o','ò':'o','ö':'o','ô':'o','õ':'o','ø':'o','ō':'o','ő':'o',
+        'ú':'u','ù':'u','ü':'u','û':'u','ū':'u','ů':'u','ű':'u','ť':'t','š':'s','ž':'z','ñ':'n'
+      };
+      final sb = StringBuffer();
+      for (final ch in s.split('')) {
+        sb.write(mapping[ch] ?? ch);
       }
-      
-      // Add highlighted match (Option A refined: soft yellow background, bold dark text)
-      final bool isDark = theme.brightness == Brightness.dark;
-      final highlightBg = isDark
-          ? theme.colorScheme.tertiary.withOpacity(0.28)
-          : theme.colorScheme.tertiaryContainer; // reuse tertiaryContainer as semantic highlight
-      final highlightColor = isDark
-          ? theme.colorScheme.onTertiaryContainer
-          : theme.colorScheme.onTertiaryContainer;
-      final matchText = text.substring(index, index + query.length);
+      return sb.toString();
+    }
+
+    final baseStyle = theme.textTheme.bodyLarge?.copyWith(
+      fontSize: (widget.settings.fontSizeTranslation - 2).toDouble(),
+      height: 1.4,
+    );
+
+    final textNorm = norm(text);
+    // Split query into tokens, filter short empties
+    final queryTokens = query
+        .split(RegExp(r"[^\p{L}\p{N}]+", unicode: true))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .map(norm)
+        .toSet();
+    if (queryTokens.isEmpty) {
+      return TextSpan(text: text, style: baseStyle);
+    }
+
+    // Build match intervals merging overlaps across tokens
+    final intervals = <List<int>>[]; // [start,end)
+    for (final tok in queryTokens) {
+      int start = 0;
+      while (true) {
+        final idx = textNorm.indexOf(tok, start);
+        if (idx == -1) break;
+        intervals.add([idx, idx + tok.length]);
+        start = idx + tok.length;
+      }
+    }
+    if (intervals.isEmpty) {
+      return TextSpan(text: text, style: baseStyle);
+    }
+    intervals.sort((a, b) => a[0].compareTo(b[0]));
+    // Merge overlaps
+    final merged = <List<int>>[];
+    for (final iv in intervals) {
+      if (merged.isEmpty || iv[0] > merged.last[1]) {
+        merged.add([iv[0], iv[1]]);
+      } else {
+        if (iv[1] > merged.last[1]) merged.last[1] = iv[1];
+      }
+    }
+
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final iv in merged) {
+      final a = iv[0], b = iv[1];
+      if (a > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, a), style: baseStyle));
+      }
+      final original = text.substring(a, b);
       spans.add(WidgetSpan(
         alignment: PlaceholderAlignment.baseline,
         baseline: TextBaseline.alphabetic,
@@ -547,9 +832,8 @@ class SearchResultItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
-            matchText,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontSize: (settings.fontSizeTranslation - 2).toDouble(),
+            original,
+            style: baseStyle?.copyWith(
               height: 1.25,
               fontWeight: FontWeight.w700,
               color: highlightColor,
@@ -557,28 +841,17 @@ class SearchResultItem extends StatelessWidget {
           ),
         ),
       ));
-      
-      start = index + query.length;
-      index = lowerText.indexOf(lowerQuery, start);
+      cursor = b;
     }
-    
-    // Add remaining text
-    if (start < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(start),
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontSize: (settings.fontSizeTranslation - 2).toDouble(),
-          height: 1.4,
-        ),
-      ));
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor), style: baseStyle));
     }
-    
-  return TextSpan(children: spans);
+    return TextSpan(children: spans);
   }
 
   void _navigateToVerse(BuildContext context) {
     final q = context.read<QuranProvider>();
-    q.openSurahAtVerse(verse.surahNumber, verse.number);
+    q.openSurahAtVerse(widget.verse.surahNumber, widget.verse.number);
     // If there's a higher-level tab controller, rely on parent logic (avoid crashing if none)
     try {
       final controller = DefaultTabController.maybeOf(context);
@@ -597,14 +870,14 @@ class _RefChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.6)],
+          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 4,
             offset: const Offset(0,2),
           )
@@ -619,6 +892,209 @@ class _RefChip extends StatelessWidget {
           letterSpacing: 0.5,
         ),
       ),
+    );
+  }
+}
+
+class _IndexBadge extends StatelessWidget {
+  final String label; final Color color; const _IndexBadge({required this.label, required this.color});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+  color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+  border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+    );
+  }
+}
+
+class _GatingNotice extends StatelessWidget {
+  final double progress; const _GatingNotice({required this.progress});
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.hourglass_bottom, size: 56, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text('Indeksi po ndërtohet (${(progress*100).toStringAsFixed(0)}%).', style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text('Kërkimi do të aktivizohet pas 20% për rezultate të kuptueshme.', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            LinearProgressIndicator(value: progress <= 0 ? null : progress),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfilingRichText extends StatelessWidget {
+  final TextSpan Function() buildSpan;
+  const _ProfilingRichText({required this.buildSpan});
+  @override
+  Widget build(BuildContext context) {
+    final sw = Stopwatch()..start();
+    final span = buildSpan();
+    sw.stop();
+    PerfMetrics.instance.recordHighlightDuration(sw.elapsed);
+    return Semantics(
+      label: 'Tekst me theksim të rezultateve',
+      child: RichText(text: span),
+    );
+  }
+}
+
+class _NoteHitCard extends StatelessWidget {
+  final Note note;
+  final String query;
+  const _NoteHitCard({required this.note, required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final parts = note.verseKey.split(':');
+    final ref = parts.length == 2 ? '${parts[0]}:${parts[1]}' : note.verseKey;
+    return InkWell(
+      onTap: () {
+        final s = int.tryParse(parts.isNotEmpty ? parts[0] : '') ?? 1;
+        final v = int.tryParse(parts.length > 1 ? parts[1] : '') ?? 1;
+        context.read<QuranProvider>().openSurahAtVerse(s, v);
+        final controller = DefaultTabController.maybeOf(context);
+        controller?.animateTo(0);
+      },
+      child: Container(
+        width: 280,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceElevated(1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.note, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  'Ajeti: $ref',
+                  style: theme.textTheme.labelSmall,
+                ),
+                const Spacer(),
+                Text(
+                  _formatDate(note.updatedAt),
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.hintColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: _HighlightedSnippet(text: note.content, query: query),
+            ),
+            if (note.tags.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 26,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (_, i) => Chip(label: Text(note.tags[i]), visualDensity: VisualDensity.compact, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  separatorBuilder: (_, __) => const SizedBox(width: 4),
+                  itemCount: note.tags.length,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _formatDate(DateTime dt) {
+    return '${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _HighlightedSnippet extends StatelessWidget {
+  final String text;
+  final String query;
+  const _HighlightedSnippet({required this.text, required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (query.isEmpty) return Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyMedium);
+    String norm(String s) {
+      s = s.toLowerCase();
+      s = s.replaceAll('ç', 'c').replaceAll('ë', 'e');
+      const mapping = {
+        'á':'a','à':'a','ä':'a','â':'a','ã':'a','å':'a','ā':'a','ă':'a','ą':'a',
+        'é':'e','è':'e','ë':'e','ê':'e','ě':'e','ē':'e','ę':'e','ė':'e',
+        'í':'i','ì':'i','ï':'i','î':'i','ī':'i','į':'i','ı':'i',
+        'ó':'o','ò':'o','ö':'o','ô':'o','õ':'o','ø':'o','ō':'o','ő':'o',
+        'ú':'u','ù':'u','ü':'u','û':'u','ū':'u','ů':'u','ű':'u','ť':'t','š':'s','ž':'z','ñ':'n'
+      };
+      final sb = StringBuffer();
+      for (final ch in s.split('')) { sb.write(mapping[ch] ?? ch); }
+      return sb.toString();
+    }
+    final base = theme.textTheme.bodyMedium;
+    final tn = norm(text);
+    final qTokens = query
+        .split(RegExp(r"[^\p{L}\p{N}]+", unicode: true))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .map(norm)
+        .toSet();
+    final intervals = <List<int>>[];
+    for (final tok in qTokens) {
+      int start = 0;
+      while (true) {
+        final i = tn.indexOf(tok, start);
+        if (i == -1) break;
+        intervals.add([i, i + tok.length]);
+        start = i + tok.length;
+      }
+    }
+    if (intervals.isEmpty) return Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: base);
+    intervals.sort((a, b) => a[0].compareTo(b[0]));
+    final merged = <List<int>>[];
+    for (final iv in intervals) {
+      if (merged.isEmpty || iv[0] > merged.last[1]) { merged.add([iv[0], iv[1]]); }
+      else if (iv[1] > merged.last[1]) { merged.last[1] = iv[1]; }
+    }
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final iv in merged) {
+      final a = iv[0], b = iv[1];
+      if (a > cursor) spans.add(TextSpan(text: text.substring(cursor, a), style: base));
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(text.substring(a, b), style: base?.copyWith(fontWeight: FontWeight.w700, height: 1.2, color: theme.colorScheme.onSecondaryContainer)),
+        ),
+      ));
+      cursor = b;
+    }
+    if (cursor < text.length) spans.add(TextSpan(text: text.substring(cursor), style: base));
+    return RichText(
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(children: spans),
     );
   }
 }

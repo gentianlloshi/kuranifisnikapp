@@ -46,7 +46,7 @@ class SheetHeader extends StatelessWidget {
                     Text(title, style: Theme.of(context).textTheme.titleLarge),
                     if (subtitle != null) ...[
                       SizedBox(height: context.spaceXs),
-                      Text(subtitle!, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.75))),
+                      Text(subtitle!, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.75))),
                     ],
                   ],
                 ),
@@ -66,7 +66,7 @@ class SheetHeader extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 0.6,
-            color: Theme.of(context).dividerColor.withOpacity(0.6),
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.6),
           ),
       ],
     );

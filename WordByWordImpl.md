@@ -362,3 +362,12 @@ Potential Next Steps:
 
 ---
 *Document version: 1.2 | Cache schema version: 2 (added adaptive auto-scroll + glow option)*
+
+---
+## 25. Maintenance Updates (Aug 22, 2025)
+Fixes:
+- Cache read type safety: Coerce cached Hive values `Map<dynamic,dynamic>` → `Map<String,dynamic>` before `fromJson` to prevent runtime cast exceptions on WBW/timestamps.
+- Lifecycle safety: Added `mounted` checks around post-frame callbacks and async UI interactions in Quran view to avoid unsafe ancestor lookups while WBW auto-scroll/highlight callbacks run.
+
+Notes:
+- No schema change required; only read-path coercion. Keep `_cacheVersion` as-is unless data format changes.

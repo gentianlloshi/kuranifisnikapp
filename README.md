@@ -6,6 +6,14 @@ Aplikacion Flutter për leximin dhe studimin e Kuranit Fisnik në gjuhën shqipe
 
 Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërkimin në Kuranin Fisnik, i fokusuar te përdoruesit shqipfolës. Aplikacioni përmban përkthime të shumta në shqip, krahas tekstit origjinal arab dhe transliterimit latin.
 
+## Çfarë ka të re (24 Gusht 2025)
+
+ - Indeksi Tematik: Ikona sipas kategorisë, parapamje e lehtë për vargje (snippet i ajetit të parë ose “S–E”), bottom sheet me bosh/placeholder miqësor. Kërkimi tani thekson rezultatet dhe zgjeron kategoritë automatikisht. “Shko te ajeti/rangu” skrollon në krye te ajeti i parë dhe thekson vargun ~6s.
+ - Kërkimi (UI): Ngjyrosje me kontrast më të lartë për pjesët e përputhura në listime.
+ - Memorizimi: Tab i ri me kokë “sticky”, statistika globale/aktive, navigim mes grupeve (sure), maskim teksti me “Prek për të parë”, përzgjedhje e ajeve, status ciklik (I Ri → Në Progres → I Mësuar), dhe kontroll i përsëritjeve të seancës.
+ - Stabilitet: Pastrim i kodit të indeksit tematik dhe teste të reja për utilitetet e parapamjes/ikonave.
+ - Performanca në start: StartupScheduler tani hap kutitë jo-kritike të Hive me vonesa të shkallëzuara pas kornizës së parë (thematicIndexBox, transliterationBox, wordByWordBox, timestampBox) për të shmangur burst I/O dhe jank.
+
 ## Karakteristikat Kryesore
 
 ### ✅ Të Implementuara Plotësisht
@@ -49,6 +57,7 @@ Ky aplikacion ofron një platformë të plotë për leximin, studimin dhe kërki
 - ✅ **Caching i të Dhënave**: Surah / përkthime / transliterime / index tematik në Hive (offline ready).
 - ✅ **Parsimi në Isolate**: JSON voluminoz zhvendosur off-main për të reduktuar frame skips në start.
 - ✅ **Indeksi i Kërkimit**: Ndërtim në isolate + debounce 350ms → kërkime të rrjedhshme gjatë shkrimit.
+ - ✅ **Indeks i Parandërtuar (opsional)**: Mund të krijoni `assets/data/search_index.json` me `dart run tool/build_search_index.dart` për start edhe më të shpejtë; aplikacioni e ngarkon automatikisht nëse ekziston.
 - ✅ **Highlight i Rafinuar**: Sfondo i verdhë me kontrast të lartë (dark-mode toned) për rezultatet e kërkimit.
 - ✅ **Auto-Scroll Audio**: Ajeti aktiv mbahet në viewport (alignment 0.1 + throttling + suppression pas scroll manual).
 - ✅ **Audio Stability**: Eliminim i ndërprerjeve me `ConcatenatingAudioSource` + prefetch/depozitim lokalisht.
@@ -124,6 +133,11 @@ Aplikacioni përmban:
    ```
 
 3. **Gjeneroni skedarët Hive (vetëm pas ndryshimeve në entitete)**
+4. **(Opsionale) Ndërtoni indeksin e kërkimit si asset**
+   ```powershell
+   dart run tool/build_search_index.dart
+   ```
+   Skedari `assets/data/search_index.json` do të ngarkohet automatikisht në start duke eliminuar ndërtimin në pajisje.
    ```bash
    flutter packages pub run build_runner build --delete-conflicting-outputs
    ```
@@ -202,10 +216,10 @@ Për pyetje ose sugjerime, kontaktoni:
 
 ---
 ### 🔄 Roadmap i Afërt
-- Persistim i indeksit të kërkimit (shmang rebuild çdo hapje)
-- Field-weighted ranking (Arabic > Translation > Transliteration)
+- Persistim i indeksit të kërkimit (snapshot incremental është në vend; zgjerim për invalidim/verzionim)
+- Field-weighted ranking i përmirësuar (aktualisht ka pesha bazike; nevojitet kalibrim dhe BM25-lite)
 - Mini-player i përhershëm në fund gjatë navigimit
 - Opsion për çaktivizim auto-scroll / reduktim animacionesh
-- Light stemming për forma fjalësh (-it, -in, -ve)
+- Normalizim morfologjik: rritje e mbulimit të prapashtesave dhe testim i regression-eve
 
 

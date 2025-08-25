@@ -18,6 +18,8 @@ class _FakeRepo implements QuranRepository {
   @override
   Future<Verse> getVerse(int surahNumber, int verseNumber) async => (await getSurahVerses(surahNumber)).firstWhere((v)=> v.verseNumber==verseNumber);
   @override
+  Future<List<Verse>> getVersesBySurah(int surahId) async => getSurahVerses(surahId);
+  @override
   Future<Map<String, dynamic>> getTranslation(String translationKey) async => {};
   @override
   Future<Map<String, dynamic>> getThematicIndex() async => {};
@@ -25,6 +27,19 @@ class _FakeRepo implements QuranRepository {
   Future<Map<String, dynamic>> getTransliterations() async => {};
   @override
   Future<List<Verse>> searchVerses(String query, {String? translationKey}) async => [];
+  // New enrichment API members
+  @override
+  Future<void> ensureSurahTranslation(int surahNumber, {String translationKey = 'sq_ahmeti'}) async {}
+  @override
+  Future<void> ensureSurahTransliteration(int surahNumber) async {}
+  @override
+  bool isSurahFullyEnriched(int surahNumber) => true;
+  @override
+  Map<String, double> translationCoverageByKey() => const {};
+  @override
+  Stream<double> get enrichmentCoverageStream => const Stream<double>.empty();
+  @override
+  Stream<Map<String, double>> get translationCoverageStream => const Stream<Map<String, double>>.empty();
 }
 
 void main() {
@@ -36,15 +51,12 @@ void main() {
     );
     final events = <SearchIndexProgress>[];
     final sub = mgr.progressStream.listen(events.add);
-    mgr.ensureIncrementalBuild();
-    // Wait a short duration to collect some events
-    await Future.delayed(const Duration(milliseconds: 200));
-    // We expect at least one event
-    expect(events.isNotEmpty, isTrue);
-    // Force full build (ensureBuilt) then wait for completion
-    await mgr.ensureBuilt();
-    await Future.delayed(const Duration(milliseconds: 50));
-    expect(events.last.complete, isTrue);
+  mgr.ensureIncrementalBuild();
+  await Future.delayed(const Duration(milliseconds: 400));
+  expect(events.isNotEmpty, isTrue);
+  await mgr.ensureBuilt();
+  await Future.delayed(const Duration(milliseconds: 150));
+  expect(events.isNotEmpty && events.last.complete, isTrue);
     await sub.cancel();
     mgr.dispose();
   });

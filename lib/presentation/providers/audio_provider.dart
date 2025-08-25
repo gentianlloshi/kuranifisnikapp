@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import '../../core/services/audio_service.dart';
 import 'word_by_word_provider.dart';
 import '../../domain/entities/verse.dart';
 import '../../domain/entities/word_by_word.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AudioProvider extends ChangeNotifier {
   final AudioService _audioService = AudioService();
@@ -19,6 +21,12 @@ class AudioProvider extends ChangeNotifier {
   Duration? _currentDuration;
   Verse? _currentVerse;
   int? _currentWordIndex;
+  int? _remainingSingleVerseLoops; // bounded loop counter when set
+  // A-B loop (MEMO-2b) state: defines inclusive verse range within a playlist (or single verses list) to loop.
+  Verse? _loopStartVerse;
+  Verse? _loopEndVerse;
+  bool _abLoopEnabled = false;
+  int? _remainingABLoops; // null => infinite until disabled
 
   bool get isPlaying => _audioService.currentState == AudioState.playing;
   bool get isLoading => _audioService.currentState == AudioState.loading;
@@ -31,6 +39,13 @@ class AudioProvider extends ChangeNotifier {
   bool get isRepeatMode => _isRepeatMode;
   bool get isPlayerExpanded => _isPlayerExpanded;
   String? get error => _error;
+  bool get isSingleVerseLoop => _audioService.isSingleVerseLoop;
+  bool get isPlaylistMode => _audioService.currentPlaylistLength > 1;
+  bool get isABLoopEnabled => _abLoopEnabled;
+  Verse? get loopStartVerse => _loopStartVerse;
+  Verse? get loopEndVerse => _loopEndVerse;
+  int? get remainingABLoops => _remainingABLoops;
+  static bool canSingleVerseLoop(int playlistLength) => playlistLength <= 1;
   // Backwards compatibility names used in widgets
   dynamic get currentTrack => _currentVerse; // alias
 
@@ -43,6 +58,16 @@ class AudioProvider extends ChangeNotifier {
       await _audioService.initialize();
       _player = _audioService.player;
       _listenStreams();
+      // Load persisted single verse loop preference (only applies outside playlist)
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final loopPref = prefs.getBool('audio_single_verse_loop') ?? false;
+        if (loopPref) {
+          await _audioService.setSingleVerseLoop(true);
+        }
+  // Load persisted A-B loop state (MEMO-2b)
+  await _loadABLoopState(prefs);
+      } catch (_) {}
       _initialized = true;
       notifyListeners();
     } catch (e) {
@@ -69,7 +94,49 @@ class AudioProvider extends ChangeNotifier {
       notifyListeners();
     });
     _audioService.stateStream.listen((_) {
+      // If single verse finished (stopped state) and bounded loops remain, replay
+      if (_audioService.currentState == AudioState.stopped && _audioService.isSingleVerseLoop && _remainingSingleVerseLoops != null) {
+        if (_remainingSingleVerseLoops! > 0 && _currentVerse != null) {
+          _remainingSingleVerseLoops = _remainingSingleVerseLoops! - 1;
+          if (_remainingSingleVerseLoops! >= 0) {
+            // Replay without toggling flags (still in loop)
+            // ignore: unawaited_futures
+            _audioService.playVerse(_currentVerse!);
+          }
+        }
+        if (_remainingSingleVerseLoops != null && _remainingSingleVerseLoops! <= 0) {
+          // Auto-disable loop after completion
+          // ignore: unawaited_futures
+          _audioService.setSingleVerseLoop(false);
+          _remainingSingleVerseLoops = null;
+        }
+      }
+      // Handle A-B loop advancement in playlist mode: if enabled and current verse is end, jump back to start.
+      if (_abLoopEnabled && _loopStartVerse != null && _loopEndVerse != null && _audioService.currentState == AudioState.stopped) {
+        // In playlist mode completion triggers stopped for single verse playback path; for playlist we monitor currentVerseStream
+      }
       notifyListeners();
+    });
+
+    // Monitor verse changes for A-B looping (playlist only)
+    _audioService.currentVerseStream.listen((v) {
+      if (!_abLoopEnabled || _loopStartVerse == null || _loopEndVerse == null) return;
+      if (!_audioService.isSingleVerseLoop && isPlaylistMode && v != null) {
+        final endKey = _loopEndVerse!.verseKey;
+        // If we've just reached end verse and loops remaining, schedule jump to start
+        if (v.verseKey == endKey) {
+          if (_remainingABLoops != null) {
+            if (_remainingABLoops! <= 0) {
+              disableABLoop();
+              return;
+            }
+            _remainingABLoops = _remainingABLoops! - 1;
+          }
+          // Seek to start verse by index if playlist and verses loaded
+          // We rely on playlist order matching provided verses sequence.
+          _jumpToLoopStart();
+        }
+      }
     });
   }
 
@@ -108,7 +175,7 @@ class AudioProvider extends ChangeNotifier {
       Map<int, List<WordTimestamp>>? map;
       if (wbwProvider != null) {
         // Ensure surah data loaded (idempotent)
-        final surahId = verses.isNotEmpty ? (verses.first.surahId ?? verses.first.surahNumber) : null;
+  final surahId = verses.isNotEmpty ? verses.first.surahId : null;
         if (surahId != null) {
           await wbwProvider.ensureLoaded(surahId);
           map = wbwProvider.allTimestamps;
@@ -116,6 +183,51 @@ class AudioProvider extends ChangeNotifier {
       }
       await _audioService.playPlaylist(verses, startIndex: startIndex, allTimestamps: map ?? const {});
     } catch (e) { _error = e.toString(); notifyListeners(); }
+  }
+
+  // A-B loop controls (playlist verse range). Verses must belong to current playlist context.
+  void setABLoop({Verse? start, Verse? end, int? repeatCount}) {
+    if (start == null || end == null) {
+      disableABLoop();
+      return;
+    }
+    // Ensure ordering; if user picked in reverse, swap.
+  if (start.surahId == end.surahId && start.verseNumber > end.verseNumber) {
+      final tmp = start; start = end; end = tmp;
+    }
+    _loopStartVerse = start;
+    _loopEndVerse = end;
+    _abLoopEnabled = true;
+    _remainingABLoops = repeatCount != null && repeatCount > 0 ? repeatCount : null; // null => infinite
+  // Persist
+  unawaited(_persistABLoopState());
+    notifyListeners();
+  }
+
+  void disableABLoop() {
+    _abLoopEnabled = false;
+    _loopStartVerse = null;
+    _loopEndVerse = null;
+    _remainingABLoops = null;
+  // Persist
+  unawaited(_persistABLoopState());
+    notifyListeners();
+  }
+
+  Future<void> _jumpToLoopStart() async {
+    if (!_abLoopEnabled || _loopStartVerse == null) return;
+    if (!isPlaylistMode) return;
+    // Perform index-based seek within current playlist using service helper
+    try {
+      final ok = await _audioService.seekToVerseInPlaylist(_loopStartVerse!);
+      if (!ok) {
+        // Fallback to direct play if not found (should be rare)
+        await _audioService.playVerse(_loopStartVerse!);
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> togglePlayPause() async {
@@ -133,6 +245,53 @@ class AudioProvider extends ChangeNotifier {
   Future<void> playNext() async { try { await _audioService.playNext(); } catch (e) { _error = e.toString(); notifyListeners(); } }
   Future<void> playPrevious() async { try { await _audioService.playPrevious(); } catch (e) { _error = e.toString(); notifyListeners(); } }
   void toggleRepeatMode() { _audioService.toggleRepeatMode(); _isRepeatMode = !_isRepeatMode; notifyListeners(); }
+  Future<void> setSingleVerseLoop(bool enable) async {
+    if (isPlaylistMode && enable) return; // guard: do not enable in playlist mode
+    await _audioService.setSingleVerseLoop(enable);
+    // Persist preference
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('audio_single_verse_loop', enable);
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  // Configure finite loop count (plays verse N times total). Calls enable loop and sets counter.
+  Future<void> setSingleVerseLoopCount(int times) async {
+    if (times <= 1) { _remainingSingleVerseLoops = null; await setSingleVerseLoop(false); return; }
+    if (isPlaylistMode) return;
+    _remainingSingleVerseLoops = times - 1; // remaining after first play
+    await setSingleVerseLoop(true);
+  }
+
+  // AUDIO-1: Start playback from last read verse using provided callback to fetch resume point.
+  Future<void> playFromLastRead(Future<Verse?> Function() resolver) async {
+    try {
+      final verse = await resolver();
+      if (verse != null) {
+        await playVerse(verse);
+      }
+    } catch (e) { _error = e.toString(); notifyListeners(); }
+  }
+
+  // AUDIO-1 convenience: given ReadingProgressProvider + QuranProvider, start playback from most recent reading point.
+  Future<void> playFromReadingProgress({required Future<Map<String,int>> Function() getLastReadPosition, required int? Function() currentSurahIdProvider, required Future<void> Function(int) ensureSurahLoaded, required Verse? Function(int,int) verseFinder}) async {
+    try {
+      final pos = await getLastReadPosition(); // map surah->verse
+      if (pos.isEmpty) return;
+      // Choose most recent surah based on verse update order (map insertion order unknown) – select highest timestamp not available here, fallback to highest surah id.
+      // For richer resume use dedicated ReadingProgressProvider externally.
+      // Pick max surah key.
+      final surah = pos.keys.map(int.parse).fold<int>(1,(a,b)=> b>a?b:a);
+      final verseNumber = pos['$surah'] ?? 1;
+      if (currentSurahIdProvider() != surah) {
+        await ensureSurahLoaded(surah);
+      }
+      Verse? verse = verseFinder(surah, verseNumber);
+      verse ??= Verse(surahId: surah, verseNumber: verseNumber, arabicText: '', translation: null, transliteration: null, verseKey: '$surah:$verseNumber');
+      await playVerse(verse);
+    } catch (e) { _error = e.toString(); notifyListeners(); }
+  }
 
   Future<void> seekTo(Duration position) async { try { await _audioService.seekTo(position); } catch (e) { _error = e.toString(); notifyListeners(); } }
   Future<void> setVolume(double volume) async { try { await _audioService.setVolume(volume); notifyListeners(); } catch (e) { _error = e.toString(); notifyListeners(); } }
@@ -156,8 +315,8 @@ class AudioProvider extends ChangeNotifier {
     // Simpler: attempt resolve (may cost a HEAD) – acceptable for on-demand button
     try {
       // Reuse play resolution indirectly by constructing code
-      final surah = (verse.surahId ?? verse.surahNumber).toString().padLeft(3,'0');
-      final ayah = (verse.verseNumber ?? verse.number).toString().padLeft(3,'0');
+  final surah = verse.surahId.toString().padLeft(3,'0');
+  final ayah = verse.verseNumber.toString().padLeft(3,'0');
       final code = '$surah$ayah';
       // Check known reciter folders
       const reciters = ['Alafasy_128kbps','Abdul_Basit_Mujawwad','AbdulSamad_64kbps'];
@@ -170,8 +329,8 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> downloadVerseAudio(Verse verse, Function(double) onProgress) async {
-    final surah = (verse.surahId ?? verse.surahNumber).toString().padLeft(3,'0');
-    final ayah = (verse.verseNumber ?? verse.number).toString().padLeft(3,'0');
+  final surah = verse.surahId.toString().padLeft(3,'0');
+  final ayah = verse.verseNumber.toString().padLeft(3,'0');
     final code = '$surah$ayah';
     // Prefer first reciter; fallback list could be added
     final url = 'https://everyayah.com/data/Alafasy_128kbps/$code.mp3';
@@ -179,8 +338,8 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> deleteVerseAudio(Verse verse) async {
-    final surah = (verse.surahId ?? verse.surahNumber).toString().padLeft(3,'0');
-    final ayah = (verse.verseNumber ?? verse.number).toString().padLeft(3,'0');
+  final surah = verse.surahId.toString().padLeft(3,'0');
+  final ayah = verse.verseNumber.toString().padLeft(3,'0');
     final code = '$surah$ayah';
     const reciters = ['Alafasy_128kbps','Abdul_Basit_Mujawwad','AbdulSamad_64kbps'];
     for (final r in reciters) {
@@ -193,6 +352,39 @@ class AudioProvider extends ChangeNotifier {
     final m = d.inMinutes.remainder(60).toString().padLeft(2,'0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2,'0');
     return '$m:$s';
+  }
+
+  // MEMO-2b persistence helpers
+  Future<void> _persistABLoopState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('audio_abloop_enabled', _abLoopEnabled);
+      await prefs.setString('audio_abloop_start_key', _loopStartVerse?.verseKey ?? '');
+      await prefs.setString('audio_abloop_end_key', _loopEndVerse?.verseKey ?? '');
+      await prefs.setInt('audio_abloop_repeat', _remainingABLoops ?? -1); // -1 => infinite/null
+    } catch (_) {}
+  }
+
+  Future<void> _loadABLoopState(SharedPreferences prefs) async {
+    try {
+      final enabled = prefs.getBool('audio_abloop_enabled') ?? false;
+      final startKey = prefs.getString('audio_abloop_start_key');
+      final endKey = prefs.getString('audio_abloop_end_key');
+      final rc = prefs.getInt('audio_abloop_repeat') ?? -1;
+      if (!enabled || startKey == null || startKey.isEmpty || endKey == null || endKey.isEmpty) {
+        return;
+      }
+      Verse parse(String key) {
+        final parts = key.split(':');
+        final s = parts.isNotEmpty ? int.tryParse(parts[0]) ?? 1 : 1;
+        final v = parts.length > 1 ? int.tryParse(parts[1]) ?? 1 : 1;
+        return Verse(surahId: s, verseNumber: v, arabicText: '', translation: null, transliteration: null, verseKey: '$s:$v');
+      }
+      _loopStartVerse = parse(startKey);
+      _loopEndVerse = parse(endKey);
+      _abLoopEnabled = true;
+      _remainingABLoops = rc > 0 ? rc : null;
+    } catch (_) {}
   }
 
   set isPlayerExpanded(bool v) { _isPlayerExpanded = v; notifyListeners(); }

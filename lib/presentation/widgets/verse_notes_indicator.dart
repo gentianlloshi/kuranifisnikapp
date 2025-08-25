@@ -109,7 +109,7 @@ class VerseNotesBottomSheet extends StatelessWidget {
             Icon(
               Icons.note_add_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             SizedBox(height: context.spaceLg),
             Text(
@@ -150,7 +150,7 @@ class VerseNotesBottomSheet extends StatelessWidget {
             Text(
               'Krijuar: ${_formatDate(note.createdAt)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
               ),
             ),
             if (note.tags.isNotEmpty) ...[

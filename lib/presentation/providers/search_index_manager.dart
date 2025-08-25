@@ -1,12 +1,16 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
 import 'inverted_index_builder.dart' as idx;
+import 'search_index_isolate.dart' as iso;
+import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
+import 'package:kurani_fisnik_app/core/search/stemmer.dart';
+import 'package:kurani_fisnik_app/core/search/token_utils.dart' as tq;
+import 'search_snapshot_store.dart';
 
 /// Encapsulates building and querying the inverted search index.
 /// Responsible only for in-memory structures; persistence & advanced ranking can layer on top later.
@@ -37,16 +41,71 @@ class SearchIndexManager {
   // Persistence constants
   static const int _snapshotVersion = 2; // bumped for incremental structure
   static const String _snapshotFile = 'search_index_v$_snapshotVersion.json';
+  // Computed corpus hash (lazy). Used to invalidate old snapshots when assets change.
+  String? _cachedCorpusHash;
+  final SnapshotStore _snapshotStore;
+  final bool _enablePrebuiltAsset;
+
+  // Scoring weights (tunable)
+  static const int _baseHitWeight = 10;
+  static const int _wTranslation = 25;
+  static const int _wArabic = 15;
+  static const int _wTransliteration = 10;
 
   SearchIndexManager({
     required this.getSurahsUseCase,
     required this.getSurahVersesUseCase,
-  });
+    SnapshotStore? snapshotStore,
+    bool enablePrebuiltAsset = true,
+  }) : _snapshotStore = snapshotStore ?? DefaultSnapshotStore(fileName: _snapshotFile),
+        _enablePrebuiltAsset = enablePrebuiltAsset;
+
+  Future<bool> _tryLoadPrebuiltAsset() async {
+    // Expect optional asset at assets/data/search_index.json containing keys: index, verses
+    try {
+      final jsonStr = await rootBundle.loadString('assets/data/search_index.json');
+      if (jsonStr.isEmpty) return false;
+      final obj = json.decode(jsonStr) as Map<String, dynamic>;
+      final idxMap = (obj['index'] as Map?)?.cast<String, dynamic>();
+      final versesMap = (obj['verses'] as Map?)?.cast<String, dynamic>();
+      if (idxMap == null || versesMap == null) return false;
+      _invertedIndex = idxMap.map((k, v) => MapEntry(k, (v as List).cast<String>()));
+      _verseCache.clear();
+      versesMap.forEach((k, v) {
+        final m = (v as Map).cast<String, dynamic>();
+        _verseCache[k] = Verse(
+          surahId: (m['surahNumber'] as num?)?.toInt() ?? m['surahId'] as int? ?? 0,
+          verseNumber: (m['number'] as num?)?.toInt() ?? m['verseNumber'] as int? ?? 0,
+          arabicText: (m['ar'] ?? '') as String,
+          translation: (m['t'] as String?) ?? m['translation'] as String?,
+          transliteration: (m['tr'] as String?) ?? m['transliteration'] as String?,
+          verseKey: (m['verseKey'] as String?) ?? k,
+          juz: (m['juz'] as num?)?.toInt(),
+        );
+      });
+      _nextSurahToIndex = 115; // mark as complete
+      _incrementalMode = false;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Lightweight lookup for an already-cached verse by its key (e.g., "2:255").
+  /// Returns null if the verse hasn't been indexed yet.
+  Verse? getVerseByKey(String verseKey) => _verseCache[verseKey];
 
   /// Ensures the index is fully built (blocking until completion) unless already built.
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
     if (_invertedIndex != null) return;
     // Try fast-path load from snapshot
+    // 1) Prefer prebuilt asset if present and valid
+  if (_enablePrebuiltAsset && await _tryLoadPrebuiltAsset()) {
+      _emitProgress(1.0);
+      if (onProgress != null) onProgress(1.0);
+      return;
+    }
+    // 2) Try on-device snapshot
     if (await _tryLoadSnapshot()) {
   _emitProgress(1.0);
   if (onProgress != null) onProgress(1.0); // backward compatibility
@@ -58,33 +117,36 @@ class SearchIndexManager {
     _building = true;
     _buildCompleter = Completer<void>();
     try {
-      final List<Map<String, dynamic>> raw = [];
-      for (int s = 1; s <= 114; s++) {
-        try {
-          final verses = await getSurahVersesUseCase.call(s);
-          for (final v in verses) {
-            final key = '${v.surahNumber}:${v.number}';
-            _verseCache[key] = v;
-            raw.add({
-              'key': key,
-              't': (v.textTranslation ?? '').toString(),
-              'tr': (v.textTransliteration ?? '').toString(),
-              'ar': (v.textArabic ?? '').toString(),
-            });
-          }
-      final p = s / 114.0 * 0.5;
-      _emitProgress(p);
-      if (onProgress != null) onProgress(p);
-          await Future<void>.delayed(const Duration(milliseconds: 1));
-        } catch (_) {
-          // Skip surah silently
-        }
-      }
-    _emitProgress(0.55);
-    if (onProgress != null) onProgress(0.55);
-      _invertedIndex = await compute(idx.buildInvertedIndex, raw);
-    _emitProgress(1.0);
-    if (onProgress != null) onProgress(1.0);
+      // Load required asset JSONs on main isolate (fast; file I/O) and offload heavy parse/build
+      final arabicStr = await rootBundle.loadString('assets/data/arabic_quran.json');
+      // Prefer default translation for index; can be made dynamic later
+      final translationStr = await rootBundle.loadString('assets/data/sq_ahmeti.json');
+      String translitStr = '';
+      try { translitStr = await rootBundle.loadString('assets/data/transliterations.json'); } catch (_) {}
+
+      _emitProgress(0.05); if (onProgress != null) onProgress(0.05);
+      final result = await compute(iso.buildFullIndexFromAssets, {
+        'arabic': arabicStr,
+        'translation': translationStr,
+        'transliterations': translitStr,
+      });
+      final index = (result['index'] as Map).map((k, v) => MapEntry(k as String, (v as List).cast<String>()));
+      final verses = (result['verses'] as Map).cast<String, dynamic>();
+      // Populate caches
+      _invertedIndex = index;
+      verses.forEach((k, v) {
+        final obj = v as Map<String, dynamic>;
+        _verseCache[k] = Verse(
+          surahId: obj['surahNumber'] as int,
+          verseNumber: obj['number'] as int,
+          arabicText: obj['ar'] as String? ?? '',
+          translation: obj['t'] as String?,
+          transliteration: obj['tr'] as String?,
+          verseKey: obj['verseKey'] as String? ?? k,
+          juz: obj['juz'] as int?,
+        );
+      });
+      _emitProgress(1.0); if (onProgress != null) onProgress(1.0);
       // Persist snapshot (fire & forget)
       unawaited(_saveSnapshot());
     } catch (_) {
@@ -101,6 +163,12 @@ class SearchIndexManager {
   void ensureIncrementalBuild({void Function(double progress)? onProgress}) {
     // Already fully built & not in incremental mode
     if (_invertedIndex != null && !_incrementalMode) return;
+    // If full index is built via isolate above, don't run per-surah main-thread batches
+    if (_invertedIndex != null && _nextSurahToIndex > 114) {
+      _emitProgress(1.0);
+      if (onProgress != null) onProgress(1.0);
+      return;
+    }
     // If a build already in progress, just return (callers can await existing completer if exposed later)
     if (_building) return;
     _incrementalMode = true;
@@ -127,15 +195,30 @@ class SearchIndexManager {
           _nextSurahToIndex = s; // record current for snapshot resume
           final batchSw = Stopwatch()..start();
           try {
+            // TODO: Move incremental per-surah collection into isolate as well if needed.
             final verses = await getSurahVersesUseCase.call(s);
+            // Keep verse cache for result hydration
+            final raw = <Map<String, dynamic>>[];
             for (final v in verses) {
-              _verseCache['${v.surahNumber}:${v.number}'] = v;
-              _indexVerse(v);
+              final key = '${v.surahNumber}:${v.number}';
+              _verseCache[key] = v;
+              raw.add({
+                'key': key,
+                't': (v.textTranslation ?? '').toString(),
+                'tr': (v.textTransliteration ?? '').toString(),
+                'ar': v.textArabic.toString(),
+              });
+            }
+            if (raw.isNotEmpty) {
+              // Build partial inverted index off the main isolate and merge
+              final partial = await compute(idx.buildInvertedIndex, raw);
+              _mergePartialIndex(partial);
             }
           } catch (_) {/* skip surah errors silently */}
           final p = s / 114.0;
-            _emitProgress(p);
-            if (onProgress != null) onProgress(p);
+          _emitProgress(p);
+          PerfMetrics.instance.setIndexCoverage(p);
+          if (onProgress != null) onProgress(p);
           final elapsed = batchSw.elapsedMilliseconds;
           if (elapsed > 30) {
             // Avoid importing logger here to keep manager lean; using debugPrint.
@@ -150,6 +233,7 @@ class SearchIndexManager {
         if (session == _buildSessionId) {
           _incrementalMode = false;
           _emitProgress(1.0);
+          PerfMetrics.instance.setIndexCoverage(1.0);
           if (onProgress != null) onProgress(1.0);
         }
       } catch (_) {
@@ -157,12 +241,31 @@ class SearchIndexManager {
       } finally {
         if (session == _buildSessionId) {
           _building = false;
-          if (!(_buildCompleter?.isCompleted ?? true)) {
-            _buildCompleter!.complete();
+          final comp = _buildCompleter;
+          if (comp != null && !comp.isCompleted) {
+            comp.complete();
           }
         }
       }
     }();
+  }
+
+  void _mergePartialIndex(Map<String, List<String>> partial) {
+    final dst = _invertedIndex!;
+    partial.forEach((token, keys) {
+      final list = dst.putIfAbsent(token, () => <String>[]);
+      // Append while avoiding duplicates at the very end of the list (rare)
+      if (list.isEmpty) {
+        list.addAll(keys);
+      } else {
+        for (final k in keys) {
+          if (list.isEmpty || list.last != k) {
+            // Weak de-duplication; safe since each verse appears once per partial
+            list.add(k);
+          }
+        }
+      }
+    });
   }
 
   List<Verse> search(
@@ -175,42 +278,79 @@ class SearchIndexManager {
   if (_invertedIndex == null) return [];
     final tokens = _expandQueryTokens(query);
     if (tokens.isEmpty) return [];
-    final candidateScores = <String, int>{};
+  final candidateScores = <String, int>{};
+    // Exact/prefix hits
     for (final t in tokens) {
       final list = _invertedIndex![t];
       if (list == null) continue;
       for (final key in list) {
-        candidateScores.update(key, (v) => v + 1, ifAbsent: () => 1);
+        candidateScores.update(key, (v) => v + _baseHitWeight, ifAbsent: () => _baseHitWeight);
+      }
+    }
+    // Fuzzy fallback (Levenshtein distance 1 for short tokens, <=2 for longer)
+    // Apply diacritic-insensitive normalization to query tokens for general correctness
+    final rawTokens = tq
+        .tokenizeLatin(query)
+        .map((e) => _normalizeLatin(e))
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList();
+    if (rawTokens.isNotEmpty) {
+      final indexTokens = _invertedIndex!.keys;
+      for (final qTok in rawTokens) {
+        final maxDist = qTok.length <= 4 ? 1 : 2;
+        for (final idxTok in indexTokens) {
+          final idxN = _normalizeLatin(idxTok);
+          if (idxN.isEmpty) continue;
+          if ((idxN.length - qTok.length).abs() > maxDist) continue;
+          // Quick first-letter filter to reduce noise and cost
+          if (idxN[0] != qTok[0]) continue;
+          final d = _levenshtein(idxN, qTok, maxDist);
+          if (d >= 0 && d <= maxDist) {
+            final keys = _invertedIndex![idxTok];
+            if (keys == null) continue;
+            final weight = (_baseHitWeight / (d + 2)).round(); // lower weight for fuzzier
+            for (final k in keys) {
+              candidateScores.update(k, (v) => v + weight, ifAbsent: () => weight);
+            }
+          }
+        }
       }
     }
     if (candidateScores.isEmpty) return [];
-    final fullTokens = _tokenize(query).map((e) => e.toLowerCase()).toSet();
-    final scored = <_ScoredVerse>[];
+  // Use normalized tokens for consistent matching/highlighting
+  final fullTokens = tq.tokenizeLatin(query)
+      .map((e) => e.toLowerCase())
+      .map(_normalizeLatin)
+      .toSet();
+  final scored = <_ScoredVerse>[];
     candidateScores.forEach((key, base) {
       final verse = _verseCache[key];
       if (verse == null) return;
       if (juzFilter != null && verse.juz != juzFilter) return;
-      int score = base * 10;
+      int score = base * _baseHitWeight;
+      // Build normalized field strings for substring checks
+      final tRaw = verse.textTranslation ?? '';
+      final trRaw = verse.textTransliteration ?? '';
+      final arRaw = verse.textArabic;
+      final tNorm = _normalizeLatin(tRaw.toLowerCase());
+      final trNorm = _normalizeLatin(trRaw.toLowerCase());
+      final arNorm = _normalizeArabic(arRaw).toLowerCase();
+      bool hasSubstringHit = false;
       if (includeTranslation) {
-        final translation = (verse.textTranslation ?? '').toLowerCase();
-        for (final ft in fullTokens) {
-          if (translation.contains(ft)) score += 25;
-        }
+        for (final ft in fullTokens) { if (tNorm.contains(ft)) { score += _wTranslation; hasSubstringHit = true; } }
       }
       if (includeArabic) {
-        final ar = (verse.textArabic ?? '').toLowerCase();
-        for (final ft in fullTokens) {
-          if (ar.contains(ft)) score += 15; // lower weight
-        }
+        for (final ft in fullTokens) { if (arNorm.contains(ft)) { score += _wArabic; hasSubstringHit = true; } }
       }
       if (includeTransliteration) {
-        final tr = (verse.textTransliteration ?? '').toLowerCase();
-        for (final ft in fullTokens) {
-          if (tr.contains(ft)) score += 10; // lowest weight
-        }
+        for (final ft in fullTokens) { if (trNorm.contains(ft)) { score += _wTransliteration; hasSubstringHit = true; } }
       }
+      // Prune pure-fuzzy outliers: require at least one substring hit in any included field
+      if (!hasSubstringHit) return;
       scored.add(_ScoredVerse(verse, score));
     });
+    // Default ranking by score, stable tie-breakers
     scored.sort((a, b) {
       final c = b.score.compareTo(a.score);
       if (c != 0) return c;
@@ -221,55 +361,11 @@ class SearchIndexManager {
     return scored.map((e) => e.verse).toList();
   }
 
-  List<String> _tokenize(String text) {
-    final lower = text.toLowerCase();
-    final parts = lower.split(RegExp(r'[^a-zçëšžáéíóúâêîôûäöü0-9]+'));
-    return parts.where((p) => p.isNotEmpty).toList();
-  }
-
   List<String> _expandQueryTokens(String query) {
-    final raw = _tokenize(query);
-    final result = <String>[];
-    for (final r in raw) {
-      if (r.length <= 2) {
-        result.add(r);
-        continue;
-      }
-      result.add(r);
-      final norm = r.replaceAll('ç', 'c').replaceAll('ë', 'e');
-      if (norm != r) result.add(norm);
-    }
-    return result.toSet().toList();
+    return tq.expandQueryTokens(query, lightStem);
   }
 
-  // Tokenize & insert a single verse into the existing in-memory inverted index (incremental mode)
-  void _indexVerse(Verse v) {
-    if (_invertedIndex == null) return;
-    final key = '${v.surahNumber}:${v.number}';
-    final tokens = <String>{}
-      ..addAll(_tokenize((v.textTranslation ?? '')))
-      ..addAll(_tokenize((v.textTransliteration ?? '')))
-      ..addAll(_tokenize(_normalizeArabic((v.textArabic))));
-    final seenVerseTokens = <String>{};
-    for (final tok in tokens) {
-      if (tok.isEmpty) continue;
-      final norm = _normalizeLatin(tok);
-      void addToken(String t) {
-        if (seenVerseTokens.add(t)) {
-          final list = _invertedIndex!.putIfAbsent(t, () => <String>[]);
-          list.add(key);
-        }
-      }
-      addToken(tok);
-      if (norm != tok) addToken(norm);
-      if (norm.length >= 3) {
-        final maxPref = norm.length - 1 < 10 ? norm.length - 1 : 10;
-        for (int l = 2; l <= maxPref; l++) {
-          addToken(norm.substring(0, l));
-        }
-      }
-    }
-  }
+  // _indexVerse removed (was unused after isolate-based build)
 
   String _normalizeArabic(String input) {
     var s = input;
@@ -296,6 +392,8 @@ class SearchIndexManager {
     }
     return sb.toString();
   }
+
+  // stemmer provided by core/search/stemmer.dart
 
   /// Public API for UI to notify that user scrolled (used for adaptive throttling)
   void notifyUserScrollEvent() {
@@ -341,20 +439,46 @@ class SearchIndexManager {
   }
 }
 
-extension on SearchIndexManager {
-  Future<File> _snapshotPath() async {
-    final dir = await getApplicationDocumentsDirectory();
-  return File('${dir.path}/${SearchIndexManager._snapshotFile}');
+// Bounded Levenshtein (returns -1 if exceeds maxDist early)
+int _levenshtein(String a, String b, int maxDist) {
+  final m = a.length, n = b.length;
+  if ((m - n).abs() > maxDist) return -1;
+  if (m == 0) return n <= maxDist ? n : -1;
+  if (n == 0) return m <= maxDist ? m : -1;
+  List<int> prev = List<int>.generate(n + 1, (j) => j);
+  List<int> curr = List<int>.filled(n + 1, 0);
+  for (int i = 1; i <= m; i++) {
+    curr[0] = i;
+    int rowMin = curr[0];
+    final ca = a.codeUnitAt(i - 1);
+    for (int j = 1; j <= n; j++) {
+      final cb = b.codeUnitAt(j - 1);
+      final cost = ca == cb ? 0 : 1;
+      final ins = curr[j - 1] + 1;
+      final del = prev[j] + 1;
+      final sub = prev[j - 1] + cost;
+      final v = (ins < del ? ins : del);
+      curr[j] = v < sub ? v : sub;
+      if (curr[j] < rowMin) rowMin = curr[j];
+    }
+    if (rowMin > maxDist) return -1; // early prune
+    final tmp = prev; prev = curr; curr = tmp;
   }
+  final d = prev[n];
+  return d <= maxDist ? d : -1;
+}
+
+extension on SearchIndexManager {
 
   Future<bool> _tryLoadSnapshot() async {
     try {
-      final file = await _snapshotPath();
-      if (!await file.exists()) return false;
-      final content = await file.readAsString();
-      final jsonMap = json.decode(content) as Map<String, dynamic>;
+  final jsonMap = await _snapshotStore.load();
+  if (jsonMap == null) return false;
       final version = jsonMap['version'] as int?;
       if (version != SearchIndexManager._snapshotVersion) return false; // mismatch version
+  final dataVersion = jsonMap['dataVersion'] as String?;
+  final currentHash = await _computeCorpusHash();
+  if (dataVersion != currentHash) return false; // corpus changed
       final inv = (jsonMap['index'] as Map<String, dynamic>).map((k, v) => MapEntry(k, (v as List).cast<String>()));
       final versesJson = (jsonMap['verses'] as Map<String, dynamic>);
       versesJson.forEach((k, v) {
@@ -389,7 +513,6 @@ extension on SearchIndexManager {
   Future<void> _saveSnapshot({bool partial = false}) async {
     if (_invertedIndex == null) return;
     try {
-      final file = await _snapshotPath();
       final versesMap = <String, dynamic>{};
       _verseCache.forEach((k, v) {
         versesMap[k] = {
@@ -402,16 +525,29 @@ extension on SearchIndexManager {
           'juz': v.juz,
         };
       });
-      final payload = json.encode({
+  final payload = {
         'version': SearchIndexManager._snapshotVersion,
+        'dataVersion': await _computeCorpusHash(),
         'index': _invertedIndex,
         'verses': versesMap,
         'createdAt': DateTime.now().toIso8601String(),
         'nextSurah': partial ? _nextSurahToIndex : 115, // 115 => complete ( > 114 )
-      });
-      await file.writeAsString(payload, flush: true);
+  };
+  await _snapshotStore.save(payload);
     } catch (_) {
       // ignore persistence failure silently
+    }
+  }
+
+  // Compute a lightweight corpus hash using asset bytes to invalidate snapshots when data changes.
+  Future<String> _computeCorpusHash() async {
+    if (_cachedCorpusHash != null) return _cachedCorpusHash!;
+    try {
+      final hash = await _snapshotStore.computeCurrentDataVersion();
+      _cachedCorpusHash = hash;
+      return hash;
+    } catch (_) {
+      return 'v2:fallback';
     }
   }
 }

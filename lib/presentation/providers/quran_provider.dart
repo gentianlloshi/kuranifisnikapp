@@ -12,6 +12,7 @@ import '../../domain/usecases/get_surah_verses_usecase.dart';
 import 'search_index_manager.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../../domain/repositories/quran_repository.dart';
+import '../../core/metrics/perf_metrics.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
@@ -40,9 +41,11 @@ class QuranProvider extends ChangeNotifier {
         ) {
     _init();
     // Subscribe to live progress stream
-    _indexProgressSub = _indexManager?.progressStream.listen((evt) {
+  _indexProgressSub = _indexManager?.progressStream.listen((evt) {
       _isBuildingIndex = !evt.complete;
       _indexProgress = evt.progress;
+  // Update perf metrics coverage (index fraction). Enrichment coverage handled in repo merges.
+  PerfMetrics.instance.setIndexCoverage(evt.progress);
       notifyListeners();
     });
   }
@@ -62,11 +65,15 @@ class QuranProvider extends ChangeNotifier {
         await loadSurahMetasArabicOnly();
       });
     }
+  // Kick off full off-main search index build (non-blocking)
+  // ignore: discarded_futures
+  _indexManager?.ensureBuilt();
   }
 
   // Metadata-only list (no verse bodies) to reduce startup memory.
   List<SurahMeta> _surahsMeta = [];
   List<Verse> _allCurrentSurahVerses = []; // full list for current surah
+  final Map<int, List<Verse>> _prefetchCache = {}; // surahNumber -> verses (prefetched)
   List<Verse> _pagedVerses = []; // verses exposed with pagination
   List<Verse> _searchResults = [];
   bool _isLoading = false;
@@ -78,6 +85,9 @@ class QuranProvider extends ChangeNotifier {
   static const int _pageSize = 20;
   // Pending scroll target (verse number) after loading a surah, used for smooth scroll from search / bookmarks
   int? _pendingScrollVerseNumber;
+  // Pending highlight range on arrival (inclusive), used to softly highlight verses after navigation
+  int? _pendingHighlightStartVerseNumber;
+  int? _pendingHighlightEndVerseNumber;
   // Search indexing (delegated)
   bool _isBuildingIndex = false; // mirrors manager state for UI convenience
   double _indexProgress = 0;
@@ -96,11 +106,13 @@ class QuranProvider extends ChangeNotifier {
   int? get currentSurahId => _currentSurahId;
   Surah? get currentSurah => _currentSurah;
   bool get hasMoreVerses => _hasMoreVerses;
+  // Expose underlying repository for debug / metrics panels (read-only usage)
+  QuranRepository? get repository => _quranRepository;
 
   Future<void> loadSurahs() async {
     _setLoading(true);
     try {
-      final res = await _getSurahsUseCase!.call();
+  final uc = _getSurahsUseCase; if (uc == null) return; final res = await uc.call();
       if (res is Success<List<Surah>>) {
         final sw = Stopwatch()..start();
         final all = res.value.map((s) => SurahMeta.fromSurah(s)).toList();
@@ -131,7 +143,7 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahMetasArabicOnly() async {
     _setLoading(true);
     try {
-      final surahs = await _getSurahsArabicOnlyUseCase!.call();
+  final uc = _getSurahsArabicOnlyUseCase; if (uc == null) return; final surahs = await uc.call();
       final sw = Stopwatch()..start();
       final all = surahs.map((s) => SurahMeta.fromSurah(s)).toList();
       _surahsMeta = [];
@@ -183,20 +195,21 @@ class QuranProvider extends ChangeNotifier {
     }
     if (_indexManager != null) {
       // Kick incremental build if not started yet (returns immediately) – user-driven start.
-      final wasIdle = !_indexManager!.isBuilding && indexProgress <= 0.0;
-      _indexManager!.ensureIncrementalBuild();
+  final mgr = _indexManager; // promote for null-safe access
+  final wasIdle = !(mgr.isBuilding) && indexProgress <= 0.0;
+  mgr.ensureIncrementalBuild();
       if (wasIdle && !_userTriggeredIndexOnce) {
         _userTriggeredIndexOnce = true;
         Logger.i('Index build triggered by user search input', tag: 'SearchIndex');
       }
       // Perform search over currently indexed subset (results will improve as index grows)
-      _searchResults = _indexManager!.search(
+  _searchResults = (mgr.search(
         query,
         juzFilter: _activeJuzFilter,
         includeTranslation: _filterTranslation,
         includeArabic: _filterArabic,
         includeTransliteration: _filterTransliteration,
-      );
+  ));
       _error = null;
       notifyListeners();
       return;
@@ -204,7 +217,8 @@ class QuranProvider extends ChangeNotifier {
     if (_searchVersesUseCase != null) {
       _setLoading(true);
       try {
-        _searchResults = await _searchVersesUseCase!.call(query);
+        final uc = _searchVersesUseCase!;
+        _searchResults = await uc.call(query);
         _error = null;
       } catch (e) {
         _error = e.toString();
@@ -225,18 +239,28 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahVerses(int surahId) async {
     _setLoading(true);
     try {
-      _allCurrentSurahVerses = await _getSurahVersesUseCase!.call(surahId);
+      if (_prefetchCache.containsKey(surahId)) {
+        final cached = _prefetchCache.remove(surahId);
+        if (cached != null) {
+          _allCurrentSurahVerses = cached;
+        } else {
+          _allCurrentSurahVerses = [];
+        }
+      } else {
+  final uc = _getSurahVersesUseCase; if (uc == null) { _allCurrentSurahVerses = []; } else { _allCurrentSurahVerses = await uc.call(surahId); }
+      }
   Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
       // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
       // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
       // ignore: unawaited_futures
-      if (_quranRepository != null) {
+  if (_quranRepository != null) {
         // Fire-and-forget enrichment: translation then transliteration.
         Future(() async {
           try {
-            if (!_quranRepository!.isSurahFullyEnriched(surahId)) {
-              await _quranRepository!.ensureSurahTranslation(surahId);
-              await _quranRepository!.ensureSurahTransliteration(surahId);
+            final repo = _quranRepository!;
+            if (!repo.isSurahFullyEnriched(surahId)) {
+              await repo.ensureSurahTranslation(surahId);
+              await repo.ensureSurahTransliteration(surahId);
               Logger.d('Surah $surahId enriched on-demand', tag: 'LazySurah');
             }
           } catch (e) {
@@ -244,9 +268,10 @@ class QuranProvider extends ChangeNotifier {
           }
         });
       }
-      _currentSurahId = surahId;
-      // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
-      if (_currentSurah == null || _currentSurah!.number != surahId) {
+  _currentSurahId = surahId;
+  // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
+  final currentNumber = _currentSurah?.number;
+  if (_currentSurah == null || currentNumber != surahId) {
         _currentSurah = Surah(
           id: surahId,
           number: surahId,
@@ -257,11 +282,41 @@ class QuranProvider extends ChangeNotifier {
           versesCount: _allCurrentSurahVerses.length,
           verses: const [],
         );
-      }
+  }
       _loadedVerseCount = 0;
       _pagedVerses = [];
       _appendMoreVerses();
+      // If a pending scroll/highlight target exists beyond the first page, load enough pages to include it
+      if (_pendingScrollVerseNumber != null) {
+        final targetIdx = _allCurrentSurahVerses.indexWhere((v) => v.verseNumber == _pendingScrollVerseNumber);
+        if (targetIdx != -1 && targetIdx >= _loadedVerseCount) {
+          final needed = ((targetIdx + 1) - _loadedVerseCount);
+          if (needed > 0) {
+            int morePages = (needed / _pageSize).ceil();
+            while (morePages > 0 && _hasMoreVerses) {
+              _appendMoreVerses();
+              morePages--;
+            }
+          }
+        }
+      }
+      // Also ensure pending highlight range end is included to fully highlight the range
+      if (_pendingHighlightEndVerseNumber != null) {
+        final endIdx = _allCurrentSurahVerses.indexWhere((v) => v.verseNumber == _pendingHighlightEndVerseNumber);
+        if (endIdx != -1 && endIdx >= _loadedVerseCount) {
+          final needed = ((endIdx + 1) - _loadedVerseCount);
+          if (needed > 0) {
+            int morePages = (needed / _pageSize).ceil();
+            while (morePages > 0 && _hasMoreVerses) {
+              _appendMoreVerses();
+              morePages--;
+            }
+          }
+        }
+      }
       _error = null;
+  // Opportunistic prefetch of next surah early (after first page) for chaining smoothness
+  _maybePrefetchNextSurah(surahId);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -314,9 +369,21 @@ class QuranProvider extends ChangeNotifier {
 
   Future<void> loadSurah(int surahNumber) async => navigateToSurah(surahNumber);
 
-  // Called by search/bookmark navigation to set a verse to scroll to after load
+  // Called by navigation to open a surah at a specific verse and mark it for highlight.
   void openSurahAtVerse(int surahNumber, int verseNumber) async {
     _pendingScrollVerseNumber = verseNumber;
+    _pendingHighlightStartVerseNumber = verseNumber;
+    _pendingHighlightEndVerseNumber = verseNumber;
+    await navigateToSurah(surahNumber);
+  }
+
+  // Called by navigation to open a surah at a verse range and mark range for highlight.
+  void openSurahAtRange(int surahNumber, int startVerse, int endVerse) async {
+    final s = startVerse <= endVerse ? startVerse : endVerse;
+    final e = endVerse >= startVerse ? endVerse : startVerse;
+    _pendingScrollVerseNumber = s;
+    _pendingHighlightStartVerseNumber = s;
+    _pendingHighlightEndVerseNumber = e;
     await navigateToSurah(surahNumber);
   }
 
@@ -326,16 +393,37 @@ class QuranProvider extends ChangeNotifier {
     return v;
   }
 
+  // Peek without consuming (used by UI to wait until verses are available)
+  int? get pendingScrollTarget => _pendingScrollVerseNumber;
+
+  /// Returns [start, end] for a pending arrival highlight range and clears it; or null if none.
+  List<int>? consumePendingHighlightRange() {
+    final s = _pendingHighlightStartVerseNumber;
+    final e = _pendingHighlightEndVerseNumber;
+    _pendingHighlightStartVerseNumber = null;
+    _pendingHighlightEndVerseNumber = null;
+    if (s == null || e == null) return null;
+    return [s, e];
+  }
+
   void _appendMoreVerses() {
     final remaining = _allCurrentSurahVerses.length - _loadedVerseCount;
     if (remaining <= 0) {
       _hasMoreVerses = false;
+      // At end of current surah pages; if chaining desired prefetch next if not already
+      if (_currentSurahId != null) _maybePrefetchNextSurah(_currentSurahId!);
       return;
     }
     final take = remaining >= _pageSize ? _pageSize : remaining;
     _pagedVerses.addAll(_allCurrentSurahVerses.sublist(_loadedVerseCount, _loadedVerseCount + take));
     _loadedVerseCount += take;
     _hasMoreVerses = _loadedVerseCount < _allCurrentSurahVerses.length;
+    // Trigger prefetch when within one page from end
+    if (_hasMoreVerses == false && _currentSurahId != null) {
+      _maybePrefetchNextSurah(_currentSurahId!);
+    } else if (_hasMoreVerses && (_allCurrentSurahVerses.length - _loadedVerseCount) <= _pageSize && _currentSurahId != null) {
+      _maybePrefetchNextSurah(_currentSurahId!);
+    }
   }
 
   void _loadMoreVerses() {
@@ -386,6 +474,55 @@ class QuranProvider extends ChangeNotifier {
     final sw = Stopwatch()..start();
     await navigateToSurah(surahNumber); // this calls loadSurahVerses internally
     Logger.d('ensureSurahLoaded surah=$surahNumber took=${sw.elapsedMilliseconds}ms', tag: 'LazySurah');
+  }
+
+  // Prefetch next surah's verses (store in cache) if not last surah.
+  void _maybePrefetchNextSurah(int current) {
+    if (current >= 114) return; // last surah
+    final next = current + 1;
+    if (_prefetchCache.containsKey(next)) return; // already prefetched
+    // Fire and forget prefetch
+    // ignore: unawaited_futures
+    Future(() async {
+      try {
+  final uc = _getSurahVersesUseCase; if (uc == null) return; final verses = await uc.call(next);
+        _prefetchCache[next] = verses;
+        Logger.d('Prefetched surah=$next verses=${verses.length}', tag: 'Prefetch');
+      } catch (e) {
+        // ignore errors silently
+      }
+    });
+  }
+
+  bool hasPrefetched(int surahNumber) => _prefetchCache.containsKey(surahNumber);
+
+  // Resolve a verse instance for given surah & verse number. If not loaded yet, returns null (caller can load then retry).
+  Verse? findVerse(int surahNumber, int verseNumber) {
+    if (_currentSurahId == surahNumber) {
+      try { return _allCurrentSurahVerses.firstWhere((v) => v.verseNumber == verseNumber); } catch (_) {}
+      try { return _pagedVerses.firstWhere((v) => v.verseNumber == verseNumber); } catch (_) {}
+    }
+    return null;
+  }
+
+  /// Resolve a verse for a reference string like "2:255" using current caches.
+  /// Returns null if not available without triggering heavy loads.
+  Verse? resolveVerseByRef(String verseRef) {
+    final parts = verseRef.trim().split(':');
+    if (parts.length != 2) return null;
+    final s = int.tryParse(parts[0]);
+    final v = int.tryParse(parts[1]);
+    if (s == null || v == null) return null;
+    // Check current/prefetched caches first
+    final local = findVerse(s, v);
+    if (local != null) return local;
+    // Try prefetch cache (full surah list if present)
+    final pref = _prefetchCache[s];
+    if (pref != null) {
+      try { return pref.firstWhere((e) => e.verseNumber == v); } catch (_) {}
+    }
+    // Fallback to index manager verse cache (if built/snapshot loaded)
+    return _indexManager?.getVerseByKey('$s:$v');
   }
 
 }

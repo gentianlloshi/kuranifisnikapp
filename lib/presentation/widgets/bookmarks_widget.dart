@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
 import '../theme/theme.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/quran_provider.dart';
+import '../providers/selection_service.dart';
 import '../../domain/entities/bookmark.dart';
 
 class BookmarksWidget extends StatelessWidget {
@@ -10,8 +12,8 @@ class BookmarksWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<BookmarkProvider, QuranProvider>(
-      builder: (context, bookmarkProvider, quranProvider, child) {
+    return Consumer3<BookmarkProvider, QuranProvider, SelectionService>(
+      builder: (context, bookmarkProvider, quranProvider, selection, child) {
         if (bookmarkProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -47,7 +49,8 @@ class BookmarksWidget extends StatelessWidget {
           );
         }
 
-        final bookmarks = bookmarkProvider.bookmarks;
+  final bookmarks = bookmarkProvider.bookmarks;
+  final isSelecting = selection.mode == SelectionMode.bookmarks;
         
         if (bookmarks.isEmpty) {
           return Center(
@@ -56,16 +59,16 @@ class BookmarksWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.bookmark_border, size: 64, color: Theme.of(context).colorScheme.outline.withOpacity(0.6)),
+                  Icon(Icons.bookmark_border, size: 64, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6)),
                   SizedBox(height: context.spaceLg),
                   Text(
                     'Nuk keni favorit të ruajtur',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                   SizedBox(height: context.spaceSm),
                   Text(
                     'Shtoni ajete në favorit duke klikuar ikonën e bookmark-ut',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55)),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55)),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -74,17 +77,58 @@ class BookmarksWidget extends StatelessWidget {
           );
         }
 
-        return ListView.builder(
-          padding: EdgeInsets.all(context.spaceLg),
-          itemCount: bookmarks.length,
-          itemBuilder: (context, index) {
-            final bookmark = bookmarks[index];
-            return BookmarkItem(
-              bookmark: bookmark,
-              onTap: () => _navigateToVerse(context, bookmark, quranProvider),
-              onDelete: () => _deleteBookmark(context, bookmark, bookmarkProvider),
-            );
-          },
+        return Column(
+          children: [
+            if (isSelecting)
+              _BookmarkSelectionBar(
+                count: selection.selected.length,
+                onCancel: () => selection.clear(),
+                onDelete: () async {
+                  for (final key in selection.selected.toList()) {
+                    await bookmarkProvider.toggleBookmark(key);
+                  }
+                  selection.clear();
+                  if (context.mounted) {
+                    context.read<AppStateProvider>().enqueueSnack('U fshinë ${selection.selected.length} favorite');
+                  }
+                },
+                onShare: () {
+                  context.read<AppStateProvider>().enqueueSnack('Ndaria në grup së shpejti');
+                },
+              ),
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.all(context.spaceLg),
+                itemCount: bookmarks.length,
+                itemBuilder: (context, index) {
+                  final bookmark = bookmarks[index];
+                  final selected = selection.selected.contains(bookmark.verseKey);
+                  return GestureDetector(
+                    onLongPress: () {
+                      if (selection.mode != SelectionMode.bookmarks) selection.start(SelectionMode.bookmarks);
+                      selection.toggle(bookmark.verseKey);
+                    },
+                    onTap: () {
+                      if (selection.mode == SelectionMode.bookmarks) {
+                        selection.toggle(bookmark.verseKey);
+                      } else {
+                        _navigateToVerse(context, bookmark, quranProvider);
+                      }
+                    },
+                    child: Opacity(
+                      opacity: selected ? 0.85 : 1,
+                      child: BookmarkItem(
+                        bookmark: bookmark,
+                        onTap: () => _navigateToVerse(context, bookmark, quranProvider),
+                        onDelete: () => _deleteBookmark(context, bookmark, bookmarkProvider),
+                        selected: selected,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -130,12 +174,14 @@ class BookmarkItem extends StatelessWidget {
   final Bookmark bookmark;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final bool selected;
 
   const BookmarkItem({
     super.key,
     required this.bookmark,
     required this.onTap,
     required this.onDelete,
+    this.selected = false,
   });
 
   @override
@@ -149,7 +195,7 @@ class BookmarkItem extends StatelessWidget {
     final bool dark = scheme.brightness == Brightness.dark;
     return Card(
       margin: EdgeInsets.only(bottom: context.spaceMd),
-      color: scheme.surfaceElevated(1),
+  color: selected ? Color.alphaBlend(scheme.primary.withValues(alpha: 0.10), scheme.surfaceElevated(1)) : scheme.surfaceElevated(1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -164,7 +210,7 @@ class BookmarkItem extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: context.spaceSm, vertical: context.spaceXs),
                     decoration: ShapeDecoration(
-                      color: scheme.primary.withOpacity(dark ? 0.20 : 0.10),
+                      color: scheme.primary.withValues(alpha: dark ? 0.20 : 0.10),
                       shape: const StadiumBorder(),
                     ),
                     child: Text(
@@ -190,7 +236,7 @@ class BookmarkItem extends StatelessWidget {
               Text(
                 'Ruajtur më ${_formatDate(bookmark.createdAt)}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                 ),
               ),
               
@@ -206,7 +252,7 @@ class BookmarkItem extends StatelessWidget {
                     color: () {
                       final base = scheme.surfaceElevated(dark ? 2 : 1);
                       final tintOpacity = dark ? 0.08 : 0.05;
-                      return Color.alphaBlend(scheme.primary.withOpacity(tintOpacity), base);
+                      return Color.alphaBlend(scheme.primary.withValues(alpha: tintOpacity), base);
                     }(),
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -215,7 +261,7 @@ class BookmarkItem extends StatelessWidget {
                       Icon(
                         Icons.note,
                         size: 16,
-                        color: scheme.onSurfaceVariant.withOpacity(0.75),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
                       ),
                       SizedBox(width: context.spaceSm),
                       Expanded(
@@ -250,6 +296,37 @@ class BookmarkItem extends StatelessWidget {
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
+  }
+}
+
+class _BookmarkSelectionBar extends StatelessWidget {
+  final int count;
+  final VoidCallback onCancel;
+  final Future<void> Function() onDelete;
+  final VoidCallback onShare;
+  const _BookmarkSelectionBar({required this.count, required this.onCancel, required this.onDelete, required this.onShare});
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      elevation: 2,
+      color: scheme.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            children: [
+              IconButton(icon: const Icon(Icons.close), tooltip: 'Anulo', onPressed: onCancel),
+              Text('$count të zgjedhura', style: Theme.of(context).textTheme.titleMedium),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.delete_outline), tooltip: 'Fshi', onPressed: onDelete),
+              IconButton(icon: const Icon(Icons.share), tooltip: 'Ndaj', onPressed: onShare),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

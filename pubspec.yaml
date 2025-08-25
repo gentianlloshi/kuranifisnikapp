@@ -41,7 +41,7 @@ dependencies:
   flutter_html: ^3.0.0-beta.2
   
   # Search functionality
-  fuzzywuzzy: ^1.1.6
+  # fuzzywuzzy was unused; removed to slim dependencies
   
   # Rich text editor
   flutter_quill: ^11.4.2
@@ -58,6 +58,7 @@ dependencies:
   
   # Utilities
   uuid: ^4.4.0
+  crypto: ^3.0.3
 
   # Permissions
   permission_handler: ^11.3.1
@@ -88,13 +89,15 @@ flutter:
   uses-material-design: true
   
   assets:
-    - assets/data/
-    - assets/data/help/
-    - assets/data/word/
-    - assets/data/time/
-    - assets/data/texhvid/
-    - assets/fonts/
-    - assets/images/
+  - assets/data/
+  # Ensure prebuilt search index is bundled explicitly (alongside the folder glob)
+  - assets/data/search_index.json
+  - assets/data/help/
+  - assets/data/word/
+  - assets/data/time/
+  - assets/data/texhvid/
+  - assets/fonts/
+  - assets/images/
   # suret.json (emrat e sureve) përfshihet nga assets/data/ wildcard
   
   fonts:

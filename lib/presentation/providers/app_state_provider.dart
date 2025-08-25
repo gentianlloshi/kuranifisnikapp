@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../../domain/entities/app_settings.dart';
@@ -6,6 +7,9 @@ import '../../domain/usecases/settings_usecases.dart';
 class AppStateProvider extends ChangeNotifier {
   final GetSettingsUseCase? _getSettingsUseCase;
   final SaveSettingsUseCase? _saveSettingsUseCase;
+  // Snackbar queue (ERR-1)
+  final Queue<_SnackMessage> _snackQueue = Queue<_SnackMessage>();
+  bool _snackShowing = false;
 
   AppStateProvider({
     required GetSettingsUseCase getSettingsUseCase,
@@ -45,12 +49,13 @@ class AppStateProvider extends ChangeNotifier {
   bool get useSpanWordRendering => _settings.useSpanWordRendering;
   bool get backgroundIndexingEnabled => _settings.backgroundIndexingEnabled;
   bool get verboseWbwLogging => _settings.verboseWbwLogging;
+  bool get searchRankingBm25Lite => _settings.searchRankingBm25Lite;
 
   Future<void> _loadSettings() async {
-    if (_getSettingsUseCase == null) return; // Skip loading if no use case
-
     try {
-      final loadedSettings = await _getSettingsUseCase!.call();
+      final getter = _getSettingsUseCase;
+      if (getter == null) return;
+      final loadedSettings = await getter.call();
       if (loadedSettings != null) {
         _settings = loadedSettings;
         notifyListeners();
@@ -144,6 +149,11 @@ class AppStateProvider extends ChangeNotifier {
     await _updateSettings(newSettings);
   }
 
+  Future<void> updateSearchRankingBm25Lite(bool enabled) async {
+    final newSettings = _settings.copyWith(searchRankingBm25Lite: enabled);
+    await _updateSettings(newSettings);
+  }
+
   Future<void> updateDisplayOptions({
     bool? showArabic,
     bool? showTranslation,
@@ -161,13 +171,55 @@ class AppStateProvider extends ChangeNotifier {
     await _updateSettings(newSettings);
   }
 
+  // --- Snackbar Queue API ---
+  void enqueueSnack(String text, {Duration duration = const Duration(seconds: 3)}) {
+    _snackQueue.add(_SnackMessage(text, duration));
+    if (!_snackShowing) _drainSnackQueue();
+  }
+
+  _SnackMessage? get currentSnack => _snackQueue.isEmpty ? null : _snackQueue.first;
+  bool get hasSnack => _snackQueue.isNotEmpty;
+  bool get isSnackDisplaying => _snackShowing;
+
+  void markSnackDisplayed() {
+    // Called by UI host right after showing SnackBar to prevent multiple show attempts
+    _snackShowing = true;
+  }
+
+  void onSnackCompleted() {
+    if (_snackQueue.isNotEmpty) {
+      _snackQueue.removeFirst();
+    }
+    _snackShowing = false;
+    if (_snackQueue.isNotEmpty) {
+      _drainSnackQueue();
+    } else {
+      notifyListeners();
+    }
+  }
+
+  void _drainSnackQueue() {
+    if (_snackQueue.isEmpty) return;
+    // Trigger listener to present first item.
+    notifyListeners();
+  }
+
   Future<void> _updateSettings(AppSettings newSettings) async {
     try {
-      await _saveSettingsUseCase!.call(newSettings);
+      final saver = _saveSettingsUseCase;
+      if (saver != null) {
+        await saver.call(newSettings);
+      }
       _settings = newSettings;
       notifyListeners();
     } catch (e, st) {
       Logger.e('Error saving settings', e, st, tag: 'AppState');
     }
   }
+}
+
+class _SnackMessage {
+  final String text;
+  final Duration duration;
+  _SnackMessage(this.text, this.duration);
 }

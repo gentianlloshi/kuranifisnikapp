@@ -1,7 +1,10 @@
 // Isolate helper to build inverted index for verses
+import 'package:kurani_fisnik_app/core/search/stemmer.dart';
 // Input: List<Map<String,dynamic>> where each map has keys: 'key' (verseKey),
 // 't' (translation), 'tr' (transliteration), 'ar' (arabic)
 // Output: Map<String, List<String>> inverted index token -> list of verseKeys
+
+const int _kMinPrefixLen = 3;
 
 Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
   final Map<String, List<String>> index = {};
@@ -19,6 +22,7 @@ Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
     for (final tok in tokens) {
       if (tok.isEmpty) continue;
       final norm = _normalizeLatin(tok);
+  final stem = lightStem(norm);
       // Base token
       void addToken(String t){
         if (seen.add(t)) {
@@ -28,11 +32,13 @@ Map<String, List<String>> _createIndex(List<Map<String, dynamic>> raw) {
       }
       addToken(tok);
       if (norm != tok) addToken(norm);
-      // Prefix indexing (for incremental / partial search) from length 2..min(6,len-1)
-      if (norm.length >= 3) {
-        final maxPref = norm.length - 1 < 10 ? norm.length - 1 : 10; // cap at 10 chars
-        for (int l = 2; l <= maxPref; l++) {
-          addToken(norm.substring(0, l));
+      if (stem != norm && stem.length >= 3) addToken(stem);
+      // Prefix indexing (for incremental / partial search) from length _kMinPrefixLen..min(10,len-1)
+      final baseForPrefix = stem.length >= 3 ? stem : norm;
+      if (baseForPrefix.length >= _kMinPrefixLen) {
+        final maxPref = baseForPrefix.length - 1 < 10 ? baseForPrefix.length - 1 : 10; // cap at 10 chars
+        for (int l = _kMinPrefixLen; l <= maxPref; l++) {
+          addToken(baseForPrefix.substring(0, l));
         }
       }
     }
@@ -74,6 +80,8 @@ String _normalizeLatin(String input) {
   };
   final sb = StringBuffer();
   for (final ch in s.split('')) {
+
+// stemmer now provided by core/search/stemmer.dart
     sb.write(mapping[ch] ?? ch);
   }
   return sb.toString();

@@ -115,8 +115,15 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ndihmë'),
+        title: Text(
+          'Ndihmë',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -171,7 +178,7 @@ class HelpPage extends StatelessWidget {
           Text(
             'Gjithçka që duhet të dini për të shfrytëzuar platformën "Kurani Fisnik Online"',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -221,7 +228,7 @@ class HelpPage extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
