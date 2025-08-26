@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:provider/provider.dart';
 
 // Providers
@@ -24,11 +23,8 @@ import '../widgets/image_generator_widget.dart';
 import '../widgets/settings_drawer.dart';
 import '../providers/reading_progress_provider.dart';
 import '../../domain/entities/verse.dart';
-import '../../domain/repositories/quran_repository.dart';
 import '../widgets/notifications_widget.dart';
 import 'help_page.dart'; // Import the new HelpPage
-import '../../core/metrics/perf_metrics.dart';
-import '../widgets/perf_summary.dart';
 import '../providers/app_state_provider.dart';
 
 class EnhancedHomePage extends StatefulWidget {
@@ -42,7 +38,7 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   int _currentIndex = 0;
-  bool _showPerfPanel = false;
+  final Set<int> _mountedTabs = {0};
 
   final List<TabInfo> _tabs = [
     TabInfo(
@@ -100,6 +96,7 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
       if (_tabController.indexIsChanging) {
         setState(() {
           _currentIndex = _tabController.index;
+          _mountedTabs.add(_currentIndex);
         });
       }
     });
@@ -126,11 +123,6 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
         title: Text(_tabs[_currentIndex].title),
         actions: [
           if (_currentIndex == 0) _QuranOverflowMenu(),
-          IconButton(
-            tooltip: 'Perf',
-            icon: Icon(_showPerfPanel ? Icons.speed : Icons.speed_outlined),
-            onPressed: () => setState(()=> _showPerfPanel = !_showPerfPanel),
-          ),
           // Image Generator Button
           IconButton(
             onPressed: () => _showImageGenerator(context),
@@ -180,12 +172,14 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
         children: [
           Column(
             children: [
-              if (_showPerfPanel) const _PerfPanel(),
               // Main Content (tabs)
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: _tabs.map((tab) => tab.widget).toList(),
+                  children: List.generate(_tabs.length, (i) {
+                    final shouldBuild = _mountedTabs.contains(i);
+                    return shouldBuild ? _tabs[i].widget : const SizedBox.shrink();
+                  }),
                 ),
               ),
               // Global Mini Player (persistent at bottom)
@@ -486,142 +480,9 @@ class _QuranOverflowMenu extends StatelessWidget {
   }
 }
 
-class _PerfPanel extends StatefulWidget {
-  const _PerfPanel();
-  @override
-  State<_PerfPanel> createState() => _PerfPanelState();
-}
+// Deprecated debug perf panel removed.
 
-class _PerfPanelState extends State<_PerfPanel> {
-  StreamSubscription<double>? _enrSub;
-  StreamSubscription<Map<String,double>>? _trSub;
-  Map<String,double>? _latestTrCov;
-  double? _latestEnr;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _attachStreams();
-  }
-
-  void _attachStreams() {
-    final repo = _findQuranRepository(context);
-    if (repo == null) return;
-    _enrSub ??= repo.enrichmentCoverageStream.listen((v) {
-      _latestEnr = v;
-      setState(() {});
-    });
-    _trSub ??= repo.translationCoverageStream.listen((m) {
-      _latestTrCov = m;
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _enrSub?.cancel();
-    _trSub?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final metrics = PerfMetrics.instance;
-    final snap = metrics.currentSnapshot();
-    final enrichment = _latestEnr ?? snap.enrichmentCoverage;
-    return AnimatedBuilder(
-      animation: metrics,
-      builder: (_, __) {
-        final updatedSnap = metrics.currentSnapshot();
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-            border: Border(bottom: BorderSide(color: scheme.outline.withValues(alpha: 0.2))),
-          ),
-          child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodySmall!,
-            child: Row(children: [
-              Expanded(child: PerfSummary(
-                snapshot: updatedSnap,
-                indexCoverage: updatedSnap.indexCoverage,
-                enrichmentCoverage: enrichment,
-              )),
-              _TranslationCoverageButton(liveCoverage: _latestTrCov),
-            ]),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _TranslationCoverageButton extends StatelessWidget {
-  final Map<String,double>? liveCoverage;
-  const _TranslationCoverageButton({this.liveCoverage});
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: 'Translation coverage',
-      icon: const Icon(Icons.language, size: 18),
-      onPressed: () => _showDialog(context),
-    );
-  }
-
-  void _showDialog(BuildContext context) {
-    showDialog(context: context, builder: (c) {
-      final repo = _findQuranRepository(context);
-      final data = liveCoverage ?? repo?.translationCoverageByKey() ?? const {};
-      return AlertDialog(
-        title: const Text('Translation Coverage'),
-        content: data.isEmpty ? const Text('No data yet') : SizedBox(
-          width: 340,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: (data.length * 36).clamp(80, 300).toDouble(),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemBuilder: (ctx2, i) {
-                    final entry = data.entries.elementAt(i);
-                    final pct = (entry.value*100).clamp(0,100).toStringAsFixed(0);
-                    return Row(
-                      children: [
-                        Expanded(child: Text(entry.key, style: const TextStyle(fontWeight: FontWeight.w500))),
-                        SizedBox(
-                          width: 110,
-                          child: LinearProgressIndicator(value: entry.value.clamp(0,1)),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('$pct%'),
-                      ],
-                    );
-                  },
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemCount: data.length,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Align(alignment: Alignment.centerRight, child: Text('${data.length} translations', style: Theme.of(context).textTheme.labelSmall)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: ()=> Navigator.of(c).pop(), child: const Text('Mbyll')),
-        ],
-      );
-    });
-  }
-}
-
-QuranRepository? _findQuranRepository(BuildContext context) {
-  try { return Provider.of<QuranProvider>(context, listen:false).repository; } catch(_) { return null; }
-}
-
-// CoverageBar moved to presentation/widgets/perf_summary.dart
+// Coverage button/widget removed (was unused)
 
 class TabInfo {
   final String title;

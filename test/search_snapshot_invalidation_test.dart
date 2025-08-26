@@ -6,6 +6,7 @@ import 'package:kurani_fisnik_app/domain/usecases/get_surah_verses_usecase.dart'
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_usecase.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
+import 'package:kurani_fisnik_app/domain/entities/surah_meta.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 
 void main() {
@@ -87,4 +88,8 @@ class _DummyRepo implements QuranRepository {
   Map<String, double> translationCoverageByKey() => {'sq_ahmeti': 2/114};
   @override
   Future<List<Verse>> searchVerses(String query, {String? translationKey}) async => [];
+  @override
+  Future<List<SurahMeta>> getSurahList() async => [];
+  @override
+  Future<List<Verse>> getVersesForSurah(int surahId) async => [];
 }

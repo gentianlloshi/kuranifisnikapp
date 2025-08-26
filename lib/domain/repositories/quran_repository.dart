@@ -1,5 +1,6 @@
 import '../entities/surah.dart';
 import '../entities/verse.dart';
+import '../entities/surah_meta.dart';
 
 abstract class QuranRepository {
   Future<List<Surah>> getAllSurahs();
@@ -7,6 +8,9 @@ abstract class QuranRepository {
   Future<List<Verse>> getSurahVerses(int surahNumber);
   Future<List<Verse>> getVersesBySurah(int surahId); // Shtimi i metodës që mungon
   Future<Verse> getVerse(int surahNumber, int verseNumber);
+  // New lightweight APIs to avoid eager memory usage
+  Future<List<SurahMeta>> getSurahList();
+  Future<List<Verse>> getVersesForSurah(int surahId);
   Future<Map<String, dynamic>> getTranslation(String translationKey);
   Future<Map<String, dynamic>> getThematicIndex();
   Future<Map<String, dynamic>> getTransliterations();

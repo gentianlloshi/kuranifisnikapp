@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kurani_fisnik_app/domain/usecases/search_verses_usecase.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
+import 'package:kurani_fisnik_app/domain/entities/surah_meta.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 
 class FakeQuranRepository implements QuranRepository {
@@ -33,6 +34,10 @@ class FakeQuranRepository implements QuranRepository {
   Future<Map<String, dynamic>> getThematicIndex() => throw UnimplementedError();
   @override
   Future<Map<String, dynamic>> getTransliterations() => throw UnimplementedError();
+  @override
+  Future<List<SurahMeta>> getSurahList() => throw UnimplementedError();
+  @override
+  Future<List<Verse>> getVersesForSurah(int surahId) => throw UnimplementedError();
   // New enrichment API members – not used here
   @override
   Future<void> ensureSurahTranslation(int surahNumber, {String translationKey = 'sq_ahmeti'}) async {}

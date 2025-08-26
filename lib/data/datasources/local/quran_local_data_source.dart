@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show WidgetsFlutterBinding; // for ensureInitialized()
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
@@ -7,6 +8,7 @@ import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 
 abstract class QuranLocalDataSource {
   Future<List<Surah>> getQuranData();
+  Future<List<Surah>> getSurahMetas(); // metas only, no verses
   Future<Map<String, dynamic>> getTranslationData(String translationKey);
   Future<Map<String, dynamic>> getThematicIndex();
   Future<Map<String, dynamic>> getTransliterations();
@@ -32,13 +34,17 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
       final List<dynamic> cachedData = _quranBox.get('all_surahs');
       return cachedData.map((json) => Surah.fromJson(json)).toList();
     }
-
     try {
-      final String arabicJsonString = await rootBundle.loadString('assets/data/arabic_quran.json');
-      String? suretJsonString; try { suretJsonString = await rootBundle.loadString('assets/data/suret.json'); } catch(_){ }
-      final List<dynamic> surahJsonList = await compute(_parseQuranDataIsolate, {
-        'arabic': arabicJsonString,
-        'suret': suretJsonString,
+      // Ensure binding is initialized before touching RootIsolateToken
+      // (defensive: some startup paths may call into this very early)
+      WidgetsFlutterBinding.ensureInitialized();
+      // Load asset strings on the main isolate (binding-safe),
+      // then offload heavy JSON parsing/structuring to an isolate.
+      final String arabicStr = await rootBundle.loadString('assets/data/arabic_quran.json');
+      String? suretStr; try { suretStr = await rootBundle.loadString('assets/data/suret.json'); } catch (_) { suretStr = null; }
+      final List<dynamic> surahJsonList = await compute(_parseQuranDataFromStrings, {
+        'arabic': arabicStr,
+        'suret': suretStr,
       });
       final List<Surah> surahs = surahJsonList.map((m) => Surah.fromJson(m as Map<String,dynamic>)).toList()
         ..sort((a,b)=>a.number.compareTo(b.number));
@@ -49,9 +55,58 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
   @override
   Future<List<Verse>> getSurahVerses(int surahNumber) async {
-    final surahs = await getQuranData();
-    final surah = surahs.firstWhere((s) => s.number == surahNumber);
-    return surah.verses;
+    // On-demand load only verses for the requested surah
+    WidgetsFlutterBinding.ensureInitialized();
+    final String arabicStr = await rootBundle.loadString('assets/data/arabic_quran.json');
+    final Map<String,dynamic> arabicJson = json.decode(arabicStr) as Map<String,dynamic>;
+    final List<dynamic> verses = (arabicJson['quran'] as List?) ?? const [];
+    final out = <Verse>[];
+    for (final item in verses) {
+      if (item is! Map<String,dynamic>) continue;
+      final s = (item['chapter'] as num?)?.toInt();
+      if (s != surahNumber) continue;
+      final v = (item['verse'] as num?)?.toInt() ?? 0;
+      out.add(Verse(
+        surahId: surahNumber,
+        verseNumber: v,
+        arabicText: (item['text'] ?? '').toString(),
+        translation: null,
+        transliteration: null,
+        verseKey: '$surahNumber:$v',
+      ));
+    }
+    return out;
+  }
+
+  @override
+  Future<List<Surah>> getSurahMetas() async {
+    // Build metas from suret.json only (fast; no verse bodies)
+    WidgetsFlutterBinding.ensureInitialized();
+    final String suretStr = await rootBundle.loadString('assets/data/suret.json');
+    final List<dynamic> metaList = json.decode(suretStr) as List<dynamic>;
+    final out = <Surah>[];
+    for (final m in metaList) {
+      if (m is! Map<String,dynamic>) continue;
+      final n = m['numri'];
+      if (n is! int) continue;
+      final nameArabic = (m['emri_arab'] ?? 'سورة $n').toString();
+      final nameTranslation = (m['emri_shqip'] ?? 'Sure $n').toString();
+      final meaning = (m['kuptimi'] ?? nameTranslation).toString();
+      final revelation = (m['vendi'] ?? (n < 90 ? 'Medinë' : 'Mekë')).toString();
+      final versesCount = (m['numri_ajeteve'] is int) ? m['numri_ajeteve'] as int : 0;
+      out.add(Surah(
+        id: n,
+        number: n,
+        nameArabic: nameArabic,
+        nameTransliteration: meaning,
+        nameTranslation: nameTranslation,
+        versesCount: versesCount,
+        revelation: revelation,
+        verses: const [], // metas only
+      ));
+    }
+    out.sort((a,b)=> a.number.compareTo(b.number));
+    return out;
   }
 
   // Legacy fallback removed; metadata now sourced from suret.json directly.
@@ -118,11 +173,20 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
   }
 }
 
-// Isolate helper for heavy parsing
-List<dynamic> _parseQuranDataIsolate(Map<String, String?> payload) {
-  final arabicStr = payload['arabic']!;
+// Isolate helper for heavy parsing from strings (safe; no rootBundle in isolate)
+Future<List<dynamic>> _parseQuranDataFromStrings(Map<String, String?> payload) async {
+  final arabicStr = payload['arabic'] ?? '{}';
   final suretStr = payload['suret'];
-  final Map<String,dynamic> arabicJson = json.decode(arabicStr);
+  return _buildSurahListFromJsonStrings(arabicStr, suretStr);
+}
+
+Map<String, dynamic> _decodeJsonMap(String jsonStr) {
+  return json.decode(jsonStr) as Map<String, dynamic>;
+}
+
+// Shared builder used by both isolate and main-isolate paths
+List<Map<String, dynamic>> _buildSurahListFromJsonStrings(String arabicStr, String? suretStr) {
+  final Map<String,dynamic> arabicJson = json.decode(arabicStr) as Map<String,dynamic>;
   final List<dynamic> verses = arabicJson['quran'] ?? [];
   final Map<int,List<Map<String,dynamic>>> surahsMap = {};
   for (final verse in verses) {
@@ -132,7 +196,7 @@ List<dynamic> _parseQuranDataIsolate(Map<String, String?> payload) {
   Map<int, Map<String,dynamic>> metaMap = {};
   if (suretStr != null) {
     try {
-      final List<dynamic> metaList = json.decode(suretStr);
+      final List<dynamic> metaList = json.decode(suretStr) as List<dynamic>;
       for (final m in metaList) {
         if (m is Map<String,dynamic> && m['numri'] is int) {
           metaMap[m['numri'] as int] = m;
@@ -167,8 +231,4 @@ List<dynamic> _parseQuranDataIsolate(Map<String, String?> payload) {
     });
   }
   return out;
-}
-
-Map<String, dynamic> _decodeJsonMap(String jsonStr) {
-  return json.decode(jsonStr) as Map<String, dynamic>;
 }

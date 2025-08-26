@@ -15,6 +15,19 @@ class FakeQuranLocalDataSource implements QuranLocalDataSource {
   @override
   Future<List<Surah>> getQuranData() async { getQuranDataCalls++; return surahs; }
   @override
+  Future<List<Surah>> getSurahMetas() async => surahs
+      .map((s) => Surah(
+            id: s.id,
+            number: s.number,
+            nameArabic: s.nameArabic,
+            nameTransliteration: s.nameTransliteration,
+            nameTranslation: s.nameTranslation,
+            versesCount: s.versesCount,
+            revelation: s.revelation,
+            verses: const [],
+          ))
+      .toList();
+  @override
   Future<Map<String, dynamic>> getTranslationData(String translationKey) async => {'quran': []};
   @override
   Future<Map<String, dynamic>> getThematicIndex() async => {};

@@ -259,15 +259,6 @@ class _SearchWidgetState extends State<SearchWidget> {
                       ),
                     ],
                   ),
-                  // Future: Advanced filters button triggers bottom sheet
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      icon: const Icon(Icons.tune),
-                      label: const Text('Filtrat'),
-                      onPressed: () => _showFiltersSheet(context),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -293,63 +284,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     );
   }
 
-  void _showFiltersSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) {
-        return BottomSheetWrapper(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SheetHeader(
-                title: 'Filtrat e Kërkimit',
-                leadingIcon: Icons.tune,
-                onClose: () => Navigator.of(ctx).maybePop(),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Wrap(
-                  spacing: context.spaceSm,
-                  runSpacing: context.spaceXs,
-                  children: [
-                    FilterChip(
-                      label: const Text('Përkthimi'),
-                      selected: _filterTranslation,
-                      onSelected: (sel) {
-                        setState(() => _filterTranslation = sel);
-                        context.read<AppStateProvider>().updateSearchFilters(inTranslation: sel);
-                        context.read<QuranProvider>().setFieldFilters(translation: sel);
-                      },
-                    ),
-                    FilterChip(
-                      label: const Text('Arabisht'),
-                      selected: _filterArabic,
-                      onSelected: (sel) {
-                        setState(() => _filterArabic = sel);
-                        context.read<AppStateProvider>().updateSearchFilters(inArabic: sel);
-                        context.read<QuranProvider>().setFieldFilters(arabic: sel);
-                      },
-                    ),
-                    FilterChip(
-                      label: const Text('Transliterim'),
-                      selected: _filterTransliteration,
-                      onSelected: (sel) {
-                        setState(() => _filterTransliteration = sel);
-                        context.read<AppStateProvider>().updateTransliterationFilter(sel);
-                        context.read<QuranProvider>().setFieldFilters(transliteration: sel);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: context.spaceLg),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // Filters bottom sheet removed to avoid duplicate controls and reduce vertical space.
 
   void _performSearch(QuranProvider quranProvider, String query) {
     quranProvider.searchVerses(query);
@@ -466,92 +401,109 @@ class _SearchWidgetState extends State<SearchWidget> {
     );
     final count = searchResults.length;
     final label = count == 1 ? 'U gjet 1 rezultat' : 'U gjetën $count rezultate';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (unifiedTop.isNotEmpty) ...[
-          Padding(
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        // Always show the total results label at the very top
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
-              children: [
-                const Icon(Icons.star, size: 16),
-                const SizedBox(width: 6),
-                Text('Top rezultate (të kombinuara)', style: Theme.of(context).textTheme.labelMedium),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          ...unifiedTop.map((it) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: it.note != null
-                    ? _NoteHitCard(note: it.note!, query: _searchController.text.trim())
-                    : SearchResultItem(
-                        verse: it.verse!,
-                        searchQuery: _searchController.text,
-                        settings: appState.settings,
-                      ),
-              )),
-          const SizedBox(height: 8),
-        ],
-  // Only show the horizontal strip if unifiedTop doesn't already include a note
-  if (noteHitsPreview.isNotEmpty && unifiedTop.every((it) => it.note == null)) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
-              children: [
-                const Icon(Icons.note, size: 16),
-                const SizedBox(width: 6),
-                Text('Shënime të gjetura (${allNoteHits.length})', style: Theme.of(context).textTheme.labelMedium),
-                const Spacer(),
-                if (allNoteHits.length > noteHitsPreview.length)
-                  TextButton(
-                    onPressed: () => _showAllNoteHits(allNoteHits, _searchController.text.trim()),
-                    child: const Text('Shfaq të gjitha'),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w600,
                   ),
-              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            height: 120,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemBuilder: (_, i) {
-                final n = noteHitsPreview[i];
-                return _NoteHitCard(note: n, query: _searchController.text.trim());
-              },
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemCount: noteHitsPreview.length,
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
-                  fontWeight: FontWeight.w600,
-                ),
           ),
         ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: searchResults.length,
-            itemBuilder: (context, index) {
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        if (unifiedTop.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [
+                  const Icon(Icons.star, size: 16),
+                  const SizedBox(width: 6),
+                  Text('Top rezultate (të kombinuara)', style: Theme.of(context).textTheme.labelMedium),
+                ],
+              ),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (ctx, i) {
+                final it = unifiedTop[i];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: it.note != null
+                      ? _NoteHitCard(note: it.note!, query: _searchController.text.trim())
+                      : SearchResultItem(
+                          verse: it.verse!,
+                          searchQuery: _searchController.text,
+                          settings: appState.settings,
+                        ),
+                );
+              },
+              childCount: unifiedTop.length,
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        ],
+        if (noteHitsPreview.isNotEmpty && unifiedTop.every((it) => it.note == null)) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [
+                  const Icon(Icons.note, size: 16),
+                  const SizedBox(width: 6),
+                  Text('Shënime të gjetura (${allNoteHits.length})', style: Theme.of(context).textTheme.labelMedium),
+                  const Spacer(),
+                  if (allNoteHits.length > noteHitsPreview.length)
+                    TextButton(
+                      onPressed: () => _showAllNoteHits(allNoteHits, _searchController.text.trim()),
+                      child: const Text('Shfaq të gjitha'),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemBuilder: (_, i) {
+                  final n = noteHitsPreview[i];
+                  return _NoteHitCard(note: n, query: _searchController.text.trim());
+                },
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemCount: noteHitsPreview.length,
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        ],
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
               final verse = searchResults[index];
-              return SearchResultItem(
-                verse: verse,
-                searchQuery: _searchController.text,
-                settings: appState.settings,
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SearchResultItem(
+                  verse: verse,
+                  searchQuery: _searchController.text,
+                  settings: appState.settings,
+                ),
               );
             },
+            childCount: searchResults.length,
           ),
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
       ],
     );
   }
@@ -624,10 +576,11 @@ class _SearchResultItemState extends State<SearchResultItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Verse reference
-              Row(
+        Row(
                 children: [
                   _RefChip('${verse.surahNumber}:${verse.number}'),
                   const Spacer(),
+          if (searchQuery.isNotEmpty) _MatchCountBadge(text: verse.textTranslation ?? '', query: searchQuery),
                   Consumer<BookmarkProvider>(
                     builder: (context, bookmarkProvider, _) {
                       final key = '${verse.surahNumber}:${verse.number}';
@@ -893,6 +846,63 @@ class _RefChip extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _MatchCountBadge extends StatelessWidget {
+  final String text;
+  final String query;
+  const _MatchCountBadge({required this.text, required this.query});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final count = _countMatches(text, query);
+    if (count <= 0) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text('$count', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSecondaryContainer, fontWeight: FontWeight.w700)),
+    );
+  }
+
+  static int _countMatches(String text, String query) {
+    String norm(String s) {
+      s = s.toLowerCase();
+      s = s.replaceAll('ç', 'c').replaceAll('ë', 'e');
+      const mapping = {
+        'á':'a','à':'a','ä':'a','â':'a','ã':'a','å':'a','ā':'a','ă':'a','ą':'a',
+        'é':'e','è':'e','ë':'e','ê':'e','ě':'e','ē':'e','ę':'e','ė':'e',
+        'í':'i','ì':'i','ï':'i','î':'i','ī':'i','į':'i','ı':'i',
+        'ó':'o','ò':'o','ö':'o','ô':'o','õ':'o','ø':'o','ō':'o','ő':'o',
+        'ú':'u','ù':'u','ü':'u','û':'u','ū':'u','ů':'u','ű':'u','ť':'t','š':'s','ž':'z','ñ':'n'
+      };
+      final sb = StringBuffer();
+      for (final ch in s.split('')) { sb.write(mapping[ch] ?? ch); }
+      return sb.toString();
+    }
+    final tn = norm(text);
+    final tokens = query
+        .split(RegExp(r"[^\p{L}\p{N}]+", unicode: true))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .map(norm)
+        .toSet();
+    if (tokens.isEmpty) return 0;
+    int total = 0;
+    for (final tok in tokens) {
+      int start = 0;
+      while (true) {
+        final i = tn.indexOf(tok, start);
+        if (i == -1) break;
+        total++;
+        start = i + tok.length;
+      }
+    }
+    return total;
   }
 }
 

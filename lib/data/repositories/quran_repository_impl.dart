@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
+import 'package:kurani_fisnik_app/domain/entities/surah_meta.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/quran_local_data_source.dart';
 import 'package:kurani_fisnik_app/data/datasources/local/storage_data_source.dart';
@@ -30,8 +31,9 @@ class QuranRepositoryImpl implements QuranRepository {
     final sw = Stopwatch()..start();
     List<Surah> surahs = await _storageDataSource.getCachedQuranData();
     if (surahs.isEmpty) {
-      Logger.i('Loading Quran data (full) from assets...', tag: 'QuranRepo');
-      surahs = await _localDataSource.getQuranData();
+  // Full corpus load for legacy API
+  Logger.i('Loading full Quran data from assets...', tag: 'QuranRepo');
+  surahs = await _localDataSource.getQuranData();
     }
     // Merge if missing (lazy augmentation) – keep cost deferred until requested.
     final needsTranslation = surahs.isNotEmpty && surahs.first.verses.any((v) => v.textTranslation == null);
@@ -51,17 +53,31 @@ class QuranRepositoryImpl implements QuranRepository {
   // Lightweight meta fetch (no translation / transliteration merging). Used by lazy UI list / indexing pre-stage.
   Future<List<Surah>> getArabicOnly() async {
     final sw = Stopwatch()..start();
-    List<Surah> surahs = await _storageDataSource.getCachedQuranData();
-    if (surahs.isNotEmpty) {
+  List<Surah> surahs = await _storageDataSource.getCachedQuranData();
+  if (surahs.isNotEmpty) {
       Logger.d('getArabicOnly cache ${sw.elapsedMilliseconds}ms', tag: 'Perf');
       return surahs;
     }
-    Logger.i('Loading Arabic-only Quran data (no merges) from assets...', tag: 'QuranRepo');
-    surahs = await _localDataSource.getQuranData();
+  Logger.i('Loading Arabic-only Quran metas (no merges) from assets...', tag: 'QuranRepo');
+  surahs = await _localDataSource.getSurahMetas();
     // Intentionally NOT merging translation/transliteration here.
     await _storageDataSource.cacheQuranData(surahs);
     Logger.d('getArabicOnly fresh ${sw.elapsedMilliseconds}ms', tag: 'Perf');
     return surahs;
+  }
+
+  // New: return lightweight metas only (no verse lists) to keep memory low at startup
+  @override
+  Future<List<SurahMeta>> getSurahList() async {
+    final surahs = await getArabicOnly();
+    return surahs.map((s) => SurahMeta.fromSurah(s.copyWith(verses: const []))).toList();
+  }
+
+  // New: return verses for a single surah (Arabic only), avoid building all surahs
+  @override
+  Future<List<Verse>> getVersesForSurah(int surahId) async {
+  // Load verses on demand from local asset; do not expand entire corpus
+  return _localDataSource.getSurahVerses(surahId);
   }
 
   Future<void> _loadAndMergeTranslation(String translationKey, List<Surah> surahsToUpdate) async {
@@ -119,17 +135,15 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<Surah> getSurah(int surahNumber) async {
-    final surahs = await getAllSurahs();
-    return surahs.firstWhere(
-      (surah) => surah.number == surahNumber,
-      orElse: () => throw Exception('Surah $surahNumber not found'),
-    );
+  // Return meta only; verses are fetched separately
+  final metas = await getArabicOnly();
+  return metas.firstWhere((s) => s.number == surahNumber, orElse: () => throw Exception('Surah $surahNumber not found'));
   }
 
   @override
   Future<List<Verse>> getSurahVerses(int surahNumber) async {
-  final surah = await getSurah(surahNumber);
-  return surah.verses;
+  // Fetch only this surah's verses
+  return _localDataSource.getSurahVerses(surahNumber);
   }
 
   @override
@@ -140,11 +154,13 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<Verse> getVerse(int surahNumber, int verseNumber) async {
-    final surah = await getSurah(surahNumber);
-    return surah.verses.firstWhere(
-      (verse) => verse.number == verseNumber,
-      orElse: () => throw Exception('Verse $surahNumber:$verseNumber not found'),
-    );
+    // In lazy model, Surah returned by getSurah is meta-only; fetch verses on demand.
+    final verses = await getSurahVerses(surahNumber);
+    try {
+      return verses.firstWhere((v) => v.number == verseNumber);
+    } catch (_) {
+      throw Exception('Verse $surahNumber:$verseNumber not found');
+    }
   }
 
   @override

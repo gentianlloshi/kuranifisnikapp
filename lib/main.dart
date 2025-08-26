@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -54,13 +53,12 @@ import 'package:kurani_fisnik_app/domain/usecases/thematic_index_usecases.dart' 
 // Services
 import 'package:kurani_fisnik_app/core/services/notification_service.dart';
 import 'package:kurani_fisnik_app/core/services/audio_service.dart';
-import 'package:kurani_fisnik_app/core/services/service_locator.dart';
 import 'presentation/theme/design_tokens.dart';
 import 'presentation/theme/theme.dart';
 import 'presentation/startup/startup_scheduler.dart';
 import 'presentation/startup/performance_monitor.dart';
 import 'core/utils/logger.dart';
-import 'package:kurani_fisnik_app/presentation/widgets/dev_perf_overlay.dart';
+// Dev performance overlay removed for cleaner UI.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -176,8 +174,7 @@ class KuraniFisnikApp extends StatelessWidget {
         ProxyProvider2<QuranLocalDataSource, StorageDataSource, QuranRepositoryImpl>(
           update: (_, localDataSource, storageDataSource, __) {
             final repo = QuranRepositoryImpl(localDataSource, storageDataSource);
-            // Register for global diagnostics access
-            ServiceLocator.instance.registerQuranRepository(repo);
+            // Registration moved to first use site to reduce startup work.
             return repo;
           },
         ),
@@ -237,7 +234,7 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (ctx) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(ctx, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(ctx, listen: false)),
           update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => previous ?? AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
         ),
-        ChangeNotifierProxyProvider5<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, QuranProvider>(
+  ChangeNotifierProxyProvider5<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, QuranProvider>(
           create: (ctx) => QuranProvider(
             getSurahsUseCase: Provider.of<GetSurahsUseCase>(ctx, listen:false),
             getSurahsArabicOnlyUseCase: Provider.of<GetSurahsArabicOnlyUseCase>(ctx, listen:false),
@@ -257,6 +254,7 @@ class KuraniFisnikApp extends StatelessWidget {
         // Additional Providers
         ChangeNotifierProvider<AudioProvider>(
           create: (ctx) => AudioProvider(),
+          lazy: true,
         ),
         ProxyProvider<BookmarkRepositoryImpl, BookmarkUseCases>(
           update: (ctx, repo, previous) => BookmarkUseCases(repo),
@@ -267,12 +265,15 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<NoteProvider>(
           create: (ctx) => NoteProvider(),
+          lazy: true,
         ),
         ChangeNotifierProvider<MemorizationProvider>(
           create: (ctx) => MemorizationProvider(),
+          lazy: true,
         ),
         ChangeNotifierProvider<NotificationProvider>(
           create: (ctx) => NotificationProvider(service: notificationService),
+          lazy: true,
         ),
         ChangeNotifierProxyProvider<TexhvidUseCases, TexhvidProvider>(
           create: (ctx) => TexhvidProvider(texhvidUseCases: Provider.of<TexhvidUseCases>(ctx, listen:false)),
@@ -294,6 +295,7 @@ class KuraniFisnikApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<SurahSelectionProvider>(
           create: (ctx) => SurahSelectionProvider(),
+          lazy: true,
         ),
         ChangeNotifierProxyProvider<StorageRepositoryImpl, ReadingProgressProvider>(
           create: (ctx) => ReadingProgressProvider(storage: Provider.of<StorageRepositoryImpl>(ctx, listen:false)),
@@ -338,6 +340,7 @@ class KuraniFisnikApp extends StatelessWidget {
         // Global selection service (multi-domain selection future)
         ChangeNotifierProvider<SelectionService>(
           create: (ctx) => SelectionService(),
+          lazy: true,
         ),
       ],
       child: Consumer<AppStateProvider>(
@@ -376,12 +379,8 @@ class KuraniFisnikApp extends StatelessWidget {
                   title: 'Kurani Fisnik',
                   debugShowCheckedModeBanner: false,
                   theme: theme,
-                  // Wrap all app pages with the DevPerfOverlay in debug builds, ensuring
-                  // it sits under MaterialApp so Directionality is available.
-                  builder: (context, child) => DevPerfOverlay(
-                    enabled: kDebugMode,
-                    child: child ?? const SizedBox.shrink(),
-                  ),
+                  // No dev perf overlay; return the child as-is.
+                  builder: (context, child) => child ?? const SizedBox.shrink(),
                   home: const EnhancedHomePage(),
                   routes: {
                     '/home': (context) => const EnhancedHomePage(),

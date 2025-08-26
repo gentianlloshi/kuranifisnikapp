@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart' show compute;
+import 'package:flutter/services.dart' show rootBundle, ServicesBinding;
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
 import '../../domain/usecases/get_surahs_usecase.dart';
-import 'inverted_index_builder.dart' as idx;
 import 'search_index_isolate.dart' as iso;
 import 'package:kurani_fisnik_app/core/metrics/perf_metrics.dart';
 import 'package:kurani_fisnik_app/core/search/stemmer.dart';
 import 'package:kurani_fisnik_app/core/search/token_utils.dart' as tq;
 import 'search_snapshot_store.dart';
+// (keep only rootBundle import above)
 
 /// Encapsulates building and querying the inverted search index.
 /// Responsible only for in-memory structures; persistence & advanced ranking can layer on top later.
@@ -177,7 +177,7 @@ class SearchIndexManager {
     final int session = _buildSessionId;
     _buildCompleter = Completer<void>();
     _invertedIndex ??= <String, List<String>>{}; // start empty index
-    () async {
+  () async {
       try {
         // Attempt fast snapshot load once at session start.
         if (_nextSurahToIndex == 1 && await _tryLoadSnapshot()) {
@@ -190,30 +190,30 @@ class SearchIndexManager {
             return;
           }
         }
+  final rootToken = ServicesBinding.rootIsolateToken;
         for (int s = _nextSurahToIndex; s <= 114; s++) {
           if (session != _buildSessionId) return; // aborted by newer session
           _nextSurahToIndex = s; // record current for snapshot resume
           final batchSw = Stopwatch()..start();
           try {
-            // TODO: Move incremental per-surah collection into isolate as well if needed.
-            final verses = await getSurahVersesUseCase.call(s);
-            // Keep verse cache for result hydration
-            final raw = <Map<String, dynamic>>[];
-            for (final v in verses) {
-              final key = '${v.surahNumber}:${v.number}';
-              _verseCache[key] = v;
-              raw.add({
-                'key': key,
-                't': (v.textTranslation ?? '').toString(),
-                'tr': (v.textTransliteration ?? '').toString(),
-                'ar': v.textArabic.toString(),
-              });
-            }
-            if (raw.isNotEmpty) {
-              // Build partial inverted index off the main isolate and merge
-              final partial = await compute(idx.buildInvertedIndex, raw);
-              _mergePartialIndex(partial);
-            }
+            if (rootToken == null) break; // safety
+            final res = await compute(iso.buildPartialIndexForSurah, {'token': rootToken, 'surah': s});
+            final partIdx = (res['index'] as Map).map((k, v) => MapEntry(k as String, (v as List).cast<String>()));
+            final versesMap = (res['verses'] as Map).cast<String, dynamic>();
+            // Hydrate verse cache minimally to support search result hydration
+            versesMap.forEach((k, v) {
+              final obj = v as Map<String, dynamic>;
+              _verseCache[k] = Verse(
+                surahId: obj['surahNumber'] as int,
+                verseNumber: obj['number'] as int,
+                arabicText: obj['ar'] as String? ?? '',
+                translation: obj['t'] as String?,
+                transliteration: obj['tr'] as String?,
+                verseKey: obj['verseKey'] as String? ?? k,
+                juz: obj['juz'] as int?,
+              );
+            });
+            _mergePartialIndex(partIdx);
           } catch (_) {/* skip surah errors silently */}
           final p = s / 114.0;
           _emitProgress(p);

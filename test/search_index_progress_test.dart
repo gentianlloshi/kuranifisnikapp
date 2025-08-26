@@ -5,6 +5,7 @@ import 'package:kurani_fisnik_app/domain/usecases/get_surah_verses_usecase.dart'
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
+import 'package:kurani_fisnik_app/domain/entities/surah_meta.dart';
 
 class _FakeRepo implements QuranRepository {
   Future<List<Surah>> getSurahs() async => [Surah(id:1, number:1, nameArabic:'', nameTranslation:'', nameTransliteration:'', revelation:'', versesCount:7, verses:const [])];
@@ -24,6 +25,10 @@ class _FakeRepo implements QuranRepository {
   Future<Map<String, dynamic>> getThematicIndex() async => {};
   @override
   Future<Map<String, dynamic>> getTransliterations() async => {};
+  @override
+  Future<List<SurahMeta>> getSurahList() async => (await getAllSurahs()).map(SurahMeta.fromSurah).toList();
+  @override
+  Future<List<Verse>> getVersesForSurah(int surahId) async => getSurahVerses(surahId);
   @override
   Future<List<Verse>> searchVerses(String query, {String? translationKey}) async => [];
   // New enrichment API members

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kurani_fisnik_app/presentation/providers/quran_provider.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
+import 'package:kurani_fisnik_app/domain/entities/surah_meta.dart';
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_usecase.dart';
 import 'package:kurani_fisnik_app/domain/usecases/get_surah_verses_usecase.dart';
 import 'package:kurani_fisnik_app/domain/usecases/get_surahs_arabic_only_usecase.dart';
@@ -43,6 +44,10 @@ class _FakeQuranRepo implements QuranRepository {
   Future<Map<String, dynamic>> getThematicIndex() async => {};
   @override
   Future<Map<String, dynamic>> getTransliterations() async => {};
+  @override
+  Future<List<SurahMeta>> getSurahList() async => _surahs.map((s) => SurahMeta.fromSurah(s)).toList();
+  @override
+  Future<List<Verse>> getVersesForSurah(int surahId) async => getVersesBySurah(surahId);
 
   @override
   Future<List<Verse>> getVersesBySurah(int surahId) async => List.generate(7, (i) => Verse(
@@ -109,6 +114,22 @@ class _LocalAdapter implements QuranLocalDataSource {
   _LocalAdapter(this.base);
   @override
   Future<List<Surah>> getQuranData() => base.getAllSurahs();
+  @override
+  Future<List<Surah>> getSurahMetas() async {
+    final surahs = await base.getAllSurahs();
+    return surahs
+        .map((s) => Surah(
+              id: s.id,
+              number: s.number,
+              nameArabic: s.nameArabic,
+              nameTransliteration: s.nameTransliteration,
+              nameTranslation: s.nameTranslation,
+              versesCount: s.versesCount,
+              revelation: s.revelation,
+              verses: const [],
+            ))
+        .toList();
+  }
   @override
   Future<Map<String, dynamic>> getTranslationData(String translationKey) async => {};
   @override

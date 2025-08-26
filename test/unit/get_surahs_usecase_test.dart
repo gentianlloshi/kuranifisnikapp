@@ -4,6 +4,7 @@ import 'package:kurani_fisnik_app/core/utils/result.dart';
 import 'package:kurani_fisnik_app/domain/repositories/quran_repository.dart';
 import 'package:kurani_fisnik_app/domain/entities/surah.dart';
 import 'package:kurani_fisnik_app/domain/entities/verse.dart';
+import 'package:kurani_fisnik_app/domain/entities/surah_meta.dart';
 
 class FakeQuranRepository implements QuranRepository {
   final List<Surah> surahs;
@@ -31,6 +32,10 @@ class FakeQuranRepository implements QuranRepository {
   Future<Map<String, dynamic>> getThematicIndex() => throw UnimplementedError();
   @override
   Future<Map<String, dynamic>> getTransliterations() => throw UnimplementedError();
+  @override
+  Future<List<SurahMeta>> getSurahList() => throw UnimplementedError();
+  @override
+  Future<List<Verse>> getVersesForSurah(int surahId) => throw UnimplementedError();
   @override
   Future<List<Verse>> searchVerses(String query, {String? translationKey}) => throw UnimplementedError();
   // New enrichment API members – not used in this test

@@ -21,11 +21,23 @@ class ReadingProgressProvider extends ChangeNotifier {
     final ts = await storage.getLastReadTimestamps();
     _lastTimestamps = ts.map((k,v)=> MapEntry(int.parse(k), v));
     _loaded = true;
+  // Inform listeners once after first load so UI selectors can pick up initial values
+  notifyListeners();
   }
 
   Future<int?> getLastReadVerse(int surah) async {
     await _ensureLoaded();
     return _lastReadVerse[surah];
+  }
+
+  bool get isLoaded => _loaded;
+
+  // Fast path for UI: compute percent synchronously from cached state; returns 0 if not loaded yet
+  double progressPercentSync(int surah, {required int totalVerses}) {
+    if (!_loaded || totalVerses <= 0) return 0;
+    final v = _lastReadVerse[surah];
+    if (v == null) return 0;
+    return (v / totalVerses).clamp(0.0, 1.0);
   }
 
   Future<double> getProgressPercent(int surah, {required int totalVerses}) async {

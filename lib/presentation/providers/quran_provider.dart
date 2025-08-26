@@ -65,9 +65,8 @@ class QuranProvider extends ChangeNotifier {
         await loadSurahMetasArabicOnly();
       });
     }
-  // Kick off full off-main search index build (non-blocking)
-  // ignore: discarded_futures
-  _indexManager?.ensureBuilt();
+  // Do NOT build the search index at init to avoid instantiating Verse objects at startup.
+  // StartupScheduler (Phase 3) or user actions (search) will trigger incremental build later.
   }
 
   // Metadata-only list (no verse bodies) to reduce startup memory.
@@ -112,10 +111,27 @@ class QuranProvider extends ChangeNotifier {
   Future<void> loadSurahs() async {
     _setLoading(true);
     try {
-  final uc = _getSurahsUseCase; if (uc == null) return; final res = await uc.call();
-      if (res is Success<List<Surah>>) {
+      // Prefer Arabic-only meta list to keep memory footprint small
+      final uc = _getSurahsArabicOnlyUseCase ?? _getSurahsUseCase;
+      if (uc == null) return;
+      final List<Surah> surahModels;
+      if (uc is GetSurahsArabicOnlyUseCase) {
+        surahModels = await uc.call();
+      } else if (uc is GetSurahsUseCase) {
+        final res = await uc.call();
+        if (res is Success<List<Surah>>) {
+          surahModels = res.value;
+        } else {
+          _error = res.error?.message ?? 'Unknown error';
+          _setLoading(false);
+          return;
+        }
+      } else {
+        surahModels = const <Surah>[];
+      }
+      if (surahModels.isNotEmpty) {
         final sw = Stopwatch()..start();
-        final all = res.value.map((s) => SurahMeta.fromSurah(s)).toList();
+        final all = surahModels.map((s) => SurahMeta.fromSurah(s.copyWith(verses: const []))).toList();
         // Incremental publication in small batches for earlier first paint.
         _surahsMeta = [];
         final batchSize = 25;
@@ -131,7 +147,7 @@ class QuranProvider extends ChangeNotifier {
         Logger.d('Loaded surah metadata count=${_surahsMeta.length} in ${sw.elapsedMilliseconds}ms', tag: 'StartupPhase');
         _error = null;
       } else {
-        _error = res.error?.message ?? 'Unknown error';
+        _error = 'No surahs loaded';
       }
     } catch (e) {
       _error = e.toString(); // fallback if unexpected exception
@@ -247,7 +263,13 @@ class QuranProvider extends ChangeNotifier {
           _allCurrentSurahVerses = [];
         }
       } else {
-  final uc = _getSurahVersesUseCase; if (uc == null) { _allCurrentSurahVerses = []; } else { _allCurrentSurahVerses = await uc.call(surahId); }
+        final uc = _getSurahVersesUseCase;
+        if (uc == null) {
+          _allCurrentSurahVerses = [];
+        } else {
+          // Only fetch verses for the requested surah (Arabic-only); enrichment is done on-demand
+          _allCurrentSurahVerses = await uc.call(surahId);
+        }
       }
   Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
       // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.

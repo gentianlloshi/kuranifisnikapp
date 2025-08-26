@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 void main(List<String> args) async {
-  final root = Directory.current.path;
+  // final root = Directory.current.path; // not currently used
   final assetsDir = Directory('assets/data');
   if (!assetsDir.existsSync()) {
     stderr.writeln('assets/data not found. Run from repo root.');

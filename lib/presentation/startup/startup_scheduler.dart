@@ -51,13 +51,11 @@ class StartupScheduler {
   }
 
   void _phase3() {
-    // Safe-guard: check again in case user toggled off before timer fired.
-    final app = context.read<AppStateProvider>();
-    if (!app.backgroundIndexingEnabled) return; // do nothing
-    final quran = context.read<QuranProvider>();
-    if (quran.indexProgress <= 0.0 && !quran.isBuildingIndex) {
-      quran.ensureIndexBuild();
-    }
+  // Strict lazy policy: do NOT start background indexing automatically.
+  // Index build will be triggered by user actions (typing in search) or an explicit toggle in settings.
+  // This preserves ~0 Verse instances at startup and avoids early CPU spikes.
+  final _ = context.read<AppStateProvider>(); // keep access pattern if later needed
+  return;
   }
 
   void _phase4() {

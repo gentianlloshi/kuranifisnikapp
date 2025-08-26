@@ -31,6 +31,28 @@ class Surah {
     this.verses = const [],
   });
 
+  Surah copyWith({
+    int? id,
+    int? number,
+    String? nameArabic,
+    String? nameTransliteration,
+    String? nameTranslation,
+    int? versesCount,
+    String? revelation,
+    List<Verse>? verses,
+  }) {
+    return Surah(
+      id: id ?? this.id,
+      number: number ?? this.number,
+      nameArabic: nameArabic ?? this.nameArabic,
+      nameTransliteration: nameTransliteration ?? this.nameTransliteration,
+      nameTranslation: nameTranslation ?? this.nameTranslation,
+      versesCount: versesCount ?? this.versesCount,
+      revelation: revelation ?? this.revelation,
+      verses: verses ?? this.verses,
+    );
+  }
+
   factory Surah.fromJson(Map<String, dynamic> json) {
     return Surah(
       id: json['id'] ?? json['number'] ?? 0,
