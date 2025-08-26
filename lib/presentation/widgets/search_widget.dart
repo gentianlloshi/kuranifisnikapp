@@ -13,6 +13,20 @@ import '../theme/theme.dart';
 import 'sheet_header.dart';
 import '../search/unified_ranking.dart';
 
+// Lightweight snapshots for Selector-based rebuild scoping
+class _IndexState {
+  final bool building;
+  final double progress;
+  const _IndexState(this.building, this.progress);
+}
+
+class _ResultsSnapshot {
+  final List<Verse> results;
+  final bool isLoading;
+  final String? error;
+  const _ResultsSnapshot(this.results, this.isLoading, this.error);
+}
+
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key});
 
@@ -38,14 +52,14 @@ class _SearchWidgetState extends State<SearchWidget> {
       setState(() {
         _filterArabic = appState.searchInArabic;
         _filterTranslation = appState.searchInTranslation;
-  _selectedJuz = appState.searchJuz;
-  _filterTransliteration = appState.searchInTransliteration;
+        _selectedJuz = appState.searchJuz;
+        _filterTransliteration = appState.searchInTransliteration;
       });
       context.read<QuranProvider>().setJuzFilter(_selectedJuz);
       context.read<QuranProvider>().setFieldFilters(
         translation: _filterTranslation,
         arabic: _filterArabic,
-  transliteration: _filterTransliteration,
+        transliteration: _filterTransliteration,
       );
     });
   }
@@ -58,55 +72,60 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<QuranProvider, AppStateProvider>(
-      builder: (context, quranProvider, appState, child) {
-        final double p = quranProvider.indexProgress;
-        String readinessLabel;
-        Color readinessColor;
-        if (p >= 1.0) {
-          readinessLabel = 'Index i Plotë'; readinessColor = Colors.green;
-        } else if (p >= 0.8) {
-          readinessLabel = '80%'; readinessColor = Colors.lightGreen;
-        } else if (p >= 0.5) {
-          readinessLabel = '50%'; readinessColor = Colors.orange;
-        } else if (p >= 0.2) {
-          readinessLabel = '20%'; readinessColor = Colors.deepOrange;
-        } else if (p > 0) {
-          readinessLabel = '…'; readinessColor = Colors.grey;
-        } else {
-          readinessLabel = '0%'; readinessColor = Colors.grey;
-        }
-        final bool gatingActive = p < 0.2 && _searchController.text.trim().isNotEmpty;
-        return Column(
-          children: [
-            // Search input and filters
-            Container(
-              padding: EdgeInsets.all(context.spaceLg),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceElevated(1),
-                borderRadius: BorderRadius.circular(context.radiusCard.x),
-                border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.4)),
-              ),
-              child: Column(
-                children: [
-                  // Index progress (shown while building)
-                  if (quranProvider.isBuildingIndex && quranProvider.indexProgress < 0.999)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: context.spaceMd),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LinearProgressIndicator(value: quranProvider.indexProgress <= 0 ? null : quranProvider.indexProgress),
-                          SizedBox(height: context.spaceXs),
-                          Text(
-                            'Indeximi i Kërkimit... ${(quranProvider.indexProgress * 100).toStringAsFixed(0)}%',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
+    return Column(
+      children: [
+        // Search input and filters
+        Container(
+          padding: EdgeInsets.all(context.spaceLg),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceElevated(1),
+            borderRadius: BorderRadius.circular(context.radiusCard.x),
+            border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.4)),
+          ),
+          child: Column(
+            children: [
+              // Index progress (shown while building)
+              Selector<QuranProvider, _IndexState>(
+                selector: (_, qp) => _IndexState(qp.isBuildingIndex, qp.indexProgress),
+                builder: (ctx, s, __) {
+                  if (!(s.building) || s.progress >= 0.999) return const SizedBox.shrink();
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: context.spaceMd),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LinearProgressIndicator(value: s.progress <= 0 ? null : s.progress),
+                        SizedBox(height: context.spaceXs),
+                        Text(
+                          'Indeximi i Kërkimit... ${(s.progress * 100).toStringAsFixed(0)}%',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
                     ),
-                  // Search field
-                  TextField(
+                  );
+                },
+              ),
+              // Search field
+              Selector<QuranProvider, double>(
+                selector: (_, qp) => qp.indexProgress,
+                builder: (ctx, p, __) {
+                  String readinessLabel;
+                  Color readinessColor;
+                  if (p >= 1.0) {
+                    readinessLabel = 'Index i Plotë'; readinessColor = Colors.green;
+                  } else if (p >= 0.8) {
+                    readinessLabel = '80%'; readinessColor = Colors.lightGreen;
+                  } else if (p >= 0.5) {
+                    readinessLabel = '50%'; readinessColor = Colors.orange;
+                  } else if (p >= 0.2) {
+                    readinessLabel = '20%'; readinessColor = Colors.deepOrange;
+                  } else if (p > 0) {
+                    readinessLabel = '…'; readinessColor = Colors.grey;
+                  } else {
+                    readinessLabel = '0%'; readinessColor = Colors.grey;
+                  }
+                  final bool gatingActive = p < 0.2 && _searchController.text.trim().isNotEmpty;
+                  return TextField(
                     controller: _searchController,
                     enabled: !gatingActive,
                     decoration: InputDecoration(
@@ -117,8 +136,9 @@ class _SearchWidgetState extends State<SearchWidget> {
                         padding: const EdgeInsets.only(right: 4.0),
                         child: _IndexBadge(label: readinessLabel, color: readinessColor),
                       ),
-                      suffix: Consumer<QuranProvider>(
-                        builder: (ctx, qp, _) => qp.isBuildingIndex
+                      suffix: Selector<QuranProvider, bool>(
+                        selector: (_, qp) => qp.isBuildingIndex,
+                        builder: (ctx, building, _) => building
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
@@ -131,7 +151,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                               icon: const Icon(Icons.clear),
                               onPressed: () {
                                 _searchController.clear();
-                                quranProvider.clearSearch();
+                                context.read<QuranProvider>().clearSearch();
                               },
                             )
                           : null,
@@ -148,147 +168,147 @@ class _SearchWidgetState extends State<SearchWidget> {
                           final qp = context.read<QuranProvider>();
                           if (qp.indexProgress < 1.0) {
                             _indexKickIssued = true;
-                            qp.ensureIndexBuild();
+                            qp.startIndexBuild();
                           }
                         }
                       }
                       if (query.trim().isEmpty) {
-                        quranProvider.clearSearch();
+                        context.read<QuranProvider>().clearSearch();
                         _indexKickIssued = false; // reset when cleared
                       } else {
                         if (!gatingActive) {
                           // Debounce at the widget level to minimize rapid provider churn
-                          quranProvider.searchVersesDebounced(query.trim());
+                          context.read<QuranProvider>().searchVersesDebounced(query.trim());
                         }
                       }
                     },
                     onSubmitted: (query) {
-                      if (!gatingActive) quranProvider.searchVerses(query.trim());
+                      if (!gatingActive) context.read<QuranProvider>().searchVerses(query.trim());
                     },
+                  );
+                },
+              ),
+              SizedBox(height: context.spaceMd),
+              // Filters row (translation selection + Juz)
+              Row(
+                children: [
+                  // Translation dropdown
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButton<String>(
+                      value: _selectedTranslation,
+                      isExpanded: true,
+                      items: const [
+                        DropdownMenuItem(value: 'sq_ahmeti', child: Text('Ahmeti')),
+                        DropdownMenuItem(value: 'sq_mehdiu', child: Text('Mehdiu')),
+                        DropdownMenuItem(value: 'sq_nahi', child: Text('Nahi')),
+                      ],
+                      onChanged: (v) {
+                        if (v == null) return;
+                        setState(() => _selectedTranslation = v);
+                        if (_searchController.text.trim().isNotEmpty) {
+                          context.read<QuranProvider>().searchVerses(_searchController.text.trim());
+                        }
+                      },
+                    ),
                   ),
-                  SizedBox(height: context.spaceMd),
-                  
-                  // Filters row (translation selection + Juz + field toggles)
-                  Row(
-                    children: [
-                      // Translation dropdown
-                      Expanded(
-                        flex: 2,
-                        child: DropdownButton<String>(
-                          value: _selectedTranslation,
-                          isExpanded: true,
-                          items: const [
-                            DropdownMenuItem(value: 'sq_ahmeti', child: Text('Ahmeti')),
-                            DropdownMenuItem(value: 'sq_mehdiu', child: Text('Mehdiu')),
-                            DropdownMenuItem(value: 'sq_nahi', child: Text('Nahi')),
-                          ],
-                          onChanged: (v) {
-                            if (v == null) return;
-                            setState(() => _selectedTranslation = v);
-                            // (Future) tie translation filter weighting
-                            if (_searchController.text.trim().isNotEmpty) {
-                              _performSearch(quranProvider, _searchController.text.trim());
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(width: context.spaceSm),
-                      // Juz selector
-                      Expanded(
-                        child: DropdownButton<int?>(
-                          value: _selectedJuz,
-                          isExpanded: true,
-                          hint: const Text('Juz'),
-                          items: [
-                            const DropdownMenuItem<int?>(value: null, child: Text('Të gjithë')),
-                            ...List.generate(30, (i) => DropdownMenuItem<int?>(value: i + 1, child: Text('Juz ${i + 1}'))),
-                          ],
-                          onChanged: (v) {
-                            setState(() => _selectedJuz = v);
-                            context.read<AppStateProvider>().updateSearchFilters(juz: v);
-                            quranProvider.setJuzFilter(v);
-                            if (_searchController.text.trim().isNotEmpty) {
-                              _performSearch(quranProvider, _searchController.text.trim());
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: context.spaceSm),
-                  // Field toggles
-                  Wrap(
-                    spacing: context.spaceSm,
-                    runSpacing: -context.spaceXs,
-                    children: [
-                      FilterChip(
-                        label: const Text('Përkthimi'),
-                        selected: _filterTranslation,
-                        onSelected: (sel) {
-                          setState(() => _filterTranslation = sel);
-                          context.read<AppStateProvider>().updateSearchFilters(inTranslation: sel);
-                          quranProvider.setFieldFilters(translation: sel);
-                          if (_searchController.text.trim().isNotEmpty) {
-                            _performSearch(quranProvider, _searchController.text.trim());
-                          }
-                        },
-                      ),
-                      FilterChip(
-                        label: const Text('Arabisht'),
-                        selected: _filterArabic,
-                        onSelected: (sel) {
-                          setState(() => _filterArabic = sel);
-                          context.read<AppStateProvider>().updateSearchFilters(inArabic: sel);
-                          quranProvider.setFieldFilters(arabic: sel);
-                          if (_searchController.text.trim().isNotEmpty) {
-                            _performSearch(quranProvider, _searchController.text.trim());
-                          }
-                        },
-                      ),
-                      FilterChip(
-                        label: const Text('Transliterim'),
-                        selected: _filterTransliteration,
-                        onSelected: (sel) {
-                          setState(() => _filterTransliteration = sel);
-                          context.read<AppStateProvider>().updateTransliterationFilter(sel);
-                          quranProvider.setFieldFilters(transliteration: sel);
-                          if (_searchController.text.trim().isNotEmpty) {
-                            _performSearch(quranProvider, _searchController.text.trim());
-                          }
-                        },
-                      ),
-                    ],
+                  SizedBox(width: context.spaceSm),
+                  // Juz selector
+                  Expanded(
+                    child: DropdownButton<int?>(
+                      value: _selectedJuz,
+                      isExpanded: true,
+                      hint: const Text('Juz'),
+                      items: [
+                        const DropdownMenuItem<int?>(value: null, child: Text('Të gjithë')),
+                        ...List.generate(30, (i) => DropdownMenuItem<int?>(value: i + 1, child: Text('Juz ${i + 1}'))),
+                      ],
+                      onChanged: (v) {
+                        setState(() => _selectedJuz = v);
+                        context.read<AppStateProvider>().updateSearchFilters(juz: v);
+                        final qp = context.read<QuranProvider>();
+                        qp.setJuzFilter(v);
+                        if (_searchController.text.trim().isNotEmpty) {
+                          qp.searchVerses(_searchController.text.trim());
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
-            ),
-            
-            // Search results
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (n) {
-                  if (n is UserScrollNotification || n is ScrollUpdateNotification) {
-                    // inform provider for adaptive throttling
-                    quranProvider.notifyUserScrollActivity();
-                  }
-                  return false;
-                },
-        child: gatingActive
-          ? _GatingNotice(progress: p)
-          : _buildSearchResults(quranProvider, appState),
+              SizedBox(height: context.spaceSm),
+              // Field toggles
+              Wrap(
+                spacing: context.spaceSm,
+                runSpacing: -context.spaceXs,
+                children: [
+                  FilterChip(
+                    label: const Text('Përkthimi'),
+                    selected: _filterTranslation,
+                    onSelected: (sel) {
+                      setState(() => _filterTranslation = sel);
+                      context.read<AppStateProvider>().updateSearchFilters(inTranslation: sel);
+                      context.read<QuranProvider>().setFieldFilters(translation: sel);
+                      if (_searchController.text.trim().isNotEmpty) {
+                        context.read<QuranProvider>().searchVerses(_searchController.text.trim());
+                      }
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('Arabisht'),
+                    selected: _filterArabic,
+                    onSelected: (sel) {
+                      setState(() => _filterArabic = sel);
+                      context.read<AppStateProvider>().updateSearchFilters(inArabic: sel);
+                      context.read<QuranProvider>().setFieldFilters(arabic: sel);
+                      if (_searchController.text.trim().isNotEmpty) {
+                        context.read<QuranProvider>().searchVerses(_searchController.text.trim());
+                      }
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('Transliterim'),
+                    selected: _filterTransliteration,
+                    onSelected: (sel) {
+                      setState(() => _filterTransliteration = sel);
+                      context.read<AppStateProvider>().updateTransliterationFilter(sel);
+                      context.read<QuranProvider>().setFieldFilters(transliteration: sel);
+                      if (_searchController.text.trim().isNotEmpty) {
+                        context.read<QuranProvider>().searchVerses(_searchController.text.trim());
+                      }
+                    },
+                  ),
+                ],
               ),
+            ],
+          ),
+        ),
+        // Search results
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (n) {
+              if (n is UserScrollNotification || n is ScrollUpdateNotification) {
+                context.read<QuranProvider>().notifyUserScrollActivity();
+              }
+              return false;
+            },
+            child: Selector<QuranProvider, _ResultsSnapshot>(
+              selector: (_, qp) => _ResultsSnapshot(qp.searchResults, qp.isLoading, qp.error),
+              builder: (ctx, snap, __) {
+                final p = context.select<QuranProvider, double>((qp) => qp.indexProgress);
+                final gatingActive = p < 0.2 && _searchController.text.trim().isNotEmpty;
+                if (gatingActive) return _GatingNotice(progress: p);
+                final settings = context.select<AppStateProvider, dynamic>((a) => a.settings);
+                return _buildSearchResults(snap.results, snap.isLoading, snap.error, settings);
+              },
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
   // Filters bottom sheet removed to avoid duplicate controls and reduce vertical space.
-
-  void _performSearch(QuranProvider quranProvider, String query) {
-    quranProvider.searchVerses(query);
-  }
 
   // Show a modal with the full list of note hits
   void _showAllNoteHits(List<Note> notes, String query) {
@@ -319,13 +339,13 @@ class _SearchWidgetState extends State<SearchWidget> {
   }
 
 
-  Widget _buildSearchResults(QuranProvider quranProvider, AppStateProvider appState) {
+  Widget _buildSearchResults(List<Verse> searchResults, bool isLoading, String? error, dynamic settings) {
     // isSearching not implemented; rely on isLoading
-    if (quranProvider.isLoading) {
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (quranProvider.error != null) {
+    if (error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -342,7 +362,7 @@ class _SearchWidgetState extends State<SearchWidget> {
             ),
             const SizedBox(height: 8),
             Text(
-              quranProvider.error!,
+              error,
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
@@ -351,7 +371,6 @@ class _SearchWidgetState extends State<SearchWidget> {
       );
     }
 
-  final searchResults = quranProvider.searchResults;
   final noteProvider = context.read<NoteProvider>();
   // Get a larger set for unified ranking and for the bottom-sheet "show all"
   final allNoteHits = _searchController.text.trim().isNotEmpty
@@ -442,7 +461,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       : SearchResultItem(
                           verse: it.verse!,
                           searchQuery: _searchController.text,
-                          settings: appState.settings,
+                          settings: settings,
                         ),
                 );
               },
@@ -496,7 +515,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                 child: SearchResultItem(
                   verse: verse,
                   searchQuery: _searchController.text,
-                  settings: appState.settings,
+                  settings: settings,
                 ),
               );
             },

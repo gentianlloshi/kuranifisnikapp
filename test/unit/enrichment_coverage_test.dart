@@ -42,11 +42,21 @@ class _FakeQuranLocal implements QuranLocalDataSource {
 
 class _FakeStorage implements StorageDataSource {
   List<Surah> cached = [];
+  List<Surah> cachedMetas = [];
+  List<Surah> cachedFull = [];
   final Map<String,Map<String,dynamic>> translations = {};
   @override
   Future<void> cacheQuranData(List<Surah> surahs) async { cached = surahs; }
   @override
   Future<List<Surah>> getCachedQuranData() async => cached;
+  @override
+  Future<List<Surah>> getCachedQuranMetas() async => cachedMetas.isNotEmpty ? cachedMetas : cached;
+  @override
+  Future<void> cacheQuranMetas(List<Surah> surahMetas) async { cachedMetas = surahMetas; }
+  @override
+  Future<List<Surah>> getCachedQuranFull() async => cachedFull.isNotEmpty ? cachedFull : cached;
+  @override
+  Future<void> cacheQuranFull(List<Surah> surahsFull) async { cachedFull = surahsFull; }
   @override
   Future<Map<String, dynamic>> getCachedTranslationData(String translationKey) async => translations[translationKey] ?? {};
   @override

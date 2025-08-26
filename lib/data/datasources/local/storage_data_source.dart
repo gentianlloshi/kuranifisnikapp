@@ -13,8 +13,14 @@ abstract class StorageDataSource {
   Future<void> saveBookmarks(List<Bookmark> bookmarks);
   Future<List<Note>> getNotes();
   Future<void> saveNotes(List<Note> notes);
+  // Legacy (unused) – heavy/full corpus cache (kept for backward compatibility)
   Future<List<Surah>> getCachedQuranData();
   Future<void> cacheQuranData(List<Surah> surahs);
+  // New: separate caches to avoid startup loading full corpus when we only need metas
+  Future<List<Surah>> getCachedQuranMetas();
+  Future<void> cacheQuranMetas(List<Surah> surahMetas);
+  Future<List<Surah>> getCachedQuranFull();
+  Future<void> cacheQuranFull(List<Surah> surahsFull);
   Future<Map<String, dynamic>> getCachedTranslationData(String translationKey);
   Future<void> cacheTranslationData(String translationKey, Map<String, dynamic> data);
   Future<List<String>> getMemorizationList();
@@ -25,7 +31,11 @@ class StorageDataSourceImpl implements StorageDataSource {
   static const String _settingsKey = 'app_settings';
   static const String _bookmarksKey = 'bookmarks';
   static const String _notesKey = 'notes';
+  // Legacy combined cache (kept for compatibility but no longer written by new code)
   static const String _quranCacheKey = 'quran_cache';
+  // New explicit keys
+  static const String _quranMetasKey = 'quran_metas';
+  static const String _quranFullKey = 'quran_full';
   static const String _memorizationKey = 'memorization_list';
 
   @override
@@ -98,6 +108,44 @@ class StorageDataSourceImpl implements StorageDataSource {
     final prefs = await SharedPreferences.getInstance();
     final cacheJson = json.encode(surahs.map((s) => s.toJson()).toList());
     await prefs.setString(_quranCacheKey, cacheJson);
+  }
+
+  // New, safe metas-only cache
+  @override
+  Future<List<Surah>> getCachedQuranMetas() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cacheJson = prefs.getString(_quranMetasKey);
+    if (cacheJson != null) {
+      final List<dynamic> data = json.decode(cacheJson);
+      return data.map((item) => Surah.fromJson(item)).toList();
+    }
+    return [];
+  }
+
+  @override
+  Future<void> cacheQuranMetas(List<Surah> surahMetas) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cacheJson = json.encode(surahMetas.map((s) => s.toJson()).toList());
+    await prefs.setString(_quranMetasKey, cacheJson);
+  }
+
+  // New, explicit full-corpus cache (only used by legacy getAllSurahs path)
+  @override
+  Future<List<Surah>> getCachedQuranFull() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cacheJson = prefs.getString(_quranFullKey);
+    if (cacheJson != null) {
+      final List<dynamic> data = json.decode(cacheJson);
+      return data.map((item) => Surah.fromJson(item)).toList();
+    }
+    return [];
+  }
+
+  @override
+  Future<void> cacheQuranFull(List<Surah> surahsFull) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cacheJson = json.encode(surahsFull.map((s) => s.toJson()).toList());
+    await prefs.setString(_quranFullKey, cacheJson);
   }
 
   @override

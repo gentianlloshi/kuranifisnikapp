@@ -42,6 +42,14 @@ class _FakeStorage implements StorageDataSource {
   @override
   Future<List<Surah>> getCachedQuranData() async => [];
   @override
+  Future<List<Surah>> getCachedQuranMetas() async => [];
+  @override
+  Future<void> cacheQuranMetas(List<Surah> surahMetas) async {}
+  @override
+  Future<List<Surah>> getCachedQuranFull() async => [];
+  @override
+  Future<void> cacheQuranFull(List<Surah> surahsFull) async {}
+  @override
   Future<Map<String, dynamic>> getCachedTranslationData(String translationKey) async => {};
   @override
   Future<void> cacheTranslationData(String translationKey, Map<String, dynamic> data) async {}

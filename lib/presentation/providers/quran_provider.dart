@@ -23,6 +23,10 @@ class QuranProvider extends ChangeNotifier {
 
   final SearchIndexManager? _indexManager; // null in simple ctor
   StreamSubscription<SearchIndexProgress>? _indexProgressSub;
+  // Debounce for progress-driven search result refreshes
+  Timer? _resultsRefreshDebounce;
+  double _lastNotifiedProgress = -1;
+  DateTime? _lastProgressNotifyAt;
 
   QuranProvider({
     required GetSurahsUseCase getSurahsUseCase,
@@ -40,13 +44,27 @@ class QuranProvider extends ChangeNotifier {
           getSurahVersesUseCase: getSurahVersesUseCase,
         ) {
     _init();
-    // Subscribe to live progress stream
-  _indexProgressSub = _indexManager?.progressStream.listen((evt) {
+    // Subscribe to live progress stream with throttling to avoid rebuild storms
+    _indexProgressSub = _indexManager?.progressStream.listen((evt) {
       _isBuildingIndex = !evt.complete;
       _indexProgress = evt.progress;
-  // Update perf metrics coverage (index fraction). Enrichment coverage handled in repo merges.
-  PerfMetrics.instance.setIndexCoverage(evt.progress);
-      notifyListeners();
+      // Update perf metrics coverage (index fraction). Enrichment coverage handled in repo merges.
+      PerfMetrics.instance.setIndexCoverage(evt.progress);
+      // If user has an active query, refresh results as the index grows, but debounce updates
+      if (_lastQuery.isNotEmpty) {
+        _scheduleResultsRefresh();
+      }
+      // Throttle UI notifications for progress bar to at most ~every 300ms or on >=2% progress delta or on completion
+      final now = DateTime.now();
+      final shouldNotify = evt.complete ||
+          _lastNotifiedProgress < 0 ||
+          (evt.progress - _lastNotifiedProgress) >= 0.02 ||
+          (now.difference(_lastProgressNotifyAt ?? DateTime.fromMillisecondsSinceEpoch(0)).inMilliseconds >= 300);
+      if (shouldNotify) {
+        _lastNotifiedProgress = evt.progress;
+        _lastProgressNotifyAt = now;
+        notifyListeners();
+      }
     });
   }
 
@@ -95,6 +113,7 @@ class QuranProvider extends ChangeNotifier {
   Timer? _debounceTimer;
   static const _debounceDuration = Duration(milliseconds: 350);
   bool _userTriggeredIndexOnce = false; // suppress duplicate logs
+  String _lastQuery = '';
 
   List<SurahMeta> get surahs => _surahsMeta;
   List<Verse> get currentVerses => _pagedVerses;
@@ -204,6 +223,7 @@ class QuranProvider extends ChangeNotifier {
   bool get filterTransliteration => _filterTransliteration;
 
   Future<void> searchVerses(String query) async {
+    _lastQuery = query.trim();
     if (query.trim().isEmpty) {
       _searchResults = [];
       notifyListeners();
@@ -272,7 +292,7 @@ class QuranProvider extends ChangeNotifier {
         }
       }
   Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
-      // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
+  // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
       // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
       // ignore: unawaited_futures
   final repo = _quranRepository;
@@ -280,10 +300,40 @@ class QuranProvider extends ChangeNotifier {
         // Fire-and-forget enrichment: translation then transliteration.
         Future(() async {
           try {
-    if (!repo.isSurahFullyEnriched(surahId)) {
+            // Respect current field filters: only enrich what’s needed.
+            final needT = _filterTranslation && !repo.isSurahFullyEnriched(surahId);
+            if (needT) {
               await repo.ensureSurahTranslation(surahId);
+              Logger.d('Surah $surahId translation enriched', tag: 'LazySurah');
+            }
+            final needTr = _filterTransliteration && !repo.isSurahFullyEnriched(surahId);
+            if (needTr) {
               await repo.ensureSurahTransliteration(surahId);
-              Logger.d('Surah $surahId enriched on-demand', tag: 'LazySurah');
+              Logger.d('Surah $surahId transliteration enriched', tag: 'LazySurah');
+            }
+            // After enrichment, re-fetch the current surah verses once to merge enriched fields,
+            // then re-apply pagination without jank.
+            if (needT || needTr) {
+              try {
+                final enriched = await (_getSurahVersesUseCase?.call(surahId) ?? Future.value(<Verse>[]));
+                // Replace only if we are still on the same surah
+                if (_currentSurahId == surahId && enriched.isNotEmpty) {
+                  _allCurrentSurahVerses = enriched;
+                  // Recreate paged window preserving the already loaded count
+                  final prevLoaded = _loadedVerseCount;
+                  _pagedVerses = [];
+                  _loadedVerseCount = 0;
+                  _hasMoreVerses = false;
+                  while (_loadedVerseCount < prevLoaded && _loadedVerseCount < _allCurrentSurahVerses.length) {
+                    _appendMoreVerses();
+                  }
+                  // If nothing loaded yet, publish first page
+                  if (prevLoaded == 0 && _pagedVerses.isEmpty) {
+                    _appendMoreVerses();
+                  }
+                }
+              } catch (_) {}
+              notifyListeners();
             }
           } catch (e) {
             Logger.w('Enrichment failed surah=$surahId err=$e', tag: 'LazySurah');
@@ -475,6 +525,7 @@ class QuranProvider extends ChangeNotifier {
   @override
   void dispose() {
     _debounceTimer?.cancel();
+  _resultsRefreshDebounce?.cancel();
     _indexProgressSub?.cancel();
     _indexManager?.dispose();
     super.dispose();
@@ -486,8 +537,26 @@ class QuranProvider extends ChangeNotifier {
   }
 
   // Public explicit trigger for incremental index build (phase scheduler & early user actions)
-  void ensureIndexBuild() {
-  _indexManager?.ensureIncrementalBuild();
+  void startIndexBuild() {
+    _indexManager?.ensureIncrementalBuild();
+  }
+
+  // Debounced refresh of search results while index builds, to reduce rebuild churn
+  void _scheduleResultsRefresh() {
+    _resultsRefreshDebounce?.cancel();
+    _resultsRefreshDebounce = Timer(const Duration(milliseconds: 200), () {
+      final mgr = _indexManager;
+      if (mgr != null && _lastQuery.isNotEmpty) {
+        _searchResults = mgr.search(
+          _lastQuery,
+          juzFilter: _activeJuzFilter,
+          includeTranslation: _filterTranslation,
+          includeArabic: _filterArabic,
+          includeTransliteration: _filterTransliteration,
+        );
+        notifyListeners();
+      }
+    });
   }
 
   // Ensure verses for a surah are loaded; if different surah from current, switches context.

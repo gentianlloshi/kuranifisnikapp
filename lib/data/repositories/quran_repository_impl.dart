@@ -29,7 +29,8 @@ class QuranRepositoryImpl implements QuranRepository {
   Future<List<Surah>> getAllSurahs() async {
     // Full load (Arabic + default translation + transliteration) – invoked by legacy callers.
     final sw = Stopwatch()..start();
-    List<Surah> surahs = await _storageDataSource.getCachedQuranData();
+  // Prefer explicit full-corpus cache to avoid accidentally reading metas-only set
+  List<Surah> surahs = await _storageDataSource.getCachedQuranFull();
     if (surahs.isEmpty) {
   // Full corpus load for legacy API
   Logger.i('Loading full Quran data from assets...', tag: 'QuranRepo');
@@ -44,7 +45,7 @@ class QuranRepositoryImpl implements QuranRepository {
     if (needsTransliteration) {
       await _loadAndMergeTransliteration(surahs);
     }
-    await _storageDataSource.cacheQuranData(surahs);
+  await _storageDataSource.cacheQuranFull(surahs);
     Logger.d('getAllSurahs full ${sw.elapsedMilliseconds}ms', tag: 'Perf');
   _updateEnrichmentCoverage(); // full load likely enriched now
     return surahs;
@@ -53,7 +54,8 @@ class QuranRepositoryImpl implements QuranRepository {
   // Lightweight meta fetch (no translation / transliteration merging). Used by lazy UI list / indexing pre-stage.
   Future<List<Surah>> getArabicOnly() async {
     final sw = Stopwatch()..start();
-  List<Surah> surahs = await _storageDataSource.getCachedQuranData();
+  // Use metas-only cache; never read full-corpus cache on Arabic-only path
+  List<Surah> surahs = await _storageDataSource.getCachedQuranMetas();
   if (surahs.isNotEmpty) {
       Logger.d('getArabicOnly cache ${sw.elapsedMilliseconds}ms', tag: 'Perf');
       return surahs;
@@ -61,7 +63,7 @@ class QuranRepositoryImpl implements QuranRepository {
   Logger.i('Loading Arabic-only Quran metas (no merges) from assets...', tag: 'QuranRepo');
   surahs = await _localDataSource.getSurahMetas();
     // Intentionally NOT merging translation/transliteration here.
-    await _storageDataSource.cacheQuranData(surahs);
+    await _storageDataSource.cacheQuranMetas(surahs);
     Logger.d('getArabicOnly fresh ${sw.elapsedMilliseconds}ms', tag: 'Perf');
     return surahs;
   }
@@ -142,8 +144,47 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<List<Verse>> getSurahVerses(int surahNumber) async {
-  // Fetch only this surah's verses
-  return _localDataSource.getSurahVerses(surahNumber);
+    // Fetch Arabic-only verses for this surah
+    final verses = await _localDataSource.getSurahVerses(surahNumber);
+    // If this surah has been enriched previously, merge fields before returning
+    // Default translation key is 'sq_ahmeti' (matches ensureSurahTranslation default)
+    try {
+      if ((_translationMerged['sq_ahmeti']?.contains(surahNumber) ?? false)) {
+        final tData = await getTranslation('sq_ahmeti');
+        final List<dynamic> tList = (tData['quran'] as List?) ?? const [];
+        final Map<String, String> tMap = {
+          for (final item in tList)
+            if (item is Map<String, dynamic>)
+              '${(item['chapter'] as num?)?.toInt()}:${(item['verse'] as num?)?.toInt()}':
+                  (item['text'] ?? '').toString()
+        };
+        for (int i = 0; i < verses.length; i++) {
+          final v = verses[i];
+          final key = '${v.surahNumber}:${v.number}';
+          final t = tMap[key];
+          if (t != null && t.isNotEmpty) {
+            verses[i] = v.copyWith(textTranslation: () => t);
+          }
+        }
+      }
+      if (_transliterationMerged.contains(surahNumber)) {
+        final trData = await getTransliterations();
+        final obj = trData['$surahNumber'];
+        if (obj is Map<String, dynamic>) {
+          for (int i = 0; i < verses.length; i++) {
+            final v = verses[i];
+            final tr = obj['${v.number}'];
+            if (tr is String && tr.isNotEmpty) {
+              verses[i] = v.copyWith(transliteration: tr);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Non-fatal: return Arabic-only verses on any enrichment merge error
+      Logger.w('Merge enrichment in getSurahVerses failed for $surahNumber: $e', tag: 'QuranRepo');
+    }
+    return verses;
   }
 
   @override
@@ -214,7 +255,8 @@ class QuranRepositoryImpl implements QuranRepository {
     final surahs = await getArabicOnly();
     final target = surahs.firstWhere((s) => s.number == surahNumber, orElse: () => throw Exception('Surah $surahNumber not found'));
     await _loadAndMergeTranslation(translationKey, [target]);
-    await _storageDataSource.cacheQuranData(surahs); // persist enriched one
+  // Persist metas view (safe: Surah metas have empty verses; store still fine for quick list build)
+  await _storageDataSource.cacheQuranMetas(await getArabicOnly());
   }
 
   @override
@@ -223,7 +265,7 @@ class QuranRepositoryImpl implements QuranRepository {
     final surahs = await getArabicOnly();
     final target = surahs.firstWhere((s) => s.number == surahNumber, orElse: () => throw Exception('Surah $surahNumber not found'));
     await _loadAndMergeTransliteration([target]);
-    await _storageDataSource.cacheQuranData(surahs);
+  await _storageDataSource.cacheQuranMetas(await getArabicOnly());
   }
 
   @override

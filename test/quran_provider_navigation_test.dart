@@ -142,6 +142,8 @@ class _LocalAdapter implements QuranLocalDataSource {
 
 class _StorageAdapter implements StorageDataSource {
   List<Surah> cache = [];
+  List<Surah> metas = [];
+  List<Surah> full = [];
   @override
   Future<AppSettings> getSettings() async => AppSettings.defaultSettings();
   @override
@@ -158,6 +160,14 @@ class _StorageAdapter implements StorageDataSource {
   Future<List<Surah>> getCachedQuranData() async => cache;
   @override
   Future<void> cacheQuranData(List<Surah> surahs) async { cache = surahs; }
+  @override
+  Future<List<Surah>> getCachedQuranMetas() async => metas.isNotEmpty ? metas : cache;
+  @override
+  Future<void> cacheQuranMetas(List<Surah> surahMetas) async { metas = surahMetas; }
+  @override
+  Future<List<Surah>> getCachedQuranFull() async => full.isNotEmpty ? full : cache;
+  @override
+  Future<void> cacheQuranFull(List<Surah> surahsFull) async { full = surahsFull; }
   @override
   Future<Map<String, dynamic>> getCachedTranslationData(String translationKey) async => {};
   @override
