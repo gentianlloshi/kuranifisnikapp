@@ -27,15 +27,27 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
+            // Check if Issues are enabled
+            const repoInfo = await github.rest.repos.get({ owner, repo });
+            if (!repoInfo.data.has_issues) {
+              core.setFailed('Repository Issues are disabled. Enable Issues in Settings > General > Features and re-run.');
+              return;
+            }
+
+            let labelsCreated = 0;
+            let issuesCreated = 0;
+            let milestoneCreated = false;
+
             // Ensure labels exist
             const desiredLabels = seed.labels || [];
             const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, { owner, repo, per_page: 100 });
             const existingLabelNames = new Set(existingLabels.map(l => l.name));
 
-            for (const l of desiredLabels) {
+      for (const l of desiredLabels) {
               if (!existingLabelNames.has(l.name)) {
                 core.info(`Creating missing label: ${l.name}`);
-                await github.rest.issues.createLabel({ owner, repo, name: l.name, color: l.color || 'cccccc', description: l.description || '' });
+        await github.rest.issues.createLabel({ owner, repo, name: l.name, color: l.color || 'cccccc', description: l.description || '' });
+        labelsCreated++;
               }
             }
 
@@ -50,6 +62,7 @@ jobs:
               } else {
                 const created = await github.rest.issues.createMilestone({ owner, repo, title: seed.milestone.title, description: seed.milestone.description || '' });
                 milestoneNumber = created.data.number;
+                milestoneCreated = true;
                 core.info(`Created milestone: ${seed.milestone.title} (#${milestoneNumber})`);
               }
             }
@@ -74,5 +87,20 @@ jobs:
                 milestone: milestoneNumber,
                 assignees: issue.assignees || [],
               });
+              issuesCreated++;
               core.info(`Created issue #${res.data.number}: ${issue.title}`);
+            }
+
+            // Summarize
+            await core.summary
+              .addHeading('Seed Issues Summary')
+              .addList([
+                `Labels created: ${labelsCreated}`,
+                `Milestone created: ${milestoneCreated}`,
+                `Issues created: ${issuesCreated}`,
+              ])
+              .write();
+
+            if (labelsCreated === 0 && !milestoneCreated && issuesCreated === 0) {
+              core.setFailed('Nothing was created. Likely causes: missing permissions, Issues disabled, or items already existed.');
             }
