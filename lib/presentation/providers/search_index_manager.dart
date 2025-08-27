@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show compute;
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:flutter/services.dart' show rootBundle, ServicesBinding;
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
@@ -59,6 +60,17 @@ class SearchIndexManager {
     bool enablePrebuiltAsset = true,
   }) : _snapshotStore = snapshotStore ?? DefaultSnapshotStore(fileName: _snapshotFile),
         _enablePrebuiltAsset = enablePrebuiltAsset;
+
+  /// Test-only: inject a tiny index and verse cache to validate search behavior without building.
+  @visibleForTesting
+  void debugSetIndex(Map<String, List<String>> index, Map<String, Verse> verses) {
+    _invertedIndex = index;
+    _verseCache
+      ..clear()
+      ..addAll(verses);
+    _nextSurahToIndex = 115;
+    _incrementalMode = false;
+  }
 
   Future<bool> _tryLoadPrebuiltAsset() async {
     // Expect optional asset at assets/data/search_index.json containing keys: index, verses
