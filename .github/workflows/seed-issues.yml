@@ -1,0 +1,73 @@
+name: Seed Issues
+
+on:
+  workflow_dispatch:
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create labels, milestone, and issues from seed file
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const seedPath = path.join(process.env.GITHUB_WORKSPACE, '.github', 'issues_seed.json');
+            const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Ensure labels exist
+            const desiredLabels = seed.labels || [];
+            const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, { owner, repo, per_page: 100 });
+            const existingLabelNames = new Set(existingLabels.map(l => l.name));
+
+            for (const l of desiredLabels) {
+              if (!existingLabelNames.has(l.name)) {
+                core.info(`Creating missing label: ${l.name}`);
+                await github.rest.issues.createLabel({ owner, repo, name: l.name, color: l.color || 'cccccc', description: l.description || '' });
+              }
+            }
+
+            // Ensure milestone exists (if provided)
+            let milestoneNumber = undefined;
+            if (seed.milestone && seed.milestone.title) {
+              const milestones = await github.paginate(github.rest.issues.listMilestones, { owner, repo, state: 'all', per_page: 100 });
+              const found = milestones.find(m => m.title === seed.milestone.title);
+              if (found) {
+                milestoneNumber = found.number;
+                core.info(`Using existing milestone: ${found.title} (#${found.number})`);
+              } else {
+                const created = await github.rest.issues.createMilestone({ owner, repo, title: seed.milestone.title, description: seed.milestone.description || '' });
+                milestoneNumber = created.data.number;
+                core.info(`Created milestone: ${seed.milestone.title} (#${milestoneNumber})`);
+              }
+            }
+
+            // Fetch existing issues (titles) to avoid duplicates
+            const existingIssues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: 'all', per_page: 100 });
+            const existingTitles = new Set(existingIssues.map(i => i.title));
+
+            for (const issue of seed.issues) {
+              if (existingTitles.has(issue.title)) {
+                core.info(`Skipping existing issue: ${issue.title}`);
+                continue;
+              }
+
+              const labels = issue.labels || [];
+              const res = await github.rest.issues.create({
+                owner,
+                repo,
+                title: issue.title,
+                body: issue.body,
+                labels,
+                milestone: milestoneNumber,
+                assignees: issue.assignees || [],
+              });
+              core.info(`Created issue #${res.data.number}: ${issue.title}`);
+            }

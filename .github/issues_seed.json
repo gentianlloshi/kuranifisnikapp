@@ -1,0 +1,51 @@
+{
+  "labels": [
+    { "name": "bug", "color": "d73a4a", "description": "Something is not working" },
+    { "name": "high-priority", "color": "b60205", "description": "Must fix soon" },
+    { "name": "perf", "color": "1d76db", "description": "Performance related" },
+    { "name": "ux", "color": "5319e7", "description": "User experience" },
+    { "name": "tech-debt", "color": "f9d0c4", "description": "Refactor or cleanup" }
+  ],
+  "milestone": {
+    "title": "Stability & Performance (pre-release)",
+    "description": "Critical fixes before the next public release"
+  },
+  "issues": [
+    {
+      "title": "[Bug] Search tab crashes intermittently when opening",
+      "labels": ["bug", "high-priority", "ux"],
+      "body": "Observed a red-screen when opening the Search tab in recent test videos. Investigate provider access patterns in search_widget.dart; ensure callbacks use context.read and rebuilds are scoped with Selector. Capture logs and DevTools traces; add a regression test if possible.",
+      "assignees": []
+    },
+    {
+      "title": "[Perf] Eliminate startup freeze by enforcing full lazy-loading",
+      "labels": ["perf", "high-priority"],
+      "body": "Ensure metas-only startup and no Verse instances pre-first-surah. Validate with DevTools Memory snapshot (0 Verse at cold start). Audit repository/provider methods for any eager loads. Add a small integration test to assert verse count remains zero until a surah is opened.",
+      "assignees": []
+    },
+    {
+      "title": "[UX] Auto-scroll during audio playback",
+      "labels": ["ux"],
+      "body": "Couple auto-scroll to audio position or highlighted word index. Periodically verify the active verse is visible and scroll into view if not. Add a switch to disable for user preference.",
+      "assignees": []
+    },
+    {
+      "title": "[Bug] Translation disappears after toggling display options",
+      "labels": ["bug", "ux", "high-priority"],
+      "body": "Verify notifyListeners is called on display settings changes and state is updated immutably. Trace propagation from AppStateProvider to QuranViewWidget to VerseWidget. Add a minimal repro and widget test.",
+      "assignees": []
+    },
+    {
+      "title": "[UX] Fix font encoding for ë/ç in Help titles",
+      "labels": ["ux", "tech-debt"],
+      "body": "Ensure font with Latin Extended coverage is used for Help titles (e.g., Lora/Noto). Update ThemeData accordingly and verify.",
+      "assignees": []
+    },
+    {
+      "title": "[Perf] Reduce rebuild storms with Selector and const",
+      "labels": ["perf", "tech-debt"],
+      "body": "Audit heavy UI trees. Replace broad Consumers with targeted Selectors; add const constructors; avoid state changes in build. Document hotspots in the code and add guidance.",
+      "assignees": []
+    }
+  ]
+}
