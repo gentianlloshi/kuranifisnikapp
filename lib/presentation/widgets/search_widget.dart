@@ -48,6 +48,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     super.initState();
     // Hydrate from persisted settings after first frame to ensure provider ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return; // avoid setState/context usage after dispose
       final appState = context.read<AppStateProvider>();
       setState(() {
         _filterArabic = appState.searchInArabic;
@@ -55,12 +56,18 @@ class _SearchWidgetState extends State<SearchWidget> {
         _selectedJuz = appState.searchJuz;
         _filterTransliteration = appState.searchInTransliteration;
       });
-      context.read<QuranProvider>().setJuzFilter(_selectedJuz);
-      context.read<QuranProvider>().setFieldFilters(
-        translation: _filterTranslation,
-        arabic: _filterArabic,
-        transliteration: _filterTransliteration,
-      );
+      if (!mounted) return;
+      // Defer provider mutations to avoid any chance of triggering rebuilds mid-build
+      scheduleMicrotask(() {
+        if (!mounted) return;
+        final qp = context.read<QuranProvider>();
+        qp.setJuzFilter(_selectedJuz);
+        qp.setFieldFilters(
+          translation: _filterTranslation,
+          arabic: _filterArabic,
+          transliteration: _filterTransliteration,
+        );
+      });
     });
   }
 
@@ -295,10 +302,10 @@ class _SearchWidgetState extends State<SearchWidget> {
             child: Selector<QuranProvider, _ResultsSnapshot>(
               selector: (_, qp) => _ResultsSnapshot(qp.searchResults, qp.isLoading, qp.error),
               builder: (ctx, snap, __) {
-                final p = context.select<QuranProvider, double>((qp) => qp.indexProgress);
+                final p = ctx.select<QuranProvider, double>((qp) => qp.indexProgress);
                 final gatingActive = p < 0.2 && _searchController.text.trim().isNotEmpty;
                 if (gatingActive) return _GatingNotice(progress: p);
-                final settings = context.select<AppStateProvider, dynamic>((a) => a.settings);
+                final settings = ctx.select<AppStateProvider, dynamic>((a) => a.settings);
                 return _buildSearchResults(snap.results, snap.isLoading, snap.error, settings);
               },
             ),
@@ -312,6 +319,7 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   // Show a modal with the full list of note hits
   void _showAllNoteHits(List<Note> notes, String query) {
+  if (!mounted) return; // widget might have been disposed (e.g., fast tab switch)
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -564,7 +572,8 @@ class _SearchResultItemState extends State<SearchResultItem> {
         if (idx + 1 < all.length) _next = all[idx + 1];
       }
     } catch (_) {}
-    if (mounted) setState(() { _loadingCtx = false; });
+  if (!mounted) return;
+  setState(() { _loadingCtx = false; });
   }
 
   @override
@@ -614,6 +623,7 @@ class _SearchResultItemState extends State<SearchResultItem> {
                           if (!context.mounted) return;
                           final locale = Localizations.localeOf(context);
                           final strings = Strings(Strings.resolve(locale));
+                          if (!context.mounted) return;
                           context.read<AppStateProvider>().enqueueSnack(
                             wasMarked ? strings.t('bookmark_removed') : strings.t('bookmark_added'),
                             duration: const Duration(seconds: 2),
@@ -822,8 +832,9 @@ class _SearchResultItemState extends State<SearchResultItem> {
   }
 
   void _navigateToVerse(BuildContext context) {
-    final q = context.read<QuranProvider>();
-    q.openSurahAtVerse(widget.verse.surahNumber, widget.verse.number);
+  if (!context.mounted) return;
+  final q = context.read<QuranProvider>();
+  q.openSurahAtVerse(widget.verse.surahNumber, widget.verse.number);
     // If there's a higher-level tab controller, rely on parent logic (avoid crashing if none)
     try {
       final controller = DefaultTabController.maybeOf(context);
@@ -995,7 +1006,8 @@ class _NoteHitCard extends StatelessWidget {
       onTap: () {
         final s = int.tryParse(parts.isNotEmpty ? parts[0] : '') ?? 1;
         final v = int.tryParse(parts.length > 1 ? parts[1] : '') ?? 1;
-        context.read<QuranProvider>().openSurahAtVerse(s, v);
+  if (!context.mounted) return;
+  context.read<QuranProvider>().openSurahAtVerse(s, v);
         final controller = DefaultTabController.maybeOf(context);
         controller?.animateTo(0);
       },
