@@ -222,6 +222,21 @@ class QuranProvider extends ChangeNotifier {
   bool get filterArabic => _filterArabic;
   bool get filterTransliteration => _filterTransliteration;
 
+  // Expose search index manager readiness (for UI gating and diagnostics)
+  bool get isSearchIndexReady => _indexManager?.isBuilt ?? false;
+
+  // Force-load full search index (prebuilt asset or snapshot or full build) – returns when ready.
+  Future<void> ensureSearchIndexReady() async {
+    final mgr = _indexManager;
+    if (mgr == null) return;
+    if (mgr.isBuilt) return;
+    try {
+      await mgr.ensureBuilt();
+    } catch (e) {
+      Logger.w('ensureSearchIndexReady failed: $e', tag: 'SearchIndex');
+    }
+  }
+
   Future<void> searchVerses(String query) async {
     _lastQuery = query.trim();
     if (query.trim().isEmpty) {

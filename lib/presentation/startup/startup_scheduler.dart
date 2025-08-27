@@ -51,11 +51,17 @@ class StartupScheduler {
   }
 
   void _phase3() {
-  // Strict lazy policy: do NOT start background indexing automatically.
-  // Index build will be triggered by user actions (typing in search) or an explicit toggle in settings.
-  // This preserves ~0 Verse instances at startup and avoids early CPU spikes.
-  final _ = context.read<AppStateProvider>(); // keep access pattern if later needed
-  return;
+    // Try loading a snapshot or prebuilt index cheaply; if present, this is fast and avoids heavy CPU.
+    // This keeps startup light (no verse allocations), but primes search so it's usable immediately.
+    unawaited(() async {
+      try {
+        final q = context.read<QuranProvider>();
+        if (!q.isSearchIndexReady) {
+          await q.ensureSearchIndexReady();
+          Logger.d('Search index ensured (snapshot/prebuilt) in Phase 3', tag: 'StartupPhase');
+        }
+      } catch (_) {}
+    }());
   }
 
   void _phase4() {
