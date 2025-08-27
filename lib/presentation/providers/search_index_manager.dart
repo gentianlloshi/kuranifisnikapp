@@ -318,10 +318,10 @@ class SearchIndexManager {
       }
     }
     if (candidateScores.isEmpty) return [];
-  // Use normalized tokens for consistent matching/highlighting
-  final fullTokens = tq.tokenizeLatin(query)
-      .map((e) => e.toLowerCase())
-      .map(_normalizeLatin)
+  // Use expanded (normalized + stem) tokens for substring gating to avoid over-pruning
+  final fullTokens = tq
+      .expandQueryTokens(query, lightStem)
+      .map((e) => _normalizeLatin(e.toLowerCase()))
       .toSet();
   final scored = <_ScoredVerse>[];
     candidateScores.forEach((key, base) {
