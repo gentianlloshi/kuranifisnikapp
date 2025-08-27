@@ -246,6 +246,11 @@ class QuranProvider extends ChangeNotifier {
         includeArabic: _filterArabic,
         includeTransliteration: _filterTransliteration,
   ));
+      assert(() {
+        // ignore: avoid_print
+        print('[SearchDBG] Provider.searchVerses results=${_searchResults.length} query="$query"');
+        return true;
+      }());
       _error = null;
       notifyListeners();
       return;

@@ -288,8 +288,18 @@ class SearchIndexManager {
     bool includeTransliteration = true,
   }) {
   if (_invertedIndex == null) return [];
-    final tokens = _expandQueryTokens(query);
+    // Probe both raw expanded tokens and their normalized variants for maximum recall.
+    final baseTokens = _expandQueryTokens(query);
+    final tokens = <String>{}
+      ..addAll(baseTokens)
+      ..addAll(baseTokens.map((t) => _normalizeLatin(t.toLowerCase())));
     if (tokens.isEmpty) return [];
+    // Debug trace: tokens and initial state (debug builds only)
+    assert(() {
+      // ignore: avoid_print
+      print('[SearchDBG] query="$query" tokens=${tokens.toList()} invSize=${_invertedIndex?.length ?? 0} verseCache=${_verseCache.length}');
+      return true;
+    }());
   final candidateScores = <String, int>{};
     // Exact/prefix hits
     for (final t in tokens) {
@@ -329,7 +339,55 @@ class SearchIndexManager {
         }
       }
     }
-    if (candidateScores.isEmpty) return [];
+    // If still no candidates, do a substring-only fallback across currently cached verses
+    if (candidateScores.isEmpty) {
+      assert(() {
+        // ignore: avoid_print
+        print('[SearchDBG] No exact/prefix/fuzzy candidates. Falling back to substring scan. cache=${_verseCache.length}');
+        return true;
+      }());
+      final fullTokens = tq
+          .expandQueryTokens(query, lightStem)
+          .map((e) => _normalizeLatin(e.toLowerCase()))
+          .toSet();
+      if (fullTokens.isEmpty) return [];
+      final scored = <_ScoredVerse>[];
+      for (final verse in _verseCache.values) {
+        if (verse == null) continue;
+        if (juzFilter != null && verse.juz != juzFilter) continue;
+        final tNorm = _normalizeLatin((verse.textTranslation ?? '').toLowerCase());
+        final trNorm = _normalizeLatin((verse.textTransliteration ?? '').toLowerCase());
+        final arNorm = _normalizeArabic(verse.textArabic).toLowerCase();
+        bool hit = false; int score = 0;
+        if (includeTranslation) {
+          for (final ft in fullTokens) { if (tNorm.contains(ft)) { score += _wTranslation; hit = true; break; } }
+        }
+        if (!hit && includeArabic) {
+          for (final ft in fullTokens) { if (arNorm.contains(ft)) { score += _wArabic; hit = true; break; } }
+        }
+        if (!hit && includeTransliteration) {
+          for (final ft in fullTokens) { if (trNorm.contains(ft)) { score += _wTransliteration; hit = true; break; } }
+        }
+        if (hit) {
+          // Minimal base score for fallback results
+          scored.add(_ScoredVerse(verse, score + _baseHitWeight));
+        }
+      }
+      if (scored.isEmpty) return [];
+      scored.sort((a, b) {
+        final c = b.score.compareTo(a.score);
+        if (c != 0) return c;
+        final s = a.verse.surahNumber.compareTo(b.verse.surahNumber);
+        if (s != 0) return s;
+        return a.verse.number.compareTo(b.verse.number);
+      });
+      assert(() {
+        // ignore: avoid_print
+        print('[SearchDBG] Fallback produced ${scored.length} results');
+        return true;
+      }());
+      return scored.map((e) => e.verse).toList();
+    }
   // Use expanded (normalized + stem) tokens for substring gating to avoid over-pruning
   final fullTokens = tq
       .expandQueryTokens(query, lightStem)
@@ -370,6 +428,11 @@ class SearchIndexManager {
       if (s != 0) return s;
       return a.verse.number.compareTo(b.verse.number);
     });
+    assert(() {
+      // ignore: avoid_print
+      print('[SearchDBG] Ranked results count=${scored.length} for query="$query"');
+      return true;
+    }());
     return scored.map((e) => e.verse).toList();
   }
 
