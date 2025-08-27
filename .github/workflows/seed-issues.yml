@@ -41,7 +41,7 @@ jobs:
             // Ensure labels exist
             const desiredLabels = seed.labels || [];
             const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, { owner, repo, per_page: 100 });
-            const existingLabelNames = new Set(existingLabels.map(l => l.name));
+      const existingLabelNames = new Set(existingLabels.map(l => l.name));
 
       for (const l of desiredLabels) {
               if (!existingLabelNames.has(l.name)) {
