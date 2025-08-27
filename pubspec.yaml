@@ -2,7 +2,7 @@ name: kurani_fisnik_app
 description: "Aplikacion Flutter për leximin dhe studimin e Kuranit Fisnik"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
