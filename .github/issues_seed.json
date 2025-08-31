@@ -47,5 +47,12 @@
       "body": "Audit heavy UI trees. Replace broad Consumers with targeted Selectors; add const constructors; avoid state changes in build. Document hotspots in the code and add guidance.",
       "assignees": []
     }
+    ,
+    {
+      "title": "[Perf] Defer search index initialization until Search tab is opened",
+      "labels": ["perf", "high-priority"],
+      "body": "Fully defer search index ensure/build until the user interacts with the Search tab (open or first non-empty query). Remove any startup-time ensure calls. Validate with DevTools that no index parsing/build happens before Search is used, and verify cold start skipped frames drop. Add a small integration test that asserts index manager is not built on app start.",
+      "assignees": []
+    }
   ]
 }

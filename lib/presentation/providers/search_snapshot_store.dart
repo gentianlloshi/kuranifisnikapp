@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
@@ -33,7 +34,8 @@ class DefaultSnapshotStore implements SnapshotStore {
       final file = await _file();
       if (!await file.exists()) return null;
       final content = await file.readAsString();
-      return json.decode(content) as Map<String, dynamic>;
+  // Parse large JSON in an isolate to keep UI thread responsive
+  return await compute(_decodeJsonMap, content);
     } catch (_) {
       return null;
     }
@@ -89,3 +91,6 @@ class DefaultSnapshotStore implements SnapshotStore {
     }
   }
 }
+
+// Top-level function required for compute()
+Map<String, dynamic> _decodeJsonMap(String content) => json.decode(content) as Map<String, dynamic>;

@@ -1,0 +1,56 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main, master, develop, fix/**, feature/** ]
+  pull_request:
+    branches: [ main, master, develop, fix/**, feature/** ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            **/build
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Build prebuilt search index
+        run: dart run tool/build_search_index.dart
+
+      - name: Validate assets
+        run: dart run tool/validate_assets.dart
+
+      - name: Analyze (non-fatal)
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Run tests
+        run: flutter test --reporter expanded --coverage --no-pub
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info

@@ -14,6 +14,8 @@ class QuranRepositoryImpl implements QuranRepository {
   // Track which surahs have translation / transliteration merged (by translation key)
   final Map<String, Set<int>> _translationMerged = {}; // key -> set of surahNumbers
   final Set<int> _transliterationMerged = <int>{};
+  // Preferred translation key for merging during getSurahVerses
+  String _preferredTranslationKey = 'sq_ahmeti';
   // Reactive controllers (broadcast) for coverage updates
   final StreamController<double> _enrichmentCoverageController = StreamController<double>.broadcast();
   final StreamController<Map<String,double>> _translationCoverageController = StreamController<Map<String,double>>.broadcast();
@@ -93,17 +95,19 @@ class QuranRepositoryImpl implements QuranRepository {
         translationMap[key] = verse['text'];
       }
       
-        for (final surah in surahsToUpdate) {
-          bool any = false;
+  for (final surah in surahsToUpdate) {
           for (int i = 0; i < surah.verses.length; i++) {
             final verse = surah.verses[i];
             final verseKey = '${verse.surahNumber}:${verse.number}';
-            surah.verses[i] = verse.copyWith(textTranslation: () => translationMap[verseKey]);
-            any = true;
+            final t = translationMap[verseKey];
+            if (t != null) {
+              surah.verses[i] = verse.copyWith(textTranslation: () => t);
+            }
           }
-          if (any) {
-            (_translationMerged[translationKey] ??= <int>{}).add(surah.number);
-          }
+          // Important: even if 'surah' is meta-only (no verses loaded here),
+          // mark the surah as translated so that getSurahVerses() merges
+          // translation into freshly loaded Arabic-only verses on demand.
+          (_translationMerged[translationKey] ??= <int>{}).add(surah.number);
         }
     } catch (e) {
   Logger.w('Error loading translation $translationKey: $e', tag: 'QuranRepo');
@@ -147,10 +151,11 @@ class QuranRepositoryImpl implements QuranRepository {
     // Fetch Arabic-only verses for this surah
     final verses = await _localDataSource.getSurahVerses(surahNumber);
     // If this surah has been enriched previously, merge fields before returning
-    // Default translation key is 'sq_ahmeti' (matches ensureSurahTranslation default)
+    // Use preferred translation key (defaults to 'sq_ahmeti')
     try {
-      if ((_translationMerged['sq_ahmeti']?.contains(surahNumber) ?? false)) {
-        final tData = await getTranslation('sq_ahmeti');
+      final tKey = _preferredTranslationKey;
+      if ((_translationMerged[tKey]?.contains(surahNumber) ?? false)) {
+        final tData = await getTranslation(tKey);
         final List<dynamic> tList = (tData['quran'] as List?) ?? const [];
         final Map<String, String> tMap = {
           for (final item in tList)
@@ -255,6 +260,8 @@ class QuranRepositoryImpl implements QuranRepository {
     final surahs = await getArabicOnly();
     final target = surahs.firstWhere((s) => s.number == surahNumber, orElse: () => throw Exception('Surah $surahNumber not found'));
     await _loadAndMergeTranslation(translationKey, [target]);
+  // Update preferred key when explicitly ensured
+  _preferredTranslationKey = translationKey;
   // Persist metas view (safe: Surah metas have empty verses; store still fine for quick list build)
   await _storageDataSource.cacheQuranMetas(await getArabicOnly());
   }
@@ -270,14 +277,15 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   bool isSurahFullyEnriched(int surahNumber) {
-    final hasTrans = (_translationMerged['sq_ahmeti']?.contains(surahNumber) ?? false);
+  final hasTrans = (_translationMerged[_preferredTranslationKey]?.contains(surahNumber) ?? false);
     final hasTranslit = _transliterationMerged.contains(surahNumber);
     return hasTrans && hasTranslit;
   }
 
   void _updateEnrichmentCoverage() {
     // Compute fraction of surahs that have both translation+transliteration merged for default translation.
-    final enriched = _transliterationMerged.where((s) => _translationMerged['sq_ahmeti']?.contains(s) ?? false).length;
+  final key = _preferredTranslationKey;
+  final enriched = _transliterationMerged.where((s) => _translationMerged[key]?.contains(s) ?? false).length;
     final coverage = enriched / 114.0;
     PerfMetrics.instance.setEnrichmentCoverage(coverage);
     // Emit to reactive stream (ignore if closed)
@@ -303,5 +311,10 @@ class QuranRepositoryImpl implements QuranRepository {
   void dispose() {
     _enrichmentCoverageController.close();
     _translationCoverageController.close();
+  }
+
+  @override
+  void setPreferredTranslationKey(String translationKey) {
+    _preferredTranslationKey = translationKey;
   }
 }

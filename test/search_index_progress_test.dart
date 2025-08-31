@@ -44,6 +44,8 @@ class _FakeRepo implements QuranRepository {
   Stream<double> get enrichmentCoverageStream => const Stream<double>.empty();
   @override
   Stream<Map<String, double>> get translationCoverageStream => const Stream<Map<String, double>>.empty();
+  @override
+  void setPreferredTranslationKey(String translationKey) {}
 }
 
 void main() {

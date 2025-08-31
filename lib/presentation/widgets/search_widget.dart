@@ -57,17 +57,29 @@ class _SearchWidgetState extends State<SearchWidget> {
         _filterTransliteration = appState.searchInTransliteration;
       });
       if (!mounted) return;
-      // Defer provider mutations to avoid any chance of triggering rebuilds mid-build
-      scheduleMicrotask(() {
+      // Prepare references synchronously, then defer mutations to a microtask (no context used inside async).
+      final qpRef = context.read<QuranProvider>();
+      final bool bgEnabled = context.read<AppStateProvider>().backgroundIndexingEnabled;
+      scheduleMicrotask(() async {
         if (!mounted) return;
-        final qp = context.read<QuranProvider>();
+        final qp = qpRef;
         qp.setJuzFilter(_selectedJuz);
         qp.setFieldFilters(
           translation: _filterTranslation,
           arabic: _filterArabic,
           transliteration: _filterTransliteration,
         );
+        // Ensure the search index is hot-loaded from the prebuilt asset/snapshot
+        // so first queries don't run against an empty index.
+        await qp.ensureSearchIndexReady();
+        // After attempting fast-path load, optionally start incremental build to refresh snapshots
+        // only if not yet complete and background indexing is enabled.
+        if (bgEnabled && qp.indexProgress < 1.0 && !_indexKickIssued) {
+          _indexKickIssued = true; // prevent duplicate kicks in this session
+          qp.startIndexBuild();
+        }
       });
+      // Removed immediate startIndexBuild here to avoid racing with ensureSearchIndexReady()
     });
   }
 

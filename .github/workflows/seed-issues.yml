@@ -2,6 +2,15 @@ name: Seed Issues
 
 on:
   workflow_dispatch:
+    inputs:
+      fail_on_noop:
+        description: "Fail the job if nothing new is created"
+        required: false
+        default: "false"
+      dry_run:
+        description: "Don't create anything, just print what would be done"
+        required: false
+        default: "false"
 
 permissions:
   contents: read
@@ -24,6 +33,9 @@ jobs:
             const seedPath = path.join(process.env.GITHUB_WORKSPACE, '.github', 'issues_seed.json');
             const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
 
+            const failOnNoop = (core.getInput('fail_on_noop') || 'false').toLowerCase() === 'true';
+            const dryRun = (core.getInput('dry_run') || 'false').toLowerCase() === 'true';
+
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
@@ -37,6 +49,8 @@ jobs:
             let labelsCreated = 0;
             let issuesCreated = 0;
             let milestoneCreated = false;
+            let labelsPlanned = 0;
+            let issuesPlanned = 0;
 
             // Ensure labels exist
             const desiredLabels = seed.labels || [];
@@ -45,9 +59,14 @@ jobs:
 
       for (const l of desiredLabels) {
               if (!existingLabelNames.has(l.name)) {
-                core.info(`Creating missing label: ${l.name}`);
-        await github.rest.issues.createLabel({ owner, repo, name: l.name, color: l.color || 'cccccc', description: l.description || '' });
-        labelsCreated++;
+                if (dryRun) {
+                  core.info(`[dry-run] Would create label: ${l.name}`);
+                  labelsPlanned++;
+                } else {
+                  core.info(`Creating missing label: ${l.name}`);
+                  await github.rest.issues.createLabel({ owner, repo, name: l.name, color: l.color || 'cccccc', description: l.description || '' });
+                  labelsCreated++;
+                }
               }
             }
 
@@ -60,10 +79,15 @@ jobs:
                 milestoneNumber = found.number;
                 core.info(`Using existing milestone: ${found.title} (#${found.number})`);
               } else {
-                const created = await github.rest.issues.createMilestone({ owner, repo, title: seed.milestone.title, description: seed.milestone.description || '' });
-                milestoneNumber = created.data.number;
-                milestoneCreated = true;
-                core.info(`Created milestone: ${seed.milestone.title} (#${milestoneNumber})`);
+                if (dryRun) {
+                  core.info(`[dry-run] Would create milestone: ${seed.milestone.title}`);
+                  milestoneCreated = true; // mark planned for summary
+                } else {
+                  const created = await github.rest.issues.createMilestone({ owner, repo, title: seed.milestone.title, description: seed.milestone.description || '' });
+                  milestoneNumber = created.data.number;
+                  milestoneCreated = true;
+                  core.info(`Created milestone: ${seed.milestone.title} (#${milestoneNumber})`);
+                }
               }
             }
 
@@ -78,29 +102,40 @@ jobs:
               }
 
               const labels = issue.labels || [];
-              const res = await github.rest.issues.create({
-                owner,
-                repo,
-                title: issue.title,
-                body: issue.body,
-                labels,
-                milestone: milestoneNumber,
-                assignees: issue.assignees || [],
-              });
-              issuesCreated++;
-              core.info(`Created issue #${res.data.number}: ${issue.title}`);
+              if (dryRun) {
+                core.info(`[dry-run] Would create issue: ${issue.title}`);
+                issuesPlanned++;
+              } else {
+                const res = await github.rest.issues.create({
+                  owner,
+                  repo,
+                  title: issue.title,
+                  body: issue.body,
+                  labels,
+                  milestone: milestoneNumber,
+                  assignees: issue.assignees || [],
+                });
+                issuesCreated++;
+                core.info(`Created issue #${res.data.number}: ${issue.title}`);
+              }
             }
 
             // Summarize
             await core.summary
               .addHeading('Seed Issues Summary')
               .addList([
-                `Labels created: ${labelsCreated}`,
-                `Milestone created: ${milestoneCreated}`,
-                `Issues created: ${issuesCreated}`,
+                `Labels ${dryRun ? 'planned' : 'created'}: ${dryRun ? labelsPlanned : labelsCreated}`,
+                `Milestone ${dryRun ? 'planned' : 'created'}: ${milestoneCreated}`,
+                `Issues ${dryRun ? 'planned' : 'created'}: ${dryRun ? issuesPlanned : issuesCreated}`,
               ])
               .write();
 
-            if (labelsCreated === 0 && !milestoneCreated && issuesCreated === 0) {
-              core.setFailed('Nothing was created. Likely causes: missing permissions, Issues disabled, or items already existed.');
+            const nothingChanged = (labelsCreated === 0 && !milestoneCreated && issuesCreated === 0);
+            if (nothingChanged) {
+              const msg = 'Nothing to create. Likely items already exist or Issues are disabled.';
+              if (dryRun || !failOnNoop) {
+                core.notice(msg);
+              } else {
+                core.setFailed(msg);
+              }
             }

@@ -234,20 +234,22 @@ class KuraniFisnikApp extends StatelessWidget {
           create: (ctx) => AppStateProvider(getSettingsUseCase: Provider.of<GetSettingsUseCase>(ctx, listen: false), saveSettingsUseCase: Provider.of<SaveSettingsUseCase>(ctx, listen: false)),
           update: (_, getSettingsUseCase, saveSettingsUseCase, previous) => previous ?? AppStateProvider(getSettingsUseCase: getSettingsUseCase, saveSettingsUseCase: saveSettingsUseCase),
         ),
-        ChangeNotifierProxyProvider5<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, QuranProvider>(
+        ChangeNotifierProxyProvider6<GetSurahsUseCase, GetSurahsArabicOnlyUseCase, SearchVersesUseCase, get_verses.GetSurahVersesUseCase, QuranRepositoryImpl, AppStateProvider, QuranProvider>(
           create: (ctx) => QuranProvider(
             getSurahsUseCase: Provider.of<GetSurahsUseCase>(ctx, listen:false),
             getSurahsArabicOnlyUseCase: Provider.of<GetSurahsArabicOnlyUseCase>(ctx, listen:false),
             searchVersesUseCase: Provider.of<SearchVersesUseCase>(ctx, listen:false),
             getSurahVersesUseCase: Provider.of<get_verses.GetSurahVersesUseCase>(ctx, listen:false),
             quranRepository: Provider.of<QuranRepositoryImpl>(ctx, listen:false),
+            appStateProvider: Provider.of<AppStateProvider>(ctx, listen:false),
           ),
-          update: (ctx, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, repo, previous) => previous ?? QuranProvider(
+          update: (ctx, getSurahsUseCase, getSurahsArabicOnlyUseCase, searchVersesUseCase, getSurahVersesUseCase, repo, appState, previous) => previous ?? QuranProvider(
             getSurahsUseCase: getSurahsUseCase,
             getSurahsArabicOnlyUseCase: getSurahsArabicOnlyUseCase,
             searchVersesUseCase: searchVersesUseCase,
             getSurahVersesUseCase: getSurahVersesUseCase,
             quranRepository: repo,
+            appStateProvider: appState,
           ),
         ),
 

@@ -1,5 +1,7 @@
 # Kurani Fisnik - Flutter App
 
+[![Flutter CI](https://github.com/gentianlloshi/kuranifisnikapp/actions/workflows/flutter-ci.yml/badge.svg)](https://github.com/gentianlloshi/kuranifisnikapp/actions/workflows/flutter-ci.yml)
+
 Aplikacion Flutter për leximin dhe studimin e Kuranit Fisnik në gjuhën shqipe.
 
 ## Përshkrimi
@@ -193,6 +195,22 @@ Për të kontribuar në projekt:
 3. Commit ndryshimet (`git commit -m \'Add some AmazingFeature\'`) 
 4. Push në branch (`git push origin feature/AmazingFeature`)
 5. Hapni një Pull Request
+
+### Contributing – Checks & Workflows
+
+- CI: Çdo PR/push ekzekuton:
+   - `flutter analyze --no-fatal-infos --no-fatal-warnings`
+   - `flutter test --coverage`
+   - Statusi i CI tregohet nga badge më sipër. Coverage ngarkohet si artifact (lcov.info).
+- Seed Issues: Workflow “Seed Issues” krijon labels/milestone/issues nga `.github/issues_seed.json`.
+   - Mund të ekzekutohet me `dry_run=true` për verifikim.
+   - `fail_on_noop=false` (default) nuk dështojnë kur s’ka asgjë të re për t’u krijuar.
+
+Rregulla PR:
+- Ruani startup-in “lazy-by-default” (pa Verse të hidratuara në cold start).
+- Shmangni punë të rënda në thread-in kryesor; preferoni `compute`/isolate.
+- Për kërkim: mos nisni `ensureBuilt()` në start; përdorni incremental build kur hapet Search.
+- Shtoni teste për rrjedhat e reja dhe azhurnoni `issues_seed.json` kur krijoni epics.
 
 ## Licenca
 

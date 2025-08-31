@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/foundation.dart' show compute;
-import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show compute, visibleForTesting;
 import 'package:flutter/services.dart' show rootBundle, ServicesBinding;
 import '../../domain/entities/verse.dart';
 import '../../domain/usecases/get_surah_verses_usecase.dart';
@@ -20,7 +18,8 @@ class SearchIndexManager {
   final GetSurahVersesUseCase getSurahVersesUseCase;
 
   Map<String, List<String>>? _invertedIndex; // token -> verseKeys
-  final Map<String, Verse> _verseCache = {}; // verseKey -> Verse
+  final Map<String, Verse> _verseCache = {}; // verseKey -> Verse (lazy-hydrated)
+  final Map<String, Map<String, dynamic>> _verseRaw = {}; // verseKey -> raw json fields
   bool _building = false;
   Completer<void>? _buildCompleter;
   // Incremental state
@@ -68,6 +67,7 @@ class SearchIndexManager {
     _verseCache
       ..clear()
       ..addAll(verses);
+    _verseRaw.clear();
     _nextSurahToIndex = 115;
     _incrementalMode = false;
   }
@@ -77,24 +77,15 @@ class SearchIndexManager {
     try {
       final jsonStr = await rootBundle.loadString('assets/data/search_index.json');
       if (jsonStr.isEmpty) return false;
-      final obj = json.decode(jsonStr) as Map<String, dynamic>;
-      final idxMap = (obj['index'] as Map?)?.cast<String, dynamic>();
-      final versesMap = (obj['verses'] as Map?)?.cast<String, dynamic>();
-      if (idxMap == null || versesMap == null) return false;
+      // Parse heavy JSON in an isolate
+      final parsed = await compute(iso.parsePrebuiltSearchSnapshot, jsonStr);
+      final idxMap = (parsed['index'] as Map).cast<String, dynamic>();
+      final versesMap = (parsed['verses'] as Map).cast<String, dynamic>();
       _invertedIndex = idxMap.map((k, v) => MapEntry(k, (v as List).cast<String>()));
       _verseCache.clear();
-      versesMap.forEach((k, v) {
-        final m = (v as Map).cast<String, dynamic>();
-        _verseCache[k] = Verse(
-          surahId: (m['surahNumber'] as num?)?.toInt() ?? m['surahId'] as int? ?? 0,
-          verseNumber: (m['number'] as num?)?.toInt() ?? m['verseNumber'] as int? ?? 0,
-          arabicText: (m['ar'] ?? '') as String,
-          translation: (m['t'] as String?) ?? m['translation'] as String?,
-          transliteration: (m['tr'] as String?) ?? m['transliteration'] as String?,
-          verseKey: (m['verseKey'] as String?) ?? k,
-          juz: (m['juz'] as num?)?.toInt(),
-        );
-      });
+      _verseRaw
+        ..clear()
+        ..addAll(versesMap.map((k, v) => MapEntry(k, (v as Map).cast<String, dynamic>())));
       _nextSurahToIndex = 115; // mark as complete
       _incrementalMode = false;
       return true;
@@ -106,6 +97,20 @@ class SearchIndexManager {
   /// Lightweight lookup for an already-cached verse by its key (e.g., "2:255").
   /// Returns null if the verse hasn't been indexed yet.
   Verse? getVerseByKey(String verseKey) => _verseCache[verseKey];
+  
+  Verse _hydrateVerse(String key, Map<String, dynamic> raw) {
+    final v = Verse(
+      surahId: (raw['surahNumber'] as num?)?.toInt() ?? raw['surahId'] as int? ?? 0,
+      verseNumber: (raw['number'] as num?)?.toInt() ?? raw['verseNumber'] as int? ?? 0,
+      arabicText: (raw['ar'] ?? '') as String,
+      translation: (raw['t'] as String?) ?? raw['translation'] as String?,
+      transliteration: (raw['tr'] as String?) ?? raw['transliteration'] as String?,
+      verseKey: (raw['verseKey'] as String?) ?? key,
+      juz: (raw['juz'] as num?)?.toInt(),
+    );
+    _verseCache[key] = v;
+    return v;
+  }
 
   /// Ensures the index is fully built (blocking until completion) unless already built.
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
@@ -130,7 +135,7 @@ class SearchIndexManager {
     _buildCompleter = Completer<void>();
     try {
       // Load required asset JSONs on main isolate (fast; file I/O) and offload heavy parse/build
-      final arabicStr = await rootBundle.loadString('assets/data/arabic_quran.json');
+  final arabicStr = await rootBundle.loadString('assets/data/arabic_quran.json');
       // Prefer default translation for index; can be made dynamic later
       final translationStr = await rootBundle.loadString('assets/data/sq_ahmeti.json');
       String translitStr = '';
@@ -144,20 +149,12 @@ class SearchIndexManager {
       });
       final index = (result['index'] as Map).map((k, v) => MapEntry(k as String, (v as List).cast<String>()));
       final verses = (result['verses'] as Map).cast<String, dynamic>();
-      // Populate caches
+      // Populate caches (raw only; lazy-hydrate Verse on demand)
       _invertedIndex = index;
-      verses.forEach((k, v) {
-        final obj = v as Map<String, dynamic>;
-        _verseCache[k] = Verse(
-          surahId: obj['surahNumber'] as int,
-          verseNumber: obj['number'] as int,
-          arabicText: obj['ar'] as String? ?? '',
-          translation: obj['t'] as String?,
-          transliteration: obj['tr'] as String?,
-          verseKey: obj['verseKey'] as String? ?? k,
-          juz: obj['juz'] as int?,
-        );
-      });
+      _verseRaw
+        ..clear()
+        ..addAll(verses.map((k, v) => MapEntry(k, (v as Map).cast<String, dynamic>())));
+      _verseCache.clear();
       _emitProgress(1.0); if (onProgress != null) onProgress(1.0);
       // Persist snapshot (fire & forget)
       unawaited(_saveSnapshot());
@@ -212,18 +209,9 @@ class SearchIndexManager {
             final res = await compute(iso.buildPartialIndexForSurah, {'token': rootToken, 'surah': s});
             final partIdx = (res['index'] as Map).map((k, v) => MapEntry(k as String, (v as List).cast<String>()));
             final versesMap = (res['verses'] as Map).cast<String, dynamic>();
-            // Hydrate verse cache minimally to support search result hydration
+            // Store raw verse fields for this batch
             versesMap.forEach((k, v) {
-              final obj = v as Map<String, dynamic>;
-              _verseCache[k] = Verse(
-                surahId: obj['surahNumber'] as int,
-                verseNumber: obj['number'] as int,
-                arabicText: obj['ar'] as String? ?? '',
-                translation: obj['t'] as String?,
-                transliteration: obj['tr'] as String?,
-                verseKey: obj['verseKey'] as String? ?? k,
-                juz: obj['juz'] as int?,
-              );
+              _verseRaw[k] = (v as Map).cast<String, dynamic>();
             });
             _mergePartialIndex(partIdx);
           } catch (_) {/* skip surah errors silently */}
@@ -352,12 +340,14 @@ class SearchIndexManager {
           .toSet();
       if (fullTokens.isEmpty) return [];
       final scored = <_ScoredVerse>[];
-      for (final verse in _verseCache.values) {
-        if (verse == null) continue;
-        if (juzFilter != null && verse.juz != juzFilter) continue;
-        final tNorm = _normalizeLatin((verse.textTranslation ?? '').toLowerCase());
-        final trNorm = _normalizeLatin((verse.textTransliteration ?? '').toLowerCase());
-        final arNorm = _normalizeArabic(verse.textArabic).toLowerCase();
+      // Scan raw verse store first
+      for (final entry in _verseRaw.entries) {
+        final raw = entry.value;
+        final juz = (raw['juz'] as num?)?.toInt();
+        if (juzFilter != null && juz != juzFilter) continue;
+        final tNorm = _normalizeLatin(((raw['t'] as String?) ?? '').toLowerCase());
+        final trNorm = _normalizeLatin(((raw['tr'] as String?) ?? '').toLowerCase());
+        final arNorm = _normalizeArabic(((raw['ar'] as String?) ?? '')).toLowerCase();
         bool hit = false; int score = 0;
         if (includeTranslation) {
           for (final ft in fullTokens) { if (tNorm.contains(ft)) { score += _wTranslation; hit = true; break; } }
@@ -369,8 +359,31 @@ class SearchIndexManager {
           for (final ft in fullTokens) { if (trNorm.contains(ft)) { score += _wTransliteration; hit = true; break; } }
         }
         if (hit) {
-          // Minimal base score for fallback results
+          final key = entry.key;
+          final verse = _verseCache[key] ?? _hydrateVerse(key, raw);
           scored.add(_ScoredVerse(verse, score + _baseHitWeight));
+        }
+      }
+      // If no raw store, or to cover tests where only cache is present, scan cache too
+      if ((_verseRaw.isEmpty || scored.isEmpty) && _verseCache.isNotEmpty) {
+        for (final v in _verseCache.values) {
+          if (juzFilter != null && v.juz != juzFilter) continue;
+          final tNorm = _normalizeLatin((v.textTranslation ?? '').toLowerCase());
+          final trNorm = _normalizeLatin((v.textTransliteration ?? '').toLowerCase());
+          final arNorm = _normalizeArabic((v.textArabic ?? '')).toLowerCase();
+          bool hit = false; int score = 0;
+          if (includeTranslation) {
+            for (final ft in fullTokens) { if (tNorm.contains(ft)) { score += _wTranslation; hit = true; break; } }
+          }
+          if (!hit && includeArabic) {
+            for (final ft in fullTokens) { if (arNorm.contains(ft)) { score += _wArabic; hit = true; break; } }
+          }
+          if (!hit && includeTransliteration) {
+            for (final ft in fullTokens) { if (trNorm.contains(ft)) { score += _wTransliteration; hit = true; break; } }
+          }
+          if (hit) {
+            scored.add(_ScoredVerse(v, score + _baseHitWeight));
+          }
         }
       }
       if (scored.isEmpty) return [];
@@ -395,14 +408,28 @@ class SearchIndexManager {
       .toSet();
   final scored = <_ScoredVerse>[];
     candidateScores.forEach((key, base) {
-      final verse = _verseCache[key];
-      if (verse == null) return;
-      if (juzFilter != null && verse.juz != juzFilter) return;
+      final raw = _verseRaw[key];
+      Verse? verse;
+      int? juz;
+      String tRaw = '';
+      String trRaw = '';
+      String arRaw = '';
+      if (raw != null) {
+        juz = (raw['juz'] as num?)?.toInt();
+        tRaw = (raw['t'] as String?) ?? '';
+        trRaw = (raw['tr'] as String?) ?? '';
+        arRaw = (raw['ar'] as String?) ?? '';
+      } else {
+        verse = _verseCache[key];
+        if (verse == null) return; // nothing to score
+        juz = verse.juz;
+        tRaw = verse.textTranslation ?? '';
+        trRaw = verse.textTransliteration ?? '';
+        arRaw = verse.textArabic ?? '';
+      }
+      if (juzFilter != null && juz != juzFilter) return;
       int score = base * _baseHitWeight;
       // Build normalized field strings for substring checks
-      final tRaw = verse.textTranslation ?? '';
-      final trRaw = verse.textTransliteration ?? '';
-      final arRaw = verse.textArabic;
       final tNorm = _normalizeLatin(tRaw.toLowerCase());
       final trNorm = _normalizeLatin(trRaw.toLowerCase());
       final arNorm = _normalizeArabic(arRaw).toLowerCase();
@@ -418,6 +445,7 @@ class SearchIndexManager {
       }
       // Prune pure-fuzzy outliers: require at least one substring hit in any included field
       if (!hasSubstringHit) return;
+      verse ??= _hydrateVerse(key, raw!);
       scored.add(_ScoredVerse(verse, score));
     });
     // Default ranking by score, stable tie-breakers
@@ -556,18 +584,10 @@ extension on SearchIndexManager {
   if (dataVersion != currentHash) return false; // corpus changed
       final inv = (jsonMap['index'] as Map<String, dynamic>).map((k, v) => MapEntry(k, (v as List).cast<String>()));
       final versesJson = (jsonMap['verses'] as Map<String, dynamic>);
-      versesJson.forEach((k, v) {
-        final obj = v as Map<String, dynamic>;
-        _verseCache[k] = Verse(
-          surahId: obj['surahNumber'] as int,
-          verseNumber: obj['number'] as int,
-          arabicText: obj['ar'] as String? ?? '',
-          translation: obj['t'] as String?,
-          transliteration: obj['tr'] as String?,
-          verseKey: obj['verseKey'] as String? ?? k,
-          juz: obj['juz'] as int?,
-        );
-      });
+      _verseRaw
+        ..clear()
+        ..addAll(versesJson.map((k, v) => MapEntry(k, (v as Map).cast<String, dynamic>())));
+      _verseCache.clear();
       _invertedIndex = inv;
       final next = jsonMap['nextSurah'] as int?; // if present & <=114 indicates partial
       if (next != null && next >= 1 && next <= 114) {
@@ -588,18 +608,23 @@ extension on SearchIndexManager {
   Future<void> _saveSnapshot({bool partial = false}) async {
     if (_invertedIndex == null) return;
     try {
+      // Prefer saving from raw store to avoid forcing hydration of all verses
       final versesMap = <String, dynamic>{};
-      _verseCache.forEach((k, v) {
-        versesMap[k] = {
-          'surahNumber': v.surahNumber,
-          'number': v.number,
-          'verseKey': v.verseKey,
-          'ar': v.textArabic,
-          't': v.textTranslation,
-          'tr': v.textTransliteration,
-          'juz': v.juz,
-        };
-      });
+      if (_verseRaw.isNotEmpty) {
+        versesMap.addAll(_verseRaw);
+      } else {
+        _verseCache.forEach((k, v) {
+          versesMap[k] = {
+            'surahNumber': v.surahNumber,
+            'number': v.number,
+            'verseKey': v.verseKey,
+            'ar': v.textArabic,
+            't': v.textTranslation,
+            'tr': v.textTransliteration,
+            'juz': v.juz,
+          };
+        });
+      }
   final payload = {
         'version': SearchIndexManager._snapshotVersion,
         'dataVersion': await _computeCorpusHash(),

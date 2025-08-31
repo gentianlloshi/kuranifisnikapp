@@ -92,4 +92,6 @@ class _DummyRepo implements QuranRepository {
   Future<List<SurahMeta>> getSurahList() async => [];
   @override
   Future<List<Verse>> getVersesForSurah(int surahId) async => [];
+  @override
+  void setPreferredTranslationKey(String translationKey) {}
 }
