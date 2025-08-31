@@ -2,6 +2,33 @@ import 'dart:convert';
 import 'inverted_index_builder.dart' as idx;
 import 'package:flutter/services.dart';
 
+/// Parse a prebuilt search snapshot JSON string into typed maps.
+/// Expected JSON shape:
+/// {
+///   "index": { "token": ["1:1", "1:2", ...], ... },
+///   "verses": { "1:1": {"surahNumber":1, "number":1, "verseKey":"1:1", "ar":"...", "t":"...", "tr":"...", "juz":1}, ... }
+/// }
+Map<String, dynamic> parsePrebuiltSearchSnapshot(String jsonStr) {
+  final obj = json.decode(jsonStr) as Map<String, dynamic>;
+  final idxAny = (obj['index'] as Map?) ?? const <String, dynamic>{};
+  final versesAny = (obj['verses'] as Map?) ?? const <String, dynamic>{};
+  final index = <String, List<String>>{};
+  idxAny.forEach((k, v) {
+    final key = k.toString();
+    if (v is List) {
+      index[key] = v.map((e) => e.toString()).toList(growable: false);
+    }
+  });
+  final verses = <String, Map<String, dynamic>>{};
+  versesAny.forEach((k, v) {
+    final key = k.toString();
+    if (v is Map) {
+      verses[key] = v.cast<String, dynamic>();
+    }
+  });
+  return {'index': index, 'verses': verses};
+}
+
 /// Payload keys expected by [buildFullIndexFromAssets]
 /// - 'arabic': JSON string of assets/data/arabic_quran.json
 /// - 'translation': JSON string of assets/data/<translation>.json (e.g., sq_ahmeti.json)

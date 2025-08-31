@@ -13,6 +13,7 @@ import 'search_index_manager.dart';
 import 'package:kurani_fisnik_app/core/utils/logger.dart';
 import '../../domain/repositories/quran_repository.dart';
 import '../../core/metrics/perf_metrics.dart';
+import 'app_state_provider.dart';
 
 class QuranProvider extends ChangeNotifier {
   final GetSurahsUseCase? _getSurahsUseCase;
@@ -34,6 +35,7 @@ class QuranProvider extends ChangeNotifier {
     required SearchVersesUseCase searchVersesUseCase,
     required GetSurahVersesUseCase getSurahVersesUseCase,
     QuranRepository? quranRepository,
+    AppStateProvider? appStateProvider,
   })  : _getSurahsUseCase = getSurahsUseCase,
         _getSurahsArabicOnlyUseCase = getSurahsArabicOnlyUseCase,
         _searchVersesUseCase = searchVersesUseCase,
@@ -66,6 +68,37 @@ class QuranProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+    // Track selected translation; refresh open surah when it changes
+    _selectedTranslationKey = appStateProvider?.selectedTranslation ?? _selectedTranslationKey;
+    _appStateListener = () {
+      final newKey = appStateProvider?.selectedTranslation ?? _selectedTranslationKey;
+      if (newKey != _selectedTranslationKey) {
+        _selectedTranslationKey = newKey;
+        // Inform repository of preferred key
+        _quranRepository?.setPreferredTranslationKey(newKey);
+        // If a surah is open and translations are shown, ensure enrichment and reload
+        final sid = _currentSurahId;
+        if (sid != null && _filterTranslation) {
+          // ignore: unawaited_futures
+          Future(() async {
+            try {
+              await _quranRepository?.ensureSurahTranslation(sid, translationKey: newKey);
+              // Reload verses to merge new translation
+              final enriched = await (_getSurahVersesUseCase?.call(sid) ?? Future.value(<Verse>[]));
+              if (enriched.isNotEmpty) {
+                _allCurrentSurahVerses = enriched;
+                // Reset pagination to reflect new text
+                _loadedVerseCount = 0;
+                _pagedVerses = [];
+                _appendMoreVerses();
+                notifyListeners();
+              }
+            } catch (_) {}
+          });
+        }
+      }
+    };
+    appStateProvider?.addListener(_appStateListener!);
   }
 
   // Simplified constructor for basic functionality without use cases
@@ -114,6 +147,9 @@ class QuranProvider extends ChangeNotifier {
   static const _debounceDuration = Duration(milliseconds: 350);
   bool _userTriggeredIndexOnce = false; // suppress duplicate logs
   String _lastQuery = '';
+  // Track preferred translation key from settings
+  String _selectedTranslationKey = 'sq_ahmeti';
+  VoidCallback? _appStateListener;
 
   List<SurahMeta> get surahs => _surahsMeta;
   List<Verse> get currentVerses => _pagedVerses;
@@ -222,6 +258,21 @@ class QuranProvider extends ChangeNotifier {
   bool get filterArabic => _filterArabic;
   bool get filterTransliteration => _filterTransliteration;
 
+  // Expose search index manager readiness (for UI gating and diagnostics)
+  bool get isSearchIndexReady => _indexManager?.isBuilt ?? false;
+
+  // Force-load full search index (prebuilt asset or snapshot or full build) – returns when ready.
+  Future<void> ensureSearchIndexReady() async {
+    final mgr = _indexManager;
+    if (mgr == null) return;
+    if (mgr.isBuilt) return;
+    try {
+      await mgr.ensureBuilt();
+    } catch (e) {
+      Logger.w('ensureSearchIndexReady failed: $e', tag: 'SearchIndex');
+    }
+  }
+
   Future<void> searchVerses(String query) async {
     _lastQuery = query.trim();
     if (query.trim().isEmpty) {
@@ -246,6 +297,11 @@ class QuranProvider extends ChangeNotifier {
         includeArabic: _filterArabic,
         includeTransliteration: _filterTransliteration,
   ));
+      assert(() {
+        // ignore: avoid_print
+        print('[SearchDBG] Provider.searchVerses results=${_searchResults.length} query="$query"');
+        return true;
+      }());
       _error = null;
       notifyListeners();
       return;
@@ -291,54 +347,30 @@ class QuranProvider extends ChangeNotifier {
           _allCurrentSurahVerses = await uc.call(surahId);
         }
       }
-  Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
-  // Attempt on-demand enrichment (translation + transliteration) asynchronously without blocking UI.
-      // We resolve repository via context-less global if needed; better would be dependency injection; skipping for brevity.
-      // ignore: unawaited_futures
-  final repo = _quranRepository;
-  if (repo != null) {
-        // Fire-and-forget enrichment: translation then transliteration.
-        Future(() async {
-          try {
-            // Respect current field filters: only enrich what’s needed.
-            final needT = _filterTranslation && !repo.isSurahFullyEnriched(surahId);
-            if (needT) {
-              await repo.ensureSurahTranslation(surahId);
-              Logger.d('Surah $surahId translation enriched', tag: 'LazySurah');
-            }
-            final needTr = _filterTransliteration && !repo.isSurahFullyEnriched(surahId);
-            if (needTr) {
-              await repo.ensureSurahTransliteration(surahId);
-              Logger.d('Surah $surahId transliteration enriched', tag: 'LazySurah');
-            }
-            // After enrichment, re-fetch the current surah verses once to merge enriched fields,
-            // then re-apply pagination without jank.
-            if (needT || needTr) {
-              try {
-                final enriched = await (_getSurahVersesUseCase?.call(surahId) ?? Future.value(<Verse>[]));
-                // Replace only if we are still on the same surah
-                if (_currentSurahId == surahId && enriched.isNotEmpty) {
-                  _allCurrentSurahVerses = enriched;
-                  // Recreate paged window preserving the already loaded count
-                  final prevLoaded = _loadedVerseCount;
-                  _pagedVerses = [];
-                  _loadedVerseCount = 0;
-                  _hasMoreVerses = false;
-                  while (_loadedVerseCount < prevLoaded && _loadedVerseCount < _allCurrentSurahVerses.length) {
-                    _appendMoreVerses();
-                  }
-                  // If nothing loaded yet, publish first page
-                  if (prevLoaded == 0 && _pagedVerses.isEmpty) {
-                    _appendMoreVerses();
-                  }
-                }
-              } catch (_) {}
-              notifyListeners();
-            }
-          } catch (e) {
-            Logger.w('Enrichment failed surah=$surahId err=$e', tag: 'LazySurah');
+      Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
+      // Enrich synchronously before publishing to UI so translations/transliterations are present.
+      final repo = _quranRepository;
+      if (repo != null) {
+        try {
+          final needT = _filterTranslation && !repo.isSurahFullyEnriched(surahId);
+          final needTr = _filterTransliteration && !repo.isSurahFullyEnriched(surahId);
+          if (needT) {
+            await repo.ensureSurahTranslation(surahId, translationKey: _selectedTranslationKey);
+            Logger.d('Surah $surahId translation enriched', tag: 'LazySurah');
           }
-        });
+          if (needTr) {
+            await repo.ensureSurahTransliteration(surahId);
+            Logger.d('Surah $surahId transliteration enriched', tag: 'LazySurah');
+          }
+          if (needT || needTr) {
+            final enriched = await (_getSurahVersesUseCase?.call(surahId) ?? Future.value(<Verse>[]));
+            if (enriched.isNotEmpty) {
+              _allCurrentSurahVerses = enriched;
+            }
+          }
+        } catch (e) {
+          Logger.w('Synchronous enrichment failed surah=$surahId err=$e', tag: 'LazySurah');
+        }
       }
   _currentSurahId = surahId;
   // Preserve existing meta fields in _currentSurah (already set in navigateToSurah) and just attach verses after pagination.
@@ -528,6 +560,7 @@ class QuranProvider extends ChangeNotifier {
   _resultsRefreshDebounce?.cancel();
     _indexProgressSub?.cancel();
     _indexManager?.dispose();
+  _appStateListener = null; // owner (AppStateProvider) outlives this provider
     super.dispose();
   }
 

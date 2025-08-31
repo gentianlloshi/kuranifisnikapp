@@ -15,11 +15,17 @@ class WordByWordVerse {
   });
 
   factory WordByWordVerse.fromJson(Map<String, dynamic> json) {
+    final verseNum = (json['verse'] as num?)?.toInt() ?? int.tryParse('${json['verse']}') ?? 0;
+    final rawWords = (json['words'] as List?) ?? const [];
+    final words = rawWords.map((e) {
+      if (e is Map) {
+        return WordData.fromJson(Map<String, dynamic>.from(e as Map));
+      }
+      return WordData.fromJson(e as Map<String, dynamic>);
+    }).toList();
     return WordByWordVerse(
-      verseNumber: json['verse'] as int,
-      words: (json['words'] as List<dynamic>)
-          .map((e) => WordData.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      verseNumber: verseNum,
+      words: words,
     );
   }
 
@@ -53,12 +59,17 @@ class WordData {
   });
 
   factory WordData.fromJson(Map<String, dynamic> json) {
+    int _toInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse(v?.toString() ?? '') ?? 0;
+    }
     return WordData(
-      arabic: json['arabic'] as String,
-      translation: json['translation'] as String,
-      transliteration: json['transliteration'] as String,
-      charStart: json['char_start'] as int,
-      charEnd: json['char_end'] as int,
+      arabic: (json['arabic'] ?? json['text'] ?? '').toString(),
+      translation: (json['translation'] ?? '').toString(),
+      transliteration: (json['transliteration'] ?? '').toString(),
+      charStart: _toInt(json['char_start'] ?? json['start'] ?? 0),
+      charEnd: _toInt(json['char_end'] ?? json['end'] ?? 0),
     );
   }
 
@@ -86,11 +97,17 @@ class TimestampData {
   });
 
   factory TimestampData.fromJson(Map<String, dynamic> json) {
+    final verseNum = (json['verse'] as num?)?.toInt() ?? int.tryParse('${json['verse']}') ?? 0;
+    final raw = (json['words'] as List?) ?? const [];
+    final ts = raw.map((e) {
+      if (e is Map) {
+        return WordTimestamp.fromJson(Map<String, dynamic>.from(e as Map));
+      }
+      return WordTimestamp.fromJson(e as Map<String, dynamic>);
+    }).toList();
     return TimestampData(
-      verseNumber: json['verse'] as int,
-      wordTimestamps: (json['words'] as List<dynamic>)
-          .map((e) => WordTimestamp.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      verseNumber: verseNum,
+      wordTimestamps: ts,
     );
   }
 
@@ -115,9 +132,14 @@ class WordTimestamp {
   });
 
   factory WordTimestamp.fromJson(Map<String, dynamic> json) {
+    int _toInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse(v?.toString() ?? '') ?? 0;
+    }
     return WordTimestamp(
-      start: json['start'] as int,
-      end: json['end'] as int,
+      start: _toInt(json['start']),
+      end: _toInt(json['end']),
     );
   }
 

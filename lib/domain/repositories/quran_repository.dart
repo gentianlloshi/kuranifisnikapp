@@ -20,6 +20,9 @@ abstract class QuranRepository {
   Future<void> ensureSurahTransliteration(int surahNumber);
   bool isSurahFullyEnriched(int surahNumber);
   Map<String,double> translationCoverageByKey();
+  // Hint repository which translation key should be preferred when merging
+  // translations in getSurahVerses. This does not load data by itself.
+  void setPreferredTranslationKey(String translationKey);
   // Reactive streams (PERF-2) for UI to subscribe to coverage changes
   Stream<double> get enrichmentCoverageStream; // emits 0..1 when enrichment coverage changes
   // Optional: translation coverage per key aggregate (emit map for simplicity)
