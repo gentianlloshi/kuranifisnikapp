@@ -71,9 +71,10 @@ class SurahListWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 96, top: 8),
                 // Fix the row extent to provide enough vertical space for the tile contents
                 itemExtent: 120,
+                // Reduce first-frame/offscreen work
                 addAutomaticKeepAlives: false,
-                addRepaintBoundaries: true,
                 addSemanticIndexes: false,
+                addRepaintBoundaries: true,
                 cacheExtent: 300,
                 itemCount: surahs.length + 1,
                 itemBuilder: (context, index) {
@@ -93,9 +94,10 @@ class SurahListWidget extends StatelessWidget {
             }
             return GridView.builder(
               padding: const EdgeInsets.only(bottom: 96, left: 4, right: 4, top: 4),
+              // Reduce first-frame/offscreen work for grid layouts, too
               addAutomaticKeepAlives: false,
-              addRepaintBoundaries: true,
               addSemanticIndexes: false,
+              addRepaintBoundaries: true,
               cacheExtent: 600,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columns,
@@ -302,22 +304,22 @@ class _ContinueCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(Icons.play_circle_fill, color: theme.colorScheme.primary, size: 32),
-              const SizedBox(width: 12),
+      Icon(Icons.play_circle_fill, color: theme.colorScheme.primary, size: 32),
+      const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Vazhdo leximin', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                    const SizedBox(height:4),
+        Text('Vazhdo leximin', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height:4),
                     Text('Sure ${surah.nameTranslation} • Ajeti $verse', style: theme.textTheme.bodySmall),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: theme.iconTheme.color),
+      Icon(Icons.chevron_right, color: theme.iconTheme.color),
             ],
           ),
         ),

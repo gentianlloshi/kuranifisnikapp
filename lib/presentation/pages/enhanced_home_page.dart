@@ -94,9 +94,14 @@ class _EnhancedHomePageState extends State<EnhancedHomePage>
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        setState(() {
-          _currentIndex = _tabController.index;
-          _mountedTabs.add(_currentIndex);
+        final next = _tabController.index;
+        // Defer heavy tab mount until end of frame for smoother animation
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() {
+            _currentIndex = next;
+            _mountedTabs.add(_currentIndex);
+          });
         });
       }
     });

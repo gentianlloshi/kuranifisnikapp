@@ -35,16 +35,17 @@ class QuranProvider extends ChangeNotifier {
     required SearchVersesUseCase searchVersesUseCase,
     required GetSurahVersesUseCase getSurahVersesUseCase,
     QuranRepository? quranRepository,
-    AppStateProvider? appStateProvider,
+  AppStateProvider? appStateProvider,
   })  : _getSurahsUseCase = getSurahsUseCase,
         _getSurahsArabicOnlyUseCase = getSurahsArabicOnlyUseCase,
         _searchVersesUseCase = searchVersesUseCase,
         _getSurahVersesUseCase = getSurahVersesUseCase,
         _quranRepository = quranRepository,
-        _indexManager = SearchIndexManager(
+  _indexManager = SearchIndexManager(
           getSurahsUseCase: getSurahsUseCase,
           getSurahVersesUseCase: getSurahVersesUseCase,
-        ) {
+  ),
+  _appState = appStateProvider {
     _init();
     // Subscribe to live progress stream with throttling to avoid rebuild storms
     _indexProgressSub = _indexManager?.progressStream.listen((evt) {
@@ -78,7 +79,8 @@ class QuranProvider extends ChangeNotifier {
         _quranRepository?.setPreferredTranslationKey(newKey);
         // If a surah is open and translations are shown, ensure enrichment and reload
         final sid = _currentSurahId;
-        if (sid != null && _filterTranslation) {
+        final wantTranslation = _appState?.settings.showTranslation ?? true;
+        if (sid != null && wantTranslation) {
           // ignore: unawaited_futures
           Future(() async {
             try {
@@ -88,6 +90,27 @@ class QuranProvider extends ChangeNotifier {
               if (enriched.isNotEmpty) {
                 _allCurrentSurahVerses = enriched;
                 // Reset pagination to reflect new text
+                _loadedVerseCount = 0;
+                _pagedVerses = [];
+                _appendMoreVerses();
+                notifyListeners();
+              }
+            } catch (_) {}
+          });
+        }
+      }
+      // Also react to display-option toggles: if user turned translation ON and current surah lacks it, enrich and reload.
+      final sid2 = _currentSurahId;
+      if (sid2 != null) {
+        final wantTranslation2 = _appState?.settings.showTranslation ?? true;
+        if (wantTranslation2 && (_quranRepository != null) && !_quranRepository!.isSurahFullyEnriched(sid2)) {
+          // ignore: unawaited_futures
+          Future(() async {
+            try {
+              await _quranRepository?.ensureSurahTranslation(sid2, translationKey: _selectedTranslationKey);
+              final enriched = await (_getSurahVersesUseCase?.call(sid2) ?? Future.value(<Verse>[]));
+              if (enriched.isNotEmpty) {
+                _allCurrentSurahVerses = enriched;
                 _loadedVerseCount = 0;
                 _pagedVerses = [];
                 _appendMoreVerses();
@@ -108,7 +131,8 @@ class QuranProvider extends ChangeNotifier {
         _searchVersesUseCase = null,
         _getSurahVersesUseCase = null,
         _quranRepository = null,
-        _indexManager = null;
+  _indexManager = null,
+  _appState = null;
   
   Future<void> _init() async {
     if (_surahsMeta.isEmpty && _getSurahsArabicOnlyUseCase != null) {
@@ -150,6 +174,7 @@ class QuranProvider extends ChangeNotifier {
   String _lastQuery = '';
   // Track preferred translation key from settings
   String _selectedTranslationKey = 'sq_ahmeti';
+  final AppStateProvider? _appState; // hold reference for display-option checks
   VoidCallback? _appStateListener;
 
   List<SurahMeta> get surahs => _surahsMeta;
@@ -375,11 +400,13 @@ class QuranProvider extends ChangeNotifier {
         }
       }
       Logger.d('Loaded verses surah=$surahId count=${_allCurrentSurahVerses.length}', tag: 'LazySurah');
-      // Enrich synchronously before publishing to UI so translations/transliterations are present.
+    // Enrich synchronously before publishing to UI so translations/transliterations are present.
       final repo = _quranRepository;
       if (repo != null) {
         try {
-          final needT = _filterTranslation && !repo.isSurahFullyEnriched(surahId);
+      // Decouple enrichment from search filters: use display option instead
+      final wantTranslation = _appState?.settings.showTranslation ?? true;
+      final needT = wantTranslation && !repo.isSurahFullyEnriched(surahId);
           final needTr = _filterTransliteration && !repo.isSurahFullyEnriched(surahId);
           if (needT) {
             await repo.ensureSurahTranslation(surahId, translationKey: _selectedTranslationKey);
