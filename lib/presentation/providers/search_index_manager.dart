@@ -114,7 +114,21 @@ class SearchIndexManager {
 
   /// Ensures the index is fully built (blocking until completion) unless already built.
   Future<void> ensureBuilt({void Function(double progress)? onProgress}) async {
-    if (_invertedIndex != null) return;
+    // If we already have an index but it's being built incrementally, wait for completion.
+    if (_invertedIndex != null) {
+      // If not in incremental mode or we've marked completion (>114), nothing to do.
+      if (!_incrementalMode || _nextSurahToIndex > 114) {
+        return;
+      }
+      // If a build is in progress, await its completion to guarantee a fully built index.
+      final comp = _buildCompleter;
+      if (comp != null) {
+        return comp.future;
+      }
+      // No active completer but still incremental; kick off incremental build and await it.
+      ensureIncrementalBuild(onProgress: onProgress);
+      return _buildCompleter?.future;
+    }
     // Try fast-path load from snapshot
     // 1) Prefer prebuilt asset if present and valid
   if (_enablePrebuiltAsset && await _tryLoadPrebuiltAsset()) {

@@ -71,30 +71,13 @@ class SurahListWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 96, top: 8),
                 // Fix the row extent to provide enough vertical space for the tile contents
                 itemExtent: 120,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: true,
+                addSemanticIndexes: false,
                 itemCount: surahs.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return FutureBuilder<ReadingResumePoint?>(
-                      future: progressProvider.getMostRecent(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) return const SizedBox.shrink();
-                        final rp = snapshot.data!;
-                        final meta = surahs.firstWhere((s) => s.number == rp.surah, orElse: () => surahs.first);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          child: _ContinueCard(
-                            surah: meta,
-                            verse: rp.verse,
-                            onTap: () async {
-                              context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse);
-                              if (context.mounted) {
-                                context.read<AppStateProvider>().enqueueSnack('Vazhduat te ${meta.nameTranslation} • Ajeti ${rp.verse}');
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    );
+                    return _ContinueCardLoader(surahs: surahs);
                   }
                   final surah = surahs[index - 1];
                   return SurahListItem(
@@ -109,6 +92,9 @@ class SurahListWidget extends StatelessWidget {
             }
             return GridView.builder(
               padding: const EdgeInsets.only(bottom: 96, left: 4, right: 4, top: 4),
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: true,
+              addSemanticIndexes: false,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columns,
                 mainAxisSpacing: 6,
@@ -333,6 +319,48 @@ class _ContinueCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Defers fetching "Continue Reading" resume point until after first frame to reduce startup work.
+class _ContinueCardLoader extends StatefulWidget {
+  final List<SurahMeta> surahs;
+  const _ContinueCardLoader({required this.surahs});
+  @override
+  State<_ContinueCardLoader> createState() => _ContinueCardLoaderState();
+}
+
+class _ContinueCardLoaderState extends State<_ContinueCardLoader> {
+  ReadingResumePoint? _resume;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final rp = await context.read<ReadingProgressProvider>().getMostRecent();
+        if (!mounted) return;
+        setState(() => _resume = rp);
+      } catch (_) {}
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rp = _resume;
+    if (rp == null) return const SizedBox.shrink();
+    final meta = widget.surahs.firstWhere((s) => s.number == rp.surah, orElse: () => widget.surahs.first);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: _ContinueCard(
+        surah: meta,
+        verse: rp.verse,
+        onTap: () async {
+          context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse);
+          if (!mounted) return;
+          context.read<AppStateProvider>().enqueueSnack('Vazhduat te ${meta.nameTranslation} • Ajeti ${rp.verse}');
+        },
       ),
     );
   }

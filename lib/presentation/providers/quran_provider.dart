@@ -144,7 +144,8 @@ class QuranProvider extends ChangeNotifier {
   bool get isBuildingIndex => _isBuildingIndex;
   double get indexProgress => _indexProgress;
   Timer? _debounceTimer;
-  static const _debounceDuration = Duration(milliseconds: 350);
+  static const _debounceDuration = Duration(milliseconds: 400);
+  static const int _minQueryChars = 3;
   bool _userTriggeredIndexOnce = false; // suppress duplicate logs
   String _lastQuery = '';
   // Track preferred translation key from settings
@@ -323,6 +324,32 @@ class QuranProvider extends ChangeNotifier {
 
   void searchVersesDebounced(String query) {
     _debounceTimer?.cancel();
+    // Delegate to centralized input handler for consistent rules
+    onSearchInputChanged(query);
+  }
+
+  /// Centralized handler for search input changes from UI.
+  /// Applies debounce, minimum character threshold, and index readiness gating.
+  void onSearchInputChanged(String raw) {
+    final query = raw.trim();
+    _lastQuery = query;
+    _debounceTimer?.cancel();
+    // If empty, clear results immediately
+    if (query.isEmpty) {
+      _searchResults = [];
+      notifyListeners();
+      return;
+    }
+    // Enforce index readiness gating (aligns with SearchWidget visual gating ~20%)
+    if (_indexManager != null && _indexProgress < 0.2) {
+      // Skip triggering search until index crosses threshold
+      return;
+    }
+    // Enforce minimum character limit
+    if (query.length < _minQueryChars) {
+      // Do not search yet; keep previous results shown or none
+      return;
+    }
     _debounceTimer = Timer(_debounceDuration, () {
       searchVerses(query);
     });
