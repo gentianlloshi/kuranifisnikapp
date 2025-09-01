@@ -502,6 +502,7 @@ class _QuranViewWidgetState extends State<QuranViewWidget> {
                   controller: _scrollController,
                   addAutomaticKeepAlives: false,
                   addSemanticIndexes: false,
+                  addRepaintBoundaries: true,
                   padding: EdgeInsets.only(
                     left: context.spaceLg,
                     right: context.spaceLg,
@@ -672,7 +673,7 @@ class VerseWidget extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(context.spaceMd, context.spaceMd, context.spaceMd, context.spaceSm),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,29 +810,35 @@ class VerseWidget extends StatelessWidget {
                       ),
               ),
             
-            // Translation
+            // Translation (explicit LTR direction)
             if (settings.showTranslation && verse.textTranslation != null)
               Padding(
                 padding: EdgeInsets.only(bottom: context.spaceSm),
-                child: Text(
-                  verse.textTranslation!,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: settings.fontSizeTranslation.toDouble(),
-                        height: 1.55,
-                      ),
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    verse.textTranslation!,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontSize: settings.fontSizeTranslation.toDouble(),
+                          height: 1.55,
+                        ),
+                  ),
                 ),
               ),
             
-                // Transliteration
+                // Transliteration (explicit LTR direction)
                 if (settings.showTransliteration && verse.textTransliteration != null)
-                  Text(
-                    verse.textTransliteration!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: (settings.fontSizeTranslation.toDouble() - 2).clamp(10, 100),
-                          fontStyle: FontStyle.italic,
-                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-                          height: 1.4,
-                        ),
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      verse.textTransliteration!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontSize: (settings.fontSizeTranslation.toDouble() - 2).clamp(10, 100),
+                            fontStyle: FontStyle.italic,
+                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                            height: 1.4,
+                          ),
+                    ),
                   ),
               ],
             ),
