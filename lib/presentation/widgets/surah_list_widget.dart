@@ -55,8 +55,7 @@ class SurahListWidget extends StatelessWidget {
     }
 
     final selectionMode = context.select<SurahSelectionProvider, bool>((s) => s.selectionMode);
-    final selection = context.read<SurahSelectionProvider>();
-    final progressProvider = context.read<ReadingProgressProvider>();
+  final selection = context.read<SurahSelectionProvider>();
 
     return Stack(
       children: [
