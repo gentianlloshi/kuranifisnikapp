@@ -37,7 +37,7 @@ jobs:
         run: flutter pub get
 
       - name: Run focused verse rendering tests
-        run: flutter test --plain-name TestVerseContent
+        run: flutter test test/widgets/verse_widget_smoke_test.dart
 
       - name: Build prebuilt search index
         run: dart run tool/build_search_index.dart
