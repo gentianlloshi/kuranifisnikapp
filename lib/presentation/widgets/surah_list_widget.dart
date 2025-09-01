@@ -74,6 +74,7 @@ class SurahListWidget extends StatelessWidget {
                 addAutomaticKeepAlives: false,
                 addRepaintBoundaries: true,
                 addSemanticIndexes: false,
+                cacheExtent: 300,
                 itemCount: surahs.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
@@ -95,6 +96,7 @@ class SurahListWidget extends StatelessWidget {
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: true,
               addSemanticIndexes: false,
+              cacheExtent: 600,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columns,
                 mainAxisSpacing: 6,
