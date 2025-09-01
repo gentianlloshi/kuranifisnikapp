@@ -179,31 +179,21 @@ class _SearchWidgetState extends State<SearchWidget> {
                       ),
                     ),
                     onChanged: (query) {
-                      setState(() {}); // Update clear icon state
-                      if (query.isNotEmpty) {
-                        if (gatingActive) return; // block queries early readiness
-                        final app = context.read<AppStateProvider>();
-                        if (app.backgroundIndexingEnabled && !_indexKickIssued) {
-                          final qp = context.read<QuranProvider>();
-                          if (qp.indexProgress < 1.0) {
-                            _indexKickIssued = true;
-                            qp.startIndexBuild();
-                          }
+                      setState(() {}); // update clear icon state
+                      final app = context.read<AppStateProvider>();
+                      if (app.backgroundIndexingEnabled && !_indexKickIssued) {
+                        final qp = context.read<QuranProvider>();
+                        if (qp.indexProgress < 1.0) {
+                          _indexKickIssued = true;
+                          qp.startIndexBuild();
                         }
                       }
+                      context.read<QuranProvider>().onSearchInputChanged(query);
                       if (query.trim().isEmpty) {
-                        context.read<QuranProvider>().clearSearch();
                         _indexKickIssued = false; // reset when cleared
-                      } else {
-                        if (!gatingActive) {
-                          // Debounce at the widget level to minimize rapid provider churn
-                          context.read<QuranProvider>().searchVersesDebounced(query.trim());
-                        }
                       }
                     },
-                    onSubmitted: (query) {
-                      if (!gatingActive) context.read<QuranProvider>().searchVerses(query.trim());
-                    },
+                    onSubmitted: (query) => context.read<QuranProvider>().searchVerses(query.trim()),
                   );
                 },
               ),

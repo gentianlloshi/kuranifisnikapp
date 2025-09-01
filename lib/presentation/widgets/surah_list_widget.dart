@@ -55,8 +55,7 @@ class SurahListWidget extends StatelessWidget {
     }
 
     final selectionMode = context.select<SurahSelectionProvider, bool>((s) => s.selectionMode);
-    final selection = context.read<SurahSelectionProvider>();
-    final progressProvider = context.read<ReadingProgressProvider>();
+  final selection = context.read<SurahSelectionProvider>();
 
     return Stack(
       children: [
@@ -79,27 +78,7 @@ class SurahListWidget extends StatelessWidget {
                 itemCount: surahs.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return FutureBuilder<ReadingResumePoint?>(
-                      future: progressProvider.getMostRecent(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) return const SizedBox.shrink();
-                        final rp = snapshot.data!;
-                        final meta = surahs.firstWhere((s) => s.number == rp.surah, orElse: () => surahs.first);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          child: _ContinueCard(
-                            surah: meta,
-                            verse: rp.verse,
-                            onTap: () async {
-                              context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse);
-                              if (context.mounted) {
-                                context.read<AppStateProvider>().enqueueSnack('Vazhduat te ${meta.nameTranslation} • Ajeti ${rp.verse}');
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    );
+                    return _ContinueCardLoader(surahs: surahs);
                   }
                   final surah = surahs[index - 1];
                   return SurahListItem(
@@ -343,6 +322,48 @@ class _ContinueCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Defers fetching "Continue Reading" resume point until after first frame to reduce startup work.
+class _ContinueCardLoader extends StatefulWidget {
+  final List<SurahMeta> surahs;
+  const _ContinueCardLoader({required this.surahs});
+  @override
+  State<_ContinueCardLoader> createState() => _ContinueCardLoaderState();
+}
+
+class _ContinueCardLoaderState extends State<_ContinueCardLoader> {
+  ReadingResumePoint? _resume;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final rp = await context.read<ReadingProgressProvider>().getMostRecent();
+        if (!mounted) return;
+        setState(() => _resume = rp);
+      } catch (_) {}
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rp = _resume;
+    if (rp == null) return const SizedBox.shrink();
+    final meta = widget.surahs.firstWhere((s) => s.number == rp.surah, orElse: () => widget.surahs.first);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: _ContinueCard(
+        surah: meta,
+        verse: rp.verse,
+        onTap: () async {
+          context.read<QuranProvider>().openSurahAtVerse(rp.surah, rp.verse);
+          if (!mounted) return;
+          context.read<AppStateProvider>().enqueueSnack('Vazhduat te ${meta.nameTranslation} • Ajeti ${rp.verse}');
+        },
       ),
     );
   }
